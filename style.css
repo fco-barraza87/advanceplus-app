@@ -1,28 +1,84 @@
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: #0F1E44;
-  color: #F7F7F7;
-  text-align: center;
+/* 🌟 Advance+ Global Style */
+
+:root {
+  --color-bg: #0f1e44;
+  --color-accent: #c0a450;
+  --color-light: #f7f7f7;
+  --color-dark: #0a0f1c;
+  --font-main: "Inter", sans-serif;
+}
+
+* {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
+body {
+  font-family: var(--font-main);
+  background-color: var(--color-bg);
+  color: var(--color-light);
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Headers y títulos */
 header {
-  padding: 60px 20px 20px;
+  background-color: rgba(15, 30, 68, 0.9);
+  width: 100%;
+  padding: 20px 0;
+  font-weight: 600;
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
+/* Botones globales */
 button {
-  background-color: #C0A450;
-  color: #0F1E44;
+  background-color: var(--color-accent);
+  color: var(--color-bg);
   border: none;
-  padding: 12px 20px;
-  margin: 10px;
   border-radius: 8px;
+  padding: 12px 24px;
+  margin: 8px;
   cursor: pointer;
-  font-weight: bold;
-  transition: transform 0.2s ease;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
 }
 
 button:hover {
   transform: scale(1.05);
+  background-color: #d8ba63;
+}
+
+/* Tarjetas (para dashboard, cursos, etc.) */
+.card {
+  background-color: #182f65;
+  border-radius: 12px;
+  padding: 24px 32px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.25);
+  margin: 20px auto;
+  max-width: 400px;
+  text-align: center;
+}
+
+.xp {
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+  padding: 10px 20px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+footer {
+  margin-top: auto;
+  padding: 20px;
+  font-size: 0.8rem;
+  color: #a8b2d1;
 }
