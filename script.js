@@ -9,10 +9,35 @@ const supabase = window.supabase.createClient(
 );
 
 
-document.getElementById('login-btn').addEventListener('click', () => {
-  alert('Aquí irá la conexión con Supabase Auth.');
+document.getElementById('btn-login').addEventListener('click', async () => {
+  const email = prompt('Ingresa tu correo:');
+  const password = prompt('Ingresa tu contraseña:');
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    alert('❌ Error al iniciar sesión: ' + error.message);
+  } else {
+    alert('✅ Sesión iniciada con éxito, bienvenido ' + email);
+    window.location.href = '/dashboard.html'; // puedes cambiar la ruta
+  }
 });
 
-document.getElementById('register-btn').addEventListener('click', () => {
-  alert('Aquí se conectará el registro de usuario.');
+document.getElementById('btn-register').addEventListener('click', async () => {
+  const email = prompt('Ingresa tu correo para registrarte:');
+  const password = prompt('Crea una contraseña:');
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
+
+  if (error) {
+    alert('❌ Error al crear cuenta: ' + error.message);
+  } else {
+    alert('✅ Registro exitoso, revisa tu email para confirmar tu cuenta.');
+  }
 });
