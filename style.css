@@ -1,0 +1,28 @@
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #0F1E44;
+  color: #F7F7F7;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  padding: 60px 20px 20px;
+}
+
+button {
+  background-color: #C0A450;
+  color: #0F1E44;
+  border: none;
+  padding: 12px 20px;
+  margin: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.2s ease;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
