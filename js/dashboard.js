@@ -1,24 +1,24 @@
-/* ===========================
-   Supabase init
-=========================== */
-const SUPABASE_URL =
-  "https://gwemdxauzhfwwktqbxcm.supabase.co"; // <-- pon tu URL (o usa tu constante ya existente)
-const SUPABASE_KEY =
-  "sb_publishable_1quYmvn_zmzxGGaIfBSttA_MYs8QFQ1"; // <-- tu publishable key (NO la secret)
+/* ========================================================
+   DASHBOARD ADVANCE+  —  Lectura real de Supabase
+   Compatible con tablas: users, progress, courses, user_courses
+   v1.2 – Actualizado con fallback automático
+======================================================== */
 
+const SUPABASE_URL = "https://gwemdxauzhfwwktqbxcm.supabase.co"; // ⚠️ Reemplaza
+const SUPABASE_KEY = "sb_publishable_1quYmvn_zmzxGGaIfBSttA_MYs8QFQ1"; // ⚠️ Reemplaza
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ===========================
-   Helpers Gamificación
+   🧠 Funciones auxiliares
 =========================== */
 function calcLevel(totalXp) {
-  // Nivel cada 100 XP: 0-99 => nivel 1, 100-199 => 2, etc.
   const level = Math.floor(totalXp / 100) + 1;
   const xpInLevel = totalXp % 100;
   const xpToNext = 100 - xpInLevel;
   const pct = Math.min(100, (xpInLevel / 100) * 100);
   return { level, xpInLevel, xpToNext, pct };
 }
+
 function formatInitials(name, email) {
   if (name) {
     const parts = name.split(" ").filter(Boolean);
@@ -29,10 +29,10 @@ function formatInitials(name, email) {
 }
 
 /* ===========================
-   Carga de sesión + datos
+   🚀 Carga principal del dashboard
 =========================== */
 async function loadDashboard() {
-  // 1) Sesión y usuario
+  // 1️⃣ Obtener sesión actual
   const { data: userResp, error: userErr } = await supabase.auth.getUser();
   if (userErr || !userResp?.user) {
     alert("⚠️ No hay sesión activa. Inicia sesión nuevamente.");
@@ -41,7 +41,7 @@ async function loadDashboard() {
   }
   const user = userResp.user;
 
-  // 2) Pintar datos básicos
+  // 2️⃣ Mostrar datos básicos
   const name =
     user.user_metadata?.full_name ||
     user.user_metadata?.name ||
@@ -53,8 +53,9 @@ async function loadDashboard() {
     user.email
   );
 
-  // 3) PROGRESS del usuario
-  // progress: id, user_id, course_id, day, completed(bool), xp(int), updated_at, streak(int opcional)
+  /* =====================================================
+     🔹 BLOQUE 3 – PROGRESO Y CURSOS ACTIVOS
+  ===================================================== */
   const { data: rows, error: pgErr } = await supabase
     .from("progress")
     .select("course_id, completed, xp, day, updated_at, streak")
@@ -62,13 +63,12 @@ async function loadDashboard() {
 
   const progressRows = rows || [];
 
-  // Totales y derivados
+  // Calcular totales
   const totalXp = progressRows.reduce((s, r) => s + (r.xp || 0), 0);
   const daysActive = new Set(progressRows.map((r) => r.day)).size;
-  // streak: si tu tabla lo guarda usa el mayor, si no calcula rápido por días consecutivos
-  const streakStored = Math.max(...progressRows.map(r => r.streak || 0), 0);
+  const streakStored = Math.max(...progressRows.map((r) => r.streak || 0), 0);
 
-  // Nivel y barra
+  // Nivel y barra XP
   const { level, xpInLevel, xpToNext, pct } = calcLevel(totalXp);
   document.getElementById("level").textContent = level;
   document.getElementById("xp-text").textContent = `${xpInLevel} / 100`;
@@ -80,20 +80,39 @@ async function loadDashboard() {
     document.getElementById("xp-fill").style.width = pct + "%";
   });
 
-  // 4) Cursos activos (agrupados por course_id)
-  const byCourse = new Map();
-  for (const r of progressRows) {
-    if (!r.course_id) continue;
-    if (!byCourse.has(r.course_id)) {
-      byCourse.set(r.course_id, { total: 0, done: 0 });
+  /* =====================================================
+     🔹 BLOQUE 4 – Lectura combinada: progress + user_courses
+  ===================================================== */
+  let byCourse = new Map();
+
+  // Si hay progreso, agrupar por curso
+  if (progressRows.length > 0) {
+    for (const r of progressRows) {
+      if (!r.course_id) continue;
+      if (!byCourse.has(r.course_id))
+        byCourse.set(r.course_id, { total: 0, done: 0 });
+      const c = byCourse.get(r.course_id);
+      c.total += 1;
+      if (r.completed) c.done += 1;
     }
-    const c = byCourse.get(r.course_id);
-    c.total += 1;
-    if (r.completed) c.done += 1;
+  } else {
+    // Fallback: leer desde user_courses
+    const { data: ucRows, error: ucErr } = await supabase
+      .from("user_courses")
+      .select("course_id, status")
+      .eq("user_id", user.id)
+      .eq("status", "active");
+
+    if (ucRows && ucRows.length > 0) {
+      for (const r of ucRows) {
+        byCourse.set(r.course_id, { total: 1, done: 0 });
+      }
+    }
   }
+
   document.getElementById("courses-count").textContent = byCourse.size;
 
-  // Try: obtener nombres y covers desde `courses` si existe
+  // Obtener metadatos del curso
   let coursesMeta = {};
   if (byCourse.size > 0) {
     const ids = Array.from(byCourse.keys());
@@ -104,10 +123,7 @@ async function loadDashboard() {
 
     if (Array.isArray(courseRows)) {
       for (const c of courseRows) {
-        coursesMeta[c.id] = {
-          title: c.title,
-          cover: c.cover_url,
-        };
+        coursesMeta[c.id] = { title: c.title, cover: c.cover_url };
       }
     }
   }
@@ -117,15 +133,18 @@ async function loadDashboard() {
 }
 
 /* ===========================
-   Render de Cursos estilo Netflix
+   🎯 Render: cursos tipo Netflix
 =========================== */
 function renderCourses(byCourseMap, meta) {
   const grid = document.getElementById("courses-grid");
   grid.innerHTML = "";
+
   if (!byCourseMap || byCourseMap.size === 0) {
-    grid.innerHTML = `<p class="muted">No detectamos retos activos. Cuando comiences uno, aparecerá aquí.</p>`;
+    grid.innerHTML =
+      '<p class="text-muted">No tienes retos activos aún. Comienza uno para verlo aquí.</p>';
     return;
   }
+
   for (const [courseId, info] of byCourseMap.entries()) {
     const pct = info.total ? Math.round((info.done / info.total) * 100) : 0;
     const title = meta[courseId]?.title || `Reto #${courseId}`;
@@ -137,12 +156,13 @@ function renderCourses(byCourseMap, meta) {
       <div class="cover" style="background-image:url('${cover}')"></div>
       <div class="course-body">
         <div class="course-title">${title}</div>
-        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
-        <div class="progress-label muted">${pct}% completado</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:0%"></div>
+        </div>
+        <div class="progress-label text-muted">${pct}% completado</div>
       </div>
     `;
     grid.appendChild(card);
-    // animar barra
     requestAnimationFrame(() => {
       card.querySelector(".progress-fill").style.width = pct + "%";
     });
@@ -150,7 +170,7 @@ function renderCourses(byCourseMap, meta) {
 }
 
 /* ===========================
-   Badges simples por hitos
+   🏅 Render: medallas
 =========================== */
 function renderBadges(totalXp, streak, daysActive) {
   const cont = document.getElementById("badges");
@@ -158,7 +178,6 @@ function renderBadges(totalXp, streak, daysActive) {
   cont.innerHTML = "";
 
   const earned = [];
-
   if (totalXp >= 50) earned.push({ icon: "🏁", name: "Primeros 50 XP" });
   if (totalXp >= 100) earned.push({ icon: "💥", name: "Nivel 2" });
   if (streak >= 3) earned.push({ icon: "🔥", name: "Racha x3" });
@@ -183,12 +202,13 @@ function renderBadges(totalXp, streak, daysActive) {
 }
 
 /* ===========================
-   Logout
+   🚪 Logout
 =========================== */
 document.getElementById("logout").addEventListener("click", async () => {
   await supabase.auth.signOut();
+  alert("👋 Sesión cerrada correctamente.");
   window.location.href = "/";
 });
 
-/* Go! */
+/* 🟢 Ejecutar */
 loadDashboard();
