@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usuarios | Advance+</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+  <link rel="stylesheet" href="../assets/admin.css" />
+</head>
+<body>
+  <header class="admin-header">
+    <h1>👥 Gestión de Usuarios</h1>
+    <button id="back" class="btn-secondary">← Volver</button>
+  </header>
+
+  <main class="admin-dashboard">
+    <!-- 🔍 BUSCADOR -->
+    <section class="card">
+      <h2>Buscar usuario</h2>
+      <input type="text" id="search" placeholder="Buscar por nombre o email..." />
+    </section>
+
+    <!-- 📋 LISTADO -->
+    <section class="card">
+      <h2>Usuarios registrados</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>XP Total</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="users-table"></tbody>
+      </table>
+    </section>
+
+    <!-- 👤 DETALLE -->
+    <section class="card" id="user-detail" style="display:none;">
+      <h2 id="user-name-detail">Usuario</h2>
+      <p><strong>Email:</strong> <span id="user-email-detail"></span></p>
+      <p><strong>Rol actual:</strong>
+        <select id="user-role-detail">
+          <option value="user">User</option>
+          <option value="coach">Coach</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button id="save-role" class="btn-small">💾 Guardar</button>
+      </p>
+      <p><strong>XP Total:</strong> <span id="user-xp-detail"></span></p>
+      <p><strong>Racha:</strong> <span id="user-streak-detail"></span></p>
+
+      <h3>Cursos asignados</h3>
+      <ul id="user-courses-list"></ul>
+
+      <h3>Asignar nuevo curso</h3>
+      <select id="assign-course"></select>
+      <button id="assign-btn" class="btn-primary">Asignar curso</button>
+
+      <h3>Bonificar XP manualmente</h3>
+      <input type="number" id="bonus-xp" placeholder="Ej: 50" min="1" />
+      <button id="bonus-btn" class="btn-secondary">➕ Añadir XP</button>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="users.js"></script>
+</body>
+</html>

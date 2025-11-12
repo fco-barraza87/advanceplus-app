@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Cursos | Advance+</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+  <link rel="stylesheet" href="../assets/admin.css" />
+</head>
+<body>
+  <header class="admin-header">
+    <h1>📚 Gestión de Cursos</h1>
+    <button id="back" class="btn-secondary">← Volver</button>
+  </header>
+
+  <main class="admin-dashboard">
+    <section class="card">
+      <h2>Crear nuevo curso</h2>
+      <form id="new-course-form" class="form-grid">
+        <label>
+          Título:
+          <input type="text" id="title" required />
+        </label>
+        <label>
+          Descripción:
+          <textarea id="description" rows="3"></textarea>
+        </label>
+        <label>
+          Imagen de portada:
+          <input type="file" id="cover" accept="image/*" />
+        </label>
+        <label>
+          Estado:
+          <select id="status">
+            <option value="true">Activo</option>
+            <option value="false">Inactivo</option>
+          </select>
+        </label>
+        <button type="submit" class="btn-primary">💾 Crear curso</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Listado de cursos</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="courses-table"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="courses.js"></script>
+</body>
+</html>

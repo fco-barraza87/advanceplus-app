@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Importar Lección | Advance+</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <main class="admin-dashboard">
+    <section class="card">
+      <h1>📤 Importar nueva lección (GPT RETO → Supabase)</h1>
+      <form id="lesson-form" class="form-grid">
+        <label>
+          Curso (ID o título exacto):
+          <input type="text" id="course" required />
+        </label>
+        <label>
+          Día del curso:
+          <input type="number" id="day" min="1" required />
+        </label>
+        <label>
+          Título de la lección:
+          <input type="text" id="title" required />
+        </label>
+        <label>
+          URL del audio (opcional):
+          <input type="text" id="audio" placeholder="https://..." />
+        </label>
+        <label>
+          Contenido HTML:
+          <textarea id="content" rows="10" placeholder="Pega aquí el HTML generado por GPT RETO"></textarea>
+        </label>
+        <button type="submit" class="btn-primary">🚀 Subir a Supabase</button>
+      </form>
+    </section>
+    <section id="status" class="card"></section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://TU_URL_SUPABASE.supabase.co";
+    const SUPABASE_KEY = "TU_API_KEY_PUBLICA";
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const form = document.getElementById("lesson-form");
+    const status = document.getElementById("status");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const courseInput = document.getElementById("course").value.trim();
+      const day = parseInt(document.getElementById("day").value);
+      const title = document.getElementById("title").value.trim();
+      const audio = document.getElementById("audio").value.trim();
+      const content_html = document.getElementById("content").value.trim();
+
+      // 1️⃣ Buscar el course_id real si se dio un título
+      let courseId = courseInput;
+      if (!courseInput.match(/^[0-9a-f-]{36}$/)) {
+        const { data: course, error: cErr } = await supabase
+          .from("courses")
+          .select("id")
+          .ilike("title", courseInput)
+          .single();
+
+        if (cErr || !course) {
+          status.innerHTML = `<p style="color:red;">❌ No se encontró el curso "${courseInput}"</p>`;
+          return;
+        }
+        courseId = course.id;
+      }
+
+      // 2️⃣ Insertar en tabla lessons
+      const { data, error } = await supabase.from("lessons").insert([
+        {
+          course_id: courseId,
+          day,
+          title,
+          content_html,
+          audio_url: audio || null,
+          duration: 180,
+        },
+      ]);
+
+      if (error) {
+        status.innerHTML = `<p style="color:red;">❌ Error: ${error.message}</p>`;
+      } else {
+        status.innerHTML = `<p style="color:green;">✅ Lección subida con éxito al curso ${courseInput} (día ${day})</p>`;
+        form.reset();
+      }
+    });
+  </script>
+</body>
+</html>
