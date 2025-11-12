@@ -148,7 +148,7 @@ function renderCourses(byCourseMap, meta) {
   for (const [courseId, info] of byCourseMap.entries()) {
     const pct = info.total ? Math.round((info.done / info.total) * 100) : 0;
     const title = meta[courseId]?.title || `Reto #${courseId}`;
-    const cover = meta[courseId]?.cover || `${cover_url}`;
+    const cover = meta[courseId]?.cover || "/assets/placeholder.png";
 
     const card = document.createElement("article");
     card.className = "course";
