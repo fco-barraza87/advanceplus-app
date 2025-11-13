@@ -1,5 +1,5 @@
-const SUPABASE_URL = "https://TU_URL_SUPABASE.supabase.co";
-const SUPABASE_KEY = "TU_API_KEY_PUBLICA";
+const SUPABASE_URL = "https://lmlfvbzukymtkcyfromr.supabase.co";
+const SUPABASE_KEY = "sb_publishable_hmEwUbwWxBFEKl73hIcO8w_zWEFw2TW";
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const urlParams = new URLSearchParams(window.location.search);
