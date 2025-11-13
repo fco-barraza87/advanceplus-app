@@ -4,12 +4,12 @@
 const SUPABASE_URL = 
   typeof process !== "undefined" && process.env.NEXT_PUBLIC_SUPABASE_URL
     ? process.env.NEXT_PUBLIC_SUPABASE_URL
-    : "https://gwemdxauzhfwwktqbxcm.supabase.co"; // opcional para pruebas locales
+    : "https://lmlfvbzukymtkcyfromr.supabase.co"; // opcional para pruebas locales
 
 const SUPABASE_KEY = 
   typeof process !== "undefined" && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    : "sb_publishable_1quYmvn_zmzxGGaIfBSttA_MYs8QFQ1"; // opcional para pruebas locales
+    : "sb_publishable_hmEwUbwWxBFEKl73hIcO8w_zWEFw2TW"; // opcional para pruebas locales
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 

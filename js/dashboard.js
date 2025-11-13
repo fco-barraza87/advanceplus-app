@@ -4,8 +4,8 @@
    v1.2 – Actualizado con fallback automático
 ======================================================== */
 
-const SUPABASE_URL = "https://gwemdxauzhfwwktqbxcm.supabase.co"; // ⚠️ Reemplaza
-const SUPABASE_KEY = "sb_publishable_1quYmvn_zmzxGGaIfBSttA_MYs8QFQ1"; // ⚠️ Reemplaza
+const SUPABASE_URL = "https://lmlfvbzukymtkcyfromr.supabase.co"; // ⚠️ Reemplaza
+const SUPABASE_KEY = "sb_publishable_hmEwUbwWxBFEKl73hIcO8w_zWEFw2TW"; // ⚠️ Reemplaza
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ===========================
