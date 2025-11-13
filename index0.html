@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advance+ | Tu nueva disciplina</title>
+
+  <!-- Fuente e ícono -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" href="/assets/favicon.ico" />
+
+  <!-- Estilos globales -->
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+
+<body class="fade-in text-center">
+
+  <div class="container">
+    <h1 class="text-gold">Advance+</h1>
+    <p>Impulsa tu disciplina. Transforma tu vida.</p>
+
+    <div class="auth-card slide-up">
+      <input type="email" id="email" placeholder="Correo electrónico" />
+      <input type="password" id="password" placeholder="Contraseña" />
+
+      <button id="btn-login" class="btn btn-primary">Iniciar sesión</button>
+      <button id="btn-register" class="btn btn-outline">Crear cuenta</button>
+    </div>
+  </div>
+
+  <footer>© 2025 Advance+. Todos los derechos reservados.</footer>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Script Auth -->
+  <script>
+    const SUPABASE_URL = "https://lmlfvbzukymtkcyfromr.supabase.co"; // ⚠️ reemplaza
+    const SUPABASE_KEY = "sb_publishable_hmEwUbwWxBFEKl73hIcO8w_zWEFw2TW"; // ⚠️ reemplaza
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const btnLogin = document.getElementById("btn-login");
+    const btnRegister = document.getElementById("btn-register");
+
+    // LOGIN
+    btnLogin.addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      if (!email || !password) { alert("Ingresa tus credenciales."); return; }
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return alert("⚠️ Error al iniciar sesión: " + error.message);
+
+      alert("✅ Sesión iniciada correctamente. Bienvenido " + email);
+      window.location.href = "/dashboard/index.html";
+    });
+
+    // REGISTRO
+    btnRegister.addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      if (!email || !password) { alert("Ingresa correo y contraseña válidos."); return; }
+
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) return alert("⚠️ Error al crear cuenta: " + error.message);
+
+      alert("✅ Cuenta creada con éxito. Revisa tu correo para confirmar el email.");
+      window.location.href = "/dashboard/index.html";
+    });
+  </script>
+</body>
+</html>
