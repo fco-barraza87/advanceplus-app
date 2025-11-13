@@ -1,106 +1,65 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard | Advance+</title>
 
-  <!-- Fuente global -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css">
 
-  <!-- Estilos globales y específicos -->
-  <link rel="stylesheet" href="/css/style.css" />
-  <link rel="stylesheet" href="/css/dashboard.css" />
-
-  <link rel="icon" href="/assets/favicon.ico" />
+  <!-- Tipografías -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 
-<body class="fade-in">
-  <header class="app-header slide-down">
-    <div class="brand">
-      <span class="logo">🚀</span>
-      <span>Advance+ Dashboard</span>
-    </div>
-    <div class="header-actions">
-      <button id="logout" class="btn btn-outline">Cerrar sesión</button>
+<body class="a-bg-dark">
+
+  <!-- HEADER -->
+  <header class="a-header">
+    <h1 class="a-logo">Advance+</h1>
+    <div class="a-user-info">
+      <img id="userAvatar" class="a-avatar" src="/assets/avatar.png" alt="avatar">
+      <span id="userName" class="a-username">Cargando...</span>
     </div>
   </header>
 
-  <main class="container fade-in">
-    <!-- USER CARD + STATS -->
-    <section class="grid grid-2-1">
-      <div class="card user-card">
-        <div class="user-row">
-          <div class="avatar" id="avatar-initials">A+</div>
-          <div>
-            <h2 id="user-name">Cargando...</h2>
-            <p id="user-email" class="text-muted">user@email</p>
-          </div>
-        </div>
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="dashboard-container">
 
-        <div class="chips">
-          <span class="chip chip-gold">Nivel <span id="level">1</span></span>
-          <span class="chip">Streak <span id="streak">0</span> 🔥</span>
-        </div>
+    <!-- Gamificación -->
+    <section class="gamification-card">
+      <h2 class="section-title">Tu progreso</h2>
 
-        <!-- XP PROGRESS -->
-        <div class="xp-wrap">
-          <div class="xp-label">
-            <strong>XP</strong>
-            <span id="xp-text" class="text-muted">0 / 100</span>
-          </div>
-          <div class="xp-bar">
-            <div id="xp-fill" class="xp-fill"></div>
-          </div>
-          <div class="xp-next text-muted">Siguiente nivel en <span id="xp-to-next">100</span> XP</div>
-        </div>
-
-        <!-- QUICK STATS -->
-        <div class="stats">
-          <div class="stat">
-            <div class="stat-num" id="xp-total">0</div>
-            <div class="stat-label">XP total</div>
-          </div>
-          <div class="stat">
-            <div class="stat-num" id="days-active">0</div>
-            <div class="stat-label">Días activos</div>
-          </div>
-          <div class="stat">
-            <div class="stat-num" id="courses-count">0</div>
-            <div class="stat-label">Retos activos</div>
-          </div>
+      <div class="xp-box">
+        <span id="xpTotal" class="xp-value">0 XP</span>
+        <div class="level-badge">
+          <span id="userLevel">Lv 1</span>
         </div>
       </div>
 
-      <!-- BADGES -->
-      <div class="card badges-card">
-        <h3>Logros</h3>
-        <div id="badges" class="badges">
-          <!-- badges dinámicos -->
-        </div>
-        <p class="text-muted" id="badges-empty">Aún no has obtenido medallas. ¡Suma XP y rachas!</p>
+      <!-- Barra de progreso -->
+      <div class="progress-wrapper">
+        <div id="xpBar" class="progress-bar"></div>
+      </div>
+
+      <p id="streakText" class="streak-label">🔥 Racha: 0 días</p>
+    </section>
+
+    <!-- Cursos del usuario -->
+    <section class="courses-section">
+      <h2 class="section-title">Tus cursos</h2>
+
+      <div id="coursesGrid" class="courses-grid">
+        <!-- Cursos cargados dinámicamente -->
       </div>
     </section>
 
-    <!-- COURSES (Netflix-style) -->
-    <section class="card courses-card slide-up">
-      <div class="section-title">
-        <h3>Tus retos activos</h3>
-        <span class="text-muted" id="courses-subtitle">Basado en tu progreso</span>
-      </div>
-      <div id="courses-grid" class="courses-grid">
-        <!-- cards dinámicas -->
-      </div>
-    </section>
   </main>
 
-  <footer>
-    © 2025 Advance+. Todos los derechos reservados.
-  </footer>
-
   <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Script del Dashboard -->
-  <script src="/js/dashboard.js"></script>
+  <script src="/js/supabase.js"></script>
+
+  <!-- JS del dashboard -->
+  <script type="module" src="./dashboard.js"></script>
+
 </body>
 </html>

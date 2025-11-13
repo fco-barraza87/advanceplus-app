@@ -1,28 +1,152 @@
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: #0F1E44;
+/* --- DASHBOARD --- */
+
+.a-bg-dark {
+  background: #0A0F1C;
   color: #F7F7F7;
-  text-align: center;
-  margin: 0;
-  padding: 0;
+  font-family: Inter, sans-serif;
 }
 
-header {
-  padding: 60px 20px 20px;
+/* HEADER */
+.a-header {
+  background: #0F1E44;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
-button {
-  background-color: #C0A450;
-  color: #0F1E44;
-  border: none;
-  padding: 12px 20px;
-  margin: 10px;
-  border-radius: 8px;
-  cursor: pointer;
+.a-logo {
+  font-family: Montserrat, sans-serif;
+  font-size: 22px;
+  color: #C0A450;
+}
+
+.a-user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.a-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.a-username {
+  font-size: 14px;
+  color: #F7F7F7;
+}
+
+/* LAYOUT */
+.dashboard-container {
+  padding: 20px;
+}
+
+/* GAMIFICATION CARD */
+.gamification-card {
+  background: #0F1E44;
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.section-title {
+  font-family: Montserrat;
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+
+.xp-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.xp-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: #C0A450;
+}
+
+.level-badge {
+  background: #C0A450;
+  padding: 8px 14px;
+  border-radius: 12px;
   font-weight: bold;
+  color: #0A0F1C;
+}
+
+.progress-wrapper {
+  background: rgba(255,255,255,0.1);
+  height: 10px;
+  width: 100%;
+  border-radius: 20px;
+  margin: 15px 0;
+}
+
+.progress-bar {
+  background: #C0A450;
+  height: 10px;
+  width: 0%;
+  border-radius: 20px;
+  transition: width 0.6s ease;
+}
+
+.streak-label {
+  color: #F7F7F7;
+  opacity: 0.8;
+  font-size: 14px;
+}
+
+/* COURSES GRID */
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.course-card {
+  background: #0F1E44;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
   transition: transform 0.2s ease;
 }
 
-button:hover {
-  transform: scale(1.05);
+.course-card:hover {
+  transform: scale(1.03);
+}
+
+.course-cover {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+}
+
+.course-info {
+  padding: 12px;
+}
+
+.course-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #F7F7F7;
+}
+
+.course-progress {
+  margin-top: 6px;
+  height: 6px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+}
+
+.course-progress-bar {
+  height: 6px;
+  background: #C0A450;
+  width: 0%;
+  border-radius: 10px;
+  transition: width 0.4s ease;
 }
