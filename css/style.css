@@ -282,3 +282,12 @@
 .hidden {
   display: none;
 }
+
+
+.onb-container { text-align: center; padding: 40px 20px; }
+.onb-title { font-family: Montserrat; font-size: 28px; color: #C0A450; margin-bottom: 10px; }
+.onb-sub { color: #F7F7F7; opacity: .8; margin-bottom: 30px; }
+.onb-options { display: grid; gap: 15px; }
+.onb-card { background: #0F1E44; padding: 15px; border-radius: 14px; color: #fff; cursor: pointer; }
+.loader { border: 6px solid rgba(255,255,255,0.2); border-top: 6px solid #C0A450; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: auto; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
