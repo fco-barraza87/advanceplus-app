@@ -169,29 +169,6 @@ registerForm.addEventListener("submit", async (e) => {
 });
 
 
-  // 2) Buscar el curso-bienvenida
-  const { data: course } = await supabase
-    .from("courses")
-    .select("id, slug")
-    .eq("slug", "curso-bienvenida")
-    .single();
-
-  // 3) Asignar automáticamente al usuario
-  if (course) {
-    await supabase
-      .from("user_courses")
-      .insert({
-        user_id: user.id,
-        course_id: course.id,
-        status: "active"
-      })
-      .catch(() => {}); // Ignora si ya existía
-  }
-
-  // 4) Continuar al dashboard
-  window.location.href = "/dashboard/index.html";
-});
-
 
 
     /* RESET */
