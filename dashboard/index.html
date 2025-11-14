@@ -1,67 +1,31 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard | Advance+</title>
-
-  <link rel="stylesheet" href="/css/style.css">
-
-  <!-- Tipografías -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
-
-<body class="a-bg-dark">
-
-  <!-- HEADER -->
-  <header class="a-header">
-    <h1 class="a-logo">Advance+</h1>
-    <div class="a-user-info">
-      <img id="userAvatar" class="a-avatar" src="/assets/avatar.png" alt="avatar">
-      <span id="userName" class="a-username">Cargando...</span>
-      <button id="logoutBtn" class="btn-b">Cerrar sesión</button>
-    </div>
+<body class="app-bg">
+  <!-- Header -->
+  <header class="dash-header">
+    <h1 class="dash-title">Bienvenido a tu Dashboard</h1>
+    <button id="logoutBtn" class="btn-b">Cerrar sesión</button>
   </header>
 
-  <!-- CONTENIDO PRINCIPAL -->
-  <main class="dashboard-container">
-
-    <!-- Gamificación -->
-    <section class="gamification-card">
+  <!-- Contenido principal -->
+  <main class="dash-main">
+    <section class="dash-section">
       <h2 class="section-title">Tu progreso</h2>
-
-      <div class="xp-box">
-        <span id="xpTotal" class="xp-value">0 XP</span>
-        <div class="level-badge">
-          <span id="userLevel">Lv 1</span>
-        </div>
-      </div>
-
-      <!-- Barra de progreso -->
-      <div class="progress-wrapper">
-        <div id="xpBar" class="progress-bar"></div>
-      </div>
-
-      <p id="streakText" class="streak-label">🔥 Racha: 0 días</p>
+      <div id="progressContainer" class="progress-card">Cargando progreso...</div>
     </section>
 
-    <!-- Cursos del usuario -->
-    <section class="courses-section">
+    <section class="dash-section">
       <h2 class="section-title">Tus cursos</h2>
-
-      <div id="coursesGrid" class="courses-grid">
-        <!-- Cursos cargados dinámicamente -->
-      </div>
+      <div id="coursesContainer" class="courses-grid">Cargando cursos...</div>
     </section>
-
   </main>
 
-  <!-- Supabase -->
-  <script src="/js/supabase.js" type="module"></script>
-
-
-  <!-- JS del dashboard -->
-  <script type="module" src="./dashboard.js"></script>
-
+  <script type="module" src="/js/dashboard/dashboard.js"></script>
 </body>
 </html>
