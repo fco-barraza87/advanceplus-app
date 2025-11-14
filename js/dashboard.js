@@ -209,6 +209,13 @@ document.getElementById("logout").addEventListener("click", async () => {
   alert("👋 Sesión cerrada correctamente.");
   window.location.href = "/";
 });
+import { supabase } from "/js/supabase.js";
+
+document.getElementById("logoutBtn").onclick = async () => {
+  await supabase.auth.signOut();
+  window.location.href = "/index.html";
+};
+
 
 /* 🟢 Ejecutar */
 loadDashboard();
