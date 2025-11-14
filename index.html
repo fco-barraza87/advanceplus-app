@@ -112,24 +112,54 @@
       window.location.href = "/dashboard/index.html";
     });
 
-    /* REGISTER */
-    registerForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const name = document.getElementById("regName").value.trim();
-      const email = document.getElementById("regEmail").value.trim();
-      const password = document.getElementById("regPassword").value.trim();
-      const err = document.getElementById("regError");
-      err.textContent = "";
+/* REGISTER */
+registerForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = document.getElementById("regName").value.trim();
+  const email = document.getElementById("regEmail").value.trim();
+  const password = document.getElementById("regPassword").value.trim();
+  const err = document.getElementById("regError");
+  err.textContent = "";
 
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { full_name: name } }
-      });
+  // 1) Crear usuario en Supabase Auth
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { full_name: name } }
+  });
 
-      if (error) { err.textContent = error.message; return; }
-      window.location.href = "/dashboard/index.html";
-    });
+  if (error) { 
+    err.textContent = error.message; 
+    return; 
+  }
+
+  const user = data.user;
+  if (!user) return; // Session puede tardar medio segundo
+
+  // 2) Buscar el curso-bienvenida
+  const { data: course } = await supabase
+    .from("courses")
+    .select("id, slug")
+    .eq("slug", "curso-bienvenida")
+    .single();
+
+  // 3) Asignar automáticamente al usuario
+  if (course) {
+    await supabase
+      .from("user_courses")
+      .insert({
+        user_id: user.id,
+        course_id: course.id,
+        status: "active"
+      })
+      .catch(() => {}); // Ignora si ya existía
+  }
+
+  // 4) Continuar al dashboard
+  window.location.href = "/dashboard/index.html";
+});
+
+
 
     /* RESET */
     const resetModal = document.getElementById("resetModal");

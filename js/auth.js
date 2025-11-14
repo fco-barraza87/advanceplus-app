@@ -6,7 +6,7 @@ import { supabase } from "./supabase.js";
 ----------------------------------------------------- */
 
 /**
- * Obtiene el usuario autenticado.
+ * Obtiene el usuario autenticado (auth.users).
  */
 export async function getCurrentUser() {
   const { data: { user } } = await supabase.auth.getUser();
@@ -24,23 +24,22 @@ export async function logout() {
 /**
  * Escucha cambios de sesión (login, logout, refresh).
  */
-supabase.auth.onAuthStateChange(async (event, session) => {
+supabase.auth.onAuthStateChange(async (event) => {
   if (event === "SIGNED_OUT") {
     window.location.href = "/index.html";
   }
 });
-
 
 /* -----------------------------------------------------
    VALIDACIONES DE ACCESO (Role-Based Access)
 ----------------------------------------------------- */
 
 /**
- * Devuelve perfil completo desde la tabla users.
+ * Devuelve perfil completo desde la tabla CORRECTA: public.profiles
  */
 export async function getUserProfile(userId) {
   const { data, error } = await supabase
-    .from("users")
+    .from("profiles")
     .select("id, full_name, role, avatar_url, xp_total, streak_current")
     .eq("id", userId)
     .single();
@@ -53,10 +52,8 @@ export async function getUserProfile(userId) {
   return data;
 }
 
-
 /**
  * Asegura que el usuario esté autenticado.
- * Si no lo está → redirige al login.
  */
 export async function requireAuth() {
   const user = await getCurrentUser();
@@ -68,14 +65,14 @@ export async function requireAuth() {
 }
 
 /**
- * Asegura que el usuario sea ADMIN.
+ * Asegura acceso ADMIN.
  */
 export async function requireAdmin() {
   const user = await requireAuth();
   if (!user) return;
 
   const profile = await getUserProfile(user.id);
-  if (profile.role !== "admin") {
+  if (!profile || profile.role !== "admin") {
     alert("Acceso denegado.");
     window.location.href = "/dashboard/index.html";
   }
@@ -83,16 +80,15 @@ export async function requireAdmin() {
   return profile;
 }
 
-
 /**
- * Asegura que el usuario sea COACH.
+ * Asegura acceso COACH.
  */
 export async function requireCoach() {
   const user = await requireAuth();
   if (!user) return;
 
   const profile = await getUserProfile(user.id);
-  if (profile.role !== "coach") {
+  if (!profile || profile.role !== "coach") {
     alert("Acceso exclusivo para coaches.");
     window.location.href = "/dashboard/index.html";
   }
@@ -100,16 +96,15 @@ export async function requireCoach() {
   return profile;
 }
 
-
 /**
- * Asegura que el usuario sea USER normal.
+ * Asegura acceso USER.
  */
 export async function requireUser() {
   const user = await requireAuth();
   if (!user) return;
 
   const profile = await getUserProfile(user.id);
-  if (profile.role !== "user") {
+  if (!profile || profile.role !== "user") {
     alert("Acceso denegado.");
     window.location.href = "/dashboard/index.html";
   }
@@ -117,11 +112,9 @@ export async function requireUser() {
   return profile;
 }
 
-
 /* -----------------------------------------------------
-   Carga rápida de datos del usuario (para headers/UI)
+   Información mínima para UI/Header
 ----------------------------------------------------- */
-
 export async function loadUserMinimalInfo() {
   const user = await getCurrentUser();
   if (!user) return null;
@@ -131,9 +124,8 @@ export async function loadUserMinimalInfo() {
   return {
     id: user.id,
     email: user.email,
-    name: profile.full_name,
-    role: profile.role,
-    avatar: profile.avatar_url,
+    name: profile?.full_name || "",
+    role: profile?.role || "user",
+    avatar: profile?.avatar_url || null,
   };
 }
-
