@@ -3,23 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tu tiempo ideal | Advance+</title>
+  <title>Tu tiempo | Advance+</title>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
-<body class="login-bg fade-in">
-  <main class="onb-container slide-up">
+<body class="login-bg">
+  <main class="onb-container">
     <h2 class="onb-title">¿Cuánto tiempo puedes dedicar al día?</h2>
     <p class="onb-sub">Mejor pocos minutos constantes que mucho y nunca.</p>
 
-    <div class="onb-options wiggle">
-      <button class="onb-card" onclick="saveTime(5)">5 minutos</button>
-      <button class="onb-card" onclick="saveTime(10)">10 minutos</button>
-      <button class="onb-card" onclick="saveTime(15)">15 minutos</button>
-      <button class="onb-card" onclick="saveTime(30)">30 minutos</button>
-    </div>
-
-    <div class="onb-progress">
-      <div style="width: 60%"></div>
+    <div class="onb-options">
+      <button class="onb-card time-btn" data-minutes="5">5 minutos</button>
+      <button class="onb-card time-btn" data-minutes="10">10 minutos</button>
+      <button class="onb-card time-btn" data-minutes="15">15 minutos</button>
+      <button class="onb-card time-btn" data-minutes="30">30 minutos</button>
     </div>
   </main>
 

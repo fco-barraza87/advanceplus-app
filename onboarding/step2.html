@@ -6,31 +6,20 @@
   <title>Tu objetivo | Advance+</title>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
-<body class="login-bg fade-in">
-  <main class="onb-container slide-up">
-    <h2 class="onb-title">¿Cuál es tu objetivo principal ahora?</h2>
+<body class="login-bg">
+  <main class="onb-container">
+    <h2 class="onb-title">¿Cuál es tu objetivo principal?</h2>
     <p class="onb-sub">Elige el que más se acerque a lo que quieres trabajar.</p>
 
-    <div class="onb-options wiggle">
-      <button class="onb-card" onclick="saveGoal('bienestar')">
-        Mejorar mi bienestar
-      </button>
-      <button class="onb-card" onclick="saveGoal('disciplina')">
-        Ser más disciplinado
-      </button>
-      <button class="onb-card" onclick="saveGoal('mentalidad')">
-        Trabajar mi mentalidad
-      </button>
-      <button class="onb-card" onclick="saveGoal('productividad')">
-        Aumentar mi productividad
-      </button>
-    </div>
-
-    <div class="onb-progress">
-      <div style="width: 40%"></div>
+    <div class="onb-options">
+      <button class="onb-card goal-btn" data-goal="bienestar">Mejorar mi bienestar</button>
+      <button class="onb-card goal-btn" data-goal="disciplina">Ser más disciplinado</button>
+      <button class="onb-card goal-btn" data-goal="mentalidad">Trabajar mi mentalidad</button>
+      <button class="onb-card goal-btn" data-goal="productividad">Aumentar mi productividad</button>
     </div>
   </main>
 
   <script type="module" src="/js/onboarding.js"></script>
 </body>
 </html>
+

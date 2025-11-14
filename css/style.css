@@ -301,26 +301,26 @@
 
 .onb-sub {
   color: #F7F7F7;
-  opacity: 0.8;
-  margin-bottom: 30px;
+  opacity: .8;
+  margin-bottom: 24px;
 }
 
 .onb-options {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .onb-card {
   background: #0F1E44;
-  padding: 14px 16px;
-  border-radius: 16px;
-  color: #fff;
+  padding: 12px 16px;
+  border-radius: 14px;
   border: none;
+  color: #fff;
   text-align: left;
-  width: 100%;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
+
+
 
 .onb-card:hover {
   transform: translateY(-2px);
