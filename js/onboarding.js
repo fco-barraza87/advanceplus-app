@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!user) return;
 
         await supabase
-          .from("users")
+          .from("profiles")  // ← CAMBIO AQUÍ
           .update({ goals_json: { main_goal: goal } })
           .eq("id", user.id);
 
@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!user) return;
 
         await supabase
-          .from("users")
+          .from("profiles")  // ← CAMBIO AQUÍ
           .update({ preferred_focus_time: `${minutes}_min` })
           .eq("id", user.id);
 
@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // 1. Marcar onboarding completado
         await supabase
-          .from("users")
+          .from("profiles")   // ← CAMBIO AQUÍ
           .update({ onboarding_completed: true })
           .eq("id", user.id);
 
@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             course_id: course.id,
             status: "active"
           })
-          .catch(() => {}); // Ignora error si ya está asignado
+          .catch(() => {}); // Ignora duplicados
 
         // 4. Redirigir
         goTo(`/curso/index.html?c=${course.slug}`);
