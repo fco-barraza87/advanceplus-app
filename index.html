@@ -45,9 +45,7 @@ loginForm.addEventListener("submit", async (e) => {
   window.location.href = "/dashboard/index.html";
 });
 
-/* --------------------------
-   REGISTER
---------------------------- */
+/* REGISTER */
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -72,7 +70,6 @@ registerForm.addEventListener("submit", async (e) => {
 
   // 2) Intentar obtener la sesión
   let user = data.user;
-
   if (!user) {
     const retry = await supabase.auth.getUser();
     user = retry.data.user;
@@ -90,21 +87,23 @@ registerForm.addEventListener("submit", async (e) => {
     .eq("slug", "curso-bienvenida")
     .single();
 
-  // 4) Asignar curso
+  // 4) Asignar curso usando formato correcto Supabase v2
   if (course) {
-    await supabase
+    const { error: insertError } = await supabase
       .from("user_courses")
       .insert({
         user_id: user.id,
         course_id: course.id,
         status: "active"
-      })
-      .catch(() => {});
+      });
+
+    // ignorar error si el curso ya está asignado
   }
 
-  // 5) Ir al dashboard
+  // 5) Redirigir
   window.location.href = "/dashboard/index.html";
 });
+
 
 /* --------------------------
    RESET PASSWORD
