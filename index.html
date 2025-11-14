@@ -1,124 +1,61 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Advance+ | Acceso</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <style>
-    /* Tabs */
-    .auth-tabs { display: flex; justify-content: center; margin-bottom: 20px; }
-    .auth-tab { padding: 10px 20px; cursor: pointer; font-family: Montserrat; color: #F7F7F7; opacity: 0.6; border-bottom: 2px solid transparent; }
-    .auth-tab.active { opacity: 1; border-bottom: 2px solid #C0A450; }
-    .auth-form { display: none; }
-    .auth-form.active { display: block; }
-  </style>
-</head>
+<script type="module">
+import { supabase } from "/js/supabase.js";
 
-<body class="login-bg">
-  <main class="login-container">
-    <div class="login-card">
-      <h1 class="login-title">Advance+</h1>
+/* --------------------------
+   TABS LOGIN / REGISTER
+--------------------------- */
+const tabLogin = document.getElementById("tabLogin");
+const tabRegister = document.getElementById("tabRegister");
+const loginForm = document.getElementById("loginForm");
+const registerForm = document.getElementById("registerForm");
 
-      <!-- Tabs -->
-      <div class="auth-tabs">
-        <div id="tabLogin" class="auth-tab active">Iniciar Sesión</div>
-        <div id="tabRegister" class="auth-tab">Crear Cuenta</div>
-      </div>
+tabLogin.onclick = () => {
+  tabLogin.classList.add("active");
+  tabRegister.classList.remove("active");
+  loginForm.classList.add("active");
+  registerForm.classList.remove("active");
+};
 
-      <!-- LOGIN FORM -->
-      <form id="loginForm" class="auth-form active">
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="loginEmail" placeholder="email@example.com" required />
-        </div>
-        <div class="form-group">
-          <label>Contraseña</label>
-          <input type="password" id="loginPassword" placeholder="********" required />
-        </div>
-        <button type="submit" class="btn-a">Ingresar</button>
-        <p id="loginError" class="login-error"></p>
-        <p class="login-forgot" id="openReset">¿Olvidaste tu contraseña?</p>
-      </form>
+tabRegister.onclick = () => {
+  tabRegister.classList.add("active");
+  tabLogin.classList.remove("active");
+  registerForm.classList.add("active");
+  loginForm.classList.remove("active");
+};
 
-      <!-- REGISTER FORM -->
-      <form id="registerForm" class="auth-form">
-        <div class="form-group">
-          <label>Nombre completo</label>
-          <input type="text" id="regName" placeholder="Carlos Pérez" required />
-        </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="regEmail" placeholder="email@example.com" required />
-        </div>
-        <div class="form-group">
-          <label>Contraseña</label>
-          <input type="password" id="regPassword" placeholder="********" required />
-        </div>
-        <button type="submit" class="btn-a">Crear cuenta</button>
-        <p id="regError" class="login-error"></p>
-      </form>
-    </div>
+/* --------------------------
+   LOGIN
+--------------------------- */
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    <!-- RESET MODAL -->
-    <div id="resetModal" class="reset-modal hidden">
-      <div class="reset-box">
-        <h3>Restablecer contraseña</h3>
-        <input type="email" id="resetEmail" placeholder="Ingresa tu email" />
-        <button id="resetSend" class="btn-a">Enviar enlace</button>
-        <button id="resetClose" class="btn-b">Cerrar</button>
-        <p id="resetMsg"></p>
-      </div>
-    </div>
-  </main>
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value.trim();
+  const err = document.getElementById("loginError");
 
-  <script type="module" src="/js/supabase.js"></script>
+  err.textContent = "";
 
-  <script type="module">
-    import { supabase } from "/js/supabase.js";
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-    /* Tabs */
-    const tabLogin = document.getElementById("tabLogin");
-    const tabRegister = document.getElementById("tabRegister");
+  if (error) {
+    err.textContent = "Credenciales incorrectas";
+    return;
+  }
 
-    const loginForm = document.getElementById("loginForm");
-    const registerForm = document.getElementById("registerForm");
+  window.location.href = "/dashboard/index.html";
+});
 
-    tabLogin.onclick = () => {
-      tabLogin.classList.add("active");
-      tabRegister.classList.remove("active");
-      loginForm.classList.add("active");
-      registerForm.classList.remove("active");
-    };
-
-    tabRegister.onclick = () => {
-      tabRegister.classList.add("active");
-      tabLogin.classList.remove("active");
-      registerForm.classList.add("active");
-      loginForm.classList.remove("active");
-    };
-
-    /* LOGIN */
-    loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("loginEmail").value.trim();
-      const password = document.getElementById("loginPassword").value.trim();
-      const err = document.getElementById("loginError");
-      err.textContent = "";
-
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) { err.textContent = "Credenciales incorrectas"; return; }
-      window.location.href = "/dashboard/index.html";
-    });
-
-/* REGISTER */
+/* --------------------------
+   REGISTER
+--------------------------- */
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+
   const name = document.getElementById("regName").value.trim();
   const email = document.getElementById("regEmail").value.trim();
   const password = document.getElementById("regPassword").value.trim();
   const err = document.getElementById("regError");
+
   err.textContent = "";
 
   // 1) Crear usuario
@@ -133,7 +70,7 @@ registerForm.addEventListener("submit", async (e) => {
     return;
   }
 
-  // 2) Intentar obtener la sesión inmediatamente
+  // 2) Intentar obtener la sesión
   let user = data.user;
 
   if (!user) {
@@ -146,13 +83,14 @@ registerForm.addEventListener("submit", async (e) => {
     return;
   }
 
-  // 3) Asignar curso-bienvenida
+  // 3) Buscar curso-bienvenida
   const { data: course } = await supabase
     .from("courses")
     .select("id, slug")
     .eq("slug", "curso-bienvenida")
     .single();
 
+  // 4) Asignar curso
   if (course) {
     await supabase
       .from("user_courses")
@@ -164,24 +102,27 @@ registerForm.addEventListener("submit", async (e) => {
       .catch(() => {});
   }
 
-  // 4) Redirigir al dashboard
+  // 5) Ir al dashboard
   window.location.href = "/dashboard/index.html";
 });
 
+/* --------------------------
+   RESET PASSWORD
+--------------------------- */
+const resetModal = document.getElementById("resetModal");
 
+document.getElementById("openReset").onclick = () =>
+  resetModal.classList.remove("hidden");
 
+document.getElementById("resetClose").onclick = () =>
+  resetModal.classList.add("hidden");
 
-    /* RESET */
-    const resetModal = document.getElementById("resetModal");
-    document.getElementById("openReset").onclick = () => resetModal.classList.remove("hidden");
-    document.getElementById("resetClose").onclick = () => resetModal.classList.add("hidden");
+document.getElementById("resetSend").onclick = async () => {
+  const email = document.getElementById("resetEmail").value.trim();
+  const msg = document.getElementById("resetMsg");
 
-    document.getElementById("resetSend").onclick = async () => {
-      const email = document.getElementById("resetEmail").value.trim();
-      const msg = document.getElementById("resetMsg");
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
-      msg.textContent = error ? "Error enviando correo" : "Correo enviado";
-    };
-  </script>
-</body>
-</html>
+  const { error } = await supabase.auth.resetPasswordForEmail(email);
+
+  msg.textContent = error ? "Error enviando correo" : "Correo enviado";
+};
+</script>
