@@ -121,20 +121,53 @@ registerForm.addEventListener("submit", async (e) => {
   const err = document.getElementById("regError");
   err.textContent = "";
 
-  // 1) Crear usuario en Supabase Auth
+  // 1) Crear usuario
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: { data: { full_name: name } }
   });
 
-  if (error) { 
-    err.textContent = error.message; 
-    return; 
+  if (error) {
+    err.textContent = error.message;
+    return;
   }
 
-  const user = data.user;
-  if (!user) return; // Session puede tardar medio segundo
+  // 2) Intentar obtener la sesión inmediatamente
+  let user = data.user;
+
+  if (!user) {
+    const retry = await supabase.auth.getUser();
+    user = retry.data.user;
+  }
+
+  if (!user) {
+    err.textContent = "Error al iniciar sesión automáticamente.";
+    return;
+  }
+
+  // 3) Asignar curso-bienvenida
+  const { data: course } = await supabase
+    .from("courses")
+    .select("id, slug")
+    .eq("slug", "curso-bienvenida")
+    .single();
+
+  if (course) {
+    await supabase
+      .from("user_courses")
+      .insert({
+        user_id: user.id,
+        course_id: course.id,
+        status: "active"
+      })
+      .catch(() => {});
+  }
+
+  // 4) Redirigir al dashboard
+  window.location.href = "/dashboard/index.html";
+});
+
 
   // 2) Buscar el curso-bienvenida
   const { data: course } = await supabase
