@@ -1,23 +1,36 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Objetivo | Advance+</title>
-<link rel="stylesheet" href="/css/style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tu objetivo | Advance+</title>
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
-<body class="login-bg">
-<main class="onb-container">
-<h2 class="onb-title">¿Cuál es tu objetivo principal?</h2>
+<body class="login-bg fade-in">
+  <main class="onb-container slide-up">
+    <h2 class="onb-title">¿Cuál es tu objetivo principal ahora?</h2>
+    <p class="onb-sub">Elige el que más se acerque a lo que quieres trabajar.</p>
 
+    <div class="onb-options wiggle">
+      <button class="onb-card" onclick="saveGoal('bienestar')">
+        Mejorar mi bienestar
+      </button>
+      <button class="onb-card" onclick="saveGoal('disciplina')">
+        Ser más disciplinado
+      </button>
+      <button class="onb-card" onclick="saveGoal('mentalidad')">
+        Trabajar mi mentalidad
+      </button>
+      <button class="onb-card" onclick="saveGoal('productividad')">
+        Aumentar mi productividad
+      </button>
+    </div>
 
-<div class="onb-options">
-<div class="onb-card" onclick="saveGoal('bienestar')">Mejorar mi bienestar</div>
-<div class="onb-card" onclick="saveGoal('disciplina')">Ser más disciplinado</div>
-<div class="onb-card" onclick="saveGoal('mentalidad')">Trabajar mi mentalidad</div>
-<div class="onb-card" onclick="saveGoal('productividad')">Aumentar productividad</div>
-</div>
-</main>
-<script type="module" src="/js/onboarding.js"></script>
+    <div class="onb-progress">
+      <div style="width: 40%"></div>
+    </div>
+  </main>
+
+  <script type="module" src="/js/onboarding.js"></script>
 </body>
 </html>
