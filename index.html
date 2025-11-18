@@ -180,6 +180,11 @@
         return;
       }
 
+      await supabase
+        .from("profiles")
+        .update({ display_name: name })
+        .eq("id", user.id);
+
       // 3) Buscar curso-bienvenida
       const { data: course } = await supabase
         .from("courses")
