@@ -24,8 +24,11 @@ async function loadUserData() {
     .eq("user_id", user.id)
     .single();
 
-  return { user, profile, stats };
-}
+  if (statsError) {
+    console.error("Error cargando user_stats:", statsError);
+  } else {
+    renderGamification(stats);
+  }
 
 /* ==================================================
    2. RENDER USER INFO
@@ -55,12 +58,11 @@ function renderUser(profile) {
 function renderGamification(stats) {
   if (!stats) return;
 
-    const xp = profile.xp_total ?? 0;
-    const level = profile.level ?? 1;
-    const streakCurrent = profile.streak_current ?? 0;
-    const streakBest = profile.streak_best ?? 0;
+  const xp = stats.xp_total ?? 0;
+  const level = stats.level ?? 1;
+  const streakCurrent = stats.streak_current ?? 0;
+  const streakBest = stats.streak_best ?? 0;
 
-  // XP dentro del nivel
   const xpInLevel = xp % 100;
   const xpToNext = 100 - xpInLevel;
 
@@ -71,10 +73,12 @@ function renderGamification(stats) {
   qs("#streakBest").textContent = `${streakBest} 🏆`;
 
   const bar = qs("#xpBarFill");
-  const pct = Math.min(100, (xpInLevel / 100) * 100);
-  setTimeout(() => {
-    bar.style.width = `${pct}%`;
-  }, 150);
+  if (bar) {
+    const pct = Math.min(100, (xpInLevel / 100) * 100);
+    setTimeout(() => {
+      bar.style.width = `${pct}%`;
+    }, 150);
+  }
 }
 
 /* ==================================================
