@@ -13,7 +13,7 @@ async function loadUserData() {
   // 1) Profile
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, display_name, avatar_url, role")
+    .select("id, full_name, avatar_url, streak_best, role")
     .eq("id", user.id)
     .single();
 
@@ -33,7 +33,7 @@ async function loadUserData() {
 function renderUser(profile) {
   if (!profile) return;
 
-  qs("#userName").textContent = profile.display_name || "Usuario";
+  qs("#userName").textContent = profile.full_name || "Usuario";
   qs("#userRole").textContent =
     profile.role === "admin"
       ? "Administrador Advance+"
@@ -58,7 +58,7 @@ function renderGamification(stats) {
   const xp = stats.xp_total ?? 0;
   const level = stats.level ?? 1;
   const streakCurrent = stats.streak_current ?? 0;
-  const streakBest = stats.streak_best ?? 0;
+  const streakBest = profile.streak_best ?? 0;
 
   // XP dentro del nivel
   const xpInLevel = xp % 100;
