@@ -7,9 +7,12 @@
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body class="app-bg">
+
+  <!-- HEADER PREMIUM -->
   <header class="dash-header">
     <div class="dash-header-left">
       <div class="dash-logo">Advance+</div>
+
       <div class="dash-user-info">
         <div id="userAvatar" class="dash-avatar-placeholder">A+</div>
         <div class="dash-user-text">
@@ -25,12 +28,15 @@
     </div>
   </header>
 
+  <!-- ----- MAIN CONTENT ----- -->
   <main class="dashboard-layout">
+
     <!-- SECCIÓN B — GAMIFICACIÓN -->
     <section class="dash-section gamification-section">
       <h2 class="section-title">Tu progreso</h2>
 
       <div class="gamification-grid">
+
         <div class="card gamification-card">
           <div class="card-header-row">
             <span class="card-label">Nivel</span>
@@ -57,6 +63,7 @@
           <div class="card-label">Mejor racha</div>
           <div id="streakBest" class="card-big-number">0 🏆</div>
         </div>
+
       </div>
     </section>
 
@@ -67,9 +74,7 @@
         <span id="activeCount" class="section-subtitle"></span>
       </div>
 
-      <div id="activeCoursesGrid" class="courses-grid">
-        <!-- Tarjetas de cursos activos se inyectan aquí -->
-      </div>
+      <div id="activeCoursesGrid" class="courses-grid"></div>
 
       <p id="noActiveMessage" class="empty-message" style="display:none;">
         Aún no has comenzado ningún reto. Empieza por uno de los cursos recomendados abajo. 💪
@@ -82,33 +87,24 @@
         <h2 class="section-title">Explorar retos</h2>
       </div>
 
-      <div id="availableCoursesGrid" class="courses-grid">
-        <!-- Tarjetas de cursos disponibles se inyectan aquí -->
-      </div>
+      <div id="availableCoursesGrid" class="courses-grid"></div>
 
       <p id="noAvailableMessage" class="empty-message" style="display:none;">
-        Por ahora no hay más retos disponibles. 🚀
+        No hay más retos disponibles por ahora. 🚀
       </p>
     </section>
+
   </main>
 
-  <!-- Supabase global -->
-  <script type="module" src="/js/supabase.js"></script>
-
-  <!-- Protección de ruta -->
+  <!-- Router -->
   <script type="module">
     import { protectUserView } from "/js/router.js";
     protectUserView();
   </script>
 
-  <!-- Lógica del dashboard -->
-<script type="module">
-  import { protectUserView } from "/js/router.js";
-  protectUserView();
-</script>
-
-<script type="module" src="/js/dashboard.js"></script>
-
+  <!-- Dashboard logic -->
+  <script type="module" src="/js/dashboard.js"></script>
 </body>
+
 
 </html>
