@@ -177,23 +177,28 @@ async function loadDashboard() {
   } = await supabase.auth.getUser();
   if (!user) return;
 
-  // perfil
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+// 1. Obtener perfil
+const { data: profile, error: pErr } = await supabase
+  .from("profiles")
+  .select("id, display_name, avatar_url, role")
+  .eq("id", user.id)
+  .single();
 
-  renderUserHeader(profile);
+// 2. Obtener stats reales desde user_stats
+const { data: stats, error: sErr } = await supabase
+  .from("user_stats")
+  .select("*")
+  .eq("user_id", user.id)
+  .single();
 
-  // stats
-  const { data: stats } = await supabase
-    .from("user_stats")
-    .select("*")
-    .eq("user_id", user.id)
-    .single();
+if (pErr || sErr) {
+  console.error("Error cargando datos:", pErr || sErr);
+}
 
-  renderGamification(stats);
+// 3. Usar ambos
+renderUser(profile);
+renderGamification(stats ?? { xp_total: 0, level: 1, streak_current: 0, streak_best: 0 });
+
 
   // cursos activos
   const { data: active } = await supabase

@@ -102,7 +102,13 @@
   </script>
 
   <!-- Lógica del dashboard -->
-  <script type="module" src="/js/dashboard.js"></script>
+<script type="module">
+  import { protectUserView } from "/js/router.js";
+  protectUserView();
+</script>
+
+<script type="module" src="/js/dashboard.js"></script>
+
 </body>
 
 </html>
