@@ -1,41 +1,43 @@
 /* =========================================================
-   DASHBOARD.JS — Advance+ Premium
-   Lógica principal: carga perfil, stats, cursos activos y disponibles
+   DASHBOARD — ADVANCE+
+   Compatible con tu HTML real
 ========================================================= */
 
 import { supabase } from "/js/supabase.js";
 import { protectUserView } from "/js/router.js";
 
-protectUserView(); // Protección obligatoria
+protectUserView();
 
 /* -------------------------------------------------------
-   Helpers simples
+   Helpers
 ------------------------------------------------------- */
-function qs(sel) {
-  return document.querySelector(sel);
-}
-
-function setText(id, value) {
+const qs = (sel) => document.querySelector(sel);
+const setText = (id, value) => {
   const el = document.getElementById(id);
   if (el) el.textContent = value;
-}
+};
 
 /* -------------------------------------------------------
-   Render header del usuario
+   Header de usuario
 ------------------------------------------------------- */
 function renderUserHeader(profile) {
   if (!profile) return;
 
-  const nameEl = qs("#userName");
-  const roleEl = qs("#userRole");
-  const avatarEl = qs("#userAvatar");
+  setText("userName", profile.display_name || "Usuario");
+  setText("userRole", "Miembro Advance+");
 
-  if (nameEl) nameEl.textContent = profile.display_name || "Usuario";
-  if (roleEl) roleEl.textContent = "Miembro Advance+";
+  const avatar = qs("#userAvatar");
 
-  if (avatarEl) {
-    if (profile.avatar_url) avatarEl.src = profile.avatar_url;
-    else avatarEl.textContent = (profile.display_name || "?").substring(0, 1);
+  if (avatar) {
+    if (profile.avatar_url) {
+      avatar.style.background = "transparent";
+      avatar.style.border = "none";
+      avatar.textContent = "";
+      avatar.innerHTML = `<img src="${profile.avatar_url}" class="avatar-img" />`;
+    } else {
+      avatar.textContent =
+        (profile.display_name || "?").substring(0, 1).toUpperCase();
+    }
   }
 }
 
@@ -50,42 +52,47 @@ function renderGamification(stats) {
   const streakCurrent = stats.streak_current ?? 0;
   const streakBest = stats.streak_best ?? 0;
 
-  // Cálculo XP nivel
+  // calcular xp dentro del nivel
   const xpInLevel = xp % 100;
   const xpToNext = 100 - xpInLevel;
 
-  // Insertar datos
+  // insertar
   setText("levelLabel", level);
   setText("xpTotalLabel", `${xp} XP`);
   setText("xpNextLabel", `${xpToNext} XP para el siguiente nivel`);
-  setText("streakCurrent", `${streakCurrent}`);
-  setText("streakBest", `${streakBest}`);
+  setText("streakCurrent", streakCurrent);
+  setText("streakBest", streakBest);
 
-  // Barra XP
-  const xpBarFill = document.getElementById("xpBarFill");
-  if (xpBarFill) {
-    const percent = Math.min(100, (xpInLevel / 100) * 100);
+  // barra
+  const bar = qs("#xpBarFill");
+  if (bar) {
+    const pct = Math.min(100, (xpInLevel / 100) * 100);
     setTimeout(() => {
-      xpBarFill.style.width = `${percent}%`;
+      bar.style.width = `${pct}%`;
     }, 150);
   }
 }
 
 /* -------------------------------------------------------
-   Render cursos activos
+   Cursos activos
 ------------------------------------------------------- */
 function renderActiveCourses(list) {
-  const container = qs("#activeCoursesList");
-  if (!container) return;
+  const grid = qs("#activeCoursesGrid");
+  const emptyMsg = qs("#noActiveMessage");
+  const counter = qs("#activeCount");
+
+  if (!grid) return;
+
+  grid.innerHTML = "";
 
   if (!list || list.length === 0) {
-    container.innerHTML = `<p class="empty-msg">
-      Aún no has comenzado ningún reto. Empieza por uno de los cursos recomendados abajo. 💪
-    </p>`;
+    if (emptyMsg) emptyMsg.style.display = "block";
+    if (counter) counter.textContent = "0 retos activos";
     return;
   }
 
-  container.innerHTML = "";
+  if (emptyMsg) emptyMsg.style.display = "none";
+  if (counter) counter.textContent = `${list.length} retos activos`;
 
   list.forEach((item) => {
     const c = item.courses;
@@ -94,39 +101,47 @@ function renderActiveCourses(list) {
     card.className = "course-card";
 
     card.innerHTML = `
-      <img class="course-cover" src="${c.cover_url}" alt="${c.title}" />
+      <img src="${c.cover_url}" class="course-cover" alt="${c.title}">
       <div class="course-info">
         <h3>${c.title}</h3>
         <p>Día 1 de ${c.duration_days || 7}</p>
-        <button class="btn-a" onclick="window.location.href='/leccion/index.html?course=${c.id}&day=1'">
-          Continuar
-        </button>
+        <button class="btn-a"
+                onclick="window.location.href='/leccion/index.html?course=${c.id}&day=1'">
+                Continuar</button>
       </div>
     `;
 
-    container.appendChild(card);
+    grid.appendChild(card);
   });
 }
 
 /* -------------------------------------------------------
-   Render cursos disponibles (no inscritos)
+   Cursos disponibles
 ------------------------------------------------------- */
-function renderAvailableCourses(allCourses, activeCourses) {
-  const container = qs("#availableCoursesList");
-  if (!container) return;
+function renderAvailableCourses(all, active) {
+  const grid = qs("#availableCoursesGrid");
+  const emptyMsg = qs("#noAvailableMessage");
 
-  const activeIds = new Set(activeCourses.map((c) => c.courses.id));
+  if (!grid) return;
 
-  const available = allCourses.filter((c) => !activeIds.has(c.id));
+  grid.innerHTML = "";
 
-  container.innerHTML = "";
+  const activeIds = new Set(active.map((a) => a.courses.id));
+  const available = all.filter((c) => !activeIds.has(c.id));
+
+  if (available.length === 0) {
+    if (emptyMsg) emptyMsg.style.display = "block";
+    return;
+  }
+
+  if (emptyMsg) emptyMsg.style.display = "none";
 
   available.forEach((c) => {
     const card = document.createElement("div");
     card.className = "course-card";
 
     card.innerHTML = `
-      <img class="course-cover" src="${c.cover_url}" alt="${c.title}" />
+      <img src="${c.cover_url}" class="course-cover" alt="${c.title}">
       <div class="course-info">
         <span class="category-tag">${c.category}</span>
         <h3>${c.title}</h3>
@@ -135,32 +150,34 @@ function renderAvailableCourses(allCourses, activeCourses) {
       </div>
     `;
 
-    container.appendChild(card);
+    grid.appendChild(card);
   });
 }
 
 /* -------------------------------------------------------
    Logout
 ------------------------------------------------------- */
-async function setupLogout() {
-  const logoutBtn = qs("#logoutBtn");
-  if (!logoutBtn) return;
+function initLogout() {
+  const btn = qs("#btnLogout");
+  if (!btn) return;
 
-  logoutBtn.onclick = async () => {
+  btn.onclick = async () => {
     await supabase.auth.signOut();
     window.location.href = "/index.html";
   };
 }
 
 /* -------------------------------------------------------
-   Carga principal del dashboard
+   Cargar datos
 ------------------------------------------------------- */
 async function loadDashboard() {
-  // 1. Obtener auth
-  const { data: { user } } = await supabase.auth.getUser();
+  // auth
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return;
 
-  // 2. Perfil
+  // perfil
   const { data: profile } = await supabase
     .from("profiles")
     .select("*")
@@ -169,7 +186,7 @@ async function loadDashboard() {
 
   renderUserHeader(profile);
 
-  // 3. Stats
+  // stats
   const { data: stats } = await supabase
     .from("user_stats")
     .select("*")
@@ -178,7 +195,7 @@ async function loadDashboard() {
 
   renderGamification(stats);
 
-  // 4. Cursos activos
+  // cursos activos
   const { data: active } = await supabase
     .from("user_courses")
     .select("course_id, courses(*)")
@@ -188,19 +205,19 @@ async function loadDashboard() {
 
   renderActiveCourses(active || []);
 
-  // 5. Todos los cursos activos en catálogo
-  const { data: available } = await supabase
+  // todos los cursos
+  const { data: allCourses } = await supabase
     .from("courses")
     .select("*")
     .eq("active", true);
 
-  renderAvailableCourses(available || [], active || []);
+  renderAvailableCourses(allCourses || [], active || []);
 
-  // 6. Logout
-  setupLogout();
+  // logout
+  initLogout();
 }
 
 /* -------------------------------------------------------
-   Inicializar
+   Init
 ------------------------------------------------------- */
 document.addEventListener("DOMContentLoaded", loadDashboard);
