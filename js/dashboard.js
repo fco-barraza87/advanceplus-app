@@ -55,10 +55,10 @@ function renderUser(profile) {
 function renderGamification(stats) {
   if (!stats) return;
 
-  const xp = stats.xp_total ?? 0;
-  const level = stats.level ?? 1;
-  const streakCurrent = stats.streak_current ?? 0;
-  const streakBest = profile.streak_best ?? 0;
+    const xp = profile.xp_total ?? 0;
+    const level = profile.level ?? 1;
+    const streakCurrent = profile.streak_current ?? 0;
+    const streakBest = profile.streak_best ?? 0;
 
   // XP dentro del nivel
   const xpInLevel = xp % 100;
