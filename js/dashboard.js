@@ -132,10 +132,10 @@ async function loadActiveCourses(userId) {
     if (!cErr && course) {
       activeCourses.push(course);
     }
+    return activeCourses;
   }
 
-  return activeCourses;
-}
+  
 
 function renderActiveCourses(active) {
   const grid = qs("#activeCoursesGrid");
