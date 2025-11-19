@@ -105,17 +105,20 @@ function renderGamification(stats, profile) {
    4. LOAD ACTIVE COURSES (join manual, sin depender de FK)
 ================================================== */
 async function loadActiveCourses(userId) {
-  const { data: userCourses, error } = await supabase
+  const { data, error } = await supabase
     .from("user_courses")
-    .select("course_id, status, start_date")
+    .select("course_id, courses(*)")
     .eq("user_id", userId)
     .eq("status", "active")
-    .order("created_at", { ascending: false });
+    .order("started_at", { ascending: false });
 
   if (error) {
     console.error("Error cargando user_courses:", error);
     return [];
   }
+
+  return data || [];
+}
 
   const activeCourses = [];
 
