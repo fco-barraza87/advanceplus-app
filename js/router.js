@@ -84,4 +84,3 @@ export async function protectUserView() {
 export async function protectView() {
   await runRouter();
 }
-
