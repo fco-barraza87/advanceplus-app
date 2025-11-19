@@ -132,7 +132,7 @@ async function loadActiveCourses(userId) {
     if (!cErr && course) {
       activeCourses.push(course);
     }
-    return activeCourses;
+
   }
 
   
