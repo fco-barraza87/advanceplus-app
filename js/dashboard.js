@@ -110,7 +110,7 @@ async function loadActiveCourses(userId) {
     .select("course_id, status, start_date")
     .eq("user_id", userId)
     .eq("status", "active")
-    .order("start_date", { ascending: false });
+    .order("created_at", { ascending: false });
 
   if (error) {
     console.error("Error cargando user_courses:", error);
