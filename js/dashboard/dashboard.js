@@ -51,7 +51,7 @@ function renderGamification(profile) {
 
 function createActiveCourseCard(courseObj, lastDayMap) {
   const wrapper = document.createElement("article");
-  wrapper.className = "course-card clickable"; // ← nueva clase
+  wrapper.className = "course-card clickable";
 
   const course = courseObj.courses;
   const courseId = course.id;
@@ -61,6 +61,11 @@ function createActiveCourseCard(courseObj, lastDayMap) {
   const lastDay = lastDayMap[courseId] || 0;
   const nextDay = Math.min(lastDay + 1, totalDays);
 
+  // CLICK EN TODA LA TARJETA
+  wrapper.addEventListener("click", () => {
+    window.location.href = `/leccion/index.html?course=${courseId}&day=${nextDay}`;
+  });
+
   wrapper.innerHTML = `
     <div class="course-cover-wrapper">
       <img src="${cover}" alt="${course.title}" class="course-cover" />
@@ -69,13 +74,18 @@ function createActiveCourseCard(courseObj, lastDayMap) {
     <div class="course-body">
       <div class="course-title">${course.title}</div>
       <div class="course-day">Día ${nextDay} de ${totalDays}</div>
+      <div class="course-actions">
+        <button class="btn-continue">Continuar</button>
+      </div>
     </div>
   `;
 
-  // Toda la tarjeta es clickeable
-  wrapper.onclick = () => {
+  // CLICK DEL BOTÓN (sin bloquear click del wrapper)
+  const btnContinue = wrapper.querySelector(".btn-continue");
+  btnContinue.addEventListener("click", (e) => {
+    e.stopPropagation();
     window.location.href = `/leccion/index.html?course=${courseId}&day=${nextDay}`;
-  };
+  });
 
   return wrapper;
 }
