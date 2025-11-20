@@ -1,10 +1,9 @@
 import { supabase } from "/js/supabase.js";
 
-/* Helpers */
 const qs = (sel) => document.querySelector(sel);
 
 /* ==================================================
-   1. LOAD USER + PROFILE + USER_STATS
+   1. CARGA DE USUARIO + PROFILE + USER_STATS
 ================================================== */
 async function loadUserData() {
   const {
@@ -12,12 +11,10 @@ async function loadUserData() {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  // Perfil principal
+  // Perfil básico
   const { data: profile, error: pErr } = await supabase
     .from("profiles")
-    .select(
-      "id, full_name, avatar_url, role, xp_total, streak_current, streak_best"
-    )
+    .select("id, full_name, avatar_url, role")
     .eq("id", user.id)
     .single();
 
@@ -25,35 +22,41 @@ async function loadUserData() {
     console.error("Error cargando profile:", pErr);
   }
 
-  // Stats (opcional, se usa como extra)
+  // Stats oficiales (XP, rachas, nivel)
   const { data: stats, error: sErr } = await supabase
     .from("user_stats")
-    .select("*")
+    .select("xp_total, streak_current, streak_best, level")
     .eq("user_id", user.id)
     .single();
 
   if (sErr) {
-    console.warn("user_stats no encontrado (se usará solo profiles):", sErr);
+    console.error("Error cargando user_stats:", sErr);
   }
 
   return { user, profile, stats };
 }
 
 /* ==================================================
-   2. RENDER USER INFO
+   2. HEADER USUARIO
 ================================================== */
 function renderUser(profile) {
   if (!profile) return;
 
-  qs("#userName").textContent = profile.full_name || "Usuario";
-  qs("#userRole").textContent =
-    profile.role === "admin"
-      ? "Administrador Advance+"
-      : profile.role === "coach"
-      ? "Coach Advance+"
-      : "Miembro Advance+";
-
+  const nameEl = qs("#userName");
+  const roleEl = qs("#userRole");
   const avatar = qs("#userAvatar");
+
+  if (nameEl) nameEl.textContent = profile.full_name || "Usuario";
+
+  if (roleEl) {
+    roleEl.textContent =
+      profile.role === "admin"
+        ? "Administrador Advance+"
+        : profile.role === "coach"
+        ? "Coach Advance+"
+        : "Miembro Advance+";
+  }
+
   if (avatar && profile.avatar_url) {
     avatar.style.backgroundImage = `url(${profile.avatar_url})`;
     avatar.style.color = "transparent";
@@ -62,37 +65,33 @@ function renderUser(profile) {
 }
 
 /* ==================================================
-   3. RENDER GAMIFICATION (XP, NIVEL, RACHAS)
-   Usa primero user_stats; si falta algo, usa profiles.
+   3. GAMIFICACIÓN (XP, NIVEL, RACHAS)
 ================================================== */
-function renderGamification(stats, profile) {
-  if (!stats && !profile) return;
+function renderGamification(stats) {
+  if (!stats) return;
 
-  const xp =
-    stats?.xp_total ??
-    profile?.xp_total ??
-    0;
+  const xp = stats.xp_total ?? 0;
+  const level = stats.level ?? 1;
+  const streakCurrent = stats.streak_current ?? 0;
+  const streakBest = stats.streak_best ?? 0;
 
-  const level = stats?.level ?? 1;
-
-  const streakCurrent =
-    stats?.streak_current ??
-    profile?.streak_current ??
-    0;
-
-  const streakBest = profile?.streak_best ?? 0;
-
-  // XP dentro del nivel
   const xpInLevel = xp % 100;
   const xpToNext = 100 - xpInLevel;
 
-  qs("#levelLabel").textContent = level;
-  qs("#xpTotalLabel").textContent = `${xp} XP`;
-  qs("#xpNextLabel").textContent = `${xpToNext} XP para el siguiente nivel`;
-  qs("#streakCurrent").textContent = `${streakCurrent} 🔥`;
-  qs("#streakBest").textContent = `${streakBest} 🏆`;
-
+  const levelEl = qs("#levelLabel");
+  const xpTotalEl = qs("#xpTotalLabel");
+  const xpNextEl = qs("#xpNextLabel");
+  const streakCurrentEl = qs("#streakCurrent");
+  const streakBestEl = qs("#streakBest");
   const bar = qs("#xpBarFill");
+
+  if (levelEl) levelEl.textContent = level;
+  if (xpTotalEl) xpTotalEl.textContent = `${xp} XP`;
+  if (xpNextEl)
+    xpNextEl.textContent = `${xpToNext} XP para el siguiente nivel`;
+  if (streakCurrentEl) streakCurrentEl.textContent = `${streakCurrent} 🔥`;
+  if (streakBestEl) streakBestEl.textContent = `${streakBest} 🏆`;
+
   if (bar) {
     const pct = Math.min(100, (xpInLevel / 100) * 100);
     setTimeout(() => {
@@ -102,12 +101,13 @@ function renderGamification(stats, profile) {
 }
 
 /* ==================================================
-   4. LOAD ACTIVE COURSES (join manual, sin depender de FK)
+   4. CURSOS ACTIVOS (RETOS ACTIVOS)
+   → join manual, ordenado por started_at
 ================================================== */
 async function loadActiveCourses(userId) {
-  const { data, error } = await supabase
+  const { data: userCourses, error } = await supabase
     .from("user_courses")
-    .select("course_id, courses(*)")
+    .select("course_id, status, started_at")
     .eq("user_id", userId)
     .eq("status", "active")
     .order("started_at", { ascending: false });
@@ -116,9 +116,6 @@ async function loadActiveCourses(userId) {
     console.error("Error cargando user_courses:", error);
     return [];
   }
-
-  return data || [];
-}
 
   const activeCourses = [];
 
@@ -129,13 +126,13 @@ async function loadActiveCourses(userId) {
       .eq("id", uc.course_id)
       .single();
 
-    if (!cErr && course) {
+    if (!cErr && course && course.active) {
       activeCourses.push(course);
     }
-
   }
 
-  
+  return activeCourses;
+}
 
 function renderActiveCourses(active) {
   const grid = qs("#activeCoursesGrid");
@@ -179,17 +176,16 @@ function renderActiveCourses(active) {
 
   grid.querySelectorAll(".btn-course").forEach((btn) => {
     btn.onclick = () => {
-      const course = btn.dataset.id;
-      window.location.href = `/curso/index.html?c=${course}&day=1`;
+      const courseId = btn.dataset.id;
+      window.location.href = `/curso/index.html?c=${courseId}&day=1`;
     };
   });
 }
 
 /* ==================================================
-   5. LOAD AVAILABLE COURSES (EXPLORAR RETOS)
+   5. EXPLORAR RETOS (CURSOS DISPONIBLES)
 ================================================== */
 async function loadAvailableCourses(userId) {
-  // todos los cursos activos
   const { data: courses, error: cErr } = await supabase
     .from("courses")
     .select("*")
@@ -200,7 +196,6 @@ async function loadAvailableCourses(userId) {
     return [];
   }
 
-  // cursos del usuario
   const { data: myCourses, error: ucErr } = await supabase
     .from("user_courses")
     .select("course_id")
@@ -279,7 +274,7 @@ async function initDashboard() {
   const { user, profile, stats } = data;
 
   renderUser(profile);
-  renderGamification(stats, profile);
+  renderGamification(stats);
 
   const active = await loadActiveCourses(user.id);
   renderActiveCourses(active);
