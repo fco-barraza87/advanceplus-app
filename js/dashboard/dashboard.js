@@ -61,11 +61,7 @@ function createActiveCourseCard(courseObj, lastDayMap) {
   const lastDay = lastDayMap[courseId] || 0;
   const nextDay = Math.min(lastDay + 1, totalDays);
 
-  // CLICK EN TODA LA TARJETA
-  wrapper.addEventListener("click", () => {
-    window.location.href = `/leccion/index.html?course=${courseId}&day=${nextDay}`;
-  });
-
+  // 1. PRIMERO INSERTAMOS EL HTML
   wrapper.innerHTML = `
     <div class="course-cover-wrapper">
       <img src="${cover}" alt="${course.title}" class="course-cover" />
@@ -80,15 +76,20 @@ function createActiveCourseCard(courseObj, lastDayMap) {
     </div>
   `;
 
-  // CLICK DEL BOTÓN (sin bloquear click del wrapper)
+  // 2. AHORA SÍ, AGREGAMOS LOS LISTENERS
+  wrapper.addEventListener("click", () => {
+    window.location.href = `/leccion/index.html?course=${courseId}&day=${nextDay}`;
+  });
+
   const btnContinue = wrapper.querySelector(".btn-continue");
   btnContinue.addEventListener("click", (e) => {
-    e.stopPropagation();
+    e.stopPropagation(); // evita doble navegación
     window.location.href = `/leccion/index.html?course=${courseId}&day=${nextDay}`;
   });
 
   return wrapper;
 }
+
 
 
 function createAvailableCourseCard(course) {
