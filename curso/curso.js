@@ -149,6 +149,11 @@ function renderCourseHeader() {
     } días`;
   if (xpEl) xpEl.textContent = currentStats?.xp_total ?? 0;
 }
+document.getElementById("btnLogoutCourse").onclick = async () => {
+  await supabase.auth.signOut();
+  window.location.href = "/index.html";
+};
+
 
 /* ============================
    TIMELINE / DÍAS
