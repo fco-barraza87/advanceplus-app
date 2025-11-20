@@ -958,3 +958,13 @@
     align-items: flex-start;
   }
 }
+
+
+.course-card.clickable {
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.course-card.clickable:hover {
+  transform: translateY(-4px);
+}
