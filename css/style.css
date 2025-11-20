@@ -968,3 +968,15 @@
 .course-card.clickable:hover {
   transform: translateY(-4px);
 }
+
+.course-card.clickable {
+  pointer-events: auto;
+}
+
+.course-card.clickable * {
+  pointer-events: none;
+}
+
+.course-card.clickable .btn-continue {
+  pointer-events: auto;
+}
