@@ -1,4 +1,3 @@
-<!-- /curso/index.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,23 +7,97 @@
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body class="app-bg">
-  <header class="header">
-    <h1 class="header-title">Curso</h1>
+  <!-- HEADER CURSO -->
+  <header class="course-header">
+    <div class="course-header-left">
+      <button class="btn-back" onclick="window.location.href='/dashboard/index.html'">
+        ← Volver
+      </button>
+      <div>
+        <h1 id="courseTitle" class="course-title">Cargando curso...</h1>
+        <p id="courseSubtitle" class="course-subtitle"></p>
+        <p id="courseCategory" class="course-category"></p>
+      </div>
+    </div>
+    <div class="course-header-right">
+      <div class="course-xp-chip">
+        <span>XP total</span>
+        <strong id="courseXpTotal">0</strong>
+      </div>
+    </div>
   </header>
 
-  <main class="curso-container">
-    <div id="cursoPortada" class="curso-portada"></div>
-    <h2 id="cursoTitulo" class="curso-titulo"></h2>
-    <p id="cursoSubtitulo" class="curso-subtitulo"></p>
+  <main class="course-layout">
+    <!-- TIMELINE / DÍAS -->
+    <section class="course-timeline-card">
+      <h2 class="section-title">Tu recorrido</h2>
+      <p id="courseProgressText" class="course-progress-text">Día 1 de 1</p>
+      <div id="dayTimeline" class="day-timeline">
+        <!-- Chips de días se inyectan aquí -->
+      </div>
+    </section>
 
-    <div class="curso-lecciones">
-      <h3>Lecciones</h3>
-      <div id="listaLecciones" class="lista-lecciones"></div>
-    </div>
+    <!-- CONTENIDO PRINCIPAL -->
+    <section class="course-main">
+      <div class="card lesson-card">
+        <div class="lesson-header">
+          <span id="lessonDayLabel" class="lesson-day-label">Día 1</span>
+          <h2 id="lessonTitle" class="lesson-title">Título de la lección</h2>
+          <p id="lessonSubtitle" class="lesson-subtitle"></p>
+        </div>
+
+        <div id="lessonImageWrapper" class="lesson-image-wrapper hidden">
+          <img id="lessonImage" src="" alt="Imagen de la lección" class="lesson-image" />
+        </div>
+
+        <div id="lessonAudioWrapper" class="lesson-audio-wrapper hidden">
+          <p class="lesson-audio-label">Audio del día</p>
+          <audio id="lessonAudio" controls preload="none"></audio>
+        </div>
+
+        <div id="lessonBody" class="lesson-body">
+          <!-- Texto principal -->
+        </div>
+
+        <div id="lessonExercise" class="lesson-exercise">
+          <!-- Ejercicio del día -->
+        </div>
+
+        <div class="lesson-footer">
+          <div class="lesson-xp">
+            <span id="lessonXpLabel">+0 XP</span>
+          </div>
+          <button id="btnCompleteDay" class="btn-a">
+            Marcar día como completado
+          </button>
+        </div>
+      </div>
+
+      <!-- FEEDBACK / LIKE -->
+      <div class="card feedback-card">
+        <div class="feedback-header">
+          <h3>Tu experiencia hoy</h3>
+          <button id="likeBtn" class="like-btn" type="button">🤍 Me gustó</button>
+        </div>
+        <textarea id="feedbackText" class="feedback-textarea" rows="3"
+          placeholder="Escribe cómo te sentiste con esta lección..."></textarea>
+        <div class="feedback-footer">
+          <button id="sendFeedbackBtn" class="btn-b" type="button">
+            Enviar feedback
+          </button>
+          <span id="feedbackStatus" class="feedback-status"></span>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <script type="module" src="/js/supabase.js"></script>
+  <!-- Protección de ruta -->
+  <script type="module">
+    import { protectUserView } from "/js/router.js";
+    protectUserView();
+  </script>
+
+  <!-- Lógica del curso -->
   <script type="module" src="/curso/curso.js"></script>
 </body>
 </html>
-
