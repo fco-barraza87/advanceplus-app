@@ -111,6 +111,15 @@ function createAvailableCourseCard(course) {
     alert("Próximamente: detalles del curso.");
   });
 
+  const clickLayer = document.createElement("div");
+  clickLayer.className = "card-click-layer";
+  clickLayer.addEventListener("click", () => {
+    window.location.href = `/leccion/index.html?course=${courseId}&day=${nextDay}`;
+  });
+
+wrapper.appendChild(clickLayer);
+
+
   return wrapper;
 }
 
