@@ -991,3 +991,27 @@
   cursor: pointer;
   z-index: 5;
 }
+
+.course-actions {
+  width: 100%;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.btn-continue {
+  background: linear-gradient(90deg, #C0A450, #e8d39b);
+  color: #0A0F1C;
+  padding: 10px 0;
+  width: 100%;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.btn-continue:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(192, 164, 80, 0.45);
+}

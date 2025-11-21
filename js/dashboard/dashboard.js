@@ -86,49 +86,43 @@ function createActiveCourseCard(courseObj, lastDayMap) {
 
 function createActiveCourseCard(courseObj, lastDayMap) {
   const wrapper = document.createElement("article");
-  wrapper.className = "course-card"; // NO necesita clickable aquí
+  wrapper.className = "course-card";
 
   const course = courseObj.courses;
   const courseId = course.id;
 
-  const cover = course.cover_url || "https://via.placeholder.com/600x300.png?text=Advance%2B";
+  const cover = course.cover_url ||
+    "https://via.placeholder.com/600x300.png?text=Advance%2B";
+
   const totalDays = course.duration || 1;
   const lastDay = lastDayMap[courseId] || 0;
   const nextDay = Math.min(lastDay + 1, totalDays);
 
-  // Tarjeta HTML
   wrapper.innerHTML = `
     <div class="course-cover-wrapper">
       <img src="${cover}" alt="${course.title}" class="course-cover" />
       <span class="course-badge">${course.category || "Reto"}</span>
     </div>
+
     <div class="course-body">
       <div class="course-title">${course.title}</div>
       <div class="course-day">Día ${nextDay} de ${totalDays}</div>
+
       <div class="course-actions">
         <button class="btn-continue">Continuar</button>
       </div>
     </div>
   `;
 
-  // Botón continuar (funciona por separado)
   const btnContinue = wrapper.querySelector(".btn-continue");
   btnContinue.addEventListener("click", (e) => {
     e.stopPropagation();
     window.location.href = `/leccion/index.html?course=${courseId}&day=${nextDay}`;
   });
 
-  // 🔥 CAPA INVISIBLE QUE HACE CLIC ENTIRE LA TARJETA
-  const clickLayer = document.createElement("div");
-  clickLayer.className = "card-click-layer";
-  clickLayer.addEventListener("click", () => {
-    window.location.href = `/leccion/index.html?course=${courseId}&day=${nextDay}`;
-  });
-
-  wrapper.appendChild(clickLayer);
-
   return wrapper;
 }
+
 
 
 async function loadDashboard() {
