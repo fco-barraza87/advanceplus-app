@@ -153,22 +153,27 @@ function renderActiveCourses(active) {
   count.textContent = `${active.length} activos`;
 
   active.forEach((course) => {
-    const card = document.createElement("div");
+    const card = document.createElement("article");
     card.className = "course-card clickable";
+    card.dataset.id = course.id;
 
     const cover =
       course.cover_url ||
       "https://via.placeholder.com/600x300.png?text=Advance%2B";
 
     card.innerHTML = `
-      <img src="${cover}" class="course-cover" />
-      <div class="course-info">
-        <h3>${course.title}</h3>
-        <p>${course.category || ""}</p>
+      <div class="course-cover-wrapper">
+        <img src="${cover}" class="course-cover" />
+        <span class="course-badge">${course.category || "Reto"}</span>
+      </div>
+
+      <div class="course-body">
+        <div class="course-title">${course.title}</div>
+        <div class="course-meta">${course.level || "Todos los niveles"}</div>
       </div>
     `;
 
-    // Toda la tarjeta clickeable
+    // CLICK EN TODA LA TARJETA
     card.addEventListener("click", () => {
       window.location.href = `/curso/index.html?c=${course.id}&day=1`;
     });
