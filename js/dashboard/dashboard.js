@@ -86,7 +86,7 @@ function createActiveCourseCard(courseObj, lastDayMap) {
 
 function createActiveCourseCard(courseObj, lastDayMap) {
   const wrapper = document.createElement("article");
-  wrapper.className = "course-card";
+  wrapper.className = "course-card clickable";
 
   const course = courseObj.courses;
   const courseId = course.id;
@@ -97,6 +97,9 @@ function createActiveCourseCard(courseObj, lastDayMap) {
   const totalDays = course.duration || 1;
   const lastDay = lastDayMap[courseId] || 0;
   const nextDay = Math.min(lastDay + 1, totalDays);
+
+  wrapper.dataset.courseId = courseId;
+  wrapper.dataset.nextDay = nextDay;
 
   wrapper.innerHTML = `
     <div class="course-cover-wrapper">
@@ -114,9 +117,14 @@ function createActiveCourseCard(courseObj, lastDayMap) {
     </div>
   `;
 
-  const btnContinue = wrapper.querySelector(".btn-continue");
-  btnContinue.addEventListener("click", (e) => {
+  // CLICK EN EL BOTÓN
+  wrapper.querySelector(".btn-continue").addEventListener("click", (e) => {
     e.stopPropagation();
+    window.location.href = `/leccion/index.html?course=${courseId}&day=${nextDay}`;
+  });
+
+  // CLICK EN TODA LA TARJETA
+  wrapper.addEventListener("click", () => {
     window.location.href = `/leccion/index.html?course=${courseId}&day=${nextDay}`;
   });
 
