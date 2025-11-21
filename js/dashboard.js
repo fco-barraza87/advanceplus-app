@@ -229,26 +229,34 @@ function renderAvailableCourses(courses) {
 
   courses.forEach((course) => {
     const card = document.createElement("div");
-    card.className = "course-card";
+    card.className = "course-card clickable";
+    card.dataset.id = course.id;
 
     const cover =
       course.cover_url ||
       "https://via.placeholder.com/600x300.png?text=Advance%2B";
 
     card.innerHTML = `
-      <img src="${cover}" class="course-cover" />
-      <div class="course-info">
-        <h3>${course.title}</h3>
-        <p>${course.category || ""}</p>
+      <div class="course-cover-wrapper">
+        <img src="${cover}" class="course-cover" />
+        <span class="course-badge">${course.category || "Reto"}</span>
       </div>
-      <button class="btn-course-secondary">
-        Ver detalles
-      </button>
+
+      <div class="course-body">
+        <div class="course-title">${course.title}</div>
+        <div class="course-meta">${course.level || ""}</div>
+      </div>
     `;
+
+    // CLICK EN TODA LA TARJETA
+    card.addEventListener("click", () => {
+      window.location.href = `/curso-info/index.html?c=${course.id}`;
+    });
 
     grid.appendChild(card);
   });
 }
+
 
 /* ==================================================
    6. LOGOUT
