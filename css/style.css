@@ -305,64 +305,38 @@
   position: absolute;
   left: 10px;
   bottom: 10px;
-  background: rgba(0, 0, 0, 0.55);
-  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 4px 10px;
   border-radius: 999px;
   font-size: 11px;
   color: #F7F7F7;
+  backdrop-filter: blur(4px);        /* nuevo: efecto premium */
 }
 
 .course-body {
-  padding: 12px 12px 14px;
+  padding: 14px 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .course-title {
   font-family: 'Montserrat', sans-serif;
-  font-size: 14px;
-}
-
-.course-meta {
-  font-size: 12px;
-  opacity: 0.78;
-}
-
-.course-day {
-  font-size: 12px;
-  color: #C0A450;
-  font-weight: 500;
-}
-
-/*.course-actions {
-  margin-top: 8px;
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.btn-continue,
-.btn-secondary {
-  flex: 1;
-  border-radius: 999px;
-  padding: 6px 10px;
-  border: none;
-  font-size: 13px;
-  cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.2s ease, background 0.2s ease;
-}
-
-.btn-continue {
-  background: #C0A450;
-  color: #0A0F1C;
+  font-size: 16px;          /* antes 14px */
   font-weight: 600;
+  color: #F7F7F7;
+  letter-spacing: 0.01em;
+  margin-bottom: 2px;       /* mejor separación */
 }
 
-.btn-continue:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(192, 164, 80, 0.6);
-}*/
+.course-meta,
+.course-category,
+.course-day {
+  font-size: 13px;          /* antes 12px */
+  opacity: 0.78;
+  font-weight: 400;
+  color: rgba(247, 247, 247, 0.75);
+}
 
 .btn-secondary {
   background: transparent;
