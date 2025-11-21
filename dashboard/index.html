@@ -9,25 +9,13 @@
 <body class="app-bg">
 
   <!-- HEADER PREMIUM -->
-  <header class="dash-header">
-    <div class="dash-header-left">
-      <div class="dash-logo">Advance+</div>
+  <div id="appHeader"></div>
+  <script type="module">
+    import { loadHeader } from "/components/header.js";
+    loadHeader();
+  </script>
 
-      <div class="dash-user-info">
-        <div id="userAvatar" class="dash-avatar-placeholder">A+</div>
-        <div class="dash-user-text">
-          <div id="userName" class="dash-user-name">Usuario</div>
-          <div id="userRole" class="dash-user-role">Miembro Advance+</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="dash-header-right">
-      <button id="btnLogout" class="btn-logout">Cerrar sesión</button>
-      <button id="btnMenuMobile" class="btn-menu-mobile">☰</button>
-    </div>
-  </header>
-
+  
   <!-- ----- MAIN CONTENT ----- -->
   <main class="dashboard-layout">
 
