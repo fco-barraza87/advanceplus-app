@@ -6,9 +6,6 @@ function setText(id, value) {
   if (el) el.textContent = value;
 }
 
-/* ============================
-   AVATAR + GAMIFICACIÓN
-============================ */
 function renderAvatar(profile) {
   const avatarContainer = document.getElementById("userAvatar");
   if (!avatarContainer) return;
@@ -18,9 +15,8 @@ function renderAvatar(profile) {
     return;
   }
 
-  const name =
-    profile?.display_name || profile?.full_name || profile?.email || "A+";
-
+  // Iniciales como fallback
+  const name = profile?.display_name || profile?.full_name || profile?.email || "A+";
   const initials = name
     .split(" ")
     .map((n) => n[0])
@@ -46,33 +42,27 @@ function renderGamification(profile) {
   const xpBarFill = document.getElementById("xpBarFill");
   if (xpBarFill) {
     const percent = Math.min(100, (xpInLevel / 100) * 100);
+    // pequeño delay para que la transición se vea
     setTimeout(() => {
       xpBarFill.style.width = `${percent}%`;
     }, 150);
   }
 }
 
-/* ============================
-   TARJETA DE CURSO ACTIVO
-   (click en toda la tarjeta)
-============================ */
-function createActiveCourseCard(userCourseRow, lastDayMap) {
+function createActiveCourseCard(courseObj, lastDayMap) {
   const wrapper = document.createElement("article");
-  wrapper.className = "course-card clickable";
+  wrapper.className = "course-card"; // ya no hace falta clickable aquí
 
-  const course = userCourseRow.courses;
-  if (!course) return wrapper;
-
+  const course = courseObj.courses;
   const courseId = course.id;
-  const cover =
-    course.cover_url ||
-    "https://via.placeholder.com/600x300.png?text=Advance%2B";
 
-  const totalDays = course.duration || course.duration_days || 1;
+  const cover =
+    course.cover_url || "https://via.placeholder.com/600x300.png?text=Advance%2B";
+  const totalDays = course.duration || 1;
   const lastDay = lastDayMap[courseId] || 0;
   const nextDay = Math.min(lastDay + 1, totalDays);
 
-  // Guardamos datos en dataset para debugging / uso futuro
+  // guardamos datos en atributos del DOM
   wrapper.dataset.courseId = courseId;
   wrapper.dataset.nextDay = String(nextDay);
 
@@ -90,16 +80,40 @@ function createActiveCourseCard(userCourseRow, lastDayMap) {
     </div>
   `;
 
-  // CLICK en el botón
-  const btnContinue = wrapper.querySelector(".btn-continue");
-  if (btnContinue) {
-    btnContinue.addEventListener("click", (e) => {
-      e.stopPropagation(); // el click del botón no dispara el del card
-      window.location.href = `/leccion/index.html?course=${courseId}&day=${nextDay}`;
-    });
-  }
+  return wrapper;
+}
 
-  // CLICK en toda la tarjeta
+function createActiveCourseCard(courseObj, lastDayMap) {
+  const wrapper = document.createElement("article");
+  wrapper.className = "course-card";
+
+  const course = courseObj.courses;
+  const courseId = course.id;
+
+  const cover = course.cover_url ||
+    "https://via.placeholder.com/600x300.png?text=Advance%2B";
+
+  const totalDays = course.duration || 1;
+  const lastDay = lastDayMap[courseId] || 0;
+  const nextDay = Math.min(lastDay + 1, totalDays);
+
+  // Guardamos datos para delegación
+  wrapper.dataset.courseId = courseId;
+  wrapper.dataset.nextDay = nextDay;
+
+  wrapper.innerHTML = `
+    <div class="course-cover-wrapper">
+      <img src="${cover}" alt="${course.title}" class="course-cover" />
+      <span class="course-badge">${course.category || "Reto"}</span>
+    </div>
+
+    <div class="course-body">
+      <div class="course-title">${course.title}</div>
+      <div class="course-day">Día ${nextDay} de ${totalDays}</div>
+    </div>
+  `;
+
+  // HACER TODA LA TARJETA CLIQUEABLE
   wrapper.addEventListener("click", () => {
     window.location.href = `/leccion/index.html?course=${courseId}&day=${nextDay}`;
   });
@@ -107,45 +121,6 @@ function createActiveCourseCard(userCourseRow, lastDayMap) {
   return wrapper;
 }
 
-/* ============================
-   TARJETA DE CURSO DISPONIBLE
-============================ */
-function createAvailableCourseCard(course) {
-  const wrapper = document.createElement("article");
-  wrapper.className = "course-card";
-
-  const cover =
-    course.cover_url ||
-    "https://via.placeholder.com/600x300.png?text=Advance%2B";
-
-  wrapper.innerHTML = `
-    <div class="course-cover-wrapper">
-      <img src="${cover}" alt="${course.title}" class="course-cover" />
-      <span class="course-badge">${course.category || "Reto"}</span>
-    </div>
-    <div class="course-body">
-      <div class="course-title">${course.title}</div>
-      <div class="course-meta">${course.level || "Todos los niveles"}</div>
-      <div class="course-actions">
-        <button class="btn-secondary">Ver detalles</button>
-      </div>
-    </div>
-  `;
-
-  const btnDetails = wrapper.querySelector(".btn-secondary");
-  if (btnDetails) {
-    btnDetails.addEventListener("click", (e) => {
-      e.stopPropagation();
-      alert("Próximamente: detalles del curso.");
-    });
-  }
-
-  return wrapper;
-}
-
-/* ============================
-   CARGA PRINCIPAL DASHBOARD
-============================ */
 async function loadDashboard() {
   // 1. Usuario autenticado
   const {
@@ -168,30 +143,21 @@ async function loadDashboard() {
     console.error("Error cargando perfil:", profileError);
   }
 
-  setText(
-    "userName",
-    profile?.display_name || profile?.full_name || user.email
-  );
-  setText(
-    "userRole",
-    profile?.role === "coach"
-      ? "Coach Advance+"
-      : profile?.role === "admin"
-      ? "Admin Advance+"
-      : "Miembro Advance+"
-  );
+  // Header
+  setText("userName", profile?.display_name || profile?.full_name || user.email);
+  setText("userRole", profile?.role === "coach" ? "Coach Advance+" :
+                       profile?.role === "admin" ? "Admin Advance+" :
+                       "Miembro Advance+");
   renderAvatar(profile);
   renderGamification(profile);
 
   // 3. Cursos activos
   const { data: active, error: activeError } = await supabase
     .from("user_courses")
-    .select(
-      "course_id, started_at, courses ( id, title, slug, description, category, level, duration, duration_days, cover_url )"
-    )
+    .select("course_id, start_date, courses ( id, title, slug, description, category, level, duration, cover_url )")
     .eq("user_id", user.id)
     .eq("status", "active")
-    .order("started_at", { ascending: false });
+    .order("start_date", { ascending: false });
 
   if (activeError) {
     console.error("Error cargando cursos activos:", activeError);
@@ -200,7 +166,7 @@ async function loadDashboard() {
   // 4. Progreso por curso (último día completado)
   const { data: progressRows, error: progressError } = await supabase
     .from("progress")
-    .select("course_id, day, completed")
+    .select("course_id, day")
     .eq("user_id", user.id);
 
   if (progressError) {
@@ -209,7 +175,6 @@ async function loadDashboard() {
 
   const lastDayByCourse = {};
   (progressRows || []).forEach((row) => {
-    if (!row.completed) return;
     const current = lastDayByCourse[row.course_id] || 0;
     if (row.day > current) lastDayByCourse[row.course_id] = row.day;
   });
@@ -226,13 +191,32 @@ async function loadDashboard() {
       const card = createActiveCourseCard(uc, lastDayByCourse);
       activeGrid.appendChild(card);
     });
-
     if (activeCountEl) activeCountEl.textContent = `${active.length} retos activos`;
     if (noActiveMessage) noActiveMessage.style.display = "none";
   } else {
     if (activeCountEl) activeCountEl.textContent = "0 retos activos";
     if (noActiveMessage) noActiveMessage.style.display = "block";
   }
+
+   // Delegación de click para TODA la tarjeta
+  if (!activeGrid.dataset.clickBound) {
+    activeGrid.addEventListener("click", (e) => {
+      const card = e.target.closest(".course-card");
+      if (!card) return;
+
+      const courseId = card.dataset.courseId;
+      const nextDay = card.dataset.nextDay || "1";
+
+      if (!courseId) return;
+
+      // misma ruta que el botón continuar
+      window.location.href = `/leccion/index.html?course=${courseId}&day=${nextDay}`;
+    });
+
+    // marca para no duplicar el listener
+    activeGrid.dataset.clickBound = "1";
+  }
+ 
 
   // 5. Cursos disponibles (no inscritos)
   const { data: allActiveCourses, error: coursesError } = await supabase
@@ -245,9 +229,7 @@ async function loadDashboard() {
   }
 
   const activeIds = new Set((active || []).map((uc) => uc.course_id));
-  const available = (allActiveCourses || []).filter(
-    (c) => !activeIds.has(c.id)
-  );
+  const available = (allActiveCourses || []).filter((c) => !activeIds.has(c.id));
 
   const availableGrid = document.getElementById("availableCoursesGrid");
   const noAvailableMessage = document.getElementById("noAvailableMessage");
@@ -274,9 +256,6 @@ async function loadDashboard() {
   }
 }
 
-/* ============================
-   INIT
-============================ */
 document.addEventListener("DOMContentLoaded", () => {
   loadDashboard().catch((err) => console.error("Error en dashboard:", err));
 });
