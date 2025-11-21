@@ -154,7 +154,7 @@ function renderActiveCourses(active) {
 
   active.forEach((course) => {
     const card = document.createElement("div");
-    card.className = "course-card clickable";
+    card.className = "course-card";
 
     const cover =
       course.cover_url ||
@@ -166,17 +166,21 @@ function renderActiveCourses(active) {
         <h3>${course.title}</h3>
         <p>${course.category || ""}</p>
       </div>
+      <button class="btn-course" data-id="${course.id}">
+        Continuar
+      </button>
     `;
-
-    // Toda la tarjeta clickeable
-    card.addEventListener("click", () => {
-      window.location.href = `/curso/index.html?c=${course.id}&day=1`;
-    });
 
     grid.appendChild(card);
   });
-}
 
+  grid.querySelectorAll(".btn-course").forEach((btn) => {
+    btn.onclick = () => {
+      const courseId = btn.dataset.id;
+      window.location.href = `/curso/index.html?c=${courseId}&day=1`;
+    };
+  });
+}
 
 /* ==================================================
    5. EXPLORAR RETOS (CURSOS DISPONIBLES)
