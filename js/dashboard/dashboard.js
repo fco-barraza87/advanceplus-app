@@ -84,13 +84,19 @@ function createActiveCourseCard(courseObj, lastDayMap) {
 }
 
 
-
-function createAvailableCourseCard(course) {
+function createActiveCourseCard(courseObj, lastDayMap) {
   const wrapper = document.createElement("article");
-  wrapper.className = "course-card";
+  wrapper.className = "course-card"; // NO necesita clickable aquí
+
+  const course = courseObj.courses;
+  const courseId = course.id;
 
   const cover = course.cover_url || "https://via.placeholder.com/600x300.png?text=Advance%2B";
+  const totalDays = course.duration || 1;
+  const lastDay = lastDayMap[courseId] || 0;
+  const nextDay = Math.min(lastDay + 1, totalDays);
 
+  // Tarjeta HTML
   wrapper.innerHTML = `
     <div class="course-cover-wrapper">
       <img src="${cover}" alt="${course.title}" class="course-cover" />
@@ -98,30 +104,32 @@ function createAvailableCourseCard(course) {
     </div>
     <div class="course-body">
       <div class="course-title">${course.title}</div>
-      <div class="course-meta">${course.level || "Todos los niveles"}</div>
+      <div class="course-day">Día ${nextDay} de ${totalDays}</div>
       <div class="course-actions">
-        <button class="btn-secondary">Ver detalles</button>
+        <button class="btn-continue">Continuar</button>
       </div>
     </div>
   `;
 
-  const btnDetails = wrapper.querySelector(".btn-secondary");
-  btnDetails.addEventListener("click", () => {
-    // Placeholder: aquí podrías abrir modal o enviar a página del curso
-    alert("Próximamente: detalles del curso.");
+  // Botón continuar (funciona por separado)
+  const btnContinue = wrapper.querySelector(".btn-continue");
+  btnContinue.addEventListener("click", (e) => {
+    e.stopPropagation();
+    window.location.href = `/leccion/index.html?course=${courseId}&day=${nextDay}`;
   });
 
+  // 🔥 CAPA INVISIBLE QUE HACE CLIC ENTIRE LA TARJETA
   const clickLayer = document.createElement("div");
   clickLayer.className = "card-click-layer";
   clickLayer.addEventListener("click", () => {
     window.location.href = `/leccion/index.html?course=${courseId}&day=${nextDay}`;
   });
 
-wrapper.appendChild(clickLayer);
-
+  wrapper.appendChild(clickLayer);
 
   return wrapper;
 }
+
 
 async function loadDashboard() {
   // 1. Usuario autenticado
