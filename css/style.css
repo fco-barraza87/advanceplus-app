@@ -335,7 +335,7 @@
   font-weight: 500;
 }
 
-.course-actions {
+/*.course-actions {
   margin-top: 8px;
   display: flex;
   justify-content: space-between;
@@ -362,7 +362,7 @@
 .btn-continue:hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 20px rgba(192, 164, 80, 0.6);
-}
+}*/
 
 .btn-secondary {
   background: transparent;
