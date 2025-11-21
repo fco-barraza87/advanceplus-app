@@ -51,17 +51,21 @@ function renderGamification(profile) {
 
 function createActiveCourseCard(courseObj, lastDayMap) {
   const wrapper = document.createElement("article");
-  wrapper.className = "course-card clickable";
+  wrapper.className = "course-card"; // ya no hace falta clickable aquí
 
   const course = courseObj.courses;
   const courseId = course.id;
 
-  const cover = course.cover_url || "https://via.placeholder.com/600x300.png?text=Advance%2B";
+  const cover =
+    course.cover_url || "https://via.placeholder.com/600x300.png?text=Advance%2B";
   const totalDays = course.duration || 1;
   const lastDay = lastDayMap[courseId] || 0;
   const nextDay = Math.min(lastDay + 1, totalDays);
 
-  // 1. PRIMERO INSERTAMOS EL HTML
+  // guardamos datos en atributos del DOM
+  wrapper.dataset.courseId = courseId;
+  wrapper.dataset.nextDay = String(nextDay);
+
   wrapper.innerHTML = `
     <div class="course-cover-wrapper">
       <img src="${cover}" alt="${course.title}" class="course-cover" />
@@ -75,17 +79,6 @@ function createActiveCourseCard(courseObj, lastDayMap) {
       </div>
     </div>
   `;
-
-  // 2. AHORA SÍ, AGREGAMOS LOS LISTENERS
-  wrapper.addEventListener("click", () => {
-    window.location.href = `/leccion/index.html?course=${courseId}&day=${nextDay}`;
-  });
-
-  const btnContinue = wrapper.querySelector(".btn-continue");
-  btnContinue.addEventListener("click", (e) => {
-    e.stopPropagation(); // evita doble navegación
-    window.location.href = `/leccion/index.html?course=${courseId}&day=${nextDay}`;
-  });
 
   return wrapper;
 }
@@ -197,6 +190,26 @@ async function loadDashboard() {
     if (activeCountEl) activeCountEl.textContent = "0 retos activos";
     if (noActiveMessage) noActiveMessage.style.display = "block";
   }
+
+   // Delegación de click para TODA la tarjeta
+  if (!activeGrid.dataset.clickBound) {
+    activeGrid.addEventListener("click", (e) => {
+      const card = e.target.closest(".course-card");
+      if (!card) return;
+
+      const courseId = card.dataset.courseId;
+      const nextDay = card.dataset.nextDay || "1";
+
+      if (!courseId) return;
+
+      // misma ruta que el botón continuar
+      window.location.href = `/leccion/index.html?course=${courseId}&day=${nextDay}`;
+    });
+
+    // marca para no duplicar el listener
+    activeGrid.dataset.clickBound = "1";
+  }
+ 
 
   // 5. Cursos disponibles (no inscritos)
   const { data: allActiveCourses, error: coursesError } = await supabase
