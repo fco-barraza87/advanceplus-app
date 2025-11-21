@@ -58,9 +58,19 @@ async function loadGlobalHeader() {
   };
 
   // Botón volver
-  document.getElementById("btnGoBack").onclick = () => {
-    window.history.back();
-  };
+const btnBack = document.getElementById("btnBack");
+if (btnBack) {
+  btnBack.addEventListener("click", () => {
+    if (document.referrer && !document.referrer.includes(location.host)) {
+      window.location.href = "/dashboard/index.html";
+    } else if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = "/dashboard/index.html";
+    }
+  });
+}
+
 }
 
 document.addEventListener("DOMContentLoaded", loadGlobalHeader);
