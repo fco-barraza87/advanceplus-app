@@ -183,12 +183,14 @@ select option {
       const msg = document.getElementById("datosMsg");
       msg.textContent = "Guardando...";
 
-      const updates = {
+    const updates = {
         full_name: document.getElementById("nombre").value,
         pais: document.getElementById("pais").value,
         idioma: document.getElementById("idioma").value,
-        nacimiento: document.getElementById("nacimiento").value
-      };
+        birthdate: document.getElementById("nacimiento").value,
+        updated_at: new Date()
+    };
+
 
       const { error } = await supabase.auth.updateUser({
         data: updates

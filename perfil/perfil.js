@@ -59,11 +59,11 @@ async function fillDatosForm() {
 
   document.getElementById("inputFullName").value = profile?.full_name || "";
   document.getElementById("inputEmail").value = profile?.email || user.email;
-  document.getElementById("inputCountry").value = profile?.country || "";
-  document.getElementById("inputLanguage").value = profile?.language || "es";
+  document.getElementById("inputPais").value = profile?.pais || "";
+  document.getElementById("inputIdioma").value = profile?.idioma || "es";
 
-  if (profile?.birthdate)
-    document.getElementById("inputBirthdate").value = profile.birthdate;
+  if (profile?.nacimiento)
+    document.getElementById("inputNacimiento").value = profile.nacimiento;
 }
 
 /* ============================================================
