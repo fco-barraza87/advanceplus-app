@@ -12,28 +12,32 @@ import { supabase } from "/js/supabase.js";
 ============================================================ */
 async function loadUserProfile() {
   const { data: session } = await supabase.auth.getUser();
-
-  if (!session?.user) {
-    window.location.href = "/";
-    return;
-  }
+  if (!session?.user) return;
 
   const user = session.user;
-  const name =
-    user.user_metadata?.full_name ||
-    user.user_metadata?.name ||
-    user.email.split("@")[0];
 
-  const email = user.email;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
 
-  // Render en la UI
-  document.getElementById("profile-name").textContent = name;
-  document.getElementById("profile-email").textContent = email;
+  // Rellenar header
+  document.getElementById("profile-name").textContent =
+    profile?.full_name || user.email.split("@")[0];
 
-  // Avatar
-  const initials = getInitials(name, email);
-  document.getElementById("profile-avatar").textContent = initials;
+  document.getElementById("profile-email").textContent = profile?.email || user.email;
+
+  // Rellenar formulario (si existe la vista datos.html)
+  const nameInput = document.getElementById("inputFullName");
+  const countryInput = document.getElementById("inputCountry");
+  const languageInput = document.getElementById("inputLanguage");
+
+  if (nameInput) nameInput.value = profile.full_name || "";
+  if (countryInput) countryInput.value = profile.country || "";
+  if (languageInput) languageInput.value = profile.language || "";
 }
+
 
 function getInitials(name, email) {
   if (name) {
@@ -102,31 +106,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadModule("datos");
 });
 
-async function loadUserProfile() {
-  const { data: session } = await supabase.auth.getUser();
-  if (!session?.user) return;
-
-  const user = session.user;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  // Rellenar header
-  document.getElementById("profile-name").textContent =
-    profile?.full_name || user.email.split("@")[0];
-
-  document.getElementById("profile-email").textContent = profile?.email || user.email;
-
-  // Rellenar formulario (si existe la vista datos.html)
-  const nameInput = document.getElementById("inputFullName");
-  const countryInput = document.getElementById("inputCountry");
-  const languageInput = document.getElementById("inputLanguage");
-
-  if (nameInput) nameInput.value = profile.full_name || "";
-  if (countryInput) countryInput.value = profile.country || "";
-  if (languageInput) languageInput.value = profile.language || "";
-}
 
