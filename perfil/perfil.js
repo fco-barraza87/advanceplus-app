@@ -499,19 +499,19 @@ async function initCursos() {
     emptyMsg.style.display = userCourses.length === 0 ? "block" : "none";
   }
 
-  /* ================================
-     4) Acciones de botones (sin inventar rutas)
-     TODO: aquí conectas con tu sistema de cursos real
-  ================================= */
-  container.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-course-slug]");
-    if (!btn) return;
+/* ================================
+   4) Acciones de botones
+   (Usando tu ruta real de dashboard.js)
+================================ */
+container.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-course-slug]");
+  if (!btn) return;
 
-    const slug = btn.dataset.courseSlug;
-    // 🚫 No invento la ruta. Solo dejo el hook:
-    console.log("Click en curso:", slug);
-    // Aquí podrás hacer:
-    // window.location.href = `/TU_RUTA_CURSO/${slug}`;
-  });
+  const slug = btn.dataset.courseSlug;
+
+  // Ruta REAL según dashboard.js
+  window.location.href = `/curso/index.html?c=${slug}`;
+});
+
 }
 
