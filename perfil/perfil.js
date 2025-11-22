@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 /* ============================================================
-   🔹 Guardar cambios del formulario Datos Personales
+   🔹 Guardar cambios del formulario Datos Personales (dinámico)
 ============================================================ */
 document.addEventListener("submit", async (e) => {
   if (e.target.id !== "form-datos") return;
@@ -126,7 +126,7 @@ document.addEventListener("submit", async (e) => {
   const msg = document.getElementById("datosMsg");
   msg.textContent = "Guardando...";
 
-  // ✅ FIX: obtener usuario correctamente
+  // Obtener usuario autenticado
   const {
     data: { user },
     error
@@ -138,16 +138,30 @@ document.addEventListener("submit", async (e) => {
     return;
   }
 
-    const updates = {
-      full_name: document.getElementById("inputFullName").value,
-      pais: document.getElementById("inputPais").value,
-      idioma: document.getElementById("inputIdioma").value,
-      birthdate: document.getElementById("inputNacimiento").value,
-      updated_at: new Date(),
-    };
+  // Leer valores del formulario
+  const fullName = document.getElementById("inputFullName").value.trim();
+  const pais = document.getElementById("inputPais").value.trim();
+  const idioma = document.getElementById("inputIdioma").value.trim();
+  const birthdate = document.getElementById("inputNacimiento").value.trim();
 
+  // Construcción dinámica del objeto updates
+  const updates = {};
 
+  if (fullName) updates.full_name = fullName;
+  if (pais) updates.pais = pais;
+  if (idioma) updates.idioma = idioma;
+  if (birthdate) updates.birthdate = birthdate;
 
+  // Si no hay nada que actualizar → igual mostramos éxito
+  if (Object.keys(updates).length === 0) {
+    msg.style.color = "#3ee98a";
+    msg.textContent = "✔ Nada que actualizar";
+    return;
+  }
+
+  updates.updated_at = new Date();
+
+  // Actualizar en tabla profiles
   const { error: updateError } = await supabase
     .from("profiles")
     .update(updates)
@@ -156,5 +170,5 @@ document.addEventListener("submit", async (e) => {
   msg.style.color = updateError ? "#ff6b6b" : "#3ee98a";
   msg.textContent = updateError
     ? "❌ Error guardando"
-    : "✔ Guardado con éxito";
+    : "✔ Cambios guardados con éxito";
 });
