@@ -66,9 +66,6 @@ async function fillDatosForm() {
     document.getElementById("inputNacimiento").value = profile.nacimiento;
 }
 
-/* ============================================================
-   🔹 Cargar módulos HTML dinámicamente
-============================================================ */
 async function loadModule(page) {
   const container = document.getElementById("content");
 
@@ -86,6 +83,11 @@ async function loadModule(page) {
       await initPreferencias();
     }
 
+    // Si cargamos cursos.html → inicializar módulo mis cursos
+    if (page === "cursos") {
+      await initCursos();
+    }
+
   } catch (err) {
     container.innerHTML = `
       <div style="padding: 20px; color: #ff6b6b;">
@@ -94,7 +96,6 @@ async function loadModule(page) {
     `;
   }
 }
-
 
 /* ============================================================
    🔹 Activar clase active
@@ -252,3 +253,265 @@ async function initPreferencias() {
     }
   };
 }
+
+/* ============================================================
+   🔹 Inicializar módulo MIS CURSOS
+   Usa: user_courses + courses + progress (para métricas)
+============================================================ */
+async function initCursos() {
+  const data = await getProfile();
+  if (!data) return;
+
+  const { user } = data;
+
+  const container = document.getElementById("coursesContainer");
+  const emptyMsg = document.getElementById("coursesEmpty");
+  const activeEl = document.getElementById("coursesActiveCount");
+  const completedEl = document.getElementById("coursesCompletedCount");
+  const xpTotalEl = document.getElementById("coursesXpTotal");
+
+  if (!container) {
+    console.warn("⚠ No se encontró #coursesContainer en cursos.html");
+    return;
+  }
+
+  // Estado inicial
+  container.innerHTML = `
+    <div class="card" style="grid-column: 1 / -1; text-align:center; padding:18px;">
+      <div class="card-label">Cargando cursos...</div>
+    </div>
+  `;
+  if (emptyMsg) emptyMsg.style.display = "none";
+
+  /* ================================
+     1) Traer cursos del usuario
+  ================================= */
+  const { data: userCourses, error: ucError } = await supabase
+    .from("user_courses")
+    .select(`
+      id,
+      status,
+      started_at,
+      completed_at,
+      progress_pct,
+      xp_gained,
+      course:courses (
+        id,
+        title,
+        slug,
+        description,
+        category,
+        level,
+        cover_url,
+        duration_days,
+        xp_reward
+      )
+    `)
+    .eq("user_id", user.id)
+    .order("started_at", { ascending: true });
+
+  if (ucError) {
+    console.error("Error cargando user_courses:", ucError);
+    container.innerHTML = `
+      <div class="card" style="grid-column: 1 / -1; padding:18px; color:#ff6b6b;">
+        ❌ Error cargando tus cursos. Intenta nuevamente más tarde.
+      </div>
+    `;
+    return;
+  }
+
+  if (!userCourses || userCourses.length === 0) {
+    container.innerHTML = "";
+    if (emptyMsg) emptyMsg.style.display = "block";
+    if (activeEl) activeEl.textContent = "0";
+    if (completedEl) completedEl.textContent = "0";
+    if (xpTotalEl) xpTotalEl.textContent = "0";
+    return;
+  }
+
+  /* ================================
+     2) Traer progreso de todos los cursos del usuario
+  ================================= */
+  const { data: progressRows, error: progError } = await supabase
+    .from("progress")
+    .select("course_id, day, completed, xp, streak")
+    .eq("user_id", user.id);
+
+  if (progError) {
+    console.error("Error cargando progress:", progError);
+  }
+
+  const progressByCourse = {};
+  (progressRows || []).forEach((row) => {
+    if (!row.course_id) return;
+    if (!progressByCourse[row.course_id]) {
+      progressByCourse[row.course_id] = [];
+    }
+    progressByCourse[row.course_id].push(row);
+  });
+
+  /* ================================
+     3) Procesar métricas agregadas
+  ================================= */
+  let activeCount = 0;
+  let completedCount = 0;
+  let xpTotal = 0;
+
+  const cardsHtml = userCourses
+    .map((uc, index) => {
+      const course = uc.course;
+      if (!course) return "";
+
+      const courseId = course.id;
+      const prog = progressByCourse[courseId] || [];
+
+      // Total de "lecciones" (asumimos duration_days como referencia)
+      const totalLessons = course.duration_days || (prog.length ? Math.max(...prog.map(p => p.day || 0)) : null);
+
+      // Último día tocado / completado
+      const lastDay = prog.length ? Math.max(...prog.map(p => p.day || 0)) : null;
+      const lastCompletedDay = prog
+        .filter(p => p.completed)
+        .reduce((max, p) => (p.day > max ? p.day : max), 0);
+
+      // Racha del curso (max streak)
+      const streak = prog.length
+        ? prog.reduce((max, p) => Math.max(max, p.streak || 0), 0)
+        : 0;
+
+      const status = uc.status || (uc.completed_at ? "completed" : "active");
+
+      if (status === "active") activeCount++;
+      if (status === "completed") completedCount++;
+
+      const xpGained = uc.xp_gained || 0;
+      xpTotal += xpGained;
+
+      const progressPct = typeof uc.progress_pct === "number" ? uc.progress_pct : 0;
+
+      // Textos derivados
+      const statusLabel =
+        status === "completed"
+          ? "Completado"
+          : status === "active"
+          ? "En progreso"
+          : "Activo";
+
+      const lastLessonText = lastCompletedDay
+        ? `Última lección: Día ${lastCompletedDay}`
+        : lastDay
+        ? `Última actividad: Día ${lastDay}`
+        : "Aún no has comenzado";
+
+      const totalLessonsText = totalLessons
+        ? `${totalLessons} lecciones`
+        : "Lecciones dinámicas";
+
+      const startedAt = uc.started_at
+        ? new Date(uc.started_at).toLocaleDateString("es-ES")
+        : null;
+
+      const completedAt = uc.completed_at
+        ? new Date(uc.completed_at).toLocaleDateString("es-ES")
+        : null;
+
+      const chipDate = status === "completed"
+        ? (completedAt ? `Completado el ${completedAt}` : "Curso completado")
+        : (startedAt ? `Desde el ${startedAt}` : "Curso activo");
+
+      // Card HTML
+      return `
+        <article class="course-card" style="animation-delay:${index * 60}ms">
+          <div class="course-cover-wrapper">
+            <img
+              src="${course.cover_url}"
+              alt="${course.title}"
+              class="course-cover"
+              loading="lazy"
+            />
+            <div class="course-badge">
+              ${course.category} • ${course.level}
+            </div>
+          </div>
+
+          <div class="course-body">
+            <div class="card-header-row">
+              <div>
+                <h3 class="course-title">${course.title}</h3>
+                <p class="course-meta">${course.subtitle || course.description}</p>
+              </div>
+              <span class="course-day">${statusLabel}</span>
+            </div>
+
+            <div class="xp-row">
+              <div class="xp-info">
+                <span class="xp-total">Progreso: ${progressPct}%</span>
+                <span>${totalLessonsText}</span>
+              </div>
+              <div class="xp-bar">
+                <div class="xp-bar-fill" style="width: ${Math.min(
+                  Math.max(progressPct, 0),
+                  100
+                )}%"></div>
+              </div>
+            </div>
+
+            <div class="xp-info" style="margin-top:10px;">
+              <span>${lastLessonText}</span>
+              <span>Racha: ${streak} 🔥</span>
+            </div>
+
+            <div class="xp-info" style="margin-top:4px;">
+              <span>${chipDate}</span>
+              <span>XP curso: ${xpGained}</span>
+            </div>
+
+            <div class="course-actions" style="margin-top:12px; display:flex; gap:8px;">
+              <button
+                type="button"
+                class="btn-continue"
+                data-course-slug="${course.slug}"
+              >
+                Continuar
+              </button>
+              <button
+                type="button"
+                class="btn-secondary"
+                data-course-slug="${course.slug}"
+              >
+                Ver curso
+              </button>
+            </div>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+
+  container.innerHTML = cardsHtml;
+
+  // Resumen superior
+  if (activeEl) activeEl.textContent = String(activeCount);
+  if (completedEl) completedEl.textContent = String(completedCount);
+  if (xpTotalEl) xpTotalEl.textContent = String(xpTotal);
+
+  if (emptyMsg) {
+    emptyMsg.style.display = userCourses.length === 0 ? "block" : "none";
+  }
+
+  /* ================================
+     4) Acciones de botones (sin inventar rutas)
+     TODO: aquí conectas con tu sistema de cursos real
+  ================================= */
+  container.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-course-slug]");
+    if (!btn) return;
+
+    const slug = btn.dataset.courseSlug;
+    // 🚫 No invento la ruta. Solo dejo el hook:
+    console.log("Click en curso:", slug);
+    // Aquí podrás hacer:
+    // window.location.href = `/TU_RUTA_CURSO/${slug}`;
+  });
+}
+

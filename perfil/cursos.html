@@ -1,0 +1,96 @@
+<!-- ===============================================
+     MIS CURSOS — Advance+
+     Módulo para /perfil/index.html
+================================================= -->
+
+<section class="module-section">
+
+  <h2 class="module-title">Mis cursos</h2>
+  <p class="module-subtitle">
+    Retoma donde lo dejaste y sigue avanzando en tus programas Advance+.
+  </p>
+
+  <!-- RESUMEN RÁPIDO -->
+  <div id="coursesSummary" class="courses-summary-card">
+    <div class="courses-summary-item">
+      <span class="label">Cursos activos</span>
+      <span class="value" id="coursesActiveCount">-</span>
+    </div>
+    <div class="courses-summary-item">
+      <span class="label">Completados</span>
+      <span class="value" id="coursesCompletedCount">-</span>
+    </div>
+    <div class="courses-summary-item">
+      <span class="label">XP total</span>
+      <span class="value" id="coursesXpTotal">-</span>
+    </div>
+  </div>
+
+  <!-- LISTA DE CURSOS -->
+  <div id="coursesContainer" class="courses-grid">
+    <!-- Se rellena vía JS (perfil.js → initCursos) -->
+  </div>
+
+  <!-- MENSAJE VACÍO -->
+  <p id="coursesEmpty" class="form-msg" style="display:none; margin-top:16px; opacity:0.8;">
+    Aún no estás inscrito en ningún curso. Pronto verás aquí tus programas activos.
+  </p>
+
+</section>
+
+<!-- ====== ESTILOS LOCALES (reutilizan tu diseño Advance+) ====== -->
+<style>
+  .module-section {
+    padding: 10px 5px 40px;
+  }
+
+  .module-title {
+    font-family: var(--ap-font-heading, Montserrat, sans-serif);
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+
+  .module-subtitle {
+    opacity: 0.7;
+    margin-bottom: 18px;
+    font-size: 14px;
+  }
+
+  .courses-summary-card {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 18px;
+    background: rgba(10, 15, 35, 0.9);
+    border-radius: 14px;
+    padding: 12px 14px;
+    border: 1px solid var(--ap-border-soft, rgba(192, 164, 80, 0.2));
+    box-shadow: var(--ap-shadow-soft, 0 10px 26px rgba(0, 0, 0, 0.5));
+  }
+
+  .courses-summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .courses-summary-item .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+  }
+
+  .courses-summary-item .value {
+    font-family: var(--ap-font-heading, Montserrat, sans-serif);
+    font-size: 18px;
+    color: var(--ap-gold, #C0A450);
+  }
+
+  @media (max-width: 640px) {
+    .courses-summary-card {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
