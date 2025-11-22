@@ -139,12 +139,13 @@ document.addEventListener("submit", async (e) => {
   }
 
     const updates = {
-        full_name: document.getElementById("nombre").value,
-        country: document.getElementById("pais").value,
-        language: document.getElementById("idioma").value,
-        birthdate: document.getElementById("nacimiento").value,
-        updated_at: new Date()
+      full_name: document.getElementById("inputFullName").value,
+      pais: document.getElementById("inputPais").value,
+      idioma: document.getElementById("inputIdioma").value,
+      birthdate: document.getElementById("inputNacimiento").value,
+      updated_at: new Date(),
     };
+
 
 
   const { error: updateError } = await supabase
