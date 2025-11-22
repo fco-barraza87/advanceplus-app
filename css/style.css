@@ -1159,3 +1159,41 @@ body {
     align-items: flex-start;
   }
 }
+
+
+/* ============================
+   SELECT — Advance+ Fix
+============================ */
+
+select {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--ap-text) !important;
+  border: 1px solid var(--ap-border-soft) !important;
+  font-family: var(--ap-font-main);
+  appearance: none;
+}
+
+/* Icono del desplegable */
+select::-ms-expand {
+  display: none;
+}
+
+/* Opciones internas */
+select option {
+  background: var(--ap-bg-main) !important;
+  color: var(--ap-text) !important;
+  font-family: var(--ap-font-main);
+  padding: 10px;
+}
+
+/* Hover de option (solo Firefox/Blink tienen soporte parcial) */
+select option:hover {
+  background: rgba(192, 164, 80, 0.2) !important; /* dorado suave */
+}
+
+/* Para mejorar contraste al enfocar */
+select:focus {
+  outline: none;
+  border-color: var(--ap-gold) !important;
+  box-shadow: 0 0 0 3px rgba(192, 164, 80, 0.25);
+}
