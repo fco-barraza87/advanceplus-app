@@ -81,6 +81,11 @@ async function loadModule(page) {
       await fillDatosForm();
     }
 
+    // Si cargamos preferencias.html → inicializar módulo preferencias
+    if (page === "preferencias") {
+      await initPreferencias();
+    }
+
   } catch (err) {
     container.innerHTML = `
       <div style="padding: 20px; color: #ff6b6b;">
@@ -89,6 +94,7 @@ async function loadModule(page) {
     `;
   }
 }
+
 
 /* ============================================================
    🔹 Activar clase active
@@ -172,3 +178,77 @@ document.addEventListener("submit", async (e) => {
     ? "❌ Error guardando"
     : "✔ Cambios guardados con éxito";
 });
+
+
+/* ============================================================
+   🔹 Inicializar módulo de PREFERENCIAS
+   Lee de profiles.notifications (y fallback a user_metadata.prefs)
+============================================================ */
+async function initPreferencias() {
+  const data = await getProfile();
+  if (!data) return;
+
+  const { user, profile } = data;
+
+  // 1) Preferencias desde profiles.notifications
+  // 2) Si está vacío, usamos fallback desde auth.user_metadata.prefs
+  const prefs =
+    profile?.notifications && Object.keys(profile.notifications).length > 0
+      ? profile.notifications
+      : user.user_metadata?.prefs || {};
+
+  // Setear valores con defaults elegantes
+  const elModoExpress = document.getElementById("modoExpress");
+  const elNotifDiarias = document.getElementById("notifDiarias");
+  const elNotifRacha = document.getElementById("notifRacha");
+  const elTemaVisual = document.getElementById("temaVisual");
+  const elPrivNombre = document.getElementById("privNombre");
+  const msg = document.getElementById("prefMsg");
+
+  if (!elModoExpress || !elNotifDiarias || !elNotifRacha || !elTemaVisual || !elPrivNombre) {
+    console.warn("⚠ Elementos de preferencias no encontrados en el DOM.");
+    return;
+  }
+
+  elModoExpress.checked = prefs.modoExpress ?? true;
+  elNotifDiarias.checked = prefs.notifDiarias ?? true;
+  elNotifRacha.checked = prefs.notifRacha ?? true;
+  elTemaVisual.value = prefs.temaVisual || "auto";
+  elPrivNombre.checked = prefs.privNombre ?? true;
+
+  // Handler de guardado
+  const form = document.getElementById("form-preferencias");
+  if (!form) return;
+
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+
+    if (msg) {
+      msg.textContent = "Guardando...";
+      msg.style.color = "#fff";
+    }
+
+    const newPrefs = {
+      modoExpress: elModoExpress.checked,
+      notifDiarias: elNotifDiarias.checked,
+      notifRacha: elNotifRacha.checked,
+      temaVisual: elTemaVisual.value,
+      privNombre: elPrivNombre.checked
+    };
+
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({
+        notifications: newPrefs,
+        updated_at: new Date()
+      })
+      .eq("id", user.id);
+
+    if (msg) {
+      msg.style.color = updateError ? "#ff6b6b" : "#3ee98a";
+      msg.textContent = updateError
+        ? "❌ Error guardando preferencias"
+        : "✔ Preferencias guardadas";
+    }
+  };
+}

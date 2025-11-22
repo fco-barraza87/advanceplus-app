@@ -6,7 +6,7 @@
 <section class="module-section">
 
   <h2 class="module-title">Preferencias</h2>
-  <p class="module-subtitle">Personaliza tu experiencia dentro de Advance+.</p>
+  <p class="module-subtitle">Personaliza tu experiencia dentro de Advance+. </p>
 
   <form id="form-preferencias" class="module-form">
 
@@ -42,6 +42,14 @@
           <span class="slider round"></span>
         </label>
       </div>
+
+      <div class="pref-item">
+        <span>Mensajes del Coach IA+</span>
+        <label class="switch">
+          <input type="checkbox" id="notifCoach" />
+          <span class="slider round"></span>
+        </label>
+      </div>
     </div>
 
     <!-- TEMA VISUAL -->
@@ -56,6 +64,27 @@
       </select>
     </div>
 
+    <!-- REPRODUCCIÓN -->
+    <div class="pref-block">
+      <label class="pref-label">Reproducción</label>
+
+      <div class="pref-item">
+        <span>Autoplay del audio</span>
+        <label class="switch">
+          <input type="checkbox" id="autoplayAudio" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="pref-item">
+        <span>Autoplay del video</span>
+        <label class="switch">
+          <input type="checkbox" id="autoplayVideo" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+    </div>
+
     <!-- PRIVACIDAD -->
     <div class="pref-block">
       <label class="pref-label">Privacidad</label>
@@ -64,6 +93,14 @@
         <span>Mostrar mi nombre en la comunidad</span>
         <label class="switch">
           <input type="checkbox" id="privNombre" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="pref-item">
+        <span>Compartir métricas anónimas</span>
+        <label class="switch">
+          <input type="checkbox" id="privMetricas" />
           <span class="slider round"></span>
         </label>
       </div>
@@ -162,3 +199,63 @@
     transform: translateX(22px);
   }
 </style>
+
+<!-- =========================================================
+     LÓGICA JS
+========================================================= -->
+<script type="module">
+  import { supabase } from "/js/supabase.js";
+
+  document.addEventListener("DOMContentLoaded", async () => {
+
+    const { data: session } = await supabase.auth.getUser();
+    if (!session?.user) return;
+    const user = session.user;
+
+    /* ===============================
+       CARGAR PREFERENCIAS EXISTENTES
+    =============================== */
+    const prefs = user.user_metadata?.prefs || {};
+
+    document.getElementById("modoExpress").checked = prefs.modoExpress ?? true;
+    document.getElementById("notifDiarias").checked = prefs.notifDiarias ?? true;
+    document.getElementById("notifRacha").checked = prefs.notifRacha ?? true;
+    document.getElementById("notifCoach").checked = prefs.notifCoach ?? true;
+
+    document.getElementById("temaVisual").value = prefs.temaVisual || "auto";
+    document.getElementById("autoplayAudio").checked = prefs.autoplayAudio ?? false;
+    document.getElementById("autoplayVideo").checked = prefs.autoplayVideo ?? false;
+
+    document.getElementById("privNombre").checked = prefs.privNombre ?? true;
+    document.getElementById("privMetricas").checked = prefs.privMetricas ?? true;
+
+    /* ===============================
+       GUARDAR
+    =============================== */
+    document.getElementById("form-preferencias").onsubmit = async (e) => {
+      e.preventDefault();
+
+      const msg = document.getElementById("prefMsg");
+      msg.textContent = "Guardando...";
+
+      const newPrefs = {
+        modoExpress: document.getElementById("modoExpress").checked,
+        notifDiarias: document.getElementById("notifDiarias").checked,
+        notifRacha: document.getElementById("notifRacha").checked,
+        notifCoach: document.getElementById("notifCoach").checked,
+        temaVisual: document.getElementById("temaVisual").value,
+        autoplayAudio: document.getElementById("autoplayAudio").checked,
+        autoplayVideo: document.getElementById("autoplayVideo").checked,
+        privNombre: document.getElementById("privNombre").checked,
+        privMetricas: document.getElementById("privMetricas").checked
+      };
+
+      const { error } = await supabase.auth.updateUser({
+        data: { prefs: newPrefs }
+      });
+
+      msg.style.color = error ? "#ff6b6b" : "#3ee98a";
+      msg.textContent = error ? "Error guardando" : "Cambios guardados ✔";
+    };
+  });
+</script>
