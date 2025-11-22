@@ -120,13 +120,23 @@ document.addEventListener("DOMContentLoaded", async () => {
    🔹 Guardar cambios del formulario Datos Personales
 ============================================================ */
 document.addEventListener("submit", async (e) => {
-  if (e.target.id !== "form-datos") return; // evitar colisiones
+  if (e.target.id !== "form-datos") return;
   e.preventDefault();
 
   const msg = document.getElementById("datosMsg");
   msg.textContent = "Guardando...";
 
-  const { user } = await supabase.auth.getUser();
+  // ✅ FIX: obtener usuario correctamente
+  const {
+    data: { user },
+    error
+  } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    msg.textContent = "❌ No hay usuario autenticado.";
+    msg.style.color = "#ff6b6b";
+    return;
+  }
 
   const updates = {
     full_name: document.getElementById("inputFullName").value,
@@ -136,11 +146,13 @@ document.addEventListener("submit", async (e) => {
     updated_at: new Date()
   };
 
-  const { error } = await supabase
+  const { error: updateError } = await supabase
     .from("profiles")
     .update(updates)
     .eq("id", user.id);
 
-  msg.style.color = error ? "#ff6b6b" : "#3ee98a";
-  msg.textContent = error ? "❌ Error guardando" : "✔ Guardado con éxito";
+  msg.style.color = updateError ? "#ff6b6b" : "#3ee98a";
+  msg.textContent = updateError
+    ? "❌ Error guardando"
+    : "✔ Guardado con éxito";
 });
