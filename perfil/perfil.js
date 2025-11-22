@@ -1,18 +1,15 @@
 /* ============================================================
-   PERFIL ADVANCE+ — Navegación Modular
-   Carga dinámica de módulos HTML dentro de #content
-   Lee usuario desde Supabase
-   v1.0
+   PERFIL ADVANCE+ — Modular
 ============================================================ */
 
 import { supabase } from "/js/supabase.js";
 
 /* ============================================================
-   🔹 Cargar datos del usuario (avatar, nombre, email)
+   🔹 Función para obtener datos desde la tabla profiles
 ============================================================ */
-async function loadUserProfile() {
+async function getProfile() {
   const { data: session } = await supabase.auth.getUser();
-  if (!session?.user) return;
+  if (!session?.user) return null;
 
   const user = session.user;
 
@@ -22,30 +19,56 @@ async function loadUserProfile() {
     .eq("id", user.id)
     .single();
 
-  // Rellenar header
+  return { user, profile };
+}
+
+/* ============================================================
+   🔹 Rellenar HEADER del perfil
+============================================================ */
+async function renderHeaderProfile() {
+  const data = await getProfile();
+  if (!data) return;
+
+  const { user, profile } = data;
+
   document.getElementById("profile-name").textContent =
     profile?.full_name || user.email.split("@")[0];
 
-  document.getElementById("profile-email").textContent = profile?.email || user.email;
+  document.getElementById("profile-email").textContent =
+    profile?.email || user.email;
 
-  // Rellenar formulario (si existe la vista datos.html)
-  const nameInput = document.getElementById("inputFullName");
-  const countryInput = document.getElementById("inputCountry");
-  const languageInput = document.getElementById("inputLanguage");
+  // Avatar iniciales
+  const initials = (profile?.full_name || user.email)
+    .split(" ")
+    .map((x) => x[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
 
-  if (nameInput) nameInput.value = profile.full_name || "";
-  if (countryInput) countryInput.value = profile.country || "";
-  if (languageInput) languageInput.value = profile.language || "";
+  document.getElementById("profile-avatar").textContent = initials;
 }
 
+/* ============================================================
+   🔹 Rellenar FORMULARIO de datos personales
+============================================================ */
+async function fillDatosForm() {
+  const data = await getProfile();
+  if (!data) return;
 
-function getInitials(name, email) {
-  if (name) {
-    const parts = name.trim().split(" ");
-    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-    return parts[0][0].toUpperCase();
+  const { user, profile } = data;
+
+  const fullName = document.getElementById("inputFullName");
+  const email = document.getElementById("inputEmail");
+  const country = document.getElementById("inputCountry");
+  const language = document.getElementById("inputLanguage");
+
+  if (fullName) fullName.value = profile?.full_name || "";
+  if (email) {
+    email.value = profile?.email || user.email;
+    email.disabled = true; // no editable
   }
-  return (email?.[0] || "A").toUpperCase() + "+";
+  if (country) country.value = profile?.country || "";
+  if (language) language.value = profile?.language || "es";
 }
 
 /* ============================================================
@@ -56,16 +79,12 @@ async function loadModule(page) {
 
   try {
     const response = await fetch(`/perfil/${page}.html`);
-    const html = await response.text();
+    container.innerHTML = await response.text();
 
-    container.innerHTML = html;
-
-    // ⬇️ Nuevo: volver a cargar el perfil SOLO si estamos en datos personales
+    // Si cargamos datos.html → rellenar formulario
     if (page === "datos") {
-      await fillPersonalForm();
+      await fillDatosForm();
     }
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
 
   } catch (err) {
     container.innerHTML = `
@@ -77,64 +96,27 @@ async function loadModule(page) {
 }
 
 /* ============================================================
-   🔹 Activar clase "active" en el menú
-============================================================ */
-function setActiveMenu(item) {
-  document.querySelectorAll(".menu-item").forEach((el) => {
-    el.classList.remove("active");
-  });
-  item.classList.add("active");
-}
-
-/* ============================================================
-   🔹 Listeners del menú
+   🔹 Activar clase active
 ============================================================ */
 function initMenu() {
   const menuItems = document.querySelectorAll(".menu-item");
 
   menuItems.forEach((item) => {
     item.addEventListener("click", () => {
-      const page = item.getAttribute("data-page");
-      setActiveMenu(item);
+      menuItems.forEach((el) => el.classList.remove("active"));
+      item.classList.add("active");
+
+      const page = item.dataset.page;
       loadModule(page);
     });
   });
 }
 
 /* ============================================================
-   🚀 Inicializar Perfil
+   🚀 Inicializar
 ============================================================ */
 document.addEventListener("DOMContentLoaded", async () => {
-  await loadUserProfile();
+  await renderHeaderProfile();
   initMenu();
-
-  // Cargar módulo por defecto
   loadModule("datos");
 });
-
-async function fillPersonalForm() {
-  const { data: session } = await supabase.auth.getUser();
-  if (!session?.user) return;
-
-  const user = session.user;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  // Inputs del formulario (si existen)
-  const nameInput = document.getElementById("inputFullName");
-  const emailInput = document.getElementById("inputEmail");
-  const countryInput = document.getElementById("inputCountry");
-  const languageInput = document.getElementById("inputLanguage");
-  const birthdayInput = document.getElementById("inputBirthday");
-
-  if (nameInput) nameInput.value = profile?.full_name || "";
-  if (emailInput) emailInput.value = profile?.email || user.email;
-  if (countryInput) countryInput.value = profile?.country || "";
-  if (languageInput) languageInput.value = profile?.language || "es";
-  if (birthdayInput) birthdayInput.value = profile?.birthday || "";
-}
-
