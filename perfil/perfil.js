@@ -115,3 +115,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   initMenu();
   loadModule("datos");
 });
+
+/* ============================================================
+   🔹 Guardar cambios del formulario Datos Personales
+============================================================ */
+document.addEventListener("submit", async (e) => {
+  if (e.target.id !== "form-datos") return; // evitar colisiones
+  e.preventDefault();
+
+  const msg = document.getElementById("datosMsg");
+  msg.textContent = "Guardando...";
+
+  const { user } = await supabase.auth.getUser();
+
+  const updates = {
+    full_name: document.getElementById("inputFullName").value,
+    country: document.getElementById("inputCountry").value,
+    language: document.getElementById("inputLanguage").value,
+    birthdate: document.getElementById("inputBirthdate").value,
+    updated_at: new Date()
+  };
+
+  const { error } = await supabase
+    .from("profiles")
+    .update(updates)
+    .eq("id", user.id);
+
+  msg.style.color = error ? "#ff6b6b" : "#3ee98a";
+  msg.textContent = error ? "❌ Error guardando" : "✔ Guardado con éxito";
+});
