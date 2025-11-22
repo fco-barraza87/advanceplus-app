@@ -161,19 +161,14 @@ select option {
     const user = session.user;
 
     // Rellenar campos
-    document.getElementById("nombre").value =
-      user.user_metadata?.full_name || "";
+    document.getElementById("nombre").value = profile?.full_name || "";
+    document.getElementById("email").value = profile?.email || user.email;
+    document.getElementById("pais").value = profile?.country || "";
+    document.getElementById("idioma").value = profile?.language || "es";
 
-    document.getElementById("email").value = user.email;
+    if (profile?.birthdate)
+      document.getElementById("nacimiento").value = profile.birthdate;
 
-    document.getElementById("pais").value =
-      user.user_metadata?.pais || "";
-
-    document.getElementById("idioma").value =
-      user.user_metadata?.idioma || "es";
-
-    document.getElementById("nacimiento").value =
-      user.user_metadata?.nacimiento || "";
 
     // Guardar cambios
     document.getElementById("form-datos").onsubmit = async (e) => {

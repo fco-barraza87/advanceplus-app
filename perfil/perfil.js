@@ -138,13 +138,14 @@ document.addEventListener("submit", async (e) => {
     return;
   }
 
-  const updates = {
-    full_name: document.getElementById("inputFullName").value,
-    country: document.getElementById("inputCountry").value,
-    language: document.getElementById("inputLanguage").value,
-    birthdate: document.getElementById("inputBirthdate").value,
-    updated_at: new Date()
-  };
+    const updates = {
+        full_name: document.getElementById("nombre").value,
+        country: document.getElementById("pais").value,
+        language: document.getElementById("idioma").value,
+        birthdate: document.getElementById("nacimiento").value,
+        updated_at: new Date()
+    };
+
 
   const { error: updateError } = await supabase
     .from("profiles")
