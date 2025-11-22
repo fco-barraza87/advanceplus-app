@@ -101,3 +101,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Cargar módulo por defecto
   loadModule("datos");
 });
+
+async function loadUserProfile() {
+  const { data: session } = await supabase.auth.getUser();
+  if (!session?.user) return;
+
+  const user = session.user;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  // Rellenar header
+  document.getElementById("profile-name").textContent =
+    profile?.full_name || user.email.split("@")[0];
+
+  document.getElementById("profile-email").textContent = profile?.email || user.email;
+
+  // Rellenar formulario (si existe la vista datos.html)
+  const nameInput = document.getElementById("inputFullName");
+  const countryInput = document.getElementById("inputCountry");
+  const languageInput = document.getElementById("inputLanguage");
+
+  if (nameInput) nameInput.value = profile.full_name || "";
+  if (countryInput) countryInput.value = profile.country || "";
+  if (languageInput) languageInput.value = profile.language || "";
+}
+
