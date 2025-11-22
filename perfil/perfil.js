@@ -500,17 +500,16 @@ async function initCursos() {
   }
 
 /* ================================
-   4) Acciones de botones
-   (Usando tu ruta real de dashboard.js)
+   4) Acciones de botones (usar ID real)
 ================================ */
 container.addEventListener("click", (e) => {
-  const btn = e.target.closest("[data-course-slug]");
+  const btn = e.target.closest("[data-course-id]");
   if (!btn) return;
 
-  const slug = btn.dataset.courseSlug;
+  const id = btn.dataset.courseId;
 
-  // Ruta REAL según dashboard.js
-  window.location.href = `/curso/index.html?c=${slug}`;
+  // Ruta REAL confirmada
+  window.location.href = `/curso/index.html?c=${id}&day=1`;
 });
 
 }
