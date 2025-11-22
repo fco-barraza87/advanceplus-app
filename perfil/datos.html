@@ -1,6 +1,5 @@
 <!-- ===============================================
      DATOS PERSONALES — Advance+
-     Módulo para /perfil/index.html
 ================================================ -->
 
 <section class="module-section">
@@ -12,36 +11,36 @@
 
     <!-- Nombre -->
     <div class="form-group">
-      <label for="nombre">Nombre completo</label>
-      <input type="text" id="nombre" placeholder="Tu nombre" />
+      <label for="inputFullName">Nombre completo</label>
+      <input type="text" id="inputFullName" placeholder="Tu nombre" />
     </div>
 
     <!-- Email (solo lectura) -->
     <div class="form-group">
-      <label for="email">Email</label>
-      <input type="email" id="email" readonly disabled />
+      <label for="inputEmail">Email</label>
+      <input type="email" id="inputEmail" readonly disabled />
       <small class="helper-text">*El email se gestiona desde Seguridad.</small>
     </div>
 
     <!-- País -->
     <div class="form-group">
-      <label for="pais">País</label>
-      <select id="pais">
+      <label for="inputCountry">País</label>
+      <select id="inputCountry">
         <option value="">Selecciona tu país</option>
-        <option value="chile">Chile</option>
-        <option value="suiza">Suiza</option>
-        <option value="espana">España</option>
-        <option value="mexico">México</option>
-        <option value="argentina">Argentina</option>
-        <option value="colombia">Colombia</option>
-        <option value="otro">Otro</option>
+        <option value="Chile">Chile</option>
+        <option value="Suiza">Suiza</option>
+        <option value="España">España</option>
+        <option value="México">México</option>
+        <option value="Argentina">Argentina</option>
+        <option value="Colombia">Colombia</option>
+        <option value="Otro">Otro</option>
       </select>
     </div>
 
     <!-- Idioma -->
     <div class="form-group">
-      <label for="idioma">Idioma preferido</label>
-      <select id="idioma">
+      <label for="inputLanguage">Idioma preferido</label>
+      <select id="inputLanguage">
         <option value="es">Español</option>
         <option value="en">Inglés</option>
       </select>
@@ -49,8 +48,8 @@
 
     <!-- Fecha nacimiento -->
     <div class="form-group">
-      <label for="nacimiento">Fecha de nacimiento</label>
-      <input type="date" id="nacimiento" />
+      <label for="inputBirthdate">Fecha de nacimiento</label>
+      <input type="date" id="inputBirthdate" />
     </div>
 
     <!-- Botón -->
@@ -62,6 +61,21 @@
 
   </form>
 </section>
+
+<style>
+  /* Tus estilos originales + fix de select */
+  select,
+  input {
+    background: rgba(255,255,255,0.08);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  select option {
+    background: #0F1E44;
+    color: white;
+  }
+</style>
 
 
 <!-- ====== ESTILOS ====== -->

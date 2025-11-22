@@ -57,18 +57,13 @@ async function fillDatosForm() {
 
   const { user, profile } = data;
 
-  const fullName = document.getElementById("inputFullName");
-  const email = document.getElementById("inputEmail");
-  const country = document.getElementById("inputCountry");
-  const language = document.getElementById("inputLanguage");
+  document.getElementById("inputFullName").value = profile?.full_name || "";
+  document.getElementById("inputEmail").value = profile?.email || user.email;
+  document.getElementById("inputCountry").value = profile?.country || "";
+  document.getElementById("inputLanguage").value = profile?.language || "es";
 
-  if (fullName) fullName.value = profile?.full_name || "";
-  if (email) {
-    email.value = profile?.email || user.email;
-    email.disabled = true; // no editable
-  }
-  if (country) country.value = profile?.country || "";
-  if (language) language.value = profile?.language || "es";
+  if (profile?.birthdate)
+    document.getElementById("inputBirthdate").value = profile.birthdate;
 }
 
 /* ============================================================
