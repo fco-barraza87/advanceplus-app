@@ -59,14 +59,20 @@ async function loadModule(page) {
     const html = await response.text();
 
     container.innerHTML = html;
+
+    // ⬇️ Nuevo: volver a cargar el perfil SOLO si estamos en datos personales
+    if (page === "datos") {
+      await fillPersonalForm();
+    }
+
     window.scrollTo({ top: 0, behavior: "smooth" });
+
   } catch (err) {
     container.innerHTML = `
       <div style="padding: 20px; color: #ff6b6b;">
         Error cargando el módulo <strong>${page}</strong>.
       </div>
     `;
-    console.error("Error cargando módulo:", err);
   }
 }
 
@@ -106,4 +112,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadModule("datos");
 });
 
+async function fillPersonalForm() {
+  const { data: session } = await supabase.auth.getUser();
+  if (!session?.user) return;
+
+  const user = session.user;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  // Inputs del formulario (si existen)
+  const nameInput = document.getElementById("inputFullName");
+  const emailInput = document.getElementById("inputEmail");
+  const countryInput = document.getElementById("inputCountry");
+  const languageInput = document.getElementById("inputLanguage");
+  const birthdayInput = document.getElementById("inputBirthday");
+
+  if (nameInput) nameInput.value = profile?.full_name || "";
+  if (emailInput) emailInput.value = profile?.email || user.email;
+  if (countryInput) countryInput.value = profile?.country || "";
+  if (languageInput) languageInput.value = profile?.language || "es";
+  if (birthdayInput) birthdayInput.value = profile?.birthday || "";
+}
 
