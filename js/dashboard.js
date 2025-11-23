@@ -179,25 +179,31 @@ function renderActiveCourses(active, userId) {
         .from("progress")
         .select("day, completed")
         .eq("user_id", userId)
-        .eq("course_id", course.id)
-        .order("day", { ascending: true });
+        .eq("course_id", course.id);
 
       let nextDay = 1;
 
       if (!error && progressRows?.length) {
-        const completedDays = progressRows.filter((p) => p.completed);
+        // Filtrar únicamente completados
+        const completedDays = progressRows
+          .filter((p) => p.completed)
+          .map((p) => p.day);
+
         if (completedDays.length > 0) {
-          const lastDone = completedDays[completedDays.length - 1].day;
-          nextDay = lastDone + 1;
+          // Encontrar el máximo día completado
+          const lastCompleted = Math.max(...completedDays);
+          nextDay = lastCompleted + 1;
         }
       }
 
+      // No pasar del total de días del curso
       if (nextDay > course.duration_days) {
         nextDay = course.duration_days;
       }
 
       window.location.href = `/curso/index.html?c=${course.id}&day=${nextDay}`;
     });
+
 
     grid.appendChild(card);
   });
