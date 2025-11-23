@@ -13,32 +13,25 @@
       <div id="avatarInitials" class="initials-avatar hidden"></div>
     </div>
 
-
     <!-- ACCIONES -->
     <div class="avatar-actions">
 
+      <!-- input oculto -->
       <input id="avatarInput" type="file" accept="image/*" class="hidden" />
 
+      <!-- subir -->
       <button id="avatarUploadBtn" class="btn-a" type="button">
         Subir nueva foto
       </button>
 
+      <!-- eliminar -->
       <button id="avatarDeleteBtn" class="btn-b" type="button">
         Quitar avatar
       </button>
 
+      <!-- mensaje -->
       <p id="avatarMsg" class="avatar-status"></p>
 
     </div>
   </div>
-
 </section>
-
-
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const uploadBtn = document.getElementById("avatarUploadBtn");
-    const input = document.getElementById("avatarInput");
-    uploadBtn.onclick = () => input.click();
-  });
-</script>
