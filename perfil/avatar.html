@@ -1,67 +1,56 @@
 <section class="module-section">
 
-  <h2 class="module-title">Imagen de perfil</h2>
+  <h2 class="module-title">Tu Avatar</h2>
   <p class="module-subtitle">
-    Personaliza tu avatar para que tu experiencia en Advance+ sea más personal.
+    Personaliza tu imagen de perfil para que tu experiencia en Advance+ sea más personal.
   </p>
 
-  <!-- VISTA PREVIA -->
   <div class="avatar-card">
-    <div id="avatarPreview" class="avatar-preview">
-      <!-- Foto o iniciales se cargan por JS -->
+    <div class="avatar-preview-wrapper">
+      <img id="avatarPreview" class="avatar-preview" src="" alt="Tu avatar" />
     </div>
 
-    <p class="avatar-hint">Formatos permitidos: JPG, PNG · Máx 2MB</p>
-
-    <!-- BOTONES -->
     <div class="avatar-actions">
-      <label class="btn-a avatar-upload-btn">
+      <input id="avatarInput" type="file" accept="image/*" class="hidden" />
+
+      <button id="btnUploadAvatar" class="btn-a" type="button">
         Subir nueva foto
-        <input 
-          id="avatarInput" 
-          type="file" 
-          accept="image/*"
-          capture="user"
-          hidden>
-      </label>
+      </button>
 
-      <button id="avatarDelete" class="btn-b" type="button">Eliminar foto</button>
+      <button id="btnDeleteAvatar" class="btn-b" type="button">
+        Quitar avatar
+      </button>
+
+      <p id="avatarStatus" class="avatar-status"></p>
     </div>
-
-    <p id="avatarMsg" class="form-msg" style="margin-top:10px;"></p>
   </div>
 
 </section>
 
 <style>
   .avatar-card {
-    background: rgba(255,255,255,0.03);
-    border-radius: 16px;
+    background: rgba(10, 15, 35, 0.9);
     padding: 20px;
-    text-align: center;
-    border: 1px solid rgba(192,164,80,0.2);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
-    max-width: 360px;
-    margin: auto;
+    border-radius: 16px;
+    border: 1px solid rgba(192, 164, 80, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    max-width: 380px;
+  }
+
+  .avatar-preview-wrapper {
+    width: 140px;
+    height: 140px;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 3px solid var(--ap-gold);
+    box-shadow: 0 0 12px rgba(192,164,80,0.35);
   }
 
   .avatar-preview {
-    width: 130px;
-    height: 130px;
-    margin: 0 auto 14px;
-    border-radius: 999px;
-    background: radial-gradient(circle at 30% 20%, #C0A450, #0F1E44);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 44px;
-    color: white;
-    font-weight: 700;
-    overflow: hidden;
-    border: 3px solid rgba(192,164,80,0.4);
-  }
-
-  .avatar-preview img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -71,19 +60,23 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    margin-top: 14px;
+    width: 100%;
   }
 
-  .avatar-upload-btn {
-    display: block;
-    cursor: pointer;
+  #btnUploadAvatar {
+    width: 100%;
   }
 
-  .avatar-hint {
-    opacity: 0.7;
+  #btnDeleteAvatar {
+    width: 100%;
+    border-radius: 999px;
+  }
+
+  .avatar-status {
+    margin-top: 4px;
+    text-align: center;
+    min-height: 20px;
     font-size: 13px;
-    margin-bottom: 10px;
+    opacity: 0.85;
   }
 </style>
-
-<script type="module" src="/perfil/js/perfil-avatar.js"></script>

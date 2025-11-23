@@ -88,6 +88,12 @@ async function loadModule(page) {
       await initCursos();
     }
 
+    if (page === "avatar") {
+      const module = await import("/perfil/avatar.js");
+      module.initAvatar();
+    }
+
+
   } catch (err) {
     container.innerHTML = `
       <div style="padding: 20px; color: #ff6b6b;">
@@ -112,6 +118,9 @@ function initMenu() {
       loadModule(page);
     });
   });
+  <div class="menu-item" data-page="avatar">
+  Avatar
+</div>
 }
 
 /* ============================================================
