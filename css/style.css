@@ -105,7 +105,7 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: none ; /* <-- agregar esto */
+  display: block ; /* <-- agregar esto */
   border-radius: 50%;
 }
 
