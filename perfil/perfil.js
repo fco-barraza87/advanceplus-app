@@ -44,8 +44,32 @@ async function renderHeaderProfile() {
     .substring(0, 2)
     .toUpperCase();
 
-  const avatar = document.getElementById("profile-avatar");
-  if (avatar) avatar.textContent = initials;
+  const avatarHeader = document.getElementById("headerAvatarImg");
+  const avatarInitials = document.getElementById("headerAvatarInitials");
+  const avatarProfile = document.getElementById("profile-avatar");
+
+  if (profile?.avatar_url) {
+    // Header
+    window.updateHeaderAvatar(profile.avatar_url, profile.full_name);
+
+    // Avatar del perfil (círculo grande arriba)
+    if (avatarProfile) {
+      avatarProfile.style.backgroundImage = `url('${profile.avatar_url}')`;
+      avatarProfile.style.backgroundSize = "cover";
+      avatarProfile.style.backgroundPosition = "center";
+      avatarProfile.textContent = "";
+    }
+  } else {
+    // Header fallback a iniciales
+    window.updateHeaderAvatar(null, profile.full_name);
+
+    // Perfil fallback a iniciales
+    if (avatarProfile) {
+      avatarProfile.textContent = initials;
+      avatarProfile.style.backgroundImage = "none";
+    }
+  }
+
 }
 
 /* ============================================================

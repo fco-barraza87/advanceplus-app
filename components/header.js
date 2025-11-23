@@ -15,7 +15,7 @@ export async function loadHeader() {
         <div class="header-user clickable" id="headerProfileBtn">
           <div id="headerAvatar" class="header-avatar">
             <img id="headerAvatarImg" class="header-avatar-img" />
-            <div id="headerAvatarInitials" class="header-avatar-initials">A+</div>
+            <div id="headerAvatarInitials" class="header-avatar-initials"></div>
           </div>
 
           <div class="header-user-info">

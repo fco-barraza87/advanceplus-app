@@ -33,9 +33,7 @@ body {
   background: var(--ap-bg-deep);
 }
 
-.hidden {
-  display: none !important;
-}
+
 
 /* ============================================================
    HEADER PREMIUM
