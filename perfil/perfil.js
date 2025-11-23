@@ -474,12 +474,14 @@ async function initCursos() {
               >
                 Continuar
               </button>
+
+                <!-- REPETIR DESDE EL INICIO -->
               <button
                 type="button"
-                class="btn-secondary"
-                data-course-id="${course.id}"
+                class="btn-secondary btn-restart"
+                data-course-id="${courseId}"
               >
-                Ver curso
+                Volver desde el Inicio
               </button>
             </div>
           </div>
@@ -541,6 +543,16 @@ container.addEventListener("click", async (e) => {
 
   // 3) Redirigir correctamente
   window.location.href = `/curso/index.html?c=${courseId}&day=${nextDay}`;
+});
+
+
+// CLICK: Repetir desde el inicio (solo redirigir al día 1)
+container.addEventListener("click", (e) => {
+  const restartBtn = e.target.closest(".btn-restart");
+  if (!restartBtn) return;
+
+  const courseId = restartBtn.dataset.courseId;
+  window.location.href = `/curso/index.html?c=${courseId}&day=1`;
 });
 
 
