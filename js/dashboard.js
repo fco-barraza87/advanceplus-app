@@ -174,12 +174,35 @@ function renderActiveCourses(active) {
     `;
 
     // CLICK EN TODA LA TARJETA
-    card.addEventListener("click", () => {
-      window.location.href = `/curso/index.html?c=${course.id}&day=1`;
-    });
+card.addEventListener("click", async () => {
+  // 1) Obtener progreso del usuario en este curso
+  const { data: progressRows, error } = await supabase
+    .from("progress")
+    .select("day, completed")
+    .eq("user_id", user.id)
+    .eq("course_id", course.id)
+    .order("day", { ascending: true });
 
-    grid.appendChild(card);
-  });
+  let nextDay = 1;
+
+  if (!error && progressRows?.length) {
+    const completedDays = progressRows.filter(p => p.completed);
+
+    if (completedDays.length > 0) {
+      const lastDone = completedDays[completedDays.length - 1].day;
+      nextDay = lastDone + 1;
+    }
+  }
+
+  // 2) No pasar del total de días del curso
+  if (nextDay > course.duration_days) {
+    nextDay = course.duration_days;
+  }
+
+  // 3) Redirigir al curso
+  window.location.href = `/curso/index.html?c=${course.id}&day=${nextDay}`;
+});
+
 }
 
 
