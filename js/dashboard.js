@@ -240,23 +240,26 @@ async function loadAvailableCourses(userId) {
   return (courses || []).filter((c) => !ownedIds.has(c.id));
 }
 
-function renderAvailableCourses(courses) {
-  const grid = qs("#availableCoursesGrid");
-  const msg = qs("#noAvailableMessage");
+function renderActiveCourses(active, currentUser) {
+  const grid = qs("#activeCoursesGrid");
+  const msg = qs("#noActiveMessage");
+  const count = qs("#activeCount");
 
-  if (!grid || !msg) return;
+  if (!grid || !msg || !count) return;
 
   grid.innerHTML = "";
 
-  if (!courses.length) {
+  if (!active.length) {
     msg.style.display = "block";
+    count.textContent = "";
     return;
   }
 
   msg.style.display = "none";
+  count.textContent = `${active.length} activos`;
 
-  courses.forEach((course) => {
-    const card = document.createElement("div");
+  active.forEach((course) => {
+    const card = document.createElement("article");
     card.className = "course-card clickable";
     card.dataset.id = course.id;
 
@@ -272,18 +275,47 @@ function renderAvailableCourses(courses) {
 
       <div class="course-body">
         <div class="course-title">${course.title}</div>
-        <div class="course-meta">${course.level || ""}</div>
+        <div class="course-meta">${course.level || "Todos los niveles"}</div>
       </div>
     `;
 
-    // CLICK EN TODA LA TARJETA
-    card.addEventListener("click", () => {
-      window.location.href = `/curso-info/index.html?c=${course.id}`;
+    /* ------------------------------------------
+       CLICK → Abrir curso en su día correspondiente
+    ------------------------------------------- */
+    card.addEventListener("click", async () => {
+
+      // 1) Leer progreso del curso (ya creado por el trigger)
+      const { data: progressRows, error } = await supabase
+        .from("progress")
+        .select("day, completed")
+        .eq("user_id", currentUser.id)
+        .eq("course_id", course.id)
+        .order("day", { ascending: true });
+
+      let nextDay = 1;
+
+      if (!error && progressRows?.length) {
+        const completed = progressRows.filter((p) => p.completed);
+
+        if (completed.length > 0) {
+          const lastDone = completed[completed.length - 1].day;
+          nextDay = lastDone + 1;
+        }
+      }
+
+      // 2) Nunca pasar del total de días
+      if (nextDay > course.duration_days) {
+        nextDay = course.duration_days;
+      }
+
+      // 3) Redirigir al curso
+      window.location.href = `/curso/index.html?c=${course.id}&day=${nextDay}`;
     });
 
     grid.appendChild(card);
   });
 }
+
 
 
 /* ==================================================
