@@ -6,22 +6,36 @@
   </p>
 
   <div class="avatar-card">
+
+    <!-- PREVIEW -->
     <div class="avatar-preview-wrapper">
-      <img id="avatarPreview" class="avatar-preview" src="" alt="Tu avatar" />
+      <img
+        id="avatarPreview"
+        class="avatar-preview"
+        src="/img/avatar-placeholder.png"
+        alt="Tu avatar"
+      />
     </div>
 
+    <!-- ACCIONES -->
     <div class="avatar-actions">
+
+      <!-- input hidden -->
       <input id="avatarInput" type="file" accept="image/*" class="hidden" />
 
-      <button id="btnUploadAvatar" class="btn-a" type="button">
+      <!-- botón principal -->
+      <button id="avatarUploadBtn" class="btn-a" type="button">
         Subir nueva foto
       </button>
 
-      <button id="btnDeleteAvatar" class="btn-b" type="button">
+      <!-- eliminar -->
+      <button id="avatarDeleteBtn" class="btn-b" type="button">
         Quitar avatar
       </button>
 
-      <p id="avatarStatus" class="avatar-status"></p>
+      <!-- estado -->
+      <p id="avatarMsg" class="avatar-status"></p>
+
     </div>
   </div>
 
@@ -30,24 +44,29 @@
 <style>
   .avatar-card {
     background: rgba(10, 15, 35, 0.9);
-    padding: 20px;
-    border-radius: 16px;
+    padding: 24px;
+    border-radius: 20px;
     border: 1px solid rgba(192, 164, 80, 0.15);
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 20px;
     align-items: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    max-width: 380px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    max-width: 420px;
+    margin-top: 12px;
   }
 
   .avatar-preview-wrapper {
-    width: 140px;
-    height: 140px;
+    width: 160px;
+    height: 160px;
     border-radius: 999px;
     overflow: hidden;
     border: 3px solid var(--ap-gold);
-    box-shadow: 0 0 12px rgba(192,164,80,0.35);
+    box-shadow: 0 0 14px rgba(192, 164, 80, 0.35);
+    background: rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .avatar-preview {
@@ -59,24 +78,33 @@
   .avatar-actions {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
     width: 100%;
   }
 
-  #btnUploadAvatar {
+  #avatarUploadBtn,
+  #avatarDeleteBtn {
     width: 100%;
-  }
-
-  #btnDeleteAvatar {
-    width: 100%;
-    border-radius: 999px;
+    border-radius: var(--ap-radius-full);
   }
 
   .avatar-status {
     margin-top: 4px;
     text-align: center;
     min-height: 20px;
-    font-size: 13px;
-    opacity: 0.85;
+    font-size: 14px;
+    opacity: 0.9;
   }
 </style>
+
+<script>
+  // Hace que el botón "Subir nueva foto" abra el input file
+  document.addEventListener("DOMContentLoaded", () => {
+    const uploadBtn = document.getElementById("avatarUploadBtn");
+    const input = document.getElementById("avatarInput");
+
+    if (uploadBtn && input) {
+      uploadBtn.addEventListener("click", () => input.click());
+    }
+  });
+</script>
