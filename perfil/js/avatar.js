@@ -4,6 +4,7 @@ import { supabase } from "/js/supabase.js";
    Cargar avatar actual
 ================================ */
 export async function initAvatar() {
+    console.log("Avatar module loaded");
   const {
     data: { user },
   } = await supabase.auth.getUser();

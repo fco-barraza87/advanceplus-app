@@ -89,7 +89,7 @@ async function loadModule(page) {
     }
 
     if (page === "avatar") {
-      const module = await import("/perfil/avatar.js");
+      const module = await import("/perfil/js/avatar.js");
       module.initAvatar();
     }
 
