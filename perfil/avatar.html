@@ -9,14 +9,18 @@
 
     <!-- PREVIEW -->
     <div class="avatar-preview-wrapper">
-      <img id="avatarPreview" class="avatar-preview" alt="Tu avatar" />
-      <div id="avatarInitials" class="avatar-initials"></div>
+      <img
+        id="avatarPreview"
+        class="avatar-image hidden"
+        alt="Tu avatar"
+      />
+      <div id="avatarInitials" class="initials-avatar hidden"></div>
     </div>
 
     <!-- ACCIONES -->
     <div class="avatar-actions">
 
-      <input id="avatarInput" type="file" accept="image/*" hidden />
+      <input id="avatarInput" type="file" accept="image/*" class="hidden" />
 
       <button id="avatarUploadBtn" class="btn-a" type="button">
         Subir nueva foto
@@ -32,6 +36,7 @@
   </div>
 
 </section>
+
 
 <style>
   .avatar-card {
