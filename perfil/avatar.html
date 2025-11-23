@@ -9,32 +9,37 @@
 
     <!-- PREVIEW -->
     <div class="avatar-preview-wrapper">
+
+      <!-- Imagen de avatar (oculta si no hay imagen) -->
       <img
         id="avatarPreview"
         class="avatar-preview"
         src=""
-        alt="Tu avatar"
+        alt=""
       />
+
+      <!-- Iniciales (ocultas si hay foto) -->
       <div id="avatarInitials" class="avatar-initials"></div>
+
     </div>
 
     <!-- ACCIONES -->
     <div class="avatar-actions">
 
-      <!-- input hidden -->
+      <!-- Input oculto -->
       <input id="avatarInput" type="file" accept="image/*" class="hidden" />
 
-      <!-- botón principal -->
+      <!-- Subir -->
       <button id="avatarUploadBtn" class="btn-a" type="button">
         Subir nueva foto
       </button>
 
-      <!-- eliminar -->
+      <!-- Eliminar -->
       <button id="avatarDeleteBtn" class="btn-b" type="button">
         Quitar avatar
       </button>
 
-      <!-- estado -->
+      <!-- Mensaje -->
       <p id="avatarMsg" class="avatar-status"></p>
 
     </div>
@@ -64,7 +69,7 @@
     overflow: hidden;
     border: 3px solid var(--ap-gold);
     box-shadow: 0 0 14px rgba(192, 164, 80, 0.35);
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -75,14 +80,19 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: none; /* se muestra si hay foto */
   }
 
   .avatar-initials {
     position: absolute;
-    font-size: 42px;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
     font-weight: 700;
     color: var(--ap-gold);
-    display: none;
+    background: transparent;
   }
 
   .avatar-actions {
@@ -106,3 +116,14 @@
     opacity: 0.9;
   }
 </style>
+
+<script>
+  // Abrir selector al presionar "Subir nueva foto"
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("avatarUploadBtn");
+    const input = document.getElementById("avatarInput");
+
+    btn.addEventListener("click", () => input.click());
+  });
+</script>
+

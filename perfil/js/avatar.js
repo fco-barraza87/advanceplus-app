@@ -1,10 +1,12 @@
 // ============================================================
-//  AVATAR MODULE — Advance+ (Duolingo-style)
+//  AVATAR MODULE — Advance+ (versión deluxe)
 // ============================================================
 
 import { supabase } from "/js/supabase.js";
 
-// Utilidad para obtener usuario + perfil
+/**
+ * Obtener info del usuario + perfil
+ */
 async function getProfile() {
   const { data: session } = await supabase.auth.getUser();
   if (!session?.user) return null;
@@ -20,13 +22,53 @@ async function getProfile() {
   return { user, profile };
 }
 
+/**
+ * Genera iniciales desde nombre o email
+ */
+function getInitials(profile, user) {
+  const base = profile?.full_name || user.email;
+  return base
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
+}
+
+/**
+ * Mostrar avatar correcto
+ */
+function renderAvatar(profile, user) {
+  const img = document.getElementById("avatarPreview");
+  const initialsBox = document.getElementById("avatarInitials");
+
+  if (!img || !initialsBox) return;
+
+  if (profile?.avatar_url) {
+    // Mostrar foto
+    img.src = profile.avatar_url;
+    img.style.display = "block";
+    initialsBox.style.display = "none";
+  } else {
+    // Mostrar iniciales
+    const initials = getInitials(profile, user);
+    initialsBox.textContent = initials;
+
+    img.style.display = "none";
+    initialsBox.style.display = "flex";
+  }
+}
+
+/**
+ * Inicializar módulo Avatar
+ */
 export async function initAvatar() {
   const data = await getProfile();
   if (!data) return;
 
   const { user, profile } = data;
 
-  // DOM
+  // Elementos del DOM
   const avatarPreview = document.getElementById("avatarPreview");
   const avatarInitials = document.getElementById("avatarInitials");
   const uploadInput = document.getElementById("avatarInput");
@@ -34,32 +76,15 @@ export async function initAvatar() {
   const deleteBtn = document.getElementById("avatarDeleteBtn");
   const msg = document.getElementById("avatarMsg");
 
-  // Iniciales si no hay avatar
-  const initials = (profile.full_name || user.email)
-    .split(" ")
-    .map(x => x[0])
-    .join("")
-    .substring(0, 2)
-    .toUpperCase();
+  // Render inicial (foto o iniciales)
+  renderAvatar(profile, user);
 
-  // Mostrar avatar actual o iniciales
-  if (profile.avatar_url) {
-    avatarPreview.src = profile.avatar_url;
-    avatarInitials.style.display = "none";
-  } else {
-    avatarPreview.src = "";
-    avatarInitials.textContent = initials;
-    avatarInitials.style.display = "flex";
-  }
+  // ============================================================
+  //  SUBIR NUEVO AVATAR
+  // ============================================================
 
-  // ======================================
-  // CLICK → Abrir selector de archivo
-  // ======================================
   uploadBtn.addEventListener("click", () => uploadInput.click());
 
-  // ======================================
-  // SUBIR AVATAR
-  // ======================================
   uploadInput.addEventListener("change", async () => {
     const file = uploadInput.files[0];
     if (!file) return;
@@ -67,57 +92,75 @@ export async function initAvatar() {
     msg.textContent = "Cargando...";
     msg.style.color = "#fff";
 
+    // Validar tamaño (2 MB)
     if (file.size > 2 * 1024 * 1024) {
       msg.textContent = "❌ La imagen excede 2MB";
       msg.style.color = "#ff6b6b";
       return;
     }
 
-    // Previsualización instantánea
+    // Vista previa instantánea
     avatarPreview.src = URL.createObjectURL(file);
+    avatarPreview.style.display = "block";
     avatarInitials.style.display = "none";
 
+    // Mantener nombre único
     const ext = file.name.split(".").pop();
     const fileName = `avatar.${ext}`;
     const filePath = `profiles/${user.id}/${fileName}`;
 
-    // subir al bucket
+    // Subir al bucket "avatars"
     const { error: uploadError } = await supabase.storage
       .from("avatars")
-      .upload(filePath, file, { upsert: true });
+      .upload(filePath, file, {
+        upsert: true,
+      });
 
     if (uploadError) {
       msg.textContent = "❌ Error subiendo avatar";
       msg.style.color = "#ff6b6b";
+      console.error(uploadError);
+      renderAvatar(profile, user); // revertir a estado anterior
       return;
     }
 
-    // obtener URL pública
+    // Obtener URL pública
     const { data: publicData } = supabase.storage
       .from("avatars")
       .getPublicUrl(filePath);
 
     const publicUrl = publicData.publicUrl;
 
-    // guardar en profiles
-    await supabase
+    // Actualizar en BD
+    const { error: updateError } = await supabase
       .from("profiles")
       .update({ avatar_url: publicUrl })
       .eq("id", user.id);
+
+    if (updateError) {
+      msg.textContent = "❌ Error guardando en BD";
+      msg.style.color = "#ff6b6b";
+      return;
+    }
 
     msg.textContent = "✔ Avatar actualizado";
     msg.style.color = "#3ee98a";
   });
 
-  // ======================================
-  // ELIMINAR AVATAR
-  // ======================================
+  // ============================================================
+  //  ELIMINAR AVATAR
+  // ============================================================
+
   deleteBtn.addEventListener("click", async () => {
     msg.textContent = "Eliminando...";
     msg.style.color = "#fff";
 
     const folder = `profiles/${user.id}`;
-    const { data: list } = await supabase.storage.from("avatars").list(folder);
+
+    // Listar archivos del usuario
+    const { data: list } = await supabase.storage
+      .from("avatars")
+      .list(folder);
 
     if (list?.length) {
       for (const file of list) {
@@ -127,14 +170,22 @@ export async function initAvatar() {
       }
     }
 
-    await supabase
+    // Quitar URL de BD
+    const { error: updateError } = await supabase
       .from("profiles")
       .update({ avatar_url: null })
       .eq("id", user.id);
 
-    avatarPreview.src = "";
-    avatarInitials.textContent = initials;
+    if (updateError) {
+      msg.textContent = "❌ Error quitando avatar";
+      msg.style.color = "#ff6b6b";
+      return;
+    }
+
+    // Mostrar iniciales nuevamente
+    avatarPreview.style.display = "none";
     avatarInitials.style.display = "flex";
+    avatarInitials.textContent = getInitials(profile, user);
 
     msg.textContent = "✔ Avatar eliminado";
     msg.style.color = "#3ee98a";
