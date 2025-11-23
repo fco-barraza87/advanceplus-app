@@ -5,150 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Perfil | Advance+</title>
 
-  <!-- CSS global -->
   <link rel="stylesheet" href="/css/style.css" />
-
-  <style>
-    /* ======= LAYOUT PERFIL ======= */
-
-    body {
-      margin: 0;
-      background: #0F1E44;
-      color: #fff;
-      font-family: Inter, sans-serif;
-    }
-
-    /* Contenedor general debajo del header */
-    .perfil-layout {
-      display: flex;
-      height: calc(100vh - 64px); /* aprox alto header */
-      overflow: hidden;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      width: 260px;
-      background: #0A142B;
-      border-right: 1px solid rgba(255,255,255,0.05);
-      height: 100%;
-      padding: 30px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .sidebar-logo {
-      font-family: Montserrat, sans-serif;
-      font-size: 26px;
-      font-weight: 700;
-      color: #C0A450;
-      margin-bottom: 10px;
-    }
-
-    .menu-item {
-      padding: 12px 15px;
-      font-size: 15px;
-      border-radius: 10px;
-      cursor: pointer;
-      opacity: 0.8;
-      transition: all 0.2s ease;
-    }
-
-    .menu-item:hover,
-    .menu-item.active {
-      background: rgba(255,255,255,0.1);
-      opacity: 1;
-    }
-
-    /* Área principal */
-    .profile-main {
-      flex: 1;
-      height: 100%;
-      overflow-y: auto;
-      padding: 30px 40px;
-    }
-
-    /* Header usuario dentro del perfil */
-    .profile-header {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      margin-bottom: 25px;
-    }
-
-    .profile-avatar {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      background: #C0A450;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: Montserrat;
-      font-weight: 700;
-      font-size: 28px;
-      color: #0F1E44;
-    }
-
-    .profile-info h2 {
-      margin: 0;
-      font-size: 22px;
-      font-weight: 700;
-    }
-
-    .profile-info p {
-      margin: 0;
-      opacity: 0.7;
-    }
-
-    /* Contenido dinámico */
-    #content {
-      margin-top: 25px;
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Móvil */
-    @media (max-width: 900px) {
-      .perfil-layout {
-        flex-direction: column;
-        height: auto;
-      }
-
-      .sidebar {
-        width: 100%;
-        height: auto;
-        flex-direction: row;
-        overflow-x: auto;
-        padding: 15px;
-      }
-
-      .menu-item {
-        white-space: nowrap;
-      }
-
-      .profile-main {
-        padding: 20px 20px 40px;
-      }
-    }
-  </style>
 </head>
 
 <body>
 
-  <!-- HEADER GLOBAL INYECTADO -->
-<div id="appHeader"></div>
-<script type="module">
-  import { loadHeader } from "/components/header.js";
-  loadHeader();
-</script>
+  <!-- HEADER GLOBAL -->
+  <div id="appHeader"></div>
+  <script type="module">
+    import { loadHeader } from "/components/header.js";
+    loadHeader();
+  </script>
 
-  <!-- LAYOUT PERFIL (sidebar + contenido) -->
+  <!-- LAYOUT PERFIL -->
   <div class="perfil-layout">
+
     <!-- SIDEBAR -->
     <aside class="sidebar">
       <div class="sidebar-logo">Advance+</div>
@@ -165,10 +36,9 @@
       <div class="menu-item" data-page="soporte">Ayuda y soporte</div>
     </aside>
 
-    <!-- MAIN AREA -->
+    <!-- MAIN -->
     <main class="profile-main">
 
-      <!-- HEADER PERFIL -->
       <div class="profile-header">
         <div id="profile-avatar" class="profile-avatar">A+</div>
 
@@ -178,21 +48,11 @@
         </div>
       </div>
 
-      <!-- CONTENIDO DINÁMICO -->
-      <div id="content">
-        <!-- Aquí se cargará dinámicamente datos.html, preferencias.html, etc -->
-      </div>
-
+      <!-- Dinámico -->
+      <div id="content"></div>
     </main>
   </div>
 
-  <!-- Carga del header global -->
-  <script type="module">
-    import { loadHeader } from "/components/header.js";
-    loadHeader();
-  </script>
-
-  <!-- JS Navegación y datos de perfil -->
   <script type="module" src="/perfil/perfil.js"></script>
 
 </body>

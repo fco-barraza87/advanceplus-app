@@ -1,3 +1,7 @@
+//-------------------------------------------------------
+//  /perfil/js/avatar.js  — versión corregida
+//-------------------------------------------------------
+
 import { supabase } from "/js/supabase.js";
 
 async function getProfile() {
@@ -22,34 +26,36 @@ export async function initAvatar() {
   const { user, profile } = data;
 
   const preview = document.getElementById("avatarPreview");
-  const initials = document.getElementById("avatarInitials");
+  const initialsEl = document.getElementById("avatarInitials");
   const input = document.getElementById("avatarInput");
   const msg = document.getElementById("avatarMsg");
 
-  // GENERAR INICIALES
-  const nameForInitials = profile?.full_name || user.email;
-  const init = nameForInitials
+  // Iniciales
+  const name = profile?.full_name || user.email;
+  const initials = name
     .split(" ")
-    .map(n => n[0])
+    .map((x) => x[0])
     .join("")
     .substring(0, 2)
     .toUpperCase();
 
-  // Mostrar avatar o iniciales
-  if (profile?.avatar_url) {
-    preview.src = profile.avatar_url;
-    preview.style.display = "block";
-    initials.style.display = "none";
-  } else {
-    preview.style.display = "none";
-    initials.textContent = init;
-    initials.style.display = "block";
+  function renderAvatar(url) {
+    if (url) {
+      preview.src = url;
+      preview.style.display = "block";
+      initialsEl.style.display = "none";
+    } else {
+      preview.style.display = "none";
+      initialsEl.textContent = initials;
+      initialsEl.style.display = "block";
+    }
   }
 
-  // ============================
-  // SUBIR AVATAR
-  // ============================
+  renderAvatar(profile?.avatar_url);
 
+  //------------------------------------------
+  //  Subir avatar
+  //------------------------------------------
   input.onchange = async () => {
     const file = input.files[0];
     if (!file) return;
@@ -65,7 +71,6 @@ export async function initAvatar() {
     const ext = file.name.split(".").pop();
     const filePath = `profiles/${user.id}/avatar.${ext}`;
 
-    // SUBIR
     const { error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(filePath, file, { upsert: true });
@@ -76,57 +81,54 @@ export async function initAvatar() {
       return;
     }
 
-    // OBTENER URL
     const { data: publicData } = supabase.storage
       .from("avatars")
       .getPublicUrl(filePath);
 
-    const publicUrl = publicData.publicUrl;
+    const url = publicData.publicUrl;
 
-    // GUARDAR EN BD
     await supabase
       .from("profiles")
-      .update({ avatar_url: publicUrl })
+      .update({ avatar_url: url, updated_at: new Date() })
       .eq("id", user.id);
 
-    // MOSTRAR EN UI
-    preview.src = publicUrl;
-    preview.style.display = "block";
-    initials.style.display = "none";
+    renderAvatar(url);
+
+    // 🔥 Actualizar el header dinámicamente
+    window.updateHeaderAvatar(url, name);
 
     msg.textContent = "✔ Avatar actualizado";
     msg.style.color = "#3ee98a";
   };
 
-  // ============================
-  // ELIMINAR
-  // ============================
-
+  //------------------------------------------
+  //  Eliminar avatar
+  //------------------------------------------
   document.getElementById("avatarDeleteBtn").onclick = async () => {
     msg.textContent = "Eliminando...";
 
     const folder = `profiles/${user.id}`;
-
     const { data: files } = await supabase.storage
       .from("avatars")
       .list(folder);
 
     if (files) {
-      for (const file of files) {
+      for (const f of files) {
         await supabase.storage
           .from("avatars")
-          .remove([`${folder}/${file.name}`]);
+          .remove([`${folder}/${f.name}`]);
       }
     }
 
     await supabase
       .from("profiles")
-      .update({ avatar_url: null })
+      .update({ avatar_url: null, updated_at: new Date() })
       .eq("id", user.id);
 
-    preview.style.display = "none";
-    initials.textContent = init;
-    initials.style.display = "block";
+    renderAvatar(null);
+
+    // 🔥 Actualizar header
+    window.updateHeaderAvatar(null, name);
 
     msg.textContent = "✔ Avatar eliminado";
     msg.style.color = "#3ee98a";
