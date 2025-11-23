@@ -1,6 +1,6 @@
-//-------------------------------------------------------
-//  /components/header.js  —  versión corregida
-//-------------------------------------------------------
+// -------------------------------------------------------
+//  /components/header.js — versión FINAL
+// -------------------------------------------------------
 import { supabase } from "/js/supabase.js";
 
 export async function loadHeader() {
@@ -33,11 +33,15 @@ export async function loadHeader() {
     </header>
   `;
 
-  // Obtener usuario
+  //----------------------------------------------------------------
+  // Obtener usuario autenticado
+  //----------------------------------------------------------------
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  // Obtener perfil
+  //----------------------------------------------------------------
+  // Obtener perfil DB
+  //----------------------------------------------------------------
   const { data: profile } = await supabase
     .from("profiles")
     .select("full_name, role, avatar_url")
@@ -47,6 +51,7 @@ export async function loadHeader() {
   const name = profile?.full_name || user.email.split("@")[0];
 
   document.getElementById("userName").textContent = name;
+
   document.getElementById("userRole").textContent =
     profile?.role === "admin"
       ? "Administrador"
@@ -54,11 +59,12 @@ export async function loadHeader() {
       ? "Coach"
       : "Miembro Advance+";
 
+  // Avatar correcto
   updateHeaderAvatar(profile?.avatar_url, name);
 
-  //------------------------------------
-  // Navegación
-  //------------------------------------
+  //----------------------------------------------------------------
+  // Acciones
+  //----------------------------------------------------------------
   document.getElementById("headerProfileBtn").onclick = () => {
     window.location.href = "/perfil/index.html";
   };
@@ -72,7 +78,7 @@ export async function loadHeader() {
 }
 
 //-------------------------------------------------------
-//  Avatar dinámico para Header — usado por avatar.js
+//  Funcion GLOBAL — para actualizar avatar dinámicamente
 //-------------------------------------------------------
 window.updateHeaderAvatar = function (url, fullName) {
   const img = document.getElementById("headerAvatarImg");
@@ -87,7 +93,7 @@ window.updateHeaderAvatar = function (url, fullName) {
   } else {
     const initials = (fullName || "?")
       .split(" ")
-      .map((x) => x[0])
+      .map(x => x[0])
       .join("")
       .substring(0, 2)
       .toUpperCase();
