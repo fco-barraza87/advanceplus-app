@@ -5,28 +5,32 @@ export async function loadHeader() {
   const headerContainer = document.getElementById("appHeader");
   if (!headerContainer) return;
 
-  headerContainer.innerHTML = `
-    <header class="header-premium">
-      <div class="header-left">
-        <div class="header-logo">Advance+</div>
-      </div>
+container.innerHTML = `
+  <header class="header-premium">
+    <div class="header-left">
+      <button id="btnBack" class="header-btn-back">⟵</button>
 
-      <div class="header-right">
-        <div id="headerUser" class="header-user">
-          <div class="header-avatar">
-            <img id="headerAvatarImg" class="header-avatar-img" />
-            <span id="headerAvatarInitials" class="header-avatar-initials"></span>
-          </div>
-          <div>
-            <div id="headerName" class="header-user-name"></div>
-            <div id="headerRole" class="header-user-role">Miembro</div>
-          </div>
+      <div class="header-logo">Advance+</div>
+    </div>
+
+    <div class="header-right">
+      <div class="header-user clickable" id="headerProfileBtn">
+        <div id="headerAvatar" class="header-avatar">
+          <img id="headerAvatarImg" class="header-avatar-img" />
+          <div id="headerAvatarInitials" class="header-avatar-initials">A+</div>
         </div>
 
-        <button id="btnLogout" class="header-btn-logout">Salir</button>
+        <div class="header-user-info">
+          <div id="userName" class="header-user-name">Usuario</div>
+          <div id="userRole" class="header-user-role">Miembro Advance+</div>
+        </div>
       </div>
-    </header>
-  `;
+
+      <button id="btnLogout" class="header-btn-logout">Salir</button>
+    </div>
+  </header>
+`;
+
 
   // Obtener perfil
   const { data: session } = await supabase.auth.getUser();
@@ -82,6 +86,11 @@ export async function loadHeader() {
 
     document.getElementById("headerName").textContent = newName;
   };
+
+  document.getElementById("headerProfileBtn").onclick = () => {
+  window.location.href = "/perfil/index.html";
+};
+
 }
 
 
