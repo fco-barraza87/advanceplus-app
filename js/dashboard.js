@@ -134,112 +134,6 @@ async function loadActiveCourses(userId) {
   return activeCourses;
 }
 
-function renderActiveCourses(active, userId) {
-  const grid = qs("#activeCoursesGrid");
-  const msg = qs("#noActiveMessage");
-  const count = qs("#activeCount");
-
-  if (!grid || !msg || !count) return;
-
-  grid.innerHTML = "";
-
-  if (!active.length) {
-    msg.style.display = "block";
-    count.textContent = "";
-    return;
-  }
-
-  msg.style.display = "none";
-  count.textContent = `${active.length} activos`;
-
-  active.forEach((course) => {
-    const card = document.createElement("article");
-    card.className = "course-card clickable";
-    card.dataset.id = course.id;
-
-    const cover =
-      course.cover_url ||
-      "https://via.placeholder.com/600x300.png?text=Advance%2B";
-
-    card.innerHTML = `
-      <div class="course-cover-wrapper">
-        <img src="${cover}" class="course-cover" />
-        <span class="course-badge">${course.category || "Reto"}</span>
-      </div>
-
-      <div class="course-body">
-        <div class="course-title">${course.title}</div>
-        <div class="course-meta">${course.level || "Todos los niveles"}</div>
-      </div>
-    `;
-
-    // CLICK EN TODA LA TARJETA → auto select day
-    card.addEventListener("click", async () => {
-      const { data: progressRows, error } = await supabase
-        .from("progress")
-        .select("day, completed")
-        .eq("user_id", userId)
-        .eq("course_id", course.id);
-
-      let nextDay = 1;
-
-      if (!error && progressRows?.length) {
-        // Filtrar únicamente completados
-        const completedDays = progressRows
-          .filter((p) => p.completed)
-          .map((p) => p.day);
-
-        if (completedDays.length > 0) {
-          // Encontrar el máximo día completado
-          const lastCompleted = Math.max(...completedDays);
-          nextDay = lastCompleted + 1;
-        }
-      }
-
-      // No pasar del total de días del curso
-      if (nextDay > course.duration_days) {
-        nextDay = course.duration_days;
-      }
-
-      window.location.href = `/curso/index.html?c=${course.id}&day=${nextDay}`;
-    });
-
-
-    grid.appendChild(card);
-  });
-}
-
-
-
-/* ==================================================
-   5. EXPLORAR RETOS (CURSOS DISPONIBLES)
-================================================== */
-async function loadAvailableCourses(userId) {
-  const { data: courses, error: cErr } = await supabase
-    .from("courses")
-    .select("*")
-    .eq("active", true);
-
-  if (cErr) {
-    console.error("Error cargando courses:", cErr);
-    return [];
-  }
-
-  const { data: myCourses, error: ucErr } = await supabase
-    .from("user_courses")
-    .select("course_id")
-    .eq("user_id", userId);
-
-  if (ucErr) {
-    console.error("Error cargando user_courses:", ucErr);
-    return courses || [];
-  }
-
-  const ownedIds = new Set((myCourses || []).map((c) => c.course_id));
-
-  return (courses || []).filter((c) => !ownedIds.has(c.id));
-}
-
 function renderActiveCourses(active, currentUser) {
   const grid = qs("#activeCoursesGrid");
   const msg = qs("#noActiveMessage");
@@ -318,6 +212,82 @@ function renderActiveCourses(active, currentUser) {
 
 
 
+
+/* ==================================================
+   5. EXPLORAR RETOS (CURSOS DISPONIBLES)
+================================================== */
+async function loadAvailableCourses(userId) {
+  const { data: courses, error: cErr } = await supabase
+    .from("courses")
+    .select("*")
+    .eq("active", true);
+
+  if (cErr) {
+    console.error("Error cargando courses:", cErr);
+    return [];
+  }
+
+  const { data: myCourses, error: ucErr } = await supabase
+    .from("user_courses")
+    .select("course_id")
+    .eq("user_id", userId);
+
+  if (ucErr) {
+    console.error("Error cargando user_courses:", ucErr);
+    return courses || [];
+  }
+
+  const ownedIds = new Set((myCourses || []).map((c) => c.course_id));
+
+  return (courses || []).filter((c) => !ownedIds.has(c.id));
+}
+
+function renderAvailableCourses(courses) {
+  const grid = qs("#availableCoursesGrid");
+  const msg = qs("#noAvailableMessage");
+
+  if (!grid || !msg) return;
+
+  grid.innerHTML = "";
+
+  if (!courses.length) {
+    msg.style.display = "block";
+    return;
+  }
+
+  msg.style.display = "none";
+
+  courses.forEach((course) => {
+    const card = document.createElement("div");
+    card.className = "course-card clickable";
+    card.dataset.id = course.id;
+
+    const cover =
+      course.cover_url ||
+      "https://via.placeholder.com/600x300.png?text=Advance%2B";
+
+    card.innerHTML = `
+      <div class="course-cover-wrapper">
+        <img src="${cover}" class="course-cover" />
+        <span class="course-badge">${course.category || "Reto"}</span>
+      </div>
+
+      <div class="course-body">
+        <div class="course-title">${course.title}</div>
+        <div class="course-meta">${course.level || ""}</div>
+      </div>
+    `;
+
+    // CLICK EN TODA LA TARJETA
+    card.addEventListener("click", () => {
+      window.location.href = `/curso-info/index.html?c=${course.id}`;
+    });
+
+    grid.appendChild(card);
+  });
+}
+
+
 /* ==================================================
    6. LOGOUT
 ================================================== */
@@ -346,10 +316,11 @@ async function initDashboard() {
   renderGamification(stats);
 
   const active = await loadActiveCourses(user.id);
-  renderActiveCourses(active);
+  renderActiveCourses(active, user);   // 👈 AGREGAR user
 
   const available = await loadAvailableCourses(user.id);
   renderAvailableCourses(available);
 }
+
 
 initDashboard();
