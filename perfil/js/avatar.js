@@ -4,7 +4,9 @@
 
 import { supabase } from "/js/supabase.js";
 
-// Obtener usuario + perfil
+/**
+ * Obtener usuario + perfil
+ */
 async function getProfile() {
   const { data: session } = await supabase.auth.getUser();
   if (!session?.user) return null;
@@ -20,15 +22,16 @@ async function getProfile() {
   return { user, profile };
 }
 
-// ============================================================
-//   INICIALIZAR MODULO AVATAR
-// ============================================================
+/**
+ * Inicializar módulo Avatar
+ */
 export async function initAvatar() {
   const data = await getProfile();
   if (!data) return;
 
   const { user, profile } = data;
 
+  // Elementos del DOM
   const avatarPreview = document.getElementById("avatarPreview");
   const avatarInitials = document.getElementById("avatarInitials");
   const uploadInput = document.getElementById("avatarInput");
@@ -36,148 +39,109 @@ export async function initAvatar() {
   const deleteBtn = document.getElementById("avatarDeleteBtn");
   const msg = document.getElementById("avatarMsg");
 
-  // ============================================================
-  //   MOSTRAR AVATAR ACTUAL
-  // ============================================================
+  // Iniciales del usuario
+  const initials = (profile?.full_name || user.email)
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
 
+  // ============================================================
+  // MOSTRAR AVATAR INICIAL
+  // ============================================================
   if (profile?.avatar_url) {
-    avatarPreview.src = profile.avatar_url;
     avatarPreview.style.display = "block";
+    avatarPreview.src = profile.avatar_url;
     avatarInitials.style.display = "none";
   } else {
-    avatarPreview.src = "";
     avatarPreview.style.display = "none";
-
-    const initials = (profile.full_name || user.email)
-      .split(" ")
-      .map((x) => x[0])
-      .join("")
-      .substring(0, 2)
-      .toUpperCase();
-
-    avatarInitials.textContent = initials;
     avatarInitials.style.display = "flex";
+    avatarInitials.textContent = initials;
   }
 
-  // Al hacer clic → abrir input file
-  uploadBtn.addEventListener("click", () => uploadInput.click());
-
   // ============================================================
-  //   SUBIR NUEVO AVATAR
+  // SUBIR NUEVO AVATAR
   // ============================================================
-
   uploadInput.addEventListener("change", async () => {
     const file = uploadInput.files[0];
     if (!file) return;
 
-    msg.textContent = "Cargando...";
+    msg.textContent = "Cargando…";
     msg.style.color = "#fff";
 
-    // Tamaño máximo
     if (file.size > 2 * 1024 * 1024) {
-      msg.textContent = "❌ Máximo permitido: 2MB";
+      msg.textContent = "❌ La imagen excede 2MB";
       msg.style.color = "#ff6b6b";
       return;
     }
 
-    // Mostrar preview inmediata
+    // Vista previa inmediata
     avatarPreview.src = URL.createObjectURL(file);
     avatarPreview.style.display = "block";
     avatarInitials.style.display = "none";
 
-    // Nombre estándar
     const ext = file.name.split(".").pop();
     const fileName = `avatar.${ext}`;
     const filePath = `profiles/${user.id}/${fileName}`;
 
-    // SUBIR A STORAGE
     const { error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(filePath, file, { upsert: true });
 
     if (uploadError) {
-      console.error(uploadError);
-      msg.textContent = "❌ No se pudo subir el avatar";
+      msg.textContent = "❌ Error subiendo avatar";
       msg.style.color = "#ff6b6b";
       return;
     }
 
-    // URL pública definitiva
     const { data: publicData } = supabase.storage
       .from("avatars")
       .getPublicUrl(filePath);
 
     const publicUrl = publicData.publicUrl;
 
-    // Guardar en DB
-    const { error: updateError } = await supabase
+    // Guardar en BD
+    await supabase
       .from("profiles")
       .update({ avatar_url: publicUrl })
       .eq("id", user.id);
 
-    if (updateError) {
-      msg.textContent = "❌ Error guardando en perfil";
-      msg.style.color = "#ff6b6b";
-      return;
-    }
-
     msg.textContent = "✔ Avatar actualizado";
     msg.style.color = "#3ee98a";
-
-    // Recargar header para mostrarlo arriba
-    if (window.updateHeaderAvatar) {
-      updateHeaderAvatar(publicUrl);
-    }
   });
 
   // ============================================================
-  //   ELIMINAR AVATAR
+  // ELIMINAR AVATAR
   // ============================================================
-
   deleteBtn.addEventListener("click", async () => {
-    msg.textContent = "Eliminando...";
+    msg.textContent = "Eliminando…";
     msg.style.color = "#fff";
 
     const folder = `profiles/${user.id}`;
-    const { data: files } = await supabase.storage.from("avatars").list(folder);
+
+    const { data: files } = await supabase.storage
+      .from("avatars")
+      .list(folder);
 
     if (files?.length) {
-      await supabase.storage
-        .from("avatars")
-        .remove(files.map((f) => `${folder}/${f.name}`));
+      for (const f of files) {
+        await supabase.storage
+          .from("avatars")
+          .remove([`${folder}/${f.name}`]);
+      }
     }
 
-    const { error: updateError } = await supabase
+    await supabase
       .from("profiles")
       .update({ avatar_url: null })
       .eq("id", user.id);
 
-    if (updateError) {
-      msg.textContent = "❌ Error quitando avatar";
-      msg.style.color = "#ff6b6b";
-      return;
-    }
-
-    // Volver a iniciales
-    const initials = (profile.full_name || user.email)
-      .split(" ")
-      .map((x) => x[0])
-      .join("")
-      .substring(0, 2)
-      .toUpperCase();
-
-    avatarPreview.src = "";
     avatarPreview.style.display = "none";
-
-    avatarInitials.textContent = initials;
     avatarInitials.style.display = "flex";
+    avatarInitials.textContent = initials;
 
     msg.textContent = "✔ Avatar eliminado";
     msg.style.color = "#3ee98a";
-
-    // Actualizar header
-    if (window.updateHeaderAvatar) {
-      updateHeaderAvatar(null);
-    }
   });
 }
