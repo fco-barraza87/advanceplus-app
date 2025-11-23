@@ -1018,3 +1018,102 @@ select option {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+
+
+/* ============================================================================
+   LECCIÓN — Advance+ (Restauración Premium Completa)
+   Compatible con leccion.html y leccion.js
+============================================================================ */
+
+/* -------------------- HEADER DE LECCIÓN -------------------- */
+
+.header {
+  padding: 18px 20px;
+  background: var(--ap-bg-main);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+
+.header-title {
+  margin: 0;
+  font-family: var(--ap-font-heading);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ap-gold);
+  letter-spacing: 0.02em;
+}
+
+/* -------------------- CONTENEDOR DE LECCIÓN -------------------- */
+
+.leccion-container {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 24px 18px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Tarjeta de contenido */
+.leccion-contenido {
+  background: rgba(10, 15, 28, 0.96);
+  padding: 24px 26px;
+  border-radius: var(--ap-radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5);
+  color: var(--ap-text);
+  line-height: 1.65;
+  font-size: 15px;
+  font-family: var(--ap-font-main);
+}
+
+/* Párrafos internos */
+.leccion-contenido p {
+  margin-bottom: 14px;
+  font-size: 15px;
+}
+
+/* Imágenes dentro de la lección */
+.leccion-contenido img {
+  max-width: 100%;
+  border-radius: 14px;
+  margin: 16px 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Listas */
+.leccion-contenido ul,
+.leccion-contenido ol {
+  margin-left: 20px;
+  margin-bottom: 16px;
+}
+
+/* -------------------- BOTÓN COMPLETAR -------------------- */
+
+#btnCompletar {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: var(--ap-radius-full);
+  background: linear-gradient(90deg, var(--ap-gold), #f3e1ac);
+  color: #0A0F1C;
+  border: none;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+#btnCompletar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(192, 164, 80, 0.45);
+}
+
+/* -------------------- ANIMACIÓN -------------------- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
