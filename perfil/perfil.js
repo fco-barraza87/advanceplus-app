@@ -244,12 +244,6 @@ async function initPreferencias() {
   };
 }
 
-/* ============================================================
-   🔹 Cursos (sin cambios)
-============================================================ */
-async function initCursos() {
-  console.log("Cursos cargados");
-}
 
 /* ============================================================
    🔹 Cursos — con progreso real desde progress + courses
