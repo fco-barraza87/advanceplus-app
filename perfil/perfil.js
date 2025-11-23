@@ -118,9 +118,7 @@ function initMenu() {
       loadModule(page);
     });
   });
-  <div class="menu-item" data-page="avatar">
-  Avatar
-</div>
+  
 }
 
 /* ============================================================
