@@ -23,6 +23,18 @@ async function getProfile() {
 }
 
 /**
+ * Generar iniciales
+ */
+function generateInitials(str) {
+  return str
+    .split(" ")
+    .map(s => s[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
+}
+
+/**
  * Inicializar módulo Avatar
  */
 export async function initAvatar() {
@@ -38,14 +50,41 @@ export async function initAvatar() {
   const deleteBtn = document.getElementById("avatarDeleteBtn");
   const msg = document.getElementById("avatarMsg");
 
-  // Mostrar avatar actual
+  if (!avatarPreview || !uploadInput || !uploadBtn || !deleteBtn) {
+    console.error("⚠ Error: elementos del DOM no encontrados en avatar.html");
+    return;
+  }
+
+  // ============================================================
+  //   MOSTRAR AVATAR ACTUAL
+  // ============================================================
+
   if (profile?.avatar_url) {
     avatarPreview.src = profile.avatar_url;
+  } else {
+    // ❗ Si NO hay avatar → mostrar iniciales dinámicamente
+    const initials = generateInitials(profile?.full_name || user.email);
+    avatarPreview.style.objectFit = "contain";
+    avatarPreview.style.background = "var(--ap-gold)";
+    avatarPreview.style.color = "#0A0F1C";
+    avatarPreview.style.fontSize = "48px";
+    avatarPreview.style.fontWeight = "700";
+    avatarPreview.style.display = "flex";
+    avatarPreview.style.alignItems = "center";
+    avatarPreview.style.justifyContent = "center";
+    avatarPreview.src = "";
+    avatarPreview.alt = initials;
+    avatarPreview.dataset.initials = initials;
+    avatarPreview.innerText = initials;
   }
 
   // ============================================================
   //  SUBIR NUEVO AVATAR
   // ============================================================
+
+  uploadBtn.addEventListener("click", () => {
+    uploadInput.click();
+  });
 
   uploadInput.addEventListener("change", async () => {
     const file = uploadInput.files[0];
@@ -54,29 +93,27 @@ export async function initAvatar() {
     msg.textContent = "Cargando...";
     msg.style.color = "#fff";
 
-    // Validar tamaño (2 MB)
+    // Validar tamaño 2MB
     if (file.size > 2 * 1024 * 1024) {
       msg.textContent = "❌ La imagen excede 2MB";
       msg.style.color = "#ff6b6b";
       return;
     }
 
-    // Vista previa (sin esperar upload)
-    const previewUrl = URL.createObjectURL(file);
-    avatarPreview.src = previewUrl;
+    // Previsualización inmediata
+    avatarPreview.src = URL.createObjectURL(file);
+    avatarPreview.removeAttribute("data-initials");
+    avatarPreview.style.objectFit = "cover";
 
-    // Mantener nombre consistente
+    // Nombre consistente
     const ext = file.name.split(".").pop();
     const fileName = `avatar.${ext}`;
-
     const filePath = `profiles/${user.id}/${fileName}`;
 
-    // Subir al bucket "avatars"
+    // Subir archivo
     const { error: uploadError } = await supabase.storage
       .from("avatars")
-      .upload(filePath, file, {
-        upsert: true,
-      });
+      .upload(filePath, file, { upsert: true });
 
     if (uploadError) {
       msg.textContent = "❌ Error subiendo avatar";
@@ -92,7 +129,7 @@ export async function initAvatar() {
 
     const publicUrl = publicData.publicUrl;
 
-    // Actualizar en BD
+    // Guardar en DB
     const { error: updateError } = await supabase
       .from("profiles")
       .update({ avatar_url: publicUrl })
@@ -116,22 +153,20 @@ export async function initAvatar() {
     msg.textContent = "Eliminando...";
     msg.style.color = "#fff";
 
-    // Borrar archivo en bucket
     const folder = `profiles/${user.id}`;
 
+    // Listar archivos dentro de la carpeta
     const { data: list } = await supabase.storage
       .from("avatars")
       .list(folder);
 
     if (list?.length) {
       for (const file of list) {
-        await supabase.storage
-          .from("avatars")
-          .remove([`${folder}/${file.name}`]);
+        await supabase.storage.from("avatars").remove([`${folder}/${file.name}`]);
       }
     }
 
-    // Quitar URL en BD
+    // Remover URL en BD
     const { error: updateError } = await supabase
       .from("profiles")
       .update({ avatar_url: null })
@@ -143,7 +178,14 @@ export async function initAvatar() {
       return;
     }
 
-    avatarPreview.src = "/img/avatar-placeholder.png"; // Puedes dejar vacío
+    // Volver a iniciales
+    const initials = generateInitials(profile?.full_name || user.email);
+    avatarPreview.src = "";
+    avatarPreview.style.background = "var(--ap-gold)";
+    avatarPreview.style.color = "#0A0F1C";
+    avatarPreview.style.fontSize = "48px";
+    avatarPreview.innerText = initials;
+
     msg.textContent = "✔ Avatar eliminado";
     msg.style.color = "#3ee98a";
   });
