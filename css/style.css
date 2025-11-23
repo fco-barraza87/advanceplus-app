@@ -1298,3 +1298,219 @@ select option {
     transform: translateY(4px);
   }
 }
+
+
+/* ================================================
+   PÁGINA DE CURSO — Advance+ (restaurado)
+================================================ */
+
+.course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px 24px;
+  background: var(--ap-bg-main);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.course-header-left {
+  display: flex;
+  gap: 18px;
+}
+
+.btn-back {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.25);
+  color: var(--ap-text);
+  padding: 6px 12px;
+  border-radius: var(--ap-radius-full);
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.btn-back:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.course-title {
+  font-family: var(--ap-font-heading);
+  font-size: 22px;
+  margin: 0;
+}
+
+.course-subtitle {
+  opacity: 0.75;
+  margin: 0;
+}
+
+.course-category {
+  font-size: 12px;
+  color: var(--ap-gold);
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.course-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.course-xp-chip {
+  padding: 10px 16px;
+  background: rgba(192,164,80,0.12);
+  border-radius: 14px;
+  border: 1px solid rgba(192,164,80,0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.course-xp-chip span {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.course-xp-chip strong {
+  font-size: 18px;
+  color: var(--ap-gold);
+}
+
+/* === Layout === */
+
+.course-layout {
+  display: grid;
+  gap: 20px;
+  padding: 24px;
+}
+
+@media (min-width: 900px) {
+  .course-layout {
+    grid-template-columns: 300px 1fr;
+  }
+}
+
+/* === Tarjeta del timeline === */
+
+.course-timeline-card {
+  background: var(--ap-card-bg);
+  border-radius: var(--ap-radius-lg);
+  padding: 18px 16px;
+  box-shadow: var(--ap-shadow-soft);
+  border: 1px solid var(--ap-border-softer);
+}
+
+.day-timeline {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-top: 6px;
+}
+
+.day-chip {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--ap-radius-full);
+  background: rgba(15,30,68,0.8);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: var(--ap-text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.day-chip.active {
+  background: var(--ap-gold);
+  color: #0a0f1c;
+  border-color: var(--ap-gold);
+}
+
+.day-chip.completed {
+  background: rgba(192,164,80,0.1);
+  border-color: rgba(192,164,80,0.5);
+}
+
+.day-chip.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* === Card de lección === */
+
+.lesson-card {
+  background: rgba(10,15,28,0.97);
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 22px 50px rgba(0,0,0,0.5);
+}
+
+.lesson-title {
+  font-size: 20px;
+  font-family: var(--ap-font-heading);
+  margin: 8px 0;
+}
+
+.lesson-subtitle {
+  opacity: 0.75;
+  margin-bottom: 12px;
+}
+
+.lesson-image-wrapper {
+  margin: 14px 0;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.lesson-body {
+  font-size: 15px;
+  line-height: 1.65;
+  opacity: 0.9;
+}
+
+/* === Ejercicio === */
+
+.lesson-exercise {
+  margin-top: 16px;
+  padding: 14px;
+  background: rgba(15,30,68,0.85);
+  border: 1px solid rgba(192,164,80,0.3);
+  border-radius: 12px;
+  color: rgba(255,255,255,0.9);
+}
+
+/* === Footer === */
+
+.lesson-footer {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lesson-xp {
+  color: var(--ap-gold);
+}
+
+.feedback-card {
+  background: rgba(10,15,28,0.95);
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.5);
+}
+
+.like-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.like-btn.liked {
+  background: rgba(192,164,80,0.15);
+  border-color: var(--ap-gold);
+}
