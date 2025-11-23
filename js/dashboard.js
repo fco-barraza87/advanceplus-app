@@ -102,7 +102,7 @@ function renderGamification(stats) {
 
 /* ==================================================
    4. CURSOS ACTIVOS (RETOS ACTIVOS)
-   → join manual, ordenado por started_at
+   → Join manual, ordenado por started_at
 ================================================== */
 async function loadActiveCourses(userId) {
   const { data: userCourses, error } = await supabase
@@ -173,59 +173,41 @@ function renderActiveCourses(active) {
       </div>
     `;
 
-    // CLICK EN TODA LA TARJETA
-active.forEach((course) => {
-  const card = document.createElement("article");
-  card.className = "course-card clickable";
-  card.dataset.id = course.id;
+    /* -------------------------------
+       CLICK → Detectar nextDay
+    -------------------------------- */
+    card.addEventListener("click", async () => {
+      // 1) Obtener progreso del usuario
+      const { data: progressRows, error } = await supabase
+        .from("progress")
+        .select("day, completed")
+        .eq("user_id", user.id)
+        .eq("course_id", course.id)
+        .order("day", { ascending: true });
 
-  const cover =
-    course.cover_url ||
-    "https://via.placeholder.com/600x300.png?text=Advance%2B";
+      let nextDay = 1;
 
-  card.innerHTML = `
-    <div class="course-cover-wrapper">
-      <img src="${cover}" class="course-cover" />
-      <span class="course-badge">${course.category || "Reto"}</span>
-    </div>
-
-    <div class="course-body">
-      <div class="course-title">${course.title}</div>
-      <div class="course-meta">${course.level || "Todos los niveles"}</div>
-    </div>
-  `;
-
-  // CLICK EN TODA LA TARJETA → auto-day
-  card.addEventListener("click", async () => {
-    const { data: progressRows, error } = await supabase
-      .from("progress")
-      .select("day, completed")
-      .eq("user_id", user.id)
-      .eq("course_id", course.id)
-      .order("day", { ascending: true });
-
-    let nextDay = 1;
-
-    if (!error && progressRows?.length) {
-      const completedDays = progressRows.filter((p) => p.completed);
-      if (completedDays.length > 0) {
-        const lastDone = completedDays[completedDays.length - 1].day;
-        nextDay = lastDone + 1;
+      if (!error && progressRows?.length) {
+        const completedDays = progressRows.filter((p) => p.completed);
+        if (completedDays.length > 0) {
+          const lastDone = completedDays[completedDays.length - 1].day;
+          nextDay = lastDone + 1;
+        }
       }
-    }
 
-    if (nextDay > course.duration_days) {
-      nextDay = course.duration_days;
-    }
+      // 2) No pasar el total de días
+      if (nextDay > course.duration_days) {
+        nextDay = course.duration_days;
+      }
 
-    window.location.href = `/curso/index.html?c=${course.id}&day=${nextDay}`;
-  });
+      // 3) Redirigir
+      window.location.href = `/curso/index.html?c=${course.id}&day=${nextDay}`;
+    });
 
-  grid.appendChild(card);
-
-
+    grid.appendChild(card);
   });
 }
+
 
 
 /* ==================================================
