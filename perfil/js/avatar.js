@@ -1,7 +1,13 @@
 // /perfil/js/avatar.js
 import { supabase } from "/js/supabase.js";
 
-// Utilidad local para obtener user + profile
+/* ---------------------------------------------------
+   VARIABLE GLOBAL PARA EVITAR QUE PERFIL.js 
+   RE-RENDERICE EL MÓDULO MIENTRAS SUBES EL AVATAR
+--------------------------------------------------- */
+window.isUploadingAvatar = false;
+
+// Obtener user + profile
 async function getProfile() {
   const { data: session } = await supabase.auth.getUser();
   if (!session?.user) return null;
@@ -23,88 +29,78 @@ export async function initAvatar() {
 
   const { user, profile } = data;
 
-  // Elementos del DOM
-  const preview   = document.getElementById("avatarPreview");     // <img>
-  const initials  = document.getElementById("avatarInitials");    // <div>
-  const input     = document.getElementById("avatarInput");
+  // DOM
+  const imgPreview = document.getElementById("avatarPreview");
+  const initialsDiv = document.getElementById("avatarInitials");
+  const input = document.getElementById("avatarInput");
   const uploadBtn = document.getElementById("avatarUploadBtn");
   const deleteBtn = document.getElementById("avatarDeleteBtn");
-  const msg       = document.getElementById("avatarMsg");
+  const msg = document.getElementById("avatarMsg");
 
-  if (!preview || !initials || !input || !uploadBtn || !deleteBtn || !msg) {
-    console.warn("⚠ Elementos de avatar no encontrados en el DOM.");
+  if (!imgPreview || !initialsDiv) {
+    console.warn("Avatar DOM no encontrado");
     return;
   }
 
-  // Nombre para iniciales
-  const nameForInitials = profile?.full_name || user.email;
-  const init = nameForInitials
+  // Iniciales
+  const name = profile?.full_name || user.email;
+  const initials = name
     .split(" ")
-    .map((n) => n[0])
+    .map((x) => x[0])
     .join("")
     .substring(0, 2)
     .toUpperCase();
 
-  // ------------------------------------------
-  // Mostrar estado inicial (imagen o iniciales)
-  // ------------------------------------------
+  // Mostrar avatar inicial
   if (profile?.avatar_url) {
-    preview.src = profile.avatar_url;
-    preview.classList.remove("hidden");
-    initials.classList.add("hidden");
+    imgPreview.src = profile.avatar_url;
+    imgPreview.classList.remove("hidden");
+    initialsDiv.classList.add("hidden");
   } else {
-    preview.classList.add("hidden");
-    initials.textContent = init;
-    initials.classList.remove("hidden");
+    imgPreview.classList.add("hidden");
+    initialsDiv.textContent = initials;
+    initialsDiv.classList.remove("hidden");
   }
 
-  // ------------------------------------------
-  // Click en "Subir nueva foto" → abre input
-  // ------------------------------------------
+  // Abrir input
   uploadBtn.onclick = () => input.click();
 
-  // ------------------------------------------
+  // ------------------------------
   // SUBIR AVATAR
-  // ------------------------------------------
+  // ------------------------------
   input.onchange = async () => {
     const file = input.files[0];
     if (!file) return;
 
+    window.isUploadingAvatar = true;
+
     msg.textContent = "Subiendo...";
     msg.style.color = "#fff";
 
-    // Validar tamaño (2 MB)
-    if (file.size > 2 * 1024 * 1024) {
-      msg.textContent = "❌ Máximo permitido 2MB.";
-      msg.style.color = "#ff6b6b";
-      return;
-    }
-
-    // Vista previa instantánea
-    const tmpUrl = URL.createObjectURL(file);
-    preview.src = tmpUrl;
-    preview.classList.remove("hidden");
-    initials.classList.add("hidden");
+    const tmp = URL.createObjectURL(file);
+    imgPreview.src = tmp;
+    imgPreview.classList.remove("hidden");
+    initialsDiv.classList.add("hidden");
 
     const ext = file.name.split(".").pop();
-    const filePath = `profiles/${user.id}/avatar.${ext}`;
+    const path = `profiles/${user.id}/avatar.${ext}`;
 
-    // Subir al bucket avatars (con upsert)
+    // Subir
     const { error: uploadError } = await supabase.storage
       .from("avatars")
-      .upload(filePath, file, { upsert: true });
+      .upload(path, file, { upsert: true });
 
     if (uploadError) {
-      console.error(uploadError);
-      msg.textContent = "❌ Error al subir.";
+      msg.textContent = "❌ Error subiendo archivo";
       msg.style.color = "#ff6b6b";
+      window.isUploadingAvatar = false;
       return;
     }
 
-    // Obtener URL pública
+    // URL pública
     const { data: publicData } = supabase.storage
       .from("avatars")
-      .getPublicUrl(filePath);
+      .getPublicUrl(path);
 
     const publicUrl = publicData.publicUrl;
 
@@ -115,74 +111,57 @@ export async function initAvatar() {
       .eq("id", user.id);
 
     if (updateError) {
-      console.error(updateError);
-      msg.textContent = "❌ Error guardando en perfil.";
+      msg.textContent = "❌ Error guardando perfil";
       msg.style.color = "#ff6b6b";
+      window.isUploadingAvatar = false;
       return;
     }
 
-    // Actualizar UI final
-    preview.src = publicUrl;
-    preview.classList.remove("hidden");
-    initials.classList.add("hidden");
+    // Actualizar UI
+    imgPreview.src = publicUrl;
+    imgPreview.classList.remove("hidden");
+    initialsDiv.classList.add("hidden");
 
-    // Actualizar header global si existe
+    // Actualizar header
     if (window.updateHeaderAvatar) {
-      window.updateHeaderAvatar(publicUrl, nameForInitials);
+      window.updateHeaderAvatar(publicUrl, name);
     }
 
     msg.textContent = "✔ Avatar actualizado";
     msg.style.color = "#3ee98a";
+
+    window.isUploadingAvatar = false;
   };
 
-  // ------------------------------------------
+  // ------------------------------
   // ELIMINAR AVATAR
-  // ------------------------------------------
+  // ------------------------------
   deleteBtn.onclick = async () => {
     msg.textContent = "Eliminando...";
     msg.style.color = "#fff";
 
     const folder = `profiles/${user.id}`;
 
-    // Listar archivos dentro de profiles/{user.id}
-    const { data: files, error: listError } = await supabase.storage
+    const { data: files } = await supabase.storage
       .from("avatars")
       .list(folder);
 
-    if (listError) {
-      console.error(listError);
-    } else if (files && files.length) {
+    if (files?.length) {
       const paths = files.map((f) => `${folder}/${f.name}`);
-      const { error: removeError } = await supabase.storage
-        .from("avatars")
-        .remove(paths);
-
-      if (removeError) {
-        console.error(removeError);
-      }
+      await supabase.storage.from("avatars").remove(paths);
     }
 
-    // Borrar referencia en BD
-    const { error: updateError } = await supabase
+    await supabase
       .from("profiles")
       .update({ avatar_url: null })
       .eq("id", user.id);
 
-    if (updateError) {
-      console.error(updateError);
-      msg.textContent = "❌ Error quitando avatar en perfil.";
-      msg.style.color = "#ff6b6b";
-      return;
-    }
+    imgPreview.classList.add("hidden");
+    initialsDiv.textContent = initials;
+    initialsDiv.classList.remove("hidden");
 
-    // Volver a iniciales
-    preview.classList.add("hidden");
-    initials.textContent = init;
-    initials.classList.remove("hidden");
-
-    // Actualizar header
     if (window.updateHeaderAvatar) {
-      window.updateHeaderAvatar(null, nameForInitials);
+      window.updateHeaderAvatar(null, name);
     }
 
     msg.textContent = "✔ Avatar eliminado";
