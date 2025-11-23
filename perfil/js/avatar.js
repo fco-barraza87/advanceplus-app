@@ -1,6 +1,10 @@
+// ============================================================
+//  AVATAR MODULE — Advance+ (Duolingo-style)
+// ============================================================
+
 import { supabase } from "/js/supabase.js";
 
-// Obtener usuario + perfil
+// Utilidad para obtener usuario + perfil
 async function getProfile() {
   const { data: session } = await supabase.auth.getUser();
   if (!session?.user) return null;
@@ -16,142 +20,121 @@ async function getProfile() {
   return { user, profile };
 }
 
-// Generar iniciales
-function initialsFrom(str) {
-  return str
-    .split(" ")
-    .map(w => w[0])
-    .join("")
-    .substring(0, 2)
-    .toUpperCase();
-}
-
-// Mostrar solo foto
-function showImage(url) {
-  const img = document.getElementById("avatarImage");
-  const initials = document.getElementById("avatarInitials");
-
-  initials.classList.add("hidden");
-  img.classList.remove("hidden");
-  img.src = url;
-}
-
-// Mostrar iniciales
-function showInitials(text) {
-  const img = document.getElementById("avatarImage");
-  const initials = document.getElementById("avatarInitials");
-
-  img.classList.add("hidden");
-  initials.classList.remove("hidden");
-  initials.textContent = text;
-}
-
 export async function initAvatar() {
   const data = await getProfile();
   if (!data) return;
 
   const { user, profile } = data;
-  const msg = document.getElementById("avatarMsg");
-  const input = document.getElementById("avatarInput");
-  const deleteBtn = document.getElementById("avatarDeleteBtn");
 
-  // Mostrar avatar inicial
-  if (profile?.avatar_url) {
-    showImage(profile.avatar_url);
+  // DOM
+  const avatarPreview = document.getElementById("avatarPreview");
+  const avatarInitials = document.getElementById("avatarInitials");
+  const uploadInput = document.getElementById("avatarInput");
+  const uploadBtn = document.getElementById("avatarUploadBtn");
+  const deleteBtn = document.getElementById("avatarDeleteBtn");
+  const msg = document.getElementById("avatarMsg");
+
+  // Iniciales si no hay avatar
+  const initials = (profile.full_name || user.email)
+    .split(" ")
+    .map(x => x[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
+
+  // Mostrar avatar actual o iniciales
+  if (profile.avatar_url) {
+    avatarPreview.src = profile.avatar_url;
+    avatarInitials.style.display = "none";
   } else {
-    showInitials(initialsFrom(profile?.full_name || user.email));
+    avatarPreview.src = "";
+    avatarInitials.textContent = initials;
+    avatarInitials.style.display = "flex";
   }
 
-  // =====================================================
+  // ======================================
+  // CLICK → Abrir selector de archivo
+  // ======================================
+  uploadBtn.addEventListener("click", () => uploadInput.click());
+
+  // ======================================
   // SUBIR AVATAR
-  // =====================================================
-  input.addEventListener("change", async () => {
-    const file = input.files[0];
+  // ======================================
+  uploadInput.addEventListener("change", async () => {
+    const file = uploadInput.files[0];
     if (!file) return;
 
     msg.textContent = "Cargando...";
     msg.style.color = "#fff";
 
-    // Validar tamaño
     if (file.size > 2 * 1024 * 1024) {
-      msg.textContent = "❌ Máximo 2MB";
+      msg.textContent = "❌ La imagen excede 2MB";
       msg.style.color = "#ff6b6b";
       return;
     }
 
     // Previsualización instantánea
-    showImage(URL.createObjectURL(file));
+    avatarPreview.src = URL.createObjectURL(file);
+    avatarInitials.style.display = "none";
 
     const ext = file.name.split(".").pop();
     const fileName = `avatar.${ext}`;
     const filePath = `profiles/${user.id}/${fileName}`;
 
-    // Upload
+    // subir al bucket
     const { error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(filePath, file, { upsert: true });
 
     if (uploadError) {
-      msg.textContent = "❌ Error al subir";
+      msg.textContent = "❌ Error subiendo avatar";
       msg.style.color = "#ff6b6b";
       return;
     }
 
-    // Obtener URL pública
+    // obtener URL pública
     const { data: publicData } = supabase.storage
       .from("avatars")
       .getPublicUrl(filePath);
 
     const publicUrl = publicData.publicUrl;
 
-    // Guardar en BD
-    const { error: updateError } = await supabase
+    // guardar en profiles
+    await supabase
       .from("profiles")
       .update({ avatar_url: publicUrl })
       .eq("id", user.id);
-
-    if (updateError) {
-      msg.textContent = "❌ Error guardando";
-      msg.style.color = "#ff6b6b";
-      return;
-    }
 
     msg.textContent = "✔ Avatar actualizado";
     msg.style.color = "#3ee98a";
   });
 
-  // =====================================================
+  // ======================================
   // ELIMINAR AVATAR
-  // =====================================================
-
+  // ======================================
   deleteBtn.addEventListener("click", async () => {
     msg.textContent = "Eliminando...";
     msg.style.color = "#fff";
 
     const folder = `profiles/${user.id}`;
-
-    // Listar y borrar archivos
-    const { data: list } = await supabase.storage
-      .from("avatars")
-      .list(folder);
+    const { data: list } = await supabase.storage.from("avatars").list(folder);
 
     if (list?.length) {
-      await Promise.all(
-        list.map(f =>
-          supabase.storage.from("avatars")
-            .remove([`${folder}/${f.name}`])
-        )
-      );
+      for (const file of list) {
+        await supabase.storage
+          .from("avatars")
+          .remove([`${folder}/${file.name}`]);
+      }
     }
 
-    // Limpiar BD
     await supabase
       .from("profiles")
       .update({ avatar_url: null })
       .eq("id", user.id);
 
-    // Mostrar iniciales
-    showInitials(initialsFrom(profile?.full_name || user.email));
+    avatarPreview.src = "";
+    avatarInitials.textContent = initials;
+    avatarInitials.style.display = "flex";
 
     msg.textContent = "✔ Avatar eliminado";
     msg.style.color = "#3ee98a";

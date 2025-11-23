@@ -9,21 +9,13 @@
 
     <!-- PREVIEW -->
     <div class="avatar-preview-wrapper">
-
-      <!-- Foto -->
       <img
-        id="avatarImage"
-        class="avatar-image hidden"
+        id="avatarPreview"
+        class="avatar-preview"
         src=""
-        alt="Avatar"
+        alt="Tu avatar"
       />
-
-      <!-- Iniciales -->
-      <div
-        id="avatarInitials"
-        class="initials-avatar hidden"
-      ></div>
-
+      <div id="avatarInitials" class="avatar-initials"></div>
     </div>
 
     <!-- ACCIONES -->
@@ -50,12 +42,67 @@
 
 </section>
 
-<script>
-  // Botón para abrir input file
-  document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("avatarUploadBtn")
-      .addEventListener("click", () =>
-        document.getElementById("avatarInput").click()
-      );
-  });
-</script>
+<style>
+  .avatar-card {
+    background: rgba(10, 15, 35, 0.9);
+    padding: 24px;
+    border-radius: 20px;
+    border: 1px solid rgba(192, 164, 80, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    max-width: 420px;
+    margin-top: 12px;
+  }
+
+  .avatar-preview-wrapper {
+    width: 160px;
+    height: 160px;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 3px solid var(--ap-gold);
+    box-shadow: 0 0 14px rgba(192, 164, 80, 0.35);
+    background: rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .avatar-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-initials {
+    position: absolute;
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--ap-gold);
+    display: none;
+  }
+
+  .avatar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+  }
+
+  #avatarUploadBtn,
+  #avatarDeleteBtn {
+    width: 100%;
+    border-radius: var(--ap-radius-full);
+  }
+
+  .avatar-status {
+    margin-top: 4px;
+    text-align: center;
+    min-height: 20px;
+    font-size: 14px;
+    opacity: 0.9;
+  }
+</style>
