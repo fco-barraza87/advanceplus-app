@@ -134,7 +134,7 @@ async function loadActiveCourses(userId) {
   return activeCourses;
 }
 
-function renderActiveCourses(active) {
+function renderActiveCourses(active, userId) {
   const grid = qs("#activeCoursesGrid");
   const msg = qs("#noActiveMessage");
   const count = qs("#activeCount");
@@ -173,15 +173,12 @@ function renderActiveCourses(active) {
       </div>
     `;
 
-    /* -------------------------------
-       CLICK → Detectar nextDay
-    -------------------------------- */
+    // CLICK EN TODA LA TARJETA → auto select day
     card.addEventListener("click", async () => {
-      // 1) Obtener progreso del usuario
       const { data: progressRows, error } = await supabase
         .from("progress")
         .select("day, completed")
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .eq("course_id", course.id)
         .order("day", { ascending: true });
 
@@ -195,12 +192,10 @@ function renderActiveCourses(active) {
         }
       }
 
-      // 2) No pasar el total de días
       if (nextDay > course.duration_days) {
         nextDay = course.duration_days;
       }
 
-      // 3) Redirigir
       window.location.href = `/curso/index.html?c=${course.id}&day=${nextDay}`;
     });
 
