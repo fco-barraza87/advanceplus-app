@@ -11,6 +11,11 @@ export async function loadHeader() {
       <div class="header-left">
         <button id="btnBack" class="header-btn-back">⟵</button>
         <div class="header-logo">Advance+</div>
+        <div class="header-user clickable" id="headerProfileBtn">
+          <div id="headerAvatar" class="header-avatar">
+            <img id="headerAvatarImg" class="header-avatar-img" />
+            <div id="headerAvatarInitials" class="header-avatar-initials">A+</div>
+          </div>
       </div>
 
       <div class="header-right">
