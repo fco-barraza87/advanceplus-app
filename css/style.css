@@ -145,7 +145,7 @@ body {
 
 /* ============================
    DASHBOARD ADVANCE+
-============================ 
+============================ */
 
 .app-bg {
   min-height: 100vh;
@@ -153,7 +153,7 @@ body {
   color: var(--ap-text);
 }
 
-/* HEADER PREMIUM 
+HEADER PREMIUM 
 .dash-header {
   display: flex;
   justify-content: space-between;
@@ -262,7 +262,7 @@ body {
   .btn-menu-mobile {
     display: none;
   }
-} */
+} 
 
 /* LAYOUT PRINCIPAL */
 
