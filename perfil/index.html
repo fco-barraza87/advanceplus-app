@@ -141,7 +141,11 @@
 <body>
 
   <!-- HEADER GLOBAL INYECTADO -->
-  <div id="appHeader"></div>
+<div id="appHeader"></div>
+<script type="module">
+  import { loadHeader } from "/components/header.js";
+  loadHeader();
+</script>
 
   <!-- LAYOUT PERFIL (sidebar + contenido) -->
   <div class="perfil-layout">
