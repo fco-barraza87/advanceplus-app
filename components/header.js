@@ -85,14 +85,22 @@ window.updateHeaderAvatar = function (url, fullName) {
   const img = document.getElementById("headerAvatarImg");
   const initialsDiv = document.getElementById("headerAvatarInitials");
 
+  if (!img || !initialsDiv) return;
+
   if (url) {
     img.src = url;
     img.style.display = "block";
     initialsDiv.style.display = "none";
   } else {
+    const initials = (fullName || "?")
+      .split(" ")
+      .map((x) => x[0])
+      .join("")
+      .substring(0, 2)
+      .toUpperCase();
+
     initialsDiv.textContent = initials;
     initialsDiv.style.display = "flex";
     img.style.display = "none";
   }
 };
-
