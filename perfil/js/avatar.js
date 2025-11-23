@@ -124,4 +124,60 @@ export async function initAvatar() {
     msg.textContent = "✔ Avatar actualizado";
     msg.style.color = "#3ee98a";
 
-    // Recargar header para mostrar
+    // Recargar header para mostrarlo arriba
+    if (window.updateHeaderAvatar) {
+      updateHeaderAvatar(publicUrl);
+    }
+  });
+
+  // ============================================================
+  //   ELIMINAR AVATAR
+  // ============================================================
+
+  deleteBtn.addEventListener("click", async () => {
+    msg.textContent = "Eliminando...";
+    msg.style.color = "#fff";
+
+    const folder = `profiles/${user.id}`;
+    const { data: files } = await supabase.storage.from("avatars").list(folder);
+
+    if (files?.length) {
+      await supabase.storage
+        .from("avatars")
+        .remove(files.map((f) => `${folder}/${f.name}`));
+    }
+
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({ avatar_url: null })
+      .eq("id", user.id);
+
+    if (updateError) {
+      msg.textContent = "❌ Error quitando avatar";
+      msg.style.color = "#ff6b6b";
+      return;
+    }
+
+    // Volver a iniciales
+    const initials = (profile.full_name || user.email)
+      .split(" ")
+      .map((x) => x[0])
+      .join("")
+      .substring(0, 2)
+      .toUpperCase();
+
+    avatarPreview.src = "";
+    avatarPreview.style.display = "none";
+
+    avatarInitials.textContent = initials;
+    avatarInitials.style.display = "flex";
+
+    msg.textContent = "✔ Avatar eliminado";
+    msg.style.color = "#3ee98a";
+
+    // Actualizar header
+    if (window.updateHeaderAvatar) {
+      updateHeaderAvatar(null);
+    }
+  });
+}
