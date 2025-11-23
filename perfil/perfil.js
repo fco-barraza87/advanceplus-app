@@ -92,7 +92,13 @@ async function loadModule(page) {
 
   try {
     const response = await fetch(`/perfil/${page}.html`);
-    container.innerHTML = await response.text();
+    container.innerHTML = "";
+    container.insertAdjacentHTML("beforeend", await response.text());
+
+    if (page === "avatar") {
+      const module = await import("/perfil/js/avatar.js");
+      module.initAvatar();
+    }
 
     if (page === "datos") {
       await fillDatosForm();
@@ -106,10 +112,6 @@ async function loadModule(page) {
       await initCursos();
     }
 
-    if (page === "avatar") {
-      const module = await import("/perfil/js/avatar.js");
-      module.initAvatar();
-    }
   } catch (err) {
     console.error(err);
     container.innerHTML = `
