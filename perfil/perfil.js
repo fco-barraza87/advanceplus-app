@@ -470,14 +470,14 @@ async function initCursos() {
               <button
                 type="button"
                 class="btn-continue"
-                data-course-slug="${course.slug}"
+                data-course-id="${course.id}"
               >
                 Continuar
               </button>
               <button
                 type="button"
                 class="btn-secondary"
-                data-course-slug="${course.slug}"
+                data-course-id="${course.id}"
               >
                 Ver curso
               </button>
@@ -500,17 +500,49 @@ async function initCursos() {
   }
 
 /* ================================
-   4) Acciones de botones (usar ID real)
+   4) Acciones de botones (auto-día)
 ================================ */
-container.addEventListener("click", (e) => {
+container.addEventListener("click", async (e) => {
   const btn = e.target.closest("[data-course-id]");
   if (!btn) return;
 
-  const id = btn.dataset.courseId;
+  const courseId = btn.dataset.courseId;
+  const action = btn.classList.contains("btn-continue") ? "continue" : "view";
 
-  // Ruta REAL confirmada
-  window.location.href = `/curso/index.html?c=${id}&day=1`;
+  // 1) Cargar progreso del usuario para ese curso
+  const { data: progressRows, error } = await supabase
+    .from("progress")
+    .select("day, completed")
+    .eq("user_id", user.id)
+    .eq("course_id", courseId)
+    .order("day", { ascending: true });
+
+  let nextDay = 1;
+
+  if (!error && progressRows?.length) {
+    const completedDays = progressRows.filter((p) => p.completed);
+
+    if (completedDays.length > 0) {
+      const lastDone = completedDays[completedDays.length - 1].day;
+      nextDay = lastDone + 1;
+    }
+  }
+
+  // 2) Traer total de días del curso
+  const { data: course } = await supabase
+    .from("courses")
+    .select("duration_days")
+    .eq("id", courseId)
+    .single();
+
+  if (nextDay > course.duration_days) {
+    nextDay = course.duration_days;
+  }
+
+  // 3) Redirigir correctamente
+  window.location.href = `/curso/index.html?c=${courseId}&day=${nextDay}`;
 });
+
 
 }
 
