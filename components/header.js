@@ -1,6 +1,4 @@
-// -------------------------------------------------------
-//  /components/header.js — versión FINAL
-// -------------------------------------------------------
+// /components/header.js
 import { supabase } from "/js/supabase.js";
 
 export async function loadHeader() {
@@ -33,15 +31,15 @@ export async function loadHeader() {
     </header>
   `;
 
-  //----------------------------------------------------------------
-  // Obtener usuario autenticado
-  //----------------------------------------------------------------
+  // ------------------------------------------
+  // 1) Obtener usuario autenticado
+  // ------------------------------------------
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  //----------------------------------------------------------------
-  // Obtener perfil DB
-  //----------------------------------------------------------------
+  // ------------------------------------------
+  // 2) Traer perfil
+  // ------------------------------------------
   const { data: profile } = await supabase
     .from("profiles")
     .select("full_name, role, avatar_url")
@@ -50,8 +48,8 @@ export async function loadHeader() {
 
   const name = profile?.full_name || user.email.split("@")[0];
 
+  // Nombre + Rol
   document.getElementById("userName").textContent = name;
-
   document.getElementById("userRole").textContent =
     profile?.role === "admin"
       ? "Administrador"
@@ -59,17 +57,19 @@ export async function loadHeader() {
       ? "Coach"
       : "Miembro Advance+";
 
-  // Avatar correcto
-  updateHeaderAvatar(profile?.avatar_url, name);
+  // Avatar en header (imagen o iniciales)
+  updateHeaderAvatar(profile?.avatar_url || null, name);
 
-  //----------------------------------------------------------------
-  // Acciones
-  //----------------------------------------------------------------
+  // ------------------------------------------
+  // 3) Navegación
+  // ------------------------------------------
   document.getElementById("headerProfileBtn").onclick = () => {
     window.location.href = "/perfil/index.html";
   };
 
-  document.getElementById("btnBack").onclick = () => history.back();
+  document.getElementById("btnBack").onclick = () => {
+    history.back();
+  };
 
   document.getElementById("btnLogout").onclick = async () => {
     await supabase.auth.signOut();
@@ -77,9 +77,10 @@ export async function loadHeader() {
   };
 }
 
-//-------------------------------------------------------
-//  Funcion GLOBAL — para actualizar avatar dinámicamente
-//-------------------------------------------------------
+// -------------------------------------------------------
+//  Función global para actualizar avatar del header
+//  La llama avatar.js cuando subes / eliminas foto
+// -------------------------------------------------------
 window.updateHeaderAvatar = function (url, fullName) {
   const img = document.getElementById("headerAvatarImg");
   const initialsDiv = document.getElementById("headerAvatarInitials");
@@ -93,7 +94,7 @@ window.updateHeaderAvatar = function (url, fullName) {
   } else {
     const initials = (fullName || "?")
       .split(" ")
-      .map(x => x[0])
+      .map((x) => x[0])
       .join("")
       .substring(0, 2)
       .toUpperCase();
