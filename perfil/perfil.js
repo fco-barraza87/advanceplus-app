@@ -250,3 +250,107 @@ async function initPreferencias() {
 async function initCursos() {
   console.log("Cursos cargados");
 }
+
+/* ============================================================
+   🔹 Cursos — con progreso real desde progress + courses
+============================================================ */
+async function initCursos() {
+  const { data: session } = await supabase.auth.getUser();
+  if (!session?.user) return;
+
+  const userId = session.user.id;
+
+  // 1) Obtener progreso del usuario
+  const { data: progress, error: progError } = await supabase
+    .from("progress")
+    .select("*")
+    .eq("user_id", userId);
+
+  // 2) Obtener cursos
+  const { data: courses, error: coursesError } = await supabase
+    .from("courses")
+    .select("*")
+    .eq("active", true);
+
+  if (progError || coursesError) {
+    console.warn("Error cargando cursos:", progError || coursesError);
+    return;
+  }
+
+  const coursesContainer = document.getElementById("coursesContainer");
+  const emptyMessage = document.getElementById("coursesEmpty");
+
+  // Agrupar progreso por course_id
+  const grouped = {};
+  progress.forEach(p => {
+    if (!grouped[p.course_id]) grouped[p.course_id] = [];
+    grouped[p.course_id].push(p);
+  });
+
+  // KPIs
+  let totalXP = 0;
+  let activeCount = 0;
+  let completedCount = 0;
+
+  coursesContainer.innerHTML = "";
+
+  courses.forEach(course => {
+    const courseProg = grouped[course.id] || [];
+
+    if (courseProg.length === 0) return; // no está inscrito → no mostrarlo
+
+    const totalDays = course.duration_days;
+    const daysDone = courseProg.filter(d => d.completed).length;
+
+    const isCompleted = daysDone === totalDays;
+    const isActive = daysDone > 0 && !isCompleted;
+
+    // XP acumulado del curso
+    const xpCourse = courseProg.reduce((acc, x) => acc + (x.xp || 0), 0);
+    totalXP += xpCourse;
+
+    if (isCompleted) completedCount++;
+    else if (isActive) activeCount++;
+
+    // === CREAR TARJETA ===
+    const card = document.createElement("div");
+    card.className = "course-card clickable";
+    card.innerHTML = `
+      <div class="course-cover-wrapper">
+        <img src="${course.cover_url}" class="course-cover" />
+        <div class="course-badge">${course.category}</div>
+      </div>
+
+      <div class="course-body">
+        <h3 class="course-title">${course.title}</h3>
+        <p class="course-meta">
+          Día ${daysDone} de ${totalDays}
+        </p>
+        <p class="course-meta">
+          XP ganado: ${xpCourse}
+        </p>
+        <div class="course-actions">
+          <button class="btn-continue">Continuar</button>
+        </div>
+      </div>
+    `;
+
+    card.addEventListener("click", () => {
+      window.location.href = `/curso/index.html?course=${course.slug}`;
+    });
+
+    coursesContainer.appendChild(card);
+  });
+
+  // Actualizar KPIs
+  document.getElementById("coursesActiveCount").textContent = activeCount;
+  document.getElementById("coursesCompletedCount").textContent = completedCount;
+  document.getElementById("coursesXpTotal").textContent = totalXP;
+
+  // Mostrar mensaje vacío si no tiene cursos
+  if (activeCount + completedCount === 0) {
+    emptyMessage.style.display = "block";
+  } else {
+    emptyMessage.style.display = "none";
+  }
+}
