@@ -259,36 +259,38 @@ body {
 .avatar-preview-wrapper {
   width: 170px;
   height: 170px;
+  position: relative;
   border-radius: 999px;
+  overflow: hidden;
   border: 3px solid var(--ap-gold);
-  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 18px rgba(192,164,80,0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  box-shadow: 0 0 18px rgba(192, 164, 80, 0.45);
-  position: relative;
+  background: rgba(255,255,255,0.04);
 }
 
 .avatar-image {
+  position: absolute; /* ← MUY IMPORTANTE */
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  z-index: 2;
 }
 
 .initials-avatar {
-  width: 100%;
-  height: 100%;
-  border-radius: 999px;
+  position: absolute;  /* ← MUY IMPORTANTE */
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 56px;
   font-weight: 700;
+  color: #0A0F1C;
   background: radial-gradient(circle at 30% 20%, #f8e7b5, #c0a450);
-  color: #0a0f1c;
   text-transform: uppercase;
-  animation: fadeInScale 0.35s ease-out;
+  z-index: 1;
 }
 
 @keyframes fadeInScale {
