@@ -207,3 +207,28 @@ function setMetricValue(id, value) {
     el.textContent = String(value);
   }
 }
+
+
+/* ---- Cerrar sesión ---- */
+document.addEventListener("DOMContentLoaded", () => {
+  const dropdown = document.getElementById("admin-user-dropdown");
+  const toggleBtn = document.getElementById("admin-user-toggle");
+  const logoutBtn = document.getElementById("admin-logout-btn");
+
+  // Abrir/cerrar menú:
+  toggleBtn.addEventListener("click", () => {
+    dropdown.classList.toggle("admin-user-dropdown--hidden");
+  });
+
+  // Cerrar sesión:
+  logoutBtn.addEventListener("click", async () => {
+    try {
+      const { supabase } = window;
+
+      await supabase.auth.signOut();
+      window.location.href = "/index.html";
+    } catch (err) {
+      console.error("Error cerrando sesión:", err);
+    }
+  });
+});

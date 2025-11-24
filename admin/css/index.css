@@ -370,3 +370,61 @@ body {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+
+/* ----- Menú de usuario (admin header) ----- */
+
+.admin-user-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-user-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #F7F7F7;
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.admin-user-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.admin-user-dropdown {
+  position: absolute;
+  top: 36px;
+  right: 0;
+  background: rgba(15, 30, 68, 0.95);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 8px 0;
+  width: 160px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+  backdrop-filter: blur(6px);
+  z-index: 50;
+}
+
+.admin-user-dropdown--hidden {
+  display: none;
+}
+
+.admin-dropdown-item {
+  background: none;
+  border: none;
+  width: 100%;
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 14px;
+  color: #F7F7F7;
+  cursor: pointer;
+  font-family: Inter, sans-serif;
+}
+
+.admin-dropdown-item:hover {
+  background: rgba(255,255,255,0.08);
+}
