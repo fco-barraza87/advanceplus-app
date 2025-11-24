@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     const supabase = getSupabaseClient();
 
-    // 1) Obtener sesión
     const { data: { session } } = await supabase.auth.getSession();
     const userId = session?.user?.id;
 
@@ -13,32 +12,25 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    // 2) Obtener rol desde profiles
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", userId)
       .single();
 
-    // 3) Validar rol
     if (!profile || !["admin", "coach"].includes(profile.role)) {
       window.location.href = "/dashboard/index.html";
       return;
     }
 
-    // 4) Si el usuario tiene acceso → iniciar el módulo o dashboard
-    if (typeof initModule === "function") {
-      initModule();
-    }
-    if (typeof initAdminDashboard === "function") {
-      initAdminDashboard();
-    }
-
-  } catch (error) {
-    console.error("Error en validación de rol:", error);
+    // Función principal del dashboard
+    initAdminDashboard();
+  } catch (err) {
+    console.error("Error:", err);
     window.location.href = "/dashboard/index.html";
   }
 });
+
 
 
 
