@@ -118,7 +118,7 @@ async function loadUsers() {
       full_name,
       email,
       role,
-      country,
+      pais,
       language,
       timezone,
       xp_total,
@@ -219,7 +219,7 @@ function renderTable() {
       </td>
       <td>${u.email ?? "-"}</td>
       <td><span class="role-badge role-badge--${u.role}">${u.role}</span></td>
-      <td>${u.country ?? "-"} / ${u.language ?? "-"}</td>
+      <td>${u.pais ?? "-"} / ${u.language ?? "-"}</td>
       <td>${u.timezone ?? "-"}</td>
       <td>${u.xp_total ?? "0"}</td>
       <td>${u.streak_current ?? 0}d</td>
@@ -252,7 +252,7 @@ function openUserDetail(user) {
   // Formulario
   document.getElementById("field-full_name").value = user.full_name ?? "";
   document.getElementById("field-avatar_url").value = user.avatar_url ?? "";
-  document.getElementById("field-country").value = user.country ?? "";
+  document.getElementById("field-pais").value = user.pais ?? "";
   document.getElementById("field-language").value = user.language ?? "es";
   document.getElementById("field-timezone").value = user.timezone ?? "";
   document.getElementById("field-preferred_focus_time").value =
@@ -311,7 +311,7 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
   const fields = {
     full_name: document.getElementById("field-full_name").value.trim(),
     avatar_url: document.getElementById("field-avatar_url").value.trim(),
-    country: document.getElementById("field-country").value.trim(),
+    country: document.getElementById("field-pais").value.trim(),
     language: document.getElementById("field-language").value,
     timezone: document.getElementById("field-timezone").value.trim(),
     preferred_focus_time: document.getElementById("field-preferred_focus_time").value.trim(),
