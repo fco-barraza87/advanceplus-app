@@ -339,3 +339,29 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
 
   await loadUsers();
 });
+
+/* ============================================================
+   FUNCIONALIDAD DE TABS (Perfil / Stats / Progreso)
+============================================================ */
+
+const tabButtons = document.querySelectorAll(".detail-tab");
+const tabContents = document.querySelectorAll(".detail-tab-content");
+
+tabButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const tab = btn.getAttribute("data-tab");
+
+    // 1. Cambiar estado visual del botón
+    tabButtons.forEach(b => b.classList.remove("detail-tab--active"));
+    btn.classList.add("detail-tab--active");
+
+    // 2. Mostrar contenido correspondiente
+    tabContents.forEach(content => {
+      content.classList.add("detail-tab-content--hidden");
+      if (content.getAttribute("data-tab-content") === tab) {
+        content.classList.remove("detail-tab-content--hidden");
+      }
+    });
+  });
+});
+
