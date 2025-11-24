@@ -111,25 +111,29 @@ async function loadCurrentAdminProfile() {
 async function loadUsers() {
   showLoading();
 
-  const { data, error } = await supabase
+    const { data, error } = await supabase
     .from("profiles")
     .select(`
-      id,
-      full_name,
-      email,
-      role,
-      pais,
-      language,
-      timezone,
-      xp_total,
-      streak_current,
-      streak_best,
-      updated_at,
-      avatar_url,
-      preferred_focus_time,
-      goals_json,
-      notifications
+        id,
+        full_name,
+        email,
+        role,
+        pais,                -- si ya migraste country → pais
+        language,
+        timezone,
+        xp_total,
+        streak_current,
+        streak_best,
+        level,
+        last_reward,
+        badges,
+        goals_json,
+        notifications,
+        preferred_focus_time,
+        updated_at,
+        avatar_url
     `);
+
 
   hideLoading();
 
@@ -257,9 +261,14 @@ function openUserDetail(user) {
   document.getElementById("field-timezone").value = user.timezone ?? "";
   document.getElementById("field-preferred_focus_time").value =
     user.preferred_focus_time ?? "";
-  document.getElementById("stat-xp-total").textContent = user.xp_total ?? "-";
-  document.getElementById("stat-streak-current").textContent = user.streak_current ?? "-";
-  document.getElementById("stat-streak-best").textContent = user.streak_best ?? "-";
+
+  document.getElementById("stat-level").textContent = user.level ?? "0";
+  document.getElementById("stat-xp-total").value = user.xp_total ?? 0;
+  document.getElementById("stat-streak-current").value = user.streak_current ?? 0;
+  document.getElementById("stat-streak-best").value = user.streak_best ?? 0;
+  document.getElementById("stat-last-reward").textContent = user.last_reward ?? "–";
+
+
 
   document.getElementById("field-goals_json").value =
     user.goals_json ?? "";
@@ -365,3 +374,27 @@ tabButtons.forEach((btn) => {
   });
 });
 
+document.getElementById("save-stats").addEventListener("click", async () => {
+  if (!currentSelectedUser) return;
+
+  const newStats = {
+    xp_total: Number(document.getElementById("stat-xp-total").value),
+    streak_current: Number(document.getElementById("stat-streak-current").value),
+    streak_best: Number(document.getElementById("stat-streak-best").value),
+    level: Number(document.getElementById("stat-level").textContent)
+  };
+
+  const { error } = await supabase
+    .from("profiles")
+    .update(newStats)
+    .eq("id", currentSelectedUser.id);
+
+  if (error) {
+    console.error("Error guardando estadísticas:", error);
+    alert("❌ Error guardando estadísticas");
+    return;
+  }
+
+  alert("✔ Estadísticas guardadas");
+  loadUsers();
+});
