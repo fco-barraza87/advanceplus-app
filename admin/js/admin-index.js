@@ -1,36 +1,5 @@
 // /admin/js/admin-index.js
 
-document.addEventListener("DOMContentLoaded", async () => {
-  try {
-    const supabase = getSupabaseClient();
-
-    const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id;
-
-    if (!userId) {
-      window.location.href = "/index.html";
-      return;
-    }
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", userId)
-      .single();
-
-    if (!profile || !["admin", "coach"].includes(profile.role)) {
-      window.location.href = "/dashboard/index.html";
-      return;
-    }
-
-    // Función principal del dashboard
-    initAdminDashboard();
-  } catch (err) {
-    console.error("Error:", err);
-    window.location.href = "/dashboard/index.html";
-  }
-});
-
 
 
 
