@@ -17,7 +17,7 @@ const supabase = getSupabaseClient();
 let currentAdminProfile = null;
 let allUsers = [];
 let filteredUsers = [];
-let currentSelectedUser = null;   // <-- FIX: ahora sí se usa correctamente
+let currentSelectedUser = null;
 
 // Elementos UI
 const rolePill = document.getElementById("current-role-pill");
@@ -40,12 +40,6 @@ const cards = {
 const panel = document.getElementById("user-detail-panel");
 const closePanelBtn = document.getElementById("close-detail-panel");
 
-// Overlay para oscurecer fondo
-const overlay = document.createElement("div");
-overlay.id = "admin-overlay";
-overlay.classList.add("admin-overlay-hidden");
-document.body.appendChild(overlay);
-
 // ==========================
 //   Inicialización general
 // ==========================
@@ -54,9 +48,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!currentAdminProfile) return;
 
   if (!["admin", "coach"].includes(currentAdminProfile.role)) {
-    document
-      .getElementById("access-message")
-      .classList.remove("access-message--hidden");
+    document.getElementById("access-message").classList.remove("access-message--hidden");
     return;
   }
 
@@ -125,10 +117,7 @@ async function loadUsers() {
       streak_current,
       streak_best,
       updated_at,
-      avatar_url,
-      preferred_focus_time,
-      goals_json,
-      notifications
+      avatar_url
     `);
 
   hideLoading();
@@ -186,8 +175,9 @@ function attachEvents() {
 
   document.getElementById("refresh-users").addEventListener("click", loadUsers);
 
-  closePanelBtn.addEventListener("click", closePanel);
-  overlay.addEventListener("click", closePanel);
+  closePanelBtn.addEventListener("click", () => {
+    panel.classList.add("detail-panel--hidden");
+  });
 }
 
 
@@ -237,43 +227,29 @@ function renderTable() {
 //           PANEL DE DETALLE DE USUARIO
 // ===============================================
 function openUserDetail(user) {
-  currentSelectedUser = user;   // <-- ⭐ FIX PRINCIPAL
-
   panel.classList.remove("detail-panel--hidden");
-  overlay.classList.remove("admin-overlay-hidden");
 
-  // Títulos
   document.getElementById("detail-name").textContent = user.full_name;
   document.getElementById("detail-email").textContent = user.email;
   document.getElementById("detail-role-badge").textContent = user.role;
-  document.getElementById("detail-created").textContent =
-    "Actualizado: " + formatDate(user.updated_at);
+  document.getElementById("detail-created").textContent = "Actualizado: " + formatDate(user.updated_at);
 
-  // Formulario
+  // Datos del formulario:
   document.getElementById("field-full_name").value = user.full_name ?? "";
   document.getElementById("field-avatar_url").value = user.avatar_url ?? "";
   document.getElementById("field-country").value = user.country ?? "";
   document.getElementById("field-language").value = user.language ?? "es";
   document.getElementById("field-timezone").value = user.timezone ?? "";
-  document.getElementById("field-preferred_focus_time").value =
-    user.preferred_focus_time ?? "";
-  document.getElementById("field-goals_json").value =
-    user.goals_json ?? "";
-  document.getElementById("field-notifications").value =
-    user.notifications ?? "";
+  document.getElementById("field-preferred_focus_time").value = user.preferred_focus_time ?? "";
+  document.getElementById("field-goals_json").value = user.goals_json ?? "";
+  document.getElementById("field-notifications").value = user.notifications ?? "";
 
-  // Estadísticas
+  // Estadísticas:
   document.getElementById("stat-level").textContent = user.level ?? "-";
   document.getElementById("stat-xp-total").textContent = user.xp_total ?? "-";
-  document.getElementById("stat-streak-current").textContent =
-    user.streak_current ?? "-";
-  document.getElementById("stat-streak-best").textContent =
-    user.streak_best ?? "-";
-}
+  document.getElementById("stat-streak-current").textContent = user.streak_current ?? "-";
+  document.getElementById("stat-streak-best").textContent = user.streak_best ?? "-";
 
-function closePanel() {
-  panel.classList.add("detail-panel--hidden");
-  overlay.classList.add("admin-overlay-hidden");
 }
 
 
@@ -294,19 +270,15 @@ function formatDate(date) {
 
 
 
-// ===============================================
-//        GUARDAR CAMBIOS EN PERFIL (FIX)
-// ===============================================
+/* ============================================================
+   GUARDAR CAMBIOS EN PERFIL
+============================================================ */
+
 document.getElementById("profile-form").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const saveStatus = document.getElementById("profile-save-status");
   saveStatus.textContent = "Guardando...";
-
-  if (!currentSelectedUser) {
-    saveStatus.textContent = "❌ Error interno";
-    return;
-  }
 
   const fields = {
     full_name: document.getElementById("field-full_name").value.trim(),
@@ -326,12 +298,13 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
 
   if (error) {
     console.error("Error guardando cambios:", error);
-    saveStatus.textContent = "❌ Error guardando";
+    saveStatus.textContent = "❌ Error guardando cambios";
     return;
   }
 
   saveStatus.textContent = "✔ Guardado";
   setTimeout(() => (saveStatus.textContent = ""), 2000);
 
-  await loadUsers();
+  // refrescar tabla
+  loadUsers();
 });

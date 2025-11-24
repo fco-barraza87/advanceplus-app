@@ -727,17 +727,16 @@ textarea {
 }
 
 
-.panel-backdrop {
+#admin-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(2px);
-  z-index: 10;
-  transition: opacity 0.25s ease-out;
-  opacity: 1;
+  backdrop-filter: blur(4px);
+  z-index: 15;
+  transition: opacity 0.25s ease;
 }
 
-.panel-backdrop--hidden {
+.admin-overlay-hidden {
   opacity: 0;
   pointer-events: none;
 }
