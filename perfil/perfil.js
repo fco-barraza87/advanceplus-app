@@ -316,7 +316,18 @@ async function initCursos() {
     const courseProg = grouped[course.id] || [];
     const totalDays = course.duration_days;
     const daysDone = courseProg.filter(d => d.completed).length;
-    const xpCourse = courseProg.reduce((acc, x) => acc + (x.xp || 0), 0);
+    // Obtener XP real desde user_stats
+    const { data: stats } = await supabase
+      .from("user_stats")
+      .select("xp_total")
+      .eq("user_id", userId)
+      .single();
+
+    const totalXP = stats?.xp_total || 0;
+
+    // Actualizar visual de XP Total de la sección
+    document.getElementById("coursesXpTotal").textContent = totalXP;
+
 
     // Determinar estado
     const isCompleted = daysDone === totalDays;
