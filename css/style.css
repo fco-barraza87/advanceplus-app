@@ -1704,3 +1704,12 @@ select option {
   background: rgba(192,164,80,0.15);
   border-color: var(--ap-gold);
 }
+
+
+/* FIX: El contenido del curso queda cubierto por estilos globales duplicados */
+.course-main .card,
+.lesson-card {
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
+}
