@@ -1,4 +1,6 @@
 // /admin/js/admin-index.js
+console.log("¿Supabase existe?", window.supabase);
+
 
 function getSupabaseClient() {
   if (window.supabase) return window.supabase;
