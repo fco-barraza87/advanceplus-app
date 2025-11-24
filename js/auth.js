@@ -74,7 +74,7 @@ export async function requireAdmin() {
   const profile = await getUserProfile(user.id);
   if (!profile || profile.role !== "admin") {
     alert("Acceso denegado.");
-    window.location.href = "/admin/index.html";
+    window.location.href = "/dashboard/index.html";
   }
 
   return profile;
@@ -90,7 +90,7 @@ export async function requireCoach() {
   const profile = await getUserProfile(user.id);
   if (!profile || profile.role !== "coach") {
     alert("Acceso exclusivo para coaches.");
-    window.location.href = "/admin/index.html";
+    window.location.href = "/dashboard/index.html";
   }
 
   return profile;

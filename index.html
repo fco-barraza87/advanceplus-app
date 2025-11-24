@@ -119,9 +119,9 @@
     };
 
 
-    /* ──────────────────────────────
-       LOGIN
-    ─────────────────────────────── */
+/* ──────────────────────────────
+   LOGIN (con redirección por rol)
+────────────────────────────── */
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -138,6 +138,37 @@
         return;
       }
 
+      // 🔍 Obtener sesión
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session || !session.user) {
+        err.textContent = "Error obteniendo sesión";
+        return;
+      }
+
+      const userId = session.user.id;
+
+      // 🔍 Obtener rol desde profiles (nunca desde el JWT)
+      const { data: profile, error: errProfile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .single();
+
+      if (errProfile || !profile) {
+        console.error("No se pudo leer el rol del usuario:", errProfile);
+        err.textContent = "Error interno. Contacta soporte.";
+        return;
+      }
+
+      const role = profile.role;
+
+      // 🎯 Redirecciones correctas
+      if (role === "admin" || role === "coach") {
+        window.location.href = "/admin/index.html";
+        return;
+      }
+
+      // Usuario normal
       window.location.href = "/dashboard/index.html";
     });
 
