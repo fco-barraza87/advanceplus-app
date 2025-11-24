@@ -154,7 +154,10 @@
     </main>
   </div>
 
-  <!-- JS exclusivo del dashboard admin -->
+  <!-- 1. Inicializar Supabase (define window.supabase) -->
+  <script type="module" src="/js/supabase.js"></script>
+
+  <!-- 2. Dashboard admin (usa window.supabase) -->
   <script type="module" src="/admin/js/admin-index.js"></script>
 </body>
 </html>

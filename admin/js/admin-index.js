@@ -1,8 +1,5 @@
 // /admin/js/admin-index.js
 
-
-
-
 function getSupabaseClient() {
   if (window.supabase) return window.supabase;
   throw new Error(
