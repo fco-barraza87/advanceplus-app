@@ -3,6 +3,47 @@
 // ⚠️ Conecta esto con tu cliente real de Supabase.
 // Si ya tienes window.supabase, esto funcionará.
 // Si usas otra cosa, cambia esta función.
+
+// 🔒 Validación automática de acceso admin/coach
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const supabase = getSupabaseClient();
+
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id;
+
+    if (!userId) {
+      window.location.href = "/index.html";
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .single();
+
+    if (!profile || !["admin", "coach"].includes(profile.role)) {
+      window.location.href = "/dashboard/index.html";
+      return;
+    }
+
+    initModule(); // 👈 el tuyo
+  } catch (err) {
+    console.error("Error:", err);
+    window.location.href = "/dashboard/index.html";
+  }
+});
+
+function getSupabaseClient() {
+  if (window.supabase) return window.supabase;
+  throw new Error("Supabase no está inicializado");
+}
+
+// … el resto de tu archivo sin tocar
+
+
+
 function getSupabaseClient() {
   if (window.supabase) return window.supabase;
   throw new Error(

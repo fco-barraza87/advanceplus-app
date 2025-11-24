@@ -1,5 +1,47 @@
 // /admin/js/admin-index.js
 
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const supabase = getSupabaseClient();
+
+    // 1) Obtener sesión
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id;
+
+    if (!userId) {
+      window.location.href = "/index.html";
+      return;
+    }
+
+    // 2) Obtener rol desde profiles
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .single();
+
+    // 3) Validar rol
+    if (!profile || !["admin", "coach"].includes(profile.role)) {
+      window.location.href = "/dashboard/index.html";
+      return;
+    }
+
+    // 4) Si el usuario tiene acceso → iniciar el módulo o dashboard
+    if (typeof initModule === "function") {
+      initModule();
+    }
+    if (typeof initAdminDashboard === "function") {
+      initAdminDashboard();
+    }
+
+  } catch (error) {
+    console.error("Error en validación de rol:", error);
+    window.location.href = "/dashboard/index.html";
+  }
+});
+
+
+
 function getSupabaseClient() {
   if (window.supabase) return window.supabase;
   throw new Error(
