@@ -324,7 +324,7 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
   const fields = {
     full_name: document.getElementById("field-full_name").value.trim(),
     avatar_url: document.getElementById("field-avatar_url").value.trim(),
-    country: document.getElementById("field-pais").value.trim(),
+    pais: document.getElementById("field-pais").value.trim(),
     language: document.getElementById("field-language").value,
     timezone: document.getElementById("field-timezone").value.trim(),
     preferred_focus_time: document.getElementById("field-preferred_focus_time").value.trim(),
