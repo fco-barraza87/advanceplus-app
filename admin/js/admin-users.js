@@ -109,27 +109,28 @@ async function loadCurrentAdminProfile() {
 async function loadUsers() {
   showLoading();
 
-  const { data, error } = await supabase
+    const { data, error } = await supabase
     .from("profiles")
-    .select(
-      `
-      id,
-      full_name,
-      email,
-      role,
-      pais,
-      language,
-      timezone,
-      xp_total,
-      streak_current,
-      streak_best,
-      preferred_focus_time,
-      goals_json,
-      notifications,
-      updated_at,
-      avatar_url
-    `
-    );
+    .select(`
+        id,
+        full_name,
+        email,
+        role,
+        avatar_url,
+        country,
+        pais,
+        language,
+        idioma,
+        timezone,
+        xp_total,
+        streak_current,
+        streak_best,
+        goals_json,
+        preferred_focus_time,
+        notifications,
+        updated_at
+    `);
+
 
   hideLoading();
 
@@ -260,7 +261,6 @@ function openUserDetail(user) {
     user.notifications ?? "";
 
   // Estadísticas (usamos los campos de profiles)
-  document.getElementById("stat-level").textContent = "-"; // por ahora sin columna level
   document.getElementById("stat-xp-total").value = user.xp_total ?? 0;
   document.getElementById("stat-streak-current").value =
     user.streak_current ?? 0;
@@ -305,20 +305,17 @@ document
       return;
     }
 
-    const fields = {
-      full_name: document.getElementById("field-full_name").value.trim(),
-      avatar_url: document.getElementById("field-avatar_url").value.trim(),
-      pais: document.getElementById("field-pais").value.trim(), // ✅ usamos columna pais
-      language: document.getElementById("field-language").value,
-      timezone: document.getElementById("field-timezone").value.trim(),
-      preferred_focus_time: document
-        .getElementById("field-preferred_focus_time")
-        .value.trim(),
-      goals_json: document.getElementById("field-goals_json").value.trim(),
-      notifications: document
-        .getElementById("field-notifications")
-        .value.trim(),
-    };
+        const fields = {
+          full_name: document.getElementById("field-full_name").value.trim(),
+          avatar_url: document.getElementById("field-avatar_url").value.trim(),
+          pais: document.getElementById("field-pais").value.trim(),   // si usas pais
+          language: document.getElementById("field-language").value,
+          timezone: document.getElementById("field-timezone").value.trim(),
+          preferred_focus_time: document.getElementById("field-preferred_focus_time").value.trim(),
+          goals_json: document.getElementById("field-goals_json").value.trim(),
+          notifications: document.getElementById("field-notifications").value.trim()
+        };
+
 
     const { error } = await supabase
       .from("profiles")
@@ -372,12 +369,11 @@ if (saveStatsBtn) {
     statsStatus.textContent = "Guardando...";
 
     const newStats = {
-      xp_total: Number(document.getElementById("stat-xp-total").value),
-      streak_current: Number(
-        document.getElementById("stat-streak-current").value
-      ),
-      streak_best: Number(document.getElementById("stat-streak-best").value),
+        xp_total: Number(document.getElementById("stat-xp-total").value),
+        streak_current: Number(document.getElementById("stat-streak-current").value),
+        streak_best: Number(document.getElementById("stat-streak-best").value)
     };
+
 
     const { error } = await supabase
       .from("profiles")
