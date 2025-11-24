@@ -118,7 +118,7 @@ async function loadUsers() {
         full_name,
         email,
         role,
-        pais,                -- si ya migraste country → pais
+        pais,
         language,
         timezone,
         xp_total,
