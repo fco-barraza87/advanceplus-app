@@ -1376,19 +1376,6 @@ select option {
   color: var(--ap-gold);
 }
 
-/* === Layout === */
-
-.course-layout {
-  display: grid;
-  gap: 20px;
-  padding: 24px;
-}
-
-@media (min-width: 900px) {
-  .course-layout {
-    grid-template-columns: 300px 1fr;
-  }
-}
 
 /* === Tarjeta del timeline === */
 
@@ -1592,19 +1579,6 @@ select option {
   color: var(--ap-gold);
 }
 
-/* === Layout === */
-
-.course-layout {
-  display: grid;
-  gap: 20px;
-  padding: 24px;
-}
-
-@media (min-width: 900px) {
-  .course-layout {
-    grid-template-columns: 300px 1fr;
-  }
-}
 
 /* === Tarjeta del timeline === */
 
