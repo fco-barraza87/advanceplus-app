@@ -246,35 +246,57 @@ async function initPreferencias() {
 
 
 /* ============================================================
-   🔹 Cursos — con progreso real desde progress + courses
+ 🔹 Cursos — basado en user_courses + progress
 ============================================================ */
 async function initCursos() {
   const { data: session } = await supabase.auth.getUser();
   if (!session?.user) return;
-
   const userId = session.user.id;
 
-  // 1) Obtener progreso del usuario
-  const { data: progress, error: progError } = await supabase
-    .from("progress")
-    .select("*")
+  // 1) Cursos inscritos
+  const { data: userCourses, error: ucError } = await supabase
+    .from("user_courses")
+    .select("course_id, status")
     .eq("user_id", userId);
 
-  // 2) Obtener cursos
-  const { data: courses, error: coursesError } = await supabase
-    .from("courses")
-    .select("*")
-    .eq("active", true);
-
-  if (progError || coursesError) {
-    console.warn("Error cargando cursos:", progError || coursesError);
+  if (ucError) {
+    console.warn("Error cargando user_courses:", ucError);
     return;
   }
 
-  const coursesContainer = document.getElementById("coursesContainer");
-  const emptyMessage = document.getElementById("coursesEmpty");
+  if (!userCourses || userCourses.length === 0) {
+    document.getElementById("coursesEmpty").style.display = "block";
+    return;
+  }
 
-  // Agrupar progreso por course_id
+  // Obtener IDs de cursos inscritos
+  const courseIds = userCourses.map(c => c.course_id);
+
+  // 2) Obtener datos completos de cursos
+  const { data: courses, error: coursesError } = await supabase
+    .from("courses")
+    .select("*")
+    .in("id", courseIds)
+    .eq("active", true);
+
+  if (coursesError) {
+    console.warn("Error cargando cursos:", coursesError);
+    return;
+  }
+
+  // 3) Obtener progreso real (si existe)
+  const { data: progress, error: progError } = await supabase
+    .from("progress")
+    .select("*")
+    .eq("user_id", userId)
+    .in("course_id", courseIds);
+
+  if (progError) {
+    console.warn("Error cargando progreso:", progError);
+    return;
+  }
+
+  // Agrupar progreso por curso
   const grouped = {};
   progress.forEach(p => {
     if (!grouped[p.course_id]) grouped[p.course_id] = [];
@@ -286,29 +308,29 @@ async function initCursos() {
   let activeCount = 0;
   let completedCount = 0;
 
+  const coursesContainer = document.getElementById("coursesContainer");
+  const emptyMessage = document.getElementById("coursesEmpty");
   coursesContainer.innerHTML = "";
 
   courses.forEach(course => {
     const courseProg = grouped[course.id] || [];
-
-    if (courseProg.length === 0) return; // no está inscrito → no mostrarlo
-
     const totalDays = course.duration_days;
     const daysDone = courseProg.filter(d => d.completed).length;
-
-    const isCompleted = daysDone === totalDays;
-    const isActive = daysDone > 0 && !isCompleted;
-
-    // XP acumulado del curso
     const xpCourse = courseProg.reduce((acc, x) => acc + (x.xp || 0), 0);
-    totalXP += xpCourse;
+
+    // Determinar estado
+    const isCompleted = daysDone === totalDays;
+    const isActive = !isCompleted; // siempre activo si no está terminado
 
     if (isCompleted) completedCount++;
-    else if (isActive) activeCount++;
+    else activeCount++;
+
+    totalXP += xpCourse;
 
     // === CREAR TARJETA ===
     const card = document.createElement("div");
     card.className = "course-card clickable";
+
     card.innerHTML = `
       <div class="course-cover-wrapper">
         <img src="${course.cover_url}" class="course-cover" />
@@ -317,12 +339,8 @@ async function initCursos() {
 
       <div class="course-body">
         <h3 class="course-title">${course.title}</h3>
-        <p class="course-meta">
-          Día ${daysDone} de ${totalDays}
-        </p>
-        <p class="course-meta">
-          XP ganado: ${xpCourse}
-        </p>
+        <p class="course-meta">Día ${daysDone} de ${totalDays}</p>
+        <p class="course-meta">XP ganado: ${xpCourse}</p>
         <div class="course-actions">
           <button class="btn-continue">Continuar</button>
         </div>
@@ -336,15 +354,11 @@ async function initCursos() {
     coursesContainer.appendChild(card);
   });
 
-  // Actualizar KPIs
+  // Mostrar KPIs
   document.getElementById("coursesActiveCount").textContent = activeCount;
   document.getElementById("coursesCompletedCount").textContent = completedCount;
   document.getElementById("coursesXpTotal").textContent = totalXP;
 
-  // Mostrar mensaje vacío si no tiene cursos
-  if (activeCount + completedCount === 0) {
-    emptyMessage.style.display = "block";
-  } else {
-    emptyMessage.style.display = "none";
-  }
+  emptyMessage.style.display =
+    activeCount + completedCount === 0 ? "block" : "none";
 }
