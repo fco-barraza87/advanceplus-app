@@ -2,70 +2,274 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <title>Advance+ Admin — Usuarios</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usuarios | Advance+</title>
-  <link rel="stylesheet" href="../assets/style.css" />
-  <link rel="stylesheet" href="../assets/admin.css" />
+
+  <!-- Tipografías -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- CSS específico del módulo -->
+  <link rel="stylesheet" href="/admin/css/users.css" />
 </head>
 <body>
-  <header class="admin-header">
-    <h1>👥 Gestión de Usuarios</h1>
-    <button id="back" class="btn-secondary">← Volver</button>
-  </header>
+  <div class="admin-shell">
+    <!-- Barra superior -->
+    <header class="admin-header">
+      <div class="admin-header-left">
+        <div class="brand-mark">
+          <div class="brand-logo">A+</div>
+          <div class="brand-text">
+            <span class="brand-title">Advance+</span>
+            <span class="brand-subtitle">Panel Admin · Usuarios</span>
+          </div>
+        </div>
+      </div>
+      <div class="admin-header-right">
+        <div id="current-role-pill" class="role-pill role-pill--unknown">Cargando...</div>
+      </div>
+    </header>
 
-  <main class="admin-dashboard">
-    <!-- 🔍 BUSCADOR -->
-    <section class="card">
-      <h2>Buscar usuario</h2>
-      <input type="text" id="search" placeholder="Buscar por nombre o email..." />
-    </section>
+    <!-- Contenido principal -->
+    <main class="admin-main">
+      <!-- Cards de resumen -->
+      <section class="summary-section">
+        <div class="summary-card" id="card-total-users">
+          <div class="summary-label">Total usuarios</div>
+          <div class="summary-value" data-value>–</div>
+          <div class="summary-meta">Perfiles registrados</div>
+        </div>
 
-    <!-- 📋 LISTADO -->
-    <section class="card">
-      <h2>Usuarios registrados</h2>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Rol</th>
-            <th>XP Total</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="users-table"></tbody>
-      </table>
-    </section>
+        <div class="summary-card" id="card-admins">
+          <div class="summary-label">Admins</div>
+          <div class="summary-value" data-value>–</div>
+          <div class="summary-meta">Con acceso total</div>
+        </div>
 
-    <!-- 👤 DETALLE -->
-    <section class="card" id="user-detail" style="display:none;">
-      <h2 id="user-name-detail">Usuario</h2>
-      <p><strong>Email:</strong> <span id="user-email-detail"></span></p>
-      <p><strong>Rol actual:</strong>
-        <select id="user-role-detail">
-          <option value="user">User</option>
-          <option value="coach">Coach</option>
-          <option value="admin">Admin</option>
-        </select>
-        <button id="save-role" class="btn-small">💾 Guardar</button>
-      </p>
-      <p><strong>XP Total:</strong> <span id="user-xp-detail"></span></p>
-      <p><strong>Racha:</strong> <span id="user-streak-detail"></span></p>
+        <div class="summary-card" id="card-coaches">
+          <div class="summary-label">Coaches</div>
+          <div class="summary-value" data-value>–</div>
+          <div class="summary-meta">Soporte & seguimiento</div>
+        </div>
 
-      <h3>Cursos asignados</h3>
-      <ul id="user-courses-list"></ul>
+        <div class="summary-card" id="card-users">
+          <div class="summary-label">Usuarios estándar</div>
+          <div class="summary-value" data-value>–</div>
+          <div class="summary-meta">Dashboard propio</div>
+        </div>
+      </section>
 
-      <h3>Asignar nuevo curso</h3>
-      <select id="assign-course"></select>
-      <button id="assign-btn" class="btn-primary">Asignar curso</button>
+      <!-- Mensaje de error / acceso -->
+      <section id="access-message" class="access-message access-message--hidden">
+        <div class="access-message-inner">
+          <h2>Acceso restringido</h2>
+          <p>Este módulo solo está disponible para usuarios con rol <strong>admin</strong> o <strong>coach</strong>.</p>
+        </div>
+      </section>
 
-      <h3>Bonificar XP manualmente</h3>
-      <input type="number" id="bonus-xp" placeholder="Ej: 50" min="1" />
-      <button id="bonus-btn" class="btn-secondary">➕ Añadir XP</button>
-    </section>
-  </main>
+      <!-- Controles de filtro y búsqueda -->
+      <section class="filters-section">
+        <div class="filters-left">
+          <div class="field-group">
+            <label for="search-input">Buscar</label>
+            <div class="input-wrapper">
+              <input
+                id="search-input"
+                type="text"
+                placeholder="Buscar por nombre o email..."
+                autocomplete="off"
+              />
+            </div>
+          </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="users.js"></script>
+          <div class="field-group">
+            <label for="role-filter">Rol</label>
+            <div class="select-wrapper">
+              <select id="role-filter">
+                <option value="">Todos</option>
+                <option value="admin">Admin</option>
+                <option value="coach">Coach</option>
+                <option value="user">User</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="language-filter">Idioma</label>
+            <div class="select-wrapper">
+              <select id="language-filter">
+                <option value="">Todos</option>
+                <option value="es">Español</option>
+                <option value="en">Inglés</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="filters-right">
+          <button id="refresh-users" class="btn btn-ghost">
+            Recargar
+          </button>
+        </div>
+      </section>
+
+      <!-- Tabla de usuarios -->
+      <section class="table-section">
+        <div class="table-container">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>País / Idioma</th>
+                <th>Zona horaria</th>
+                <th>XP</th>
+                <th>Racha</th>
+                <th>Actualizado</th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body">
+              <!-- Filas generadas por JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="users-empty-state" class="empty-state empty-state--hidden">
+          <p>No se encontraron usuarios para los filtros actuales.</p>
+        </div>
+
+        <div id="users-loading" class="loading-overlay loading-overlay--hidden">
+          <div class="spinner"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Panel lateral de detalle de usuario -->
+  <aside id="user-detail-panel" class="detail-panel detail-panel--hidden">
+    <div class="detail-panel-header">
+      <div class="detail-user-main">
+        <div class="detail-avatar" id="detail-avatar"></div>
+        <div>
+          <div id="detail-name" class="detail-name">Nombre usuario</div>
+          <div id="detail-email" class="detail-email">email@example.com</div>
+        </div>
+      </div>
+      <button id="close-detail-panel" class="detail-close-btn" aria-label="Cerrar panel">
+        ✕
+      </button>
+    </div>
+
+    <div class="detail-panel-role-line">
+      <span id="detail-role-badge" class="role-badge">role</span>
+      <span id="detail-created" class="detail-meta"></span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="detail-tabs">
+      <button class="detail-tab detail-tab--active" data-tab="profile">Perfil</button>
+      <button class="detail-tab" data-tab="stats">Estadísticas</button>
+      <button class="detail-tab" data-tab="progress">Progreso</button>
+    </div>
+
+    <div class="detail-tab-content" data-tab-content="profile">
+      <form id="profile-form" class="detail-form">
+        <div class="form-grid">
+          <div class="field-group">
+            <label for="field-full_name">Nombre completo</label>
+            <input id="field-full_name" name="full_name" type="text" />
+          </div>
+
+          <div class="field-group">
+            <label for="field-avatar_url">Avatar URL</label>
+            <input id="field-avatar_url" name="avatar_url" type="url" />
+          </div>
+
+          <div class="field-group">
+            <label for="field-country">País</label>
+            <input id="field-country" name="country" type="text" />
+          </div>
+
+          <div class="field-group">
+            <label for="field-language">Idioma</label>
+            <select id="field-language" name="language">
+              <option value="es">Español</option>
+              <option value="en">Inglés</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label for="field-timezone">Zona horaria</label>
+            <input id="field-timezone" name="timezone" type="text" />
+          </div>
+
+          <div class="field-group">
+            <label for="field-preferred_focus_time">Momento preferido</label>
+            <input id="field-preferred_focus_time" name="preferred_focus_time" type="text" />
+          </div>
+
+          <div class="field-group field-group--full">
+            <label for="field-goals_json">Objetivos (JSON)</label>
+            <textarea id="field-goals_json" name="goals_json" rows="3"></textarea>
+          </div>
+
+          <div class="field-group field-group--full">
+            <label for="field-notifications">Notificaciones (JSON)</label>
+            <textarea id="field-notifications" name="notifications" rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="detail-actions">
+          <button id="save-profile" type="submit" class="btn btn-primary">
+            Guardar cambios
+          </button>
+          <span id="profile-save-status" class="save-status"></span>
+        </div>
+      </form>
+    </div>
+
+    <div class="detail-tab-content detail-tab-content--hidden" data-tab-content="stats">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Nivel</div>
+          <div id="stat-level" class="stat-value">–</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">XP total</div>
+          <div id="stat-xp-total" class="stat-value">–</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Racha actual</div>
+          <div id="stat-streak-current" class="stat-value">–</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Mejor racha</div>
+          <div id="stat-streak-best" class="stat-value">–</div>
+        </div>
+      </div>
+
+      <div class="badges-section">
+        <h3>Insignias</h3>
+        <div id="badges-container" class="badges-container">
+          <!-- badges -->
+        </div>
+      </div>
+
+      <div class="stat-meta">
+        <div>Última recompensa: <span id="stat-last-reward">–</span></div>
+      </div>
+    </div>
+
+    <div class="detail-tab-content detail-tab-content--hidden" data-tab-content="progress">
+      <div id="progress-summary" class="progress-summary">
+        <!-- Resumen de progreso -->
+      </div>
+    </div>
+  </aside>
+
+  <!-- JS del módulo -->
+  <script type="module" src="/admin/js/admin-users.js"></script>
 </body>
 </html>
