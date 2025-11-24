@@ -257,6 +257,10 @@ function openUserDetail(user) {
   document.getElementById("field-timezone").value = user.timezone ?? "";
   document.getElementById("field-preferred_focus_time").value =
     user.preferred_focus_time ?? "";
+  document.getElementById("stat-xp-total").textContent = user.xp_total ?? "-";
+  document.getElementById("stat-streak-current").textContent = user.streak_current ?? "-";
+  document.getElementById("stat-streak-best").textContent = user.streak_best ?? "-";
+
   document.getElementById("field-goals_json").value =
     user.goals_json ?? "";
   document.getElementById("field-notifications").value =

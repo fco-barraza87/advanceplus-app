@@ -238,16 +238,21 @@
         </div>
         <div class="stat-card">
           <div class="stat-label">XP total</div>
-          <div id="stat-xp-total" class="stat-value">–</div>
+          <input id="stat-xp-total" class="stat-input" type="number" min="0" />
         </div>
         <div class="stat-card">
           <div class="stat-label">Racha actual</div>
-          <div id="stat-streak-current" class="stat-value">–</div>
+          <input id="stat-streak-current" class="stat-input" type="number" min="0" />
         </div>
         <div class="stat-card">
           <div class="stat-label">Mejor racha</div>
-          <div id="stat-streak-best" class="stat-value">–</div>
+          <input id="stat-streak-best" class="stat-input" type="number" min="0" />
         </div>
+      </div>
+
+      <div class="detail-actions">
+        <button id="save-stats" class="btn btn-primary">Guardar estadísticas</button>
+        <span id="stats-save-status" class="save-status"></span>
       </div>
 
       <div class="badges-section">
