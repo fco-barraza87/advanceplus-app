@@ -375,12 +375,41 @@ async function initCursos() {
       </div>
     `;
 
-    card.addEventListener("click", () => {
-      window.location.href = `/curso/index.html?course=${course.slug}`;
-    });
+  /* ------------------------------------------
+     CLICK → Abrir curso en su día correspondiente
+  ------------------------------------------- */
+  card.addEventListener("click", async () => {
 
-    coursesContainer.appendChild(card);
+    // 1) Leer progreso del curso (ya creado por el trigger)
+    const { data: progressRows, error } = await supabase
+      .from("progress")
+      .select("day, completed")
+      .eq("user_id", session.user.id)
+      .eq("course_id", course.id)
+      .order("day", { ascending: true });
+
+    let nextDay = 1;
+
+    if (!error && progressRows?.length) {
+      const completed = progressRows.filter((p) => p.completed);
+
+      if (completed.length > 0) {
+        const lastDone = completed[completed.length - 1].day;
+        nextDay = lastDone + 1;
+      }
+    }
+
+    // 2) Nunca pasar del total de días
+    if (nextDay > totalDays) {
+      nextDay = totalDays;
+    }
+
+    // 3) Redirigir al curso (ID, no slug)
+    window.location.href = `/curso/index.html?c=${course.id}&day=${nextDay}`;
   });
+
+  coursesContainer.appendChild(card);
+});
 
   // 6) Mensaje vacío
   if (emptyMessage) {
