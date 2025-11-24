@@ -17,7 +17,7 @@ const supabase = getSupabaseClient();
 let currentAdminProfile = null;
 let allUsers = [];
 let filteredUsers = [];
-let currentSelectedUser = null;
+let currentSelectedUser = null;   // <-- FIX: ahora sí se usa correctamente
 
 // Elementos UI
 const rolePill = document.getElementById("current-role-pill");
@@ -33,7 +33,7 @@ const cards = {
   total: document.querySelector("#card-total-users [data-value]"),
   admins: document.querySelector("#card-admins [data-value]"),
   coaches: document.querySelector("#card-coaches [data-value]"),
-  users: document.querySelector("#card-users [data-value]"),
+  users: document.querySelector("#card-users [data-value]")
 };
 
 // Panel de detalle
@@ -64,12 +64,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   attachEvents();
 });
 
+
 // ===============================================
 //         PERFIL ACTUAL DEL ADMIN
 // ===============================================
 async function loadCurrentAdminProfile() {
   const {
-    data: { session },
+    data: { session }
   } = await supabase.auth.getSession();
 
   if (!session) {
@@ -103,33 +104,36 @@ async function loadCurrentAdminProfile() {
   }
 }
 
+
 // ===============================================
 //          CARGAR LISTA DE USUARIOS
 // ===============================================
 async function loadUsers() {
   showLoading();
 
-  const { data, error } = await supabase
+    const { data, error } = await supabase
     .from("profiles")
-    .select(
-      `
-      id,
-      full_name,
-      email,
-      role,
-      pais,
-      language,
-      timezone,
-      xp_total,
-      streak_current,
-      streak_best,
-      preferred_focus_time,
-      goals_json,
-      notifications,
-      updated_at,
-      avatar_url
-    `
-    );
+    .select(`
+        id,
+        full_name,
+        email,
+        role,
+        pais,
+        language,
+        timezone,
+        xp_total,
+        streak_current,
+        streak_best,
+        level,
+        last_reward,
+        badges,
+        goals_json,
+        notifications,
+        preferred_focus_time,
+        updated_at,
+        avatar_url
+    `);
+
 
   hideLoading();
 
@@ -145,15 +149,17 @@ async function loadUsers() {
   renderTable();
 }
 
+
 // ===============================================
 //              CARDS SUPERIORES
 // ===============================================
 function updateSummaryCards() {
   cards.total.textContent = allUsers.length;
-  cards.admins.textContent = allUsers.filter((u) => u.role === "admin").length;
-  cards.coaches.textContent = allUsers.filter((u) => u.role === "coach").length;
-  cards.users.textContent = allUsers.filter((u) => u.role === "user").length;
+  cards.admins.textContent = allUsers.filter(u => u.role === "admin").length;
+  cards.coaches.textContent = allUsers.filter(u => u.role === "coach").length;
+  cards.users.textContent = allUsers.filter(u => u.role === "user").length;
 }
+
 
 // ===============================================
 //                  FILTROS
@@ -163,7 +169,7 @@ function applyFilters() {
   const role = roleFilter.value;
   const lang = languageFilter.value;
 
-  filteredUsers = allUsers.filter((u) => {
+  filteredUsers = allUsers.filter(u => {
     const matchSearch =
       u.full_name?.toLowerCase().includes(search) ||
       u.email?.toLowerCase().includes(search);
@@ -182,13 +188,12 @@ function attachEvents() {
   roleFilter.addEventListener("change", applyFilters);
   languageFilter.addEventListener("change", applyFilters);
 
-  document
-    .getElementById("refresh-users")
-    .addEventListener("click", loadUsers);
+  document.getElementById("refresh-users").addEventListener("click", loadUsers);
 
   closePanelBtn.addEventListener("click", closePanel);
   overlay.addEventListener("click", closePanel);
 }
+
 
 // ===============================================
 //                RENDER TABLA
@@ -203,7 +208,7 @@ function renderTable() {
 
   emptyState.classList.add("empty-state--hidden");
 
-  filteredUsers.forEach((u) => {
+  filteredUsers.forEach(u => {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
@@ -231,11 +236,12 @@ function renderTable() {
   });
 }
 
+
 // ===============================================
 //           PANEL DE DETALLE DE USUARIO
 // ===============================================
 function openUserDetail(user) {
-  currentSelectedUser = user;
+  currentSelectedUser = user;   // <-- ⭐ FIX PRINCIPAL
 
   panel.classList.remove("detail-panel--hidden");
   overlay.classList.remove("admin-overlay-hidden");
@@ -247,7 +253,7 @@ function openUserDetail(user) {
   document.getElementById("detail-created").textContent =
     "Actualizado: " + formatDate(user.updated_at);
 
-  // Formulario (Perfil)
+  // Formulario
   document.getElementById("field-full_name").value = user.full_name ?? "";
   document.getElementById("field-avatar_url").value = user.avatar_url ?? "";
   document.getElementById("field-pais").value = user.pais ?? "";
@@ -255,24 +261,34 @@ function openUserDetail(user) {
   document.getElementById("field-timezone").value = user.timezone ?? "";
   document.getElementById("field-preferred_focus_time").value =
     user.preferred_focus_time ?? "";
-  document.getElementById("field-goals_json").value = user.goals_json ?? "";
+
+  document.getElementById("stat-level").textContent = user.level ?? "0";
+  document.getElementById("stat-xp-total").value = user.xp_total ?? 0;
+  document.getElementById("stat-streak-current").value = user.streak_current ?? 0;
+  document.getElementById("stat-streak-best").value = user.streak_best ?? 0;
+  document.getElementById("stat-last-reward").textContent = user.last_reward ?? "–";
+
+
+
+  document.getElementById("field-goals_json").value =
+    user.goals_json ?? "";
   document.getElementById("field-notifications").value =
     user.notifications ?? "";
 
-  // Estadísticas (usamos los campos de profiles)
-  document.getElementById("stat-level").textContent = "-"; // por ahora sin columna level
-  document.getElementById("stat-xp-total").value = user.xp_total ?? 0;
-  document.getElementById("stat-streak-current").value =
-    user.streak_current ?? 0;
-  document.getElementById("stat-streak-best").value = user.streak_best ?? 0;
-  const lastRewardEl = document.getElementById("stat-last-reward");
-  if (lastRewardEl) lastRewardEl.textContent = "–";
+  // Estadísticas
+  document.getElementById("stat-level").textContent = user.level ?? "-";
+  document.getElementById("stat-xp-total").textContent = user.xp_total ?? "-";
+  document.getElementById("stat-streak-current").textContent =
+    user.streak_current ?? "-";
+  document.getElementById("stat-streak-best").textContent =
+    user.streak_best ?? "-";
 }
 
 function closePanel() {
   panel.classList.add("detail-panel--hidden");
   overlay.classList.add("admin-overlay-hidden");
 }
+
 
 // ===============================================
 //              UTILIDADES
@@ -289,57 +305,54 @@ function formatDate(date) {
   return new Date(date).toLocaleString("es-ES");
 }
 
+
+
 // ===============================================
-//        GUARDAR CAMBIOS EN PERFIL
+//        GUARDAR CAMBIOS EN PERFIL (FIX)
 // ===============================================
-document
-  .getElementById("profile-form")
-  .addEventListener("submit", async (e) => {
-    e.preventDefault();
+document.getElementById("profile-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const saveStatus = document.getElementById("profile-save-status");
-    saveStatus.textContent = "Guardando...";
+  const saveStatus = document.getElementById("profile-save-status");
+  saveStatus.textContent = "Guardando...";
 
-    if (!currentSelectedUser) {
-      saveStatus.textContent = "❌ Error interno";
-      return;
-    }
+  if (!currentSelectedUser) {
+    saveStatus.textContent = "❌ Error interno";
+    return;
+  }
 
-    const fields = {
-      full_name: document.getElementById("field-full_name").value.trim(),
-      avatar_url: document.getElementById("field-avatar_url").value.trim(),
-      pais: document.getElementById("field-pais").value.trim(), // ✅ usamos columna pais
-      language: document.getElementById("field-language").value,
-      timezone: document.getElementById("field-timezone").value.trim(),
-      preferred_focus_time: document
-        .getElementById("field-preferred_focus_time")
-        .value.trim(),
-      goals_json: document.getElementById("field-goals_json").value.trim(),
-      notifications: document
-        .getElementById("field-notifications")
-        .value.trim(),
-    };
+  const fields = {
+    full_name: document.getElementById("field-full_name").value.trim(),
+    avatar_url: document.getElementById("field-avatar_url").value.trim(),
+    pais: document.getElementById("field-pais").value.trim(),
+    language: document.getElementById("field-language").value,
+    timezone: document.getElementById("field-timezone").value.trim(),
+    preferred_focus_time: document.getElementById("field-preferred_focus_time").value.trim(),
+    goals_json: document.getElementById("field-goals_json").value.trim(),
+    notifications: document.getElementById("field-notifications").value.trim(),
+  };
 
-    const { error } = await supabase
-      .from("profiles")
-      .update(fields)
-      .eq("id", currentSelectedUser.id);
+  const { error } = await supabase
+    .from("profiles")
+    .update(fields)
+    .eq("id", currentSelectedUser.id);
 
-    if (error) {
-      console.error("Error guardando cambios:", error);
-      saveStatus.textContent = "❌ Error guardando";
-      return;
-    }
+  if (error) {
+    console.error("Error guardando cambios:", error);
+    saveStatus.textContent = "❌ Error guardando";
+    return;
+  }
 
-    saveStatus.textContent = "✔ Guardado";
-    setTimeout(() => (saveStatus.textContent = ""), 2000);
+  saveStatus.textContent = "✔ Guardado";
+  setTimeout(() => (saveStatus.textContent = ""), 2000);
 
-    await loadUsers();
-  });
+  await loadUsers();
+});
 
 /* ============================================================
    FUNCIONALIDAD DE TABS (Perfil / Stats / Progreso)
 ============================================================ */
+
 const tabButtons = document.querySelectorAll(".detail-tab");
 const tabContents = document.querySelectorAll(".detail-tab-content");
 
@@ -347,10 +360,12 @@ tabButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     const tab = btn.getAttribute("data-tab");
 
-    tabButtons.forEach((b) => b.classList.remove("detail-tab--active"));
+    // 1. Cambiar estado visual del botón
+    tabButtons.forEach(b => b.classList.remove("detail-tab--active"));
     btn.classList.add("detail-tab--active");
 
-    tabContents.forEach((content) => {
+    // 2. Mostrar contenido correspondiente
+    tabContents.forEach(content => {
       content.classList.add("detail-tab-content--hidden");
       if (content.getAttribute("data-tab-content") === tab) {
         content.classList.remove("detail-tab-content--hidden");
@@ -359,40 +374,27 @@ tabButtons.forEach((btn) => {
   });
 });
 
-// ===============================================
-//        GUARDAR ESTADÍSTICAS (XP / RACHAS)
-// ===============================================
-const saveStatsBtn = document.getElementById("save-stats");
-const statsStatus = document.getElementById("stats-save-status");
+document.getElementById("save-stats").addEventListener("click", async () => {
+  if (!currentSelectedUser) return;
 
-if (saveStatsBtn) {
-  saveStatsBtn.addEventListener("click", async () => {
-    if (!currentSelectedUser) return;
+  const newStats = {
+    xp_total: Number(document.getElementById("stat-xp-total").value),
+    streak_current: Number(document.getElementById("stat-streak-current").value),
+    streak_best: Number(document.getElementById("stat-streak-best").value),
+    level: Number(document.getElementById("stat-level").textContent)
+  };
 
-    statsStatus.textContent = "Guardando...";
+  const { error } = await supabase
+    .from("profiles")
+    .update(newStats)
+    .eq("id", currentSelectedUser.id);
 
-    const newStats = {
-      xp_total: Number(document.getElementById("stat-xp-total").value),
-      streak_current: Number(
-        document.getElementById("stat-streak-current").value
-      ),
-      streak_best: Number(document.getElementById("stat-streak-best").value),
-    };
+  if (error) {
+    console.error("Error guardando estadísticas:", error);
+    alert("❌ Error guardando estadísticas");
+    return;
+  }
 
-    const { error } = await supabase
-      .from("profiles")
-      .update(newStats)
-      .eq("id", currentSelectedUser.id);
-
-    if (error) {
-      console.error("Error guardando estadísticas:", error);
-      statsStatus.textContent = "❌ Error";
-      return;
-    }
-
-    statsStatus.textContent = "✔ Guardado";
-    setTimeout(() => (statsStatus.textContent = ""), 2000);
-
-    loadUsers();
-  });
-}
+  alert("✔ Estadísticas guardadas");
+  loadUsers();
+});
