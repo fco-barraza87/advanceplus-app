@@ -8,16 +8,25 @@ import { supabase } from "/js/supabase.js";
    🔹 Obtener perfil
 ============================================================ */
 async function getProfile() {
-  const { data: session } = await supabase.auth.getUser();
-  if (!session?.user) return null;
+  const { data, error } = await supabase.auth.getUser();
+  if (error) {
+    console.error("Error obteniendo usuario:", error);
+    return null;
+  }
 
-  const user = session.user;
+  const user = data?.user;
+  if (!user) return null;
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profErr } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .single();
+
+  if (profErr) {
+    console.error("Error obteniendo perfil:", profErr);
+    return { user, profile: null };
+  }
 
   return { user, profile };
 }
@@ -31,11 +40,14 @@ async function renderHeaderProfile() {
 
   const { user, profile } = data;
 
-  document.getElementById("profile-name").textContent =
-    profile?.full_name || user.email.split("@")[0];
+  const displayName = profile?.full_name || user.email.split("@")[0];
 
-  document.getElementById("profile-email").textContent =
-    profile?.email || user.email;
+  const elName = document.getElementById("profile-name");
+  const elEmail = document.getElementById("profile-email");
+  const avatarProfile = document.getElementById("profile-avatar");
+
+  if (elName) elName.textContent = displayName;
+  if (elEmail) elEmail.textContent = profile?.email || user.email;
 
   const initials = (profile?.full_name || user.email)
     .split(" ")
@@ -44,12 +56,10 @@ async function renderHeaderProfile() {
     .substring(0, 2)
     .toUpperCase();
 
-  const avatarProfile = document.getElementById("profile-avatar");
-
   if (profile?.avatar_url) {
-    // Header
+    // Header (avatar pequeño global)
     if (window.updateHeaderAvatar) {
-      window.updateHeaderAvatar(profile.avatar_url, profile.full_name);
+      window.updateHeaderAvatar(profile.avatar_url, displayName);
     }
 
     // Avatar del perfil (círculo grande arriba)
@@ -62,7 +72,7 @@ async function renderHeaderProfile() {
   } else {
     // Header fallback a iniciales
     if (window.updateHeaderAvatar) {
-      window.updateHeaderAvatar(null, profile.full_name);
+      window.updateHeaderAvatar(null, displayName);
     }
 
     // Perfil fallback a iniciales
@@ -84,7 +94,6 @@ async function loadModule(page) {
     const response = await fetch(`/perfil/${page}.html`);
     const html = await response.text();
 
-    // Inserción correcta asegurando que el DOM se pinte
     container.innerHTML = "";
     container.insertAdjacentHTML("beforeend", html);
 
@@ -93,20 +102,15 @@ async function loadModule(page) {
     if (page === "preferencias") await initPreferencias();
     if (page === "cursos") await initCursos();
 
-    /* --------------------------------------------------------
-       MUY IMPORTANTE:
-       initAvatar() se carga solo DESPUÉS de que el DOM fue pintado.
-    -------------------------------------------------------- */
+    // Avatar: se inicializa solo cuando el DOM ya está pintado
     if (page === "avatar") {
       const module = await import("/perfil/js/avatar.js");
-
-      // Espera microtask → DOM 100% renderizado
       requestAnimationFrame(() => {
         module.initAvatar();
       });
     }
   } catch (err) {
-    console.error(err);
+    console.error("Error cargando módulo", page, err);
     container.innerHTML = `
       <div style="padding:20px; color:#ff6b6b">
         Error cargando el módulo <strong>${page}</strong>.
@@ -150,17 +154,26 @@ async function fillDatosForm() {
 
   const { user, profile } = data;
 
-  // Ojo: en tu schema final usas country/language,
-  // pero aquí mantengo los ids que ya tenías en el HTML.
-  document.getElementById("inputFullName").value = profile?.full_name || "";
-  document.getElementById("inputEmail").value = profile?.email || user.email;
-  document.getElementById("inputPais").value = profile?.pais || "";
-  document.getElementById("inputIdioma").value = profile?.idioma || "es";
+  const inputFullName = document.getElementById("inputFullName");
+  const inputEmail = document.getElementById("inputEmail");
+  const inputPais = document.getElementById("inputPais");
+  const inputIdioma = document.getElementById("inputIdioma");
+  const inputNacimiento = document.getElementById("inputNacimiento");
 
-  if (profile?.birthdate) {
-    document.getElementById("inputNacimiento").value = profile.birthdate;
+  if (inputFullName)
+    inputFullName.value = profile?.full_name || "";
+  if (inputEmail)
+    inputEmail.value = profile?.email || user.email;
+  if (inputPais)
+    inputPais.value = profile?.pais || "";
+  if (inputIdioma)
+    inputIdioma.value = profile?.idioma || "es";
+
+  // IMPORTANTE: la columna real en DB es birthdate (date)
+  if (inputNacimiento && profile?.birthdate) {
+    // Postgres date ya viene como "YYYY-MM-DD"
+    inputNacimiento.value = profile.birthdate;
   }
-
 }
 
 /* ============================================================
@@ -171,37 +184,62 @@ document.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const msg = document.getElementById("datosMsg");
+  if (!msg) return;
   msg.textContent = "Guardando...";
+  msg.style.color = "#fff";
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data, error: authErr } = await supabase.auth.getUser();
+  if (authErr) {
+    console.error("Error auth:", authErr);
+    msg.textContent = "❌ Error de autenticación";
+    msg.style.color = "#ff6b6b";
+    return;
+  }
+
+  const user = data?.user;
   if (!user) {
     msg.textContent = "❌ Usuario no autenticado.";
     msg.style.color = "#ff6b6b";
     return;
   }
 
-  const fullName = document.getElementById("inputFullName").value.trim();
-  const pais = document.getElementById("inputPais").value.trim();
-  const idioma = document.getElementById("inputIdioma").value.trim();
-  const birthdate = document.getElementById("inputNacimiento").value.trim();
+  const fullName = document.getElementById("inputFullName")?.value.trim() ?? "";
+  const pais = document.getElementById("inputPais")?.value.trim() ?? "";
+  const idioma = document.getElementById("inputIdioma")?.value.trim() ?? "";
+  const birthdateRaw = document.getElementById("inputNacimiento")?.value.trim() ?? "";
 
-  const updates = {};
-  if (fullName) updates.full_name = fullName;
-  if (pais) updates.pais = pais;
-  if (idioma) updates.idioma = idioma;
-  if (birthdate) updates.birthdate = birthdate;
+  // Normalizamos: si el campo está vacío, mandamos null (permitido por el schema)
+  const birthdate = birthdateRaw || null;
 
-  updates.updated_at = new Date();
+  // Enviamos SIEMPRE los campos clave para evitar updates "vacíos"
+    const updates = {
+    full_name: fullName,
+    pais,
+    idioma
+    };
 
-  const { error } = await supabase
-    .from("profiles")
-    .update(updates)
-    .eq("id", user.id);
+    if (birthdate) updates.birthdate = birthdate;
 
-  msg.style.color = error ? "#ff6b6b" : "#3ee98a";
-  msg.textContent = error ? "❌ Error" : "✔ Guardado";
+
+  try {
+    const { error } = await supabase
+      .from("profiles")
+      .update(updates)
+      .eq("id", user.id);
+
+    if (error) {
+      console.error("Error actualizando perfil:", error, updates);
+      msg.textContent = "❌ Error guardando";
+      msg.style.color = "#ff6b6b";
+    } else {
+      msg.textContent = "✔ Guardado";
+      msg.style.color = "#3ee98a";
+    }
+  } catch (err) {
+    console.error("Excepción en update profiles:", err);
+    msg.textContent = "❌ Error inesperado";
+    msg.style.color = "#ff6b6b";
+  }
 });
 
 /* ============================================================
@@ -220,34 +258,50 @@ async function initPreferencias() {
 
   const elModo = document.getElementById("modoExpress");
   const elNotif = document.getElementById("notifDiarias");
+  const form = document.getElementById("form-preferencias");
 
-  if (!elModo) return;
+  if (!elModo || !form) return;
 
   elModo.checked = prefs.modoExpress ?? true;
   elNotif.checked = prefs.notifDiarias ?? true;
 
-  const form = document.getElementById("form-preferencias");
-
   form.onsubmit = async (e) => {
     e.preventDefault();
     const msg = document.getElementById("prefMsg");
-    msg.textContent = "Guardando...";
+    if (msg) {
+      msg.textContent = "Guardando...";
+      msg.style.color = "#fff";
+    }
 
     const newPrefs = {
       modoExpress: elModo.checked,
       notifDiarias: elNotif.checked,
     };
 
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        notifications: newPrefs,
-        updated_at: new Date(),
-      })
-      .eq("id", user.id);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          notifications: newPrefs,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", user.id);
 
-    msg.style.color = error ? "#ff6b6b" : "#3ee98a";
-    msg.textContent = error ? "❌ Error" : "✔ Guardado";
+      if (msg) {
+        msg.style.color = error ? "#ff6b6b" : "#3ee98a";
+        msg.textContent = error ? "❌ Error" : "✔ Guardado";
+      }
+
+      if (error) {
+        console.error("Error guardando preferencias:", error);
+      }
+    } catch (err) {
+      console.error("Excepción preferencias:", err);
+      if (msg) {
+        msg.textContent = "❌ Error inesperado";
+        msg.style.color = "#ff6b6b";
+      }
+    }
   };
 }
 
@@ -255,12 +309,15 @@ async function initPreferencias() {
    🔹 Mis Cursos — usando user_courses + progress + user_stats
 ============================================================ */
 async function initCursos() {
-  const { data: session } = await supabase.auth.getUser();
-  if (!session?.user) return;
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data?.user) {
+    if (error) console.error("Error auth en cursos:", error);
+    return;
+  }
 
+  const session = data;
   const userId = session.user.id;
 
-  // Elementos del DOM (por si faltan, salimos sin romper nada)
   const coursesContainer = document.getElementById("coursesContainer");
   const emptyMessage = document.getElementById("coursesEmpty");
   const elActive = document.getElementById("coursesActiveCount");
@@ -269,10 +326,6 @@ async function initCursos() {
 
   if (!coursesContainer) return;
 
-  // 1) Traer en paralelo:
-  //    - Inscripciones del usuario
-  //    - Progreso del usuario
-  //    - XP total real (user_stats)
   const [
     { data: enrollments, error: enrollErr },
     { data: progress, error: progErr },
@@ -303,7 +356,6 @@ async function initCursos() {
     return;
   }
 
-  // 2) Traer datos de los cursos inscritos
   const courseIds = enrollments.map((e) => e.course_id);
   const { data: courses, error: coursesError } = await supabase
     .from("courses")
@@ -316,7 +368,6 @@ async function initCursos() {
     return;
   }
 
-  // 3) Agrupar progreso por course_id
   const progressByCourse = {};
   (progress || []).forEach((p) => {
     if (!p.course_id) return;
@@ -324,13 +375,12 @@ async function initCursos() {
     progressByCourse[p.course_id].push(p);
   });
 
-  // 4) KPIs: activos / completados según user_courses
   let activeCount = 0;
   let completedCount = 0;
 
   enrollments.forEach((e) => {
     if (e.status === "completed") completedCount++;
-    else activeCount++; // todo lo demás lo consideramos activo
+    else activeCount++;
   });
 
   const totalXP = stats?.xp_total || 0;
@@ -339,7 +389,6 @@ async function initCursos() {
   if (elCompleted) elCompleted.textContent = completedCount;
   if (elXpTotal) elXpTotal.textContent = totalXP;
 
-  // 5) Pintar tarjetas
   coursesContainer.innerHTML = "";
 
   enrollments.forEach((enr) => {
@@ -376,43 +425,39 @@ async function initCursos() {
       </div>
     `;
 
-  /* ------------------------------------------
-     CLICK → Abrir curso en su día correspondiente
-  ------------------------------------------- */
-  card.addEventListener("click", async () => {
+    // CLICK → Abrir curso en su día correspondiente
+    card.addEventListener("click", async () => {
+      const { data: progressRows, error: progErr2 } = await supabase
+        .from("progress")
+        .select("day, completed")
+        .eq("user_id", session.user.id)
+        .eq("course_id", course.id)
+        .order("day", { ascending: true });
 
-    // 1) Leer progreso del curso (ya creado por el trigger)
-    const { data: progressRows, error } = await supabase
-      .from("progress")
-      .select("day, completed")
-      .eq("user_id", session.user.id)
-      .eq("course_id", course.id)
-      .order("day", { ascending: true });
-
-    let nextDay = 1;
-
-    if (!error && progressRows?.length) {
-      const completed = progressRows.filter((p) => p.completed);
-
-      if (completed.length > 0) {
-        const lastDone = completed[completed.length - 1].day;
-        nextDay = lastDone + 1;
+      if (progErr2) {
+        console.warn("Error leyendo progreso para continuar curso:", progErr2);
       }
-    }
 
-    // 2) Nunca pasar del total de días
-    if (nextDay > totalDays) {
-      nextDay = totalDays;
-    }
+      let nextDay = 1;
 
-    // 3) Redirigir al curso (ID, no slug)
-    window.location.href = `/curso/index.html?c=${course.id}&day=${nextDay}`;
+      if (!progErr2 && progressRows?.length) {
+        const completed = progressRows.filter((p) => p.completed);
+        if (completed.length > 0) {
+          const lastDone = completed[completed.length - 1].day;
+          nextDay = lastDone + 1;
+        }
+      }
+
+      if (nextDay > totalDays) {
+        nextDay = totalDays;
+      }
+
+      window.location.href = `/curso/index.html?c=${course.id}&day=${nextDay}`;
+    });
+
+    coursesContainer.appendChild(card);
   });
 
-  coursesContainer.appendChild(card);
-});
-
-  // 6) Mensaje vacío
   if (emptyMessage) {
     emptyMessage.style.display =
       enrollments.length === 0 ? "block" : "none";
