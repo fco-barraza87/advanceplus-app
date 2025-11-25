@@ -212,13 +212,14 @@ document.addEventListener("submit", async (e) => {
   const birthdate = birthdateRaw || null;
 
   // Enviamos SIEMPRE los campos clave para evitar updates "vacíos"
-  const updates = {
-    full_name: fullName || null,
-    pais: pais || null,
-    idioma: idioma || null,
-    birthdate,
-    updated_at: new Date().toISOString(),
-  };
+    const updates = {
+    full_name: fullName,
+    pais,
+    idioma
+    };
+
+    if (birthdate) updates.birthdate = birthdate;
+
 
   try {
     const { error } = await supabase
