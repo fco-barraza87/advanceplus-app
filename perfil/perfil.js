@@ -157,9 +157,10 @@ async function fillDatosForm() {
   document.getElementById("inputPais").value = profile?.pais || "";
   document.getElementById("inputIdioma").value = profile?.idioma || "es";
 
-  if (profile?.nacimiento) {
-    document.getElementById("inputNacimiento").value = profile.nacimiento;
+  if (profile?.birthdate) {
+    document.getElementById("inputNacimiento").value = profile.birthdate;
   }
+
 }
 
 /* ============================================================
