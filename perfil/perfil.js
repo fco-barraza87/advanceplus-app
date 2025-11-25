@@ -169,7 +169,7 @@ async function fillDatosForm() {
   if (inputIdioma)
     inputIdioma.value = profile?.idioma || "es";
 
-  // Columna real en DB: birthdate (date)
+  // IMPORTANTE: la columna real en DB es birthdate (date)
   if (inputNacimiento && profile?.birthdate) {
     // Postgres date ya viene como "YYYY-MM-DD"
     inputNacimiento.value = profile.birthdate;
@@ -208,17 +208,18 @@ document.addEventListener("submit", async (e) => {
   const idioma = document.getElementById("inputIdioma")?.value.trim() ?? "";
   const birthdateRaw = document.getElementById("inputNacimiento")?.value.trim() ?? "";
 
-  // Normalizamos: si el campo está vacío, NO lo mandamos.
-  const updates = {
+  // Normalizamos: si el campo está vacío, mandamos null (permitido por el schema)
+  const birthdate = birthdateRaw || null;
+
+  // Enviamos SIEMPRE los campos clave para evitar updates "vacíos"
+    const updates = {
     full_name: fullName,
     pais,
-    idioma,
-  };
+    idioma
+    };
 
-  if (birthdateRaw !== "") {
-    // Esperamos formato YYYY-MM-DD (input[type="date"])
-    updates.birthdate = birthdateRaw;
-  }
+    if (birthdate) updates.birthdate = birthdate;
+
 
   try {
     const { error } = await supabase
@@ -282,6 +283,7 @@ async function initPreferencias() {
         .from("profiles")
         .update({
           notifications: newPrefs,
+          updated_at: new Date().toISOString(),
         })
         .eq("id", user.id);
 
