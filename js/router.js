@@ -1,12 +1,13 @@
-// /js/router.js
 import { supabase } from "./supabase.js";
 
-/* BASE */
+/* ========== SESSION ========= */
+
 export async function getUser() {
   const { data: { session }} = await supabase.auth.getSession();
   return session?.user || null;
 }
 
+/* ========== PROFILE (solo lo necesario) ========= */
 
 export async function getProfile(userId) {
   const { data, error } = await supabase
@@ -23,14 +24,7 @@ export async function getProfile(userId) {
   return data;
 }
 
-const user = await getUser();
-if (!user) {
-  window.location.href = "/index.html";
-  return;
-}
-
-const role = user.app_metadata?.role || "user";
-
+/* ========== USER COURSES ========= */
 
 export async function getUserCourses(userId) {
   const { data, error } = await supabase
@@ -43,14 +37,23 @@ export async function getUserCourses(userId) {
     return [];
   }
 
-  return data || [];
+  return data;
 }
 
-/* ROUTER PRINCIPAL */
+/* ========== ROUTER PRINCIPAL ========= */
+
 export async function runRouter() {
   const user = await getUser();
   if (!user) {
     window.location.href = "/index.html";
+    return;
+  }
+
+  // el rol ahora viene del JWT 🎉
+  const role = user.app_metadata?.role || "user";
+
+  if (role === "admin" || role === "coach") {
+    window.location.href = "/admin/index.html";
     return;
   }
 
@@ -60,35 +63,15 @@ export async function runRouter() {
   const userCourses = await getUserCourses(user.id);
   const hasCourses = userCourses.length > 0;
 
-  // A) Usuario frío
   if (!hasCourses && !onboardingCompleted) {
     window.location.href = "/onboarding/step1.html";
     return;
   }
 
-  // B) Usuario con cursos
   if (hasCourses) {
-    const firstCourse = userCourses[0].course_id;
-    window.location.href = `/curso/index.html?c=${firstCourse}`;
+    window.location.href = `/curso/index.html?c=${userCourses[0].course_id}`;
     return;
   }
 
-  // C) Sin cursos pero onboarding OK
-  if (!hasCourses && onboardingCompleted) {
-    window.location.href = "/dashboard/index.html";
-    return;
-  }
-}
-
-/* Vistas que solo necesitan verificar sesión */
-export async function protectUserView() {
-  const user = await getUser();
-  if (!user) {
-    window.location.href = "/index.html";
-  }
-}
-
-/* Alias antiguo (si lo usas en alguna parte) */
-export async function protectView() {
-  await runRouter();
+  window.location.href = "/dashboard/index.html";
 }
