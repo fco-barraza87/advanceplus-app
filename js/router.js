@@ -2,6 +2,12 @@
 import { supabase } from "./supabase.js";
 
 /* BASE */
+export async function getUser() {
+  const { data: { session }} = await supabase.auth.getSession();
+  return session?.user || null;
+}
+
+
 export async function getProfile(userId) {
   const { data, error } = await supabase
     .from("profiles")
@@ -25,21 +31,6 @@ if (!user) {
 
 const role = user.app_metadata?.role || "user";
 
-
-export async function getProfile(userId) {
-  const { data, error } = await supabase
-    .from("profiles")             // <-- antes ponías "users"
-    .select("onboarding_completed")
-    .eq("id", userId)
-    .single();
-
-  if (error) {
-    console.error("Error getProfile:", error);
-    return null;
-  }
-
-  return data;
-}
 
 export async function getUserCourses(userId) {
   const { data, error } = await supabase
