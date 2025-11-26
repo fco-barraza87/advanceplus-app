@@ -7,6 +7,28 @@ export async function getUser() {
   return session?.user || null;
 }
 
+
+export async function protectUserView() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    window.location.href = "/index.html";
+    return;
+  }
+
+  // cargar el perfil
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  // si es admin, no debe estar aquí
+  if (profile?.role === "admin") {
+    window.location.href = "/admin/index.html";
+  }
+}
+
+
 /* ========== PROFILE (solo lo necesario) ========= */
 
 export async function getProfile(userId) {
