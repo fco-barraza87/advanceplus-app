@@ -120,58 +120,46 @@
 
 
 /* ──────────────────────────────
-   LOGIN (con redirección por rol)
+   LOGIN usando JWT (sin tocar profiles)
 ────────────────────────────── */
-    loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-      const email = document.getElementById("loginEmail").value.trim();
-      const password = document.getElementById("loginPassword").value.trim();
-      const err = document.getElementById("loginError");
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value.trim();
+  const err = document.getElementById("loginError");
 
-      err.textContent = "";
+  err.textContent = "";
 
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+  // 1) Login normal
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-      if (error) {
-        err.textContent = "Credenciales incorrectas";
-        return;
-      }
+  if (error) {
+    err.textContent = "Credenciales incorrectas";
+    return;
+  }
 
-      // 🔍 Obtener sesión
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session || !session.user) {
-        err.textContent = "Error obteniendo sesión";
-        return;
-      }
+  // 2) Traer el JWT recién generado
+  const { data: { session } } = await supabase.auth.getSession();
 
-      const userId = session.user.id;
+  if (!session || !session.user) {
+    err.textContent = "Error obteniendo sesión";
+    return;
+  }
 
-      // 🔍 Obtener rol desde profiles (nunca desde el JWT)
-      const { data: profile, error: errProfile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", userId)
-        .single();
+  // 3) Leer rol desde JWT (NO desde profiles)
+  const role = session.user.app_metadata?.role || "user";
 
-      if (errProfile || !profile) {
-        console.error("No se pudo leer el rol del usuario:", errProfile);
-        err.textContent = "Error interno. Contacta soporte.";
-        return;
-      }
+  // 4) Redirecciones por rol
+  if (role === "admin" || role === "coach") {
+    window.location.href = "/admin/index.html";
+    return;
+  }
 
-      const role = profile.role;
-
-      // 🎯 Redirecciones correctas
-      if (role === "admin" || role === "coach") {
-        window.location.href = "/admin/index.html";
-        return;
-      }
-
-      // Usuario normal
-      window.location.href = "/dashboard/index.html";
-    });
-
+  // Usuario normal
+  window.location.href = "/dashboard/index.html";
+});
+  
 
     /* ──────────────────────────────
        REGISTER

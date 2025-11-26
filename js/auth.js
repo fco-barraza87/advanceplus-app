@@ -2,28 +2,19 @@
 import { supabase } from "./supabase.js";
 
 /* -----------------------------------------------------
-   AUTH CORE – Manejo centralizado de sesión
+   AUTH CORE – Sesión
 ----------------------------------------------------- */
 
-/**
- * Obtiene el usuario autenticado (auth.users).
- */
 export async function getCurrentUser() {
   const { data: { user } } = await supabase.auth.getUser();
   return user;
 }
 
-/**
- * Cierra sesión global.
- */
 export async function logout() {
   await supabase.auth.signOut();
   window.location.href = "/index.html";
 }
 
-/**
- * Escucha cambios de sesión (login, logout, refresh).
- */
 supabase.auth.onAuthStateChange(async (event) => {
   if (event === "SIGNED_OUT") {
     window.location.href = "/index.html";
@@ -31,30 +22,20 @@ supabase.auth.onAuthStateChange(async (event) => {
 });
 
 /* -----------------------------------------------------
-   VALIDACIONES DE ACCESO (Role-Based Access)
+   ROLE ACCESS — usando JWT, no SELECT a profiles
 ----------------------------------------------------- */
 
-/**
- * Devuelve perfil completo desde la tabla CORRECTA: public.profiles
- */
-export async function getUserProfile(userId) {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("id, full_name, role, avatar_url, xp_total, streak_current")
-    .eq("id", userId)
-    .single();
-
-  if (error) {
-    console.error("Error cargando perfil:", error);
-    return null;
-  }
-
-  return data;
+export async function getUserRole() {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.user?.app_metadata?.role || "user";
 }
 
-/**
- * Asegura que el usuario esté autenticado.
- */
+/* YA NO CONSULTAMOS LA TABLA profiles para el ROL */
+
+/* -----------------------------------------------------
+   Protecciones de acceso
+----------------------------------------------------- */
+
 export async function requireAuth() {
   const user = await getCurrentUser();
   if (!user) {
@@ -64,68 +45,52 @@ export async function requireAuth() {
   return user;
 }
 
-/**
- * Asegura acceso ADMIN.
- */
 export async function requireAdmin() {
-  const user = await requireAuth();
-  if (!user) return;
+  await requireAuth();
+  const role = await getUserRole();
 
-  const profile = await getUserProfile(user.id);
-  if (!profile || profile.role !== "admin") {
+  if (role !== "admin") {
     alert("Acceso denegado.");
     window.location.href = "/dashboard/index.html";
   }
-
-  return profile;
 }
 
-/**
- * Asegura acceso COACH.
- */
 export async function requireCoach() {
-  const user = await requireAuth();
-  if (!user) return;
+  await requireAuth();
+  const role = await getUserRole();
 
-  const profile = await getUserProfile(user.id);
-  if (!profile || profile.role !== "coach") {
+  if (role !== "coach") {
     alert("Acceso exclusivo para coaches.");
     window.location.href = "/dashboard/index.html";
   }
-
-  return profile;
 }
 
-/**
- * Asegura acceso USER.
- */
 export async function requireUser() {
-  const user = await requireAuth();
-  if (!user) return;
+  await requireAuth();
+  const role = await getUserRole();
 
-  const profile = await getUserProfile(user.id);
-  if (!profile || profile.role !== "user") {
+  if (role !== "user") {
     alert("Acceso denegado.");
     window.location.href = "/dashboard/index.html";
   }
-
-  return profile;
 }
 
 /* -----------------------------------------------------
-   Información mínima para UI/Header
+   Información mínima para UI/header
 ----------------------------------------------------- */
 export async function loadUserMinimalInfo() {
   const user = await getCurrentUser();
   if (!user) return null;
 
-  const profile = await getUserProfile(user.id);
+  const { data: { session } } = await supabase.auth.getSession();
+  const role = session?.user?.app_metadata?.role || "user";
 
+  // YA NO LEES LA TABLA profiles PARA EL ROL
   return {
     id: user.id,
     email: user.email,
-    name: profile?.full_name || "",
-    role: profile?.role || "user",
-    avatar: profile?.avatar_url || null,
+    name: user.email.split("@")[0],  // o luego lo completamos con profile
+    role,
+    avatar: null
   };
 }
