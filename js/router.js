@@ -1,29 +1,47 @@
-console.log("🔥 router.js cargó correctamente");
+console.log("🔥 router.js CARGÓ CORRECTAMENTE");
 
 import { supabase } from "./supabase.js";
 
-/* ======================================
-   PROTEGER VISTA — SOLO VERIFICA SESIÓN
-====================================== */
+/* ==========================================
+   NO REDIRIGIR SI ESTAMOS EN RUTA DE ADMIN
+========================================== */
+const ADMIN_PATH = "/admin/";
+
+if (window.location.pathname.startsWith(ADMIN_PATH)) {
+  console.log("Router desactivado en /admin/");
+}
+
+/* ==========================================
+   FUNCIÓN FALTANTE PARA EVITAR EL ERROR
+   Esta función es usada por index.html,
+   dashboard.html, onboarding, etc.
+========================================== */
 export async function protectUserView() {
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
     window.location.href = "/index.html";
   }
 }
 
-/* ======================================
-   BASE
-====================================== */
-export async function getCurrentUser() {
-  const { data: { user } } = await supabase.auth.getUser();
+/* BASE */
+export async function getUser() {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  console.log("👤 Rol detectado:", role);
   return user;
 }
 
-export async function getUserRole() {
-  const { data: { session } } = await supabase.auth.getSession();
-  return session?.user?.app_metadata?.role || "user";
+export async function getProfile(userId) {
+  const { data } = await supabase
+    .from("profiles")
+    .select("onboarding_completed, role")
+    .eq("id", userId)
+    .single();
+  return data;
 }
 
 export async function getUserCourses(userId) {
@@ -31,76 +49,70 @@ export async function getUserCourses(userId) {
     .from("user_courses")
     .select("course_id")
     .eq("user_id", userId);
-
   return data || [];
 }
 
-/* ======================================
-   RUTAS BASE PARA EVITAR LOOPS
-====================================== */
-const ADMIN_PATH = "/admin/";
-const COACH_PATH = "/coach/";
-const DASHBOARD_PATH = "/dashboard/";
+/* ===========================================
+   ROUTER PRINCIPAL (solo usuarios)
+=========================================== */
 
-/* ======================================
-   ROUTER PRINCIPAL
-====================================== */
+
+
 export async function runRouter() {
-  console.log("🚦 Router ejecutándose en:", window.location.pathname);
 
-  // 1. Verificar sesión
-  const user = await getCurrentUser();
+  console.log("🔥 router corriendo en:", window.location.pathname);
+
+  // 1. Si ya estamos en /admin/, NO redirigir al admin
+  if (window.location.pathname.startsWith(ADMIN_PATH)) {
+    console.log("🟡 Estamos en admin, router no redirige.");
+    return;
+  }
+
+  // 2. Obtener user
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    console.log("🔴 No hay usuario → index");
     window.location.href = "/index.html";
     return;
   }
 
-  // 2. Obtener rol
-  const role = await getUserRole();
-  console.log("👤 Rol detectado:", role);
+  // 3. Obtener perfil
+  const profile = await getProfile(user.id);
+  console.log("Perfil:", profile);
 
-  const currentPath = window.location.pathname;
-
-  /* ======================================
-     3. SI YA ESTÁ EN SU DESTINO → NO REDIRIGE
-  ====================================== */
-
-  // User en dashboard
-  if (role === "user" && currentPath.startsWith(DASHBOARD_PATH)) {
-    console.log("🟢 Usuario ya está en dashboard → router no actúa");
-    return;
-  }
-
-  // Admin en admin
-  if (role === "admin" && currentPath.startsWith(ADMIN_PATH)) {
-    console.log("🟢 Admin ya está en /admin/ → router no actúa");
-    return;
-  }
-
-  // Coach en coach
-  if (role === "coach" && currentPath.startsWith(COACH_PATH)) {
-    console.log("🟢 Coach ya está en /coach/ → router no actúa");
-    return;
-  }
-
-  /* ======================================
-     4. REDIRECCIÓN PRINCIPAL (solo si están no están en destino)
-  ====================================== */
-
-  if (role === "admin") {
-    console.log("🔴 Admin detectado → /admin/index.html");
+  // 4. ADMIN → redirigir SIEMPRE
+  if (profile?.role === "admin") {
+    console.log("🔴 Admin detectado → Redirigiendo a /admin/index.html");
     window.location.href = "/admin/index.html";
     return;
   }
 
-  if (role === "coach") {
-    console.log("🟣 Coach detectado → /coach/index.html");
+  // 5. COACH → redirigir
+  if (profile?.role === "coach") {
+    console.log("🟣 Coach detectado → Redirigiendo a /coach/index.html");
     window.location.href = "/coach/index.html";
     return;
   }
 
-  // Usuario normal → dashboard
-  console.log("🔵 Usuario detectado → /dashboard/index.html");
-  window.location.href = "/dashboard/index.html";
+  // 6. Usuarios normales → flujo estándar
+  const onboardingCompleted = profile?.onboarding_completed || false;
+  const userCourses = await getUserCourses(user.id);
+  const hasCourses = userCourses.length > 0;
+
+  if (!hasCourses && !onboardingCompleted) {
+    window.location.href = "/onboarding/step1.html";
+    return;
+  }
+
+  if (hasCourses) {
+    const firstCourse = userCourses[0].course_id;
+    window.location.href = `/curso/index.html?c=${firstCourse}`;
+    return;
+  }
+
+  if (!hasCourses && onboardingCompleted) {
+    window.location.href = "/dashboard/index.html";
+    return;
+  }
 }
+
+
