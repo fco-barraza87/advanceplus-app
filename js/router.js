@@ -51,36 +51,48 @@ export async function getUserCourses(userId) {
   return data || [];
 }
 
-/* ==========================================
+/* ===========================================
    ROUTER PRINCIPAL (solo usuarios)
-========================================== */
+=========================================== */
+
+const ADMIN_PATH = "/admin/";
+
 export async function runRouter() {
-  if (window.location.pathname.startsWith(ADMIN_PATH)) return;
 
-  // 1. Obtener usuario autenticado
+  console.log("🔥 router corriendo en:", window.location.pathname);
+
+  // 1. Si ya estamos en /admin/, NO redirigir al admin
+  if (window.location.pathname.startsWith(ADMIN_PATH)) {
+    console.log("🟡 Estamos en admin, router no redirige.");
+    return;
+  }
+
+  // 2. Obtener user
   const { data: { user } } = await supabase.auth.getUser();
-
   if (!user) {
     window.location.href = "/index.html";
     return;
   }
 
-  // 2. Obtener su perfil
+  // 3. Obtener perfil
   const profile = await getProfile(user.id);
+  console.log("Perfil:", profile);
 
-  // 3. Si es ADMIN → redirigir al dashboard de admin
+  // 4. ADMIN → redirigir SIEMPRE
   if (profile?.role === "admin") {
+    console.log("🔴 Admin detectado → Redirigiendo a /admin/index.html");
     window.location.href = "/admin/index.html";
     return;
   }
 
-  // 4. Si es COACH → redirigir al dashboard de coach
+  // 5. COACH → redirigir
   if (profile?.role === "coach") {
+    console.log("🟣 Coach detectado → Redirigiendo a /coach/index.html");
     window.location.href = "/coach/index.html";
     return;
   }
 
-  // 5. Usuarios normales (user)
+  // 6. Usuarios normales → flujo estándar
   const onboardingCompleted = profile?.onboarding_completed || false;
   const userCourses = await getUserCourses(user.id);
   const hasCourses = userCourses.length > 0;
@@ -101,4 +113,5 @@ export async function runRouter() {
     return;
   }
 }
+
 
