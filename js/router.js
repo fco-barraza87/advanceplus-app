@@ -1,86 +1,55 @@
 import { supabase } from "./supabase.js";
 
-/* ========== SESSION ========= */
+/* ==========================================
+   NO REDIRIGIR SI ESTAMOS EN RUTA DE ADMIN
+========================================== */
+const ADMIN_PATH = "/admin/";
 
+if (window.location.pathname.startsWith(ADMIN_PATH)) {
+  // no correr router, no redirigir
+  console.log("Router desactivado en /admin/");
+}
+
+/* BASE */
 export async function getUser() {
-  const { data: { session }} = await supabase.auth.getSession();
-  return session?.user || null;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user;
 }
-
-
-export async function protectUserView() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    window.location.href = "/index.html";
-    return;
-  }
-
-  // cargar el perfil
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  // si es admin, no debe estar aquí
-  if (profile?.role === "admin") {
-    window.location.href = "/admin/index.html";
-  }
-}
-
-
-/* ========== PROFILE (solo lo necesario) ========= */
 
 export async function getProfile(userId) {
   const { data, error } = await supabase
     .from("profiles")
-    .select("onboarding_completed")
+    .select("onboarding_completed, role")
     .eq("id", userId)
     .single();
-
-  if (error) {
-    console.error("Error getProfile:", error);
-    return null;
-  }
-
   return data;
 }
 
-/* ========== USER COURSES ========= */
-
 export async function getUserCourses(userId) {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("user_courses")
     .select("course_id")
     .eq("user_id", userId);
-
-  if (error) {
-    console.error("Error getUserCourses:", error);
-    return [];
-  }
-
-  return data;
+  return data || [];
 }
 
-/* ========== ROUTER PRINCIPAL ========= */
-
+/* ROUTER PRINCIPAL (solo usuarios) */
 export async function runRouter() {
+  if (window.location.pathname.startsWith(ADMIN_PATH)) return;
+
   const user = await getUser();
   if (!user) {
     window.location.href = "/index.html";
     return;
   }
 
-  // el rol ahora viene del JWT 🎉
-  const role = user.app_metadata?.role || "user";
-
-  if (role === "admin" || role === "coach") {
-    window.location.href = "/admin/index.html";
-    return;
-  }
-
   const profile = await getProfile(user.id);
   const onboardingCompleted = profile?.onboarding_completed || false;
+
+  // ⛔ No redirigir admins/coaches
+  if (profile?.role === "admin" || profile?.role === "coach") return;
 
   const userCourses = await getUserCourses(user.id);
   const hasCourses = userCourses.length > 0;
@@ -91,9 +60,13 @@ export async function runRouter() {
   }
 
   if (hasCourses) {
-    window.location.href = `/curso/index.html?c=${userCourses[0].course_id}`;
+    const firstCourse = userCourses[0].course_id;
+    window.location.href = `/curso/index.html?c=${firstCourse}`;
     return;
   }
 
-  window.location.href = "/dashboard/index.html";
+  if (!hasCourses && onboardingCompleted) {
+    window.location.href = "/dashboard/index.html";
+    return;
+  }
 }
