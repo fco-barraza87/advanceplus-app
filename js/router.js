@@ -55,18 +55,31 @@ export async function getUserCourses(userId) {
 export async function runRouter() {
   if (window.location.pathname.startsWith(ADMIN_PATH)) return;
 
-  const user = await getUser();
+  // 1. Obtener usuario autenticado
+  const { data: { user } } = await supabase.auth.getUser();
+
   if (!user) {
     window.location.href = "/index.html";
     return;
   }
 
+  // 2. Obtener su perfil
   const profile = await getProfile(user.id);
+
+  // 3. Si es ADMIN → redirigir al dashboard de admin
+  if (profile?.role === "admin") {
+    window.location.href = "/admin/index.html";
+    return;
+  }
+
+  // 4. Si es COACH → redirigir al dashboard de coach
+  if (profile?.role === "coach") {
+    window.location.href = "/coach/index.html";
+    return;
+  }
+
+  // 5. Usuarios normales (user)
   const onboardingCompleted = profile?.onboarding_completed || false;
-
-  // ⛔ No redirigir admins/coaches
-  if (profile?.role === "admin" || profile?.role === "coach") return;
-
   const userCourses = await getUserCourses(user.id);
   const hasCourses = userCourses.length > 0;
 
@@ -86,3 +99,4 @@ export async function runRouter() {
     return;
   }
 }
+
