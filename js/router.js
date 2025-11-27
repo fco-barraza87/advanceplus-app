@@ -6,8 +6,22 @@ import { supabase } from "./supabase.js";
 const ADMIN_PATH = "/admin/";
 
 if (window.location.pathname.startsWith(ADMIN_PATH)) {
-  // no correr router, no redirigir
   console.log("Router desactivado en /admin/");
+}
+
+/* ==========================================
+   FUNCIÓN FALTANTE PARA EVITAR EL ERROR
+   Esta función es usada por index.html,
+   dashboard.html, onboarding, etc.
+========================================== */
+export async function protectUserView() {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    window.location.href = "/index.html";
+  }
 }
 
 /* BASE */
@@ -19,7 +33,7 @@ export async function getUser() {
 }
 
 export async function getProfile(userId) {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("profiles")
     .select("onboarding_completed, role")
     .eq("id", userId)
@@ -35,7 +49,9 @@ export async function getUserCourses(userId) {
   return data || [];
 }
 
-/* ROUTER PRINCIPAL (solo usuarios) */
+/* ==========================================
+   ROUTER PRINCIPAL (solo usuarios)
+========================================== */
 export async function runRouter() {
   if (window.location.pathname.startsWith(ADMIN_PATH)) return;
 
