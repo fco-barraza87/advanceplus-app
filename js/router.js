@@ -55,7 +55,7 @@ export async function getUserCourses(userId) {
    ROUTER PRINCIPAL (solo usuarios)
 =========================================== */
 
-const ADMIN_PATH = "/admin/";
+
 
 export async function runRouter() {
 
