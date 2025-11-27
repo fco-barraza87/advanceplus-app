@@ -1,3 +1,5 @@
+console.log("🔥 router.js CARGÓ CORRECTAMENTE");
+
 import { supabase } from "./supabase.js";
 
 /* ==========================================
