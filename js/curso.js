@@ -5,21 +5,26 @@ import { requireAuth } from "/js/auth.js";
 
 (async () => {
   const params = new URLSearchParams(window.location.search);
-  const identifier = params.get("c");   // puede ser slug o id
+  const courseId = params.get("c");
   const day = Number(params.get("day")) || 1;
 
-  if (!identifier) {
+  if (!courseId) {
     alert("Curso no especificado.");
     window.location.href = "/dashboard/index.html";
     return;
   }
 
-  const course = await loadCourse(identifier);  
-  if (!course) return;
+  // Cargar curso por ID
+  const course = await loadCourse(courseId);
+  if (!course) return; // evita crash
 
+  // Render del header
   await renderCourseHeader(course);
+
+  // Cargar progreso
   await loadUserProgress(course.id, day);
 })();
+
 
 // =======================
 // Utils
@@ -74,30 +79,21 @@ let currentDay = 1;
 // =======================
 // Cargar curso
 // =======================
-async function loadCourse(identifier) {
-  let query = supabase.from("courses").select("*");
+async function loadCourse(courseId) {
+  const { data, error } = await supabase
+    .from("courses")
+    .select("*")
+    .eq("id", courseId)
+    .single();
 
-  // Detectar si es UUID (ID) o SLUG
-  const isUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(identifier);
-
-  if (isUUID) {
-    query = query.eq("id", identifier);
-  } else {
-    query = query.eq("slug", identifier);
-  }
-
-  const { data: course, error } = await query.single();
-
-  if (error || !course) {
+  if (error || !data) {
     console.error("Error cargando curso:", error);
     alert("Error cargando curso.");
-    window.location.href = "/dashboard/index.html";
     return null;
   }
 
-  return course;
+  return data;
 }
-
 
 
 // =======================
@@ -151,11 +147,13 @@ async function loadUserCourse(userId, courseId) {
 // =======================
 // Render Header
 // =======================
-function renderHeader() {
-  qs("#courseTitle").textContent = course.title;
-  qs("#courseSubtitle").textContent = course.subtitle ?? "";
-  qs("#courseCategory").textContent = course.category ?? "";
-  qs("#courseXpReward").textContent = `+${course.xp_reward || 0} XP`;
+async function renderCourseHeader(course) {
+  document.getElementById("courseTitle").textContent = course.title;
+  document.getElementById("courseSubtitle").textContent = course.subtitle || "";
+  document.getElementById("courseCategory").textContent = course.category || "";
+
+  document.getElementById("courseXpHeader").textContent =
+    `${course.xp_reward || 0} XP`;
 }
 
 
