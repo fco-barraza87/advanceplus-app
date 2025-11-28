@@ -2,6 +2,25 @@
 import { supabase } from "/js/supabase.js";
 import { requireAuth } from "/js/auth.js";
 
+
+(async () => {
+  const params = new URLSearchParams(window.location.search);
+  const identifier = params.get("c");   // puede ser slug o id
+  const day = Number(params.get("day")) || 1;
+
+  if (!identifier) {
+    alert("Curso no especificado.");
+    window.location.href = "/dashboard/index.html";
+    return;
+  }
+
+  const course = await loadCourse(identifier);  
+  if (!course) return;
+
+  await renderCourseHeader(course);
+  await loadUserProgress(course.id, day);
+})();
+
 // =======================
 // Utils
 // =======================
@@ -55,22 +74,30 @@ let currentDay = 1;
 // =======================
 // Cargar curso
 // =======================
-async function loadCourse(slug) {
-  const { data, error } = await supabase
-    .from("courses")
-    .select("*")
-    .eq("slug", slug)
-    .single();
+async function loadCourse(identifier) {
+  let query = supabase.from("courses").select("*");
 
-  if (error) {
-    console.error(error);
-    alert("Error cargando curso.");
-    window.location.href = "/dashboard/index.html";
-    return;
+  // Detectar si es UUID (ID) o SLUG
+  const isUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(identifier);
+
+  if (isUUID) {
+    query = query.eq("id", identifier);
+  } else {
+    query = query.eq("slug", identifier);
   }
 
-  course = data;
+  const { data: course, error } = await query.single();
+
+  if (error || !course) {
+    console.error("Error cargando curso:", error);
+    alert("Error cargando curso.");
+    window.location.href = "/dashboard/index.html";
+    return null;
+  }
+
+  return course;
 }
+
 
 
 // =======================
