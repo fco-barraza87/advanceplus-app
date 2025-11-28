@@ -1,8 +1,8 @@
 import { supabase } from "/js/supabase.js";
 
-/* ============================================
-   CARGAR CURSO SOLO POR ID
-============================================ */
+/* ============================================================================
+   1) CARGAR CURSO POR ID
+=========================================================================== */
 async function loadCourse(courseId) {
   const { data, error } = await supabase
     .from("courses")
@@ -19,24 +19,23 @@ async function loadCourse(courseId) {
   return data;
 }
 
-/* ============================================
-   HEADER DEL CURSO
-============================================ */
-export async function renderCourseHeader(course) {
+/* ============================================================================
+   2) RENDERIZAR HEADER DEL CURSO
+=========================================================================== */
+function renderCourseHeader(course) {
   document.getElementById("courseTitle").textContent = course.title;
-  document.getElementById("courseSubtitle").textContent = course.subtitle || "";
-  document.getElementById("courseCategory").textContent = course.category || "";
-  document.getElementById("courseXpHeader").textContent =
-    `${course.xp_reward || 0} XP`;
+  document.getElementById("courseSubtitle").textContent =
+    course.subtitle || "";
+  document.getElementById("courseCategory").textContent =
+    course.category || "";
+
+  document.getElementById("courseXpReward").textContent =
+    `+${course.xp_reward || 0} XP`;
 }
 
-document.getElementById("btnBack").onclick = () => {
-  history.back();
-};
-
-/* ============================================
-   CARGAR LECCIONES POR COURSE_ID
-============================================ */
+/* ============================================================================
+   3) CARGAR LECCIONES DEL CURSO
+=========================================================================== */
 async function loadLessons(courseId) {
   const { data, error } = await supabase
     .from("lessons")
@@ -53,24 +52,25 @@ async function loadLessons(courseId) {
   return data;
 }
 
-/* ============================================
-   PROGRESO DEL USUARIO
-============================================ */
-async function loadUserProgress(courseId, day) {
-  const { data: userCourses } = await supabase
+/* ============================================================================
+   4) PROGRESO GENERAL DEL CURSO (user_courses)
+=========================================================================== */
+async function loadUserProgress(courseId) {
+  const { data } = await supabase
     .from("user_courses")
-    .select("*")
+    .select("progress_pct")
     .eq("course_id", courseId)
     .maybeSingle();
 
-  let progress = userCourses?.progress_pct || 0;
+  const pct = data?.progress_pct || 0;
+
   document.getElementById("courseProgressText").textContent =
-    `Progreso: ${progress}%`;
+    `Progreso: ${pct}%`;
 }
 
-/* ============================================
-   PINTAR TIMELINE
-============================================ */
+/* ============================================================================
+   5) RENDER TIMELINE
+=========================================================================== */
 function renderTimeline(days, activeDay) {
   const timeline = document.getElementById("timelineDays");
   timeline.innerHTML = "";
@@ -78,11 +78,11 @@ function renderTimeline(days, activeDay) {
   for (let d = 1; d <= days; d++) {
     const chip = document.createElement("div");
     chip.className = "day-chip";
+    chip.textContent = d;
 
     if (d === activeDay) chip.classList.add("active");
     if (d < activeDay) chip.classList.add("completed");
 
-    chip.textContent = d;
     chip.onclick = () => {
       const params = new URLSearchParams(window.location.search);
       params.set("day", d);
@@ -93,26 +93,24 @@ function renderTimeline(days, activeDay) {
   }
 }
 
-/* ============================================
-   CARGAR LECCIÓN DEL DÍA
-============================================ */
+/* ============================================================================
+   6) RENDER LECCIÓN
+=========================================================================== */
 function renderLesson(lesson) {
+  document.getElementById("lessonDayLabel").textContent =
+    `Día ${lesson.day}`;
   document.getElementById("lessonTitle").textContent = lesson.title;
   document.getElementById("lessonSubtitle").textContent =
     lesson.subtitle || "";
 
-  const bodyHtml =
-    lesson.content_html ||
-    lesson.text_content ||
-  "<p>Sin contenido.</p>";
+  /* --- CONTENIDO HTML --- */
+  const htmlBody = lesson.content_html?.trim() || "";
+  const textBody = lesson.text_content?.trim() || "";
 
-document.getElementById("lessonBody").innerHTML = bodyHtml;
+  document.getElementById("lessonBody").innerHTML =
+    htmlBody || `<p>${textBody || ""}</p>`;
 
-
-  document.getElementById("lessonXp").textContent =
-    `${lesson.xp_reward || 0} XP`;
-
-  // Imagen
+  /* --- IMAGEN --- */
   if (lesson.image_url) {
     document.getElementById("lessonImageWrapper").style.display = "block";
     document.getElementById("lessonImage").src = lesson.image_url;
@@ -120,36 +118,57 @@ document.getElementById("lessonBody").innerHTML = bodyHtml;
     document.getElementById("lessonImageWrapper").style.display = "none";
   }
 
-  // Audio
+  /* --- AUDIO (opcional) --- */
   if (lesson.audio_url) {
-    document.getElementById("lessonAudioWrapper").style.display = "block";
-    document.getElementById("lessonAudio").src = lesson.audio_url;
-  } else {
-    document.getElementById("lessonAudioWrapper").style.display = "none";
+    if (!document.getElementById("lessonAudioWrapper")) {
+      const audio = document.createElement("div");
+      audio.id = "lessonAudioWrapper";
+      audio.className = "lesson-audio-wrapper";
+      audio.innerHTML = `
+        <audio id="lessonAudio" controls style="width:100%;">
+          <source src="${lesson.audio_url}" type="audio/mpeg">
+        </audio>
+      `;
+      document
+        .getElementById("lessonContainer")
+        .insertBefore(audio, document.getElementById("lessonBody"));
+    } else {
+      document.getElementById("lessonAudio").src = lesson.audio_url;
+      document.getElementById("lessonAudioWrapper").style.display = "block";
+    }
   }
 
-  // XP
+  /* --- EJERCICIO --- */
+  if (lesson.exercise_content?.trim()) {
+    document.getElementById("lessonExercise").style.display = "block";
+    document.getElementById("lessonExercise").innerHTML =
+      lesson.exercise_content;
+  } else {
+    document.getElementById("lessonExercise").style.display = "none";
+  }
+
+  /* --- XP --- */
   document.getElementById("lessonXp").textContent =
-    `${lesson.xp_reward || 0} XP`;
+    `+${lesson.xp_reward || 0} XP`;
 }
 
-/* ============================================
-   COMPLETAR LECCIÓN
-============================================ */
+/* ============================================================================
+   7) COMPLETAR LECCIÓN (RPC)
+=========================================================================== */
 async function completeLesson(courseId, day, xp) {
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
 
-  const { data: userData } = await supabase.auth.getUser();
-  const userId = userData?.user?.id;
-
-  if (!userId) {
-    alert("Sesión expirada. Inicia sesión nuevamente.");
+  if (!user) {
+    alert("Debes iniciar sesión.");
     window.location.href = "/index.html";
     return;
   }
 
-  const { data, error } = await supabase.rpc("finish_lesson", {
-    p_user_id: userId,
+  const { error } = await supabase.rpc("finish_lesson", {
     p_course_id: courseId,
+    p_user_id: user.id,
     p_day: day,
     p_xp: xp
   });
@@ -164,12 +183,12 @@ async function completeLesson(courseId, day, xp) {
   window.location.reload();
 }
 
-
-/* ============================================
-   MAIN
-============================================ */
+/* ============================================================================
+   8) MAIN
+=========================================================================== */
 (async () => {
   const params = new URLSearchParams(window.location.search);
+
   const courseId = params.get("c");
   const day = Number(params.get("day")) || 1;
 
@@ -179,13 +198,18 @@ async function completeLesson(courseId, day, xp) {
     return;
   }
 
-  // 1. CURSO
+  // BOTÓN VOLVER
+  document.getElementById("btnBack").onclick = () => {
+    window.location.href = "/dashboard/index.html";
+  };
+
+  // 1. Cargar curso
   const course = await loadCourse(courseId);
   if (!course) return;
 
   renderCourseHeader(course);
 
-  // 2. LECCIONES
+  // 2. Cargar lecciones
   const lessons = await loadLessons(course.id);
   const lesson = lessons.find(l => l.day === day);
 
@@ -194,15 +218,12 @@ async function completeLesson(courseId, day, xp) {
     return;
   }
 
-  // 3. RENDER
+  // 3. Render
   renderTimeline(lessons.length, day);
   renderLesson(lesson);
-  loadUserProgress(course.id, day);
+  loadUserProgress(course.id);
 
-  // 4. BOTÓN COMPLETAR
-  document.getElementById("btnCompletar").onclick = () => {
-  console.log("CLICK COMPLETAR → OK");
-  completeLesson(course.id, day, lesson.xp_reward);
-};
-
+  // 4. Botón completar
+  document.getElementById("btnCompletar").onclick = () =>
+    completeLesson(course.id, day, lesson.xp_reward);
 })();
