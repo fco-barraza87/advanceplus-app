@@ -30,6 +30,10 @@ export async function renderCourseHeader(course) {
     `${course.xp_reward || 0} XP`;
 }
 
+document.getElementById("btnBack").onclick = () => {
+  history.back();
+};
+
 /* ============================================
    CARGAR LECCIONES POR COURSE_ID
 ============================================ */
@@ -97,8 +101,13 @@ function renderLesson(lesson) {
   document.getElementById("lessonSubtitle").textContent =
     lesson.subtitle || "";
 
-  document.getElementById("lessonBody").innerHTML =
-    lesson.content_html || "<p>Sin contenido.</p>";
+  const bodyHtml =
+    lessons.content_html ||
+    lessons.text_content ||
+  "<p>Sin contenido.</p>";
+
+document.getElementById("lessonBody").innerHTML = bodyHtml;
+
 
   document.getElementById("lessonXp").textContent =
     `${lesson.xp_reward || 0} XP`;
@@ -118,6 +127,10 @@ function renderLesson(lesson) {
   } else {
     document.getElementById("lessonAudioWrapper").style.display = "none";
   }
+
+  // XP
+  document.getElementById("lessonXp").textContent =
+    `${lesson.xp_reward || 0} XP`;
 }
 
 /* ============================================
