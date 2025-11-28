@@ -137,15 +137,22 @@ document.getElementById("lessonBody").innerHTML = bodyHtml;
    COMPLETAR LECCIÓN
 ============================================ */
 async function completeLesson(courseId, day, xp) {
-const { data: session } = await supabase.auth.getUser();
-const userId = session?.user?.id;
 
-const { data, error } = await supabase.rpc("finish_lesson", {
-  p_user_id: userId,
-  p_course_id: courseId,
-  p_day: day,
-  p_xp: xp
-});
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData?.user?.id;
+
+  if (!userId) {
+    alert("Sesión expirada. Inicia sesión nuevamente.");
+    window.location.href = "/index.html";
+    return;
+  }
+
+  const { data, error } = await supabase.rpc("finish_lesson", {
+    p_user_id: userId,
+    p_course_id: courseId,
+    p_day: day,
+    p_xp: xp
+  });
 
   if (error) {
     console.error("Error completando lección:", error);
@@ -156,6 +163,7 @@ const { data, error } = await supabase.rpc("finish_lesson", {
   alert("Lección completada 🎉");
   window.location.reload();
 }
+
 
 /* ============================================
    MAIN
