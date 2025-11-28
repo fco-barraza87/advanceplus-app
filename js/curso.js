@@ -102,8 +102,8 @@ function renderLesson(lesson) {
     lesson.subtitle || "";
 
   const bodyHtml =
-    lessons.content_html ||
-    lessons.text_content ||
+    lesson.content_html ||
+    lesson.text_content ||
   "<p>Sin contenido.</p>";
 
 document.getElementById("lessonBody").innerHTML = bodyHtml;
