@@ -1,10 +1,10 @@
 import { supabase } from "/js/supabase.js";
 
 /* ============================================================================
-   HELPERS DE DATA
-=========================================================================== */
+   HELPERS — CARGA DE DATA
+============================================================================ */
 
-// 1) Cargar curso por ID
+// 1) Cargar curso
 async function loadCourse(courseId) {
   const { data, error } = await supabase
     .from("courses")
@@ -29,103 +29,105 @@ async function loadLessons(courseId) {
     .eq("course_id", courseId)
     .order("day", { ascending: true });
 
-  if (error || !data) {
+  if (error) {
     console.error("Error cargando lecciones:", error);
-    alert("Error cargando lecciones.");
-    return [];
-  }
-
-  return data;
-}
-
-// 3) Cargar registro user_courses (xp + progreso %)
-async function loadUserCourse(userId, courseId) {
-  const { data, error } = await supabase
-    .from("user_courses")
-    .select("progress_pct, xp_gained")
-    .eq("user_id", userId)
-    .eq("course_id", courseId)
-    .maybeSingle();
-
-  if (error) {
-    console.error("Error cargando user_courses:", error);
-  }
-
-  return data || null;
-}
-
-// 4) Cargar progreso por día (tabla progress)
-async function loadProgress(userId, courseId) {
-  const { data, error } = await supabase
-    .from("progress")
-    .select("day, completed, xp")
-    .eq("user_id", userId)
-    .eq("course_id", courseId);
-
-  if (error) {
-    console.error("Error cargando progress:", error);
     return [];
   }
 
   return data || [];
 }
 
-/* ============================================================================
-   RENDER UI
-=========================================================================== */
+// 3) user_courses — progreso general + xp acumulado de ese curso
+async function loadUserCourse(userId, courseId) {
+  const { data } = await supabase
+    .from("user_courses")
+    .select("progress_pct, xp_gained")
+    .eq("user_id", userId)
+    .eq("course_id", courseId)
+    .maybeSingle();
 
-// Header del curso
-function renderCourseHeader(course, userCourse, progressRows) {
+  return data || null;
+}
+
+// 4) progress — estado por cada día
+async function loadProgress(userId, courseId) {
+  const { data } = await supabase
+    .from("progress")
+    .select("day, completed, xp")
+    .eq("user_id", userId)
+    .eq("course_id", courseId);
+
+  return data || [];
+}
+
+// 5) XP total global desde user_stats
+async function loadUserXpTotal() {
+  const { data: userResponse } = await supabase.auth.getUser();
+  if (!userResponse?.user) return 0;
+
+  const userId = userResponse.user.id;
+
+  const { data } = await supabase
+    .from("user_stats")
+    .select("xp_total")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  return data?.xp_total ?? 0;
+}
+
+/* ============================================================================
+   RENDER DEL HEADER
+============================================================================ */
+function renderCourseHeader(course, userXpTotal) {
   document.getElementById("courseTitle").textContent = course.title;
   document.getElementById("courseSubtitle").textContent =
     course.subtitle || "";
   document.getElementById("courseCategory").textContent =
     course.category || "";
 
-  // XP TOTAL REAL del sistema
+  // XP total global
   document.getElementById("courseXpReward").textContent =
-  `+${window.__userXpTotal || 0} XP`;
-
+    `+${userXpTotal} XP`;
 }
 
-// Progreso general (texto "Progreso: X%")
-function renderCourseProgress(lessons, progressRows) {
-  const totalDays = lessons.length;
+/* ============================================================================
+   RENDER DEL PROGRESO GENERAL
+============================================================================ */
+function renderCourseProgress(userCourse, lessons, progressRows) {
+  let pct = userCourse?.progress_pct;
 
-  const completedDays = new Set(
-    progressRows.filter(r => r.completed).map(r => r.day)
-  );
-
-  const pct = Math.round((completedDays.size / totalDays) * 100);
+  if (pct == null) {
+    const completeCount = progressRows.filter(p => p.completed).length;
+    pct = lessons.length
+      ? Math.round((completeCount / lessons.length) * 100)
+      : 0;
+  }
 
   document.getElementById("courseProgressText").textContent =
     `Progreso: ${pct}%`;
-
-  document.getElementById("progressBarFill").style.width = `${pct}%`;
 }
 
-
-// Timeline de días
+/* ============================================================================
+   TIMELINE / DÍAS
+============================================================================ */
 function renderTimeline(lessons, activeDay, progressRows) {
   const timeline = document.getElementById("timelineDays");
   timeline.innerHTML = "";
 
-  const maxDay = lessons.reduce((max, l) => Math.max(max, l.day), 0);
   const completedDays = new Set(
     progressRows.filter(r => r.completed).map(r => r.day)
   );
+
+  const maxDay = lessons.reduce((max, l) => Math.max(max, l.day), 0);
 
   for (let d = 1; d <= maxDay; d++) {
     const chip = document.createElement("div");
     chip.className = "day-chip";
     chip.textContent = d;
 
-    if (completedDays.has(d)) {
-      chip.classList.add("completed");
-    }
-    if (d === activeDay) {
-      chip.classList.add("active");
-    }
+    if (completedDays.has(d)) chip.classList.add("completed");
+    if (d === activeDay) chip.classList.add("active");
 
     chip.onclick = () => {
       const params = new URLSearchParams(window.location.search);
@@ -135,26 +137,20 @@ function renderTimeline(lessons, activeDay, progressRows) {
 
     timeline.appendChild(chip);
   }
-
-
 }
 
-// Render de la lección actual
-function renderCourseHeader(course) {
-  document.getElementById("courseTitle").textContent = course.title;
-  document.getElementById("courseSubtitle").textContent = course.subtitle || "";
-  document.getElementById("courseCategory").textContent = course.category || "";
+/* ============================================================================
+   RENDER DE UNA LECCIÓN
+============================================================================ */
+function renderLesson(lesson, progressRows, maxDay) {
+  document.getElementById("lessonDayLabel").textContent = `DÍA ${lesson.day}`;
+  document.getElementById("lessonTitle").textContent = lesson.title;
+  document.getElementById("lessonSubtitle").textContent =
+    lesson.subtitle || "";
 
-  // XP REAL del usuario (ya cargado global)
-  document.getElementById("courseXpReward").textContent =
-    `+${window.__USER_XP || 0} XP`;
-}
-
-
-  // Contenido principal
+  // Body
   const htmlBody = (lesson.content_html || "").trim();
   const textBody = (lesson.text_content || "").trim();
-
   document.getElementById("lessonBody").innerHTML =
     htmlBody || (textBody ? `<p>${textBody}</p>` : "<p>Sin contenido.</p>");
 
@@ -175,14 +171,53 @@ function renderCourseHeader(course) {
     document.getElementById("lessonExercise").style.display = "none";
   }
 
-  // XP de la lección
+  // XP
   document.getElementById("lessonXp").textContent =
     `+${lesson.xp_reward || 0} XP`;
 
+  /* ─────────────────────────────
+     BOTÓN COMPLETAR
+  ───────────────────────────── */
+  const progress = progressRows.find(p => p.day === lesson.day);
+  const btn = document.getElementById("btnCompletar");
+
+  if (progress?.completed) {
+    btn.textContent = "Terminado";
+    btn.disabled = true;
+    btn.classList.add("btn-disabled");
+  } else {
+    btn.textContent = "Marcar como completado";
+    btn.disabled = false;
+    btn.classList.remove("btn-disabled");
+  }
+
+  /* ─────────────────────────────
+     BOTÓN SIGUIENTE DÍA
+  ───────────────────────────── */
+  let nextBtn = document.getElementById("btnNextDay");
+  if (!nextBtn) {
+    nextBtn = document.createElement("button");
+    nextBtn.id = "btnNextDay";
+    nextBtn.className = "btn-course btn-next-day";
+    document.querySelector(".lesson-footer").appendChild(nextBtn);
+  }
+
+  if (lesson.day >= maxDay) {
+    nextBtn.style.display = "none";
+  } else {
+    nextBtn.style.display = "block";
+    nextBtn.textContent = "Siguiente →";
+    nextBtn.onclick = () => {
+      const params = new URLSearchParams(window.location.search);
+      params.set("day", lesson.day + 1);
+      window.location.search = params.toString();
+    };
+  }
+}
 
 /* ============================================================================
-   COMPLETAR LECCIÓN (RPC) + AVANZAR AL SIGUIENTE DÍA
-=========================================================================== */
+   COMPLETAR LECCIÓN
+============================================================================ */
 async function completeLesson(courseId, userId, day, xp, maxDay) {
   const { error } = await supabase.rpc("finish_lesson", {
     p_course_id: courseId,
@@ -200,41 +235,18 @@ async function completeLesson(courseId, userId, day, xp, maxDay) {
   const nextDay = day + 1;
 
   if (nextDay <= maxDay) {
-    // Ir al siguiente día del curso
     const params = new URLSearchParams(window.location.search);
     params.set("day", nextDay);
     window.location.search = params.toString();
   } else {
-    // Último día: mantener en la página, solo refrescar progreso
     alert("🎉 ¡Has completado este curso!");
     window.location.reload();
   }
 }
 
-/* ============================================
-   OBTENER XP TOTAL DESDE user_stats
-============================================ */
-async function loadUserXp() {
-  const { data: user, error: userError } = await supabase.auth.getUser();
-  if (userError || !user?.user) return 0;
-
-  const userId = user.user.id;
-
-  const { data, error } = await supabase
-    .from("user_stats")
-    .select("xp_total")
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  if (error || !data) return 0;
-
-  return data.xp_total || 0;
-}
-
-
 /* ============================================================================
    MAIN
-=========================================================================== */
+============================================================================ */
 (async () => {
   const params = new URLSearchParams(window.location.search);
   const courseId = params.get("c");
@@ -246,27 +258,22 @@ async function loadUserXp() {
     return;
   }
 
-    // cargar xp REAL del user
-  const xpTotal = await loadUserXp();
-  document.getElementById("courseXpReward").textContent = `+${xpTotal} XP`;
-
-  // Usuario actual
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
+  // User
+  const { data: session } = await supabase.auth.getUser();
+  const user = session?.user;
   if (!user) {
-    alert("Debes iniciar sesión.");
     window.location.href = "/index.html";
     return;
   }
 
-  // Botón volver
-  document.getElementById("btnBack").onclick = () => {
-    window.location.href = "/dashboard/index.html";
-  };
+  // Load XP global
+  const userXpTotal = await loadUserXpTotal();
 
-  // Cargar todo en paralelo
+  // Back button
+  document.getElementById("btnBack").onclick = () =>
+    window.location.href = "/dashboard/index.html";
+
+  // Load all data
   const [course, lessons, userCourse, progressRows] = await Promise.all([
     loadCourse(courseId),
     loadLessons(courseId),
@@ -275,20 +282,21 @@ async function loadUserXp() {
   ]);
 
   if (!course || !lessons.length) {
-    alert("Curso o lecciones no encontrados.");
+    alert("Curso no encontrado.");
     return;
   }
 
-  const maxDay = lessons.reduce((max, l) => Math.max(max, l.day), 0);
-  const currentLesson = lessons.find(l => l.day === day) || lessons[0];
+  const maxDay = Math.max(...lessons.map(l => l.day));
+  const currentLesson =
+    lessons.find(l => l.day === day) || lessons[0];
 
-  // Render UI
-  renderCourseHeader(course, userCourse, progressRows);
+  // Render
+  renderCourseHeader(course, userXpTotal);
   renderCourseProgress(userCourse, lessons, progressRows);
   renderTimeline(lessons, currentLesson.day, progressRows);
-  renderLesson(currentLesson);
+  renderLesson(currentLesson, progressRows, maxDay);
 
-  // Botón "Marcar como completado"
+  // Button "Marcar como completado"
   document.getElementById("btnCompletar").onclick = () =>
     completeLesson(
       course.id,
@@ -297,21 +305,4 @@ async function loadUserXp() {
       currentLesson.xp_reward,
       maxDay
     );
-
-  window.__userXpTotal = xpTotal;
-
-  const isLastDay = currentLesson.day === maxDay;
-    const btnNext = document.getElementById("btnSiguiente");
-
-    if (isLastDay) {
-    btnNext.style.display = "none";
-    } else {
-    btnNext.onclick = () => {
-        const params = new URLSearchParams(window.location.search);
-        params.set("day", currentLesson.day + 1);
-        window.location.search = params.toString();
-    };
-    }
-
-
 })();
