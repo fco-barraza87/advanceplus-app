@@ -153,9 +153,9 @@ function renderLesson(lesson) {
 }
 
 /* ============================================================================
-   7) COMPLETAR LECCIÓN (RPC)
+   7) COMPLETAR LECCIÓN (RPC) + AVANZAR AL SIGUIENTE DÍA
 =========================================================================== */
-async function completeLesson(courseId, day, xp) {
+async function completeLesson(courseId, day, xp, totalDays) {
   const {
     data: { user }
   } = await supabase.auth.getUser();
@@ -179,8 +179,19 @@ async function completeLesson(courseId, day, xp) {
     return;
   }
 
-  alert("Lección completada 🎉");
-  window.location.reload();
+  /** 🔥 AVANCE AUTOMÁTICO */
+  const nextDay = day + 1;
+
+  if (nextDay <= totalDays) {
+    // Ir al siguiente día
+    const params = new URLSearchParams(window.location.search);
+    params.set("day", nextDay);
+    window.location.search = params.toString();
+  } else {
+    // Última lección
+    alert("🎉 ¡Has completado el curso!");
+    window.location.href = "/dashboard/index.html";
+  }
 }
 
 /* ============================================================================
