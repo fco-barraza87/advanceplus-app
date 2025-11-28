@@ -136,9 +136,7 @@ function renderTimeline(lessons, activeDay, progressRows) {
     timeline.appendChild(chip);
   }
 
-  if (!completedDays.has(d) && d > activeDay) {
-    chip.classList.add("locked");
-  }
+
 }
 
 // Render de la lección actual
