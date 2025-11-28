@@ -3,250 +3,677 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Advance+ | Acceso</title>
+  <title>Advance+ · Acceso</title>
 
-  <link rel="stylesheet" href="/css/style.css" />
+  <!-- Fuentes -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
   <style>
-    .auth-tabs { display: flex; justify-content: center; margin-bottom: 20px; }
-    .auth-tab { padding: 10px 20px; cursor: pointer; font-family: Montserrat; color: #F7F7F7; opacity: 0.6; border-bottom: 2px solid transparent; }
-    .auth-tab.active { opacity: 1; border-bottom: 2px solid #C0A450; }
-    .auth-form { display: none; }
-    .auth-form.active { display: block; }
+    :root {
+      --color-bg: radial-gradient(circle at top left, #1b2c55 0%, #0a1020 50%, #02040a 100%);
+      --color-panel: rgba(15, 23, 42, 0.86);
+      --color-panel-soft: rgba(15, 23, 42, 0.72);
+      --color-border: rgba(148, 163, 184, 0.5);
+      --color-gold: #C0A450;
+      --color-gold-soft: rgba(192, 164, 80, 0.16);
+      --color-text-main: #F9FAFB;
+      --color-text-muted: #9CA3AF;
+      --radius-xl: 22px;
+      --radius-md: 14px;
+      --shadow-soft: 0 20px 60px rgba(0, 0, 0, 0.6);
+      --transition-med: 0.22s ease-out;
+    }
 
-    .login-error { color: #ff6b6b; margin-top: 8px; text-align: center; }
-    .login-forgot { margin-top: 15px; text-align: center; cursor: pointer; color: #C0A450; }
-    .reset-modal.hidden { display: none; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--color-bg);
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--color-text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    /* SHELL MOBILE FIRST */
+    .auth-shell {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    .auth-card {
+      background: var(--color-panel);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-soft);
+      padding: 22px 18px 20px;
+      backdrop-filter: blur(18px);
+    }
+
+    @media (min-width: 768px) {
+      .auth-card {
+        padding: 26px 24px 24px;
+      }
+    }
+
+    /* HEADER */
+    .auth-logo {
+      width: 72px;
+      height: 72px;
+      border-radius: 999px;
+      margin: 0 auto 10px;
+      background: radial-gradient(circle at 30% 0%, #FDF7E3 0, #C0A450 38%, #0F1E44 85%);
+      border: 1px solid rgba(248, 250, 252, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', system-ui, sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #0F172A;
+      box-shadow: 0 14px 35px rgba(0, 0, 0, 0.7);
+    }
+
+    .auth-title {
+      font-family: 'Montserrat', system-ui, sans-serif;
+      font-size: 22px;
+      font-weight: 600;
+      text-align: center;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+
+    .auth-subtitle {
+      text-align: center;
+      font-size: 13px;
+      color: var(--color-text-muted);
+      margin-bottom: 18px;
+    }
+
+    /* TABS LOGIN / REGISTER */
+    .auth-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .auth-tab {
+      font-family: 'Montserrat', system-ui, sans-serif;
+      font-size: 13px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      color: rgba(249, 250, 251, 0.75);
+      background: transparent;
+      transition: var(--transition-med);
+    }
+
+    .auth-tab.active {
+      color: #F9FAFB;
+      border-color: rgba(192, 164, 80, 0.9);
+      background: var(--color-gold-soft);
+      box-shadow: 0 0 0 1px rgba(15,23,42,0.9);
+    }
+
+    /* FORMULARIOS */
+    .auth-form {
+      display: none;
+      display: none;
+    }
+
+    .auth-form.active {
+      display: block;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: rgba(249, 250, 251, 0.82);
+    }
+
+    .input {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--color-text-main);
+      font-size: 14px;
+      outline: none;
+      transition: var(--transition-med);
+    }
+
+    .input::placeholder {
+      color: rgba(148, 163, 184, 0.9);
+    }
+
+    .input:focus {
+      border-color: rgba(192, 164, 80, 0.9);
+      box-shadow: 0 0 0 1px rgba(192, 164, 80, 0.35);
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    /* BOTONES PRINCIPALES */
+    .btn-primary {
+      width: 100%;
+      margin-top: 4px;
+      padding: 11px 14px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(to right, #FDF7DD, #C0A450);
+      color: #111827;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 14px 32px rgba(0,0,0,0.7);
+      transition: var(--transition-med);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    /* ERRORES Y LINKS */
+    .auth-error {
+      color: #F97373;
+      font-size: 13px;
+      text-align: center;
+      min-height: 18px;
+      margin-top: 8px;
+    }
+
+    .auth-helper {
+      text-align: center;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+
+    .auth-link {
+      color: var(--color-gold);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .auth-link:hover {
+      text-decoration: underline;
+    }
+
+    /* SOCIAL (OCULTAS POR AHORA) */
+    .auth-social {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .auth-social--hidden {
+      display: none; /* 👈 oculto ahora, se puede quitar luego */
+    }
+
+    .btn-social {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: rgba(15,23,42,0.9);
+      color: var(--color-text-main);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition-med);
+    }
+
+    .btn-social span.icon {
+      font-size: 16px;
+    }
+
+    .btn-social:hover {
+      background: rgba(15,23,42,0.98);
+      border-color: rgba(229,231,235,0.95);
+    }
+
+    .auth-separator {
+      margin-top: 14px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      color: var(--color-text-muted);
+      text-align: center;
+      position: relative;
+    }
+
+    .auth-separator::before,
+    .auth-separator::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 32%;
+      height: 1px;
+      background: rgba(148, 163, 184, 0.45);
+    }
+
+    .auth-separator::before {
+      left: 0;
+    }
+
+    .auth-separator::after {
+      right: 0;
+    }
+
+    /* RESET PASSWORD MODAL */
+    .reset-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .reset-overlay.hidden {
+      display: none;
+    }
+
+    .reset-card {
+      width: 100%;
+      max-width: 360px;
+      background: var(--color-panel-soft);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: 18px 18px 16px;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(16px);
+    }
+
+    .reset-title {
+      font-family: 'Montserrat';
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .reset-sub {
+      font-size: 13px;
+      color: var(--color-text-muted);
+      margin-bottom: 12px;
+    }
+
+    .reset-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn-secondary {
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      background: transparent;
+      color: var(--color-text-main);
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(15,23,42,0.9);
+    }
+
+    .reset-msg {
+      font-size: 13px;
+      margin-top: 6px;
+    }
   </style>
 </head>
 
-<body class="login-bg">
+<body>
+  <main class="auth-shell">
+    <section class="auth-card">
 
-  <main class="login-container">
-    <div class="login-card">
+      <!-- LOGO / TITULO -->
+      <div class="auth-logo">A+</div>
+      <h1 class="auth-title">Advance+</h1>
+      <p class="auth-subtitle">Accede a tu cuenta para continuar tu progreso.</p>
 
-      <h1 class="login-title">Advance+</h1>
-
-      <!-- Tabs -->
+      <!-- TABS -->
       <div class="auth-tabs">
-        <div id="tabLogin" class="auth-tab active">Iniciar Sesión</div>
-        <div id="tabRegister" class="auth-tab">Crear Cuenta</div>
+        <button id="tab-login" class="auth-tab active" type="button">Iniciar sesión</button>
+        <button id="tab-register" class="auth-tab" type="button">Crear cuenta</button>
       </div>
 
-      <!-- LOGIN FORM -->
-      <form id="loginForm" class="auth-form active">
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="loginEmail" placeholder="email@example.com" required />
+      <!-- FORM LOGIN -->
+      <form id="loginForm" class="auth-form active" autocomplete="on">
+        <div class="field">
+          <label for="loginEmail">Email</label>
+          <input id="loginEmail" type="email" class="input" placeholder="email@example.com" required />
         </div>
 
-        <div class="form-group">
-          <label>Contraseña</label>
-          <input type="password" id="loginPassword" placeholder="********" required />
+        <div class="field">
+          <label for="loginPassword">Contraseña</label>
+          <input id="loginPassword" type="password" class="input" placeholder="••••••••" required />
         </div>
 
-        <button type="submit" class="btn-a">Ingresar</button>
-        <p id="loginError" class="login-error"></p>
+        <button type="submit" class="btn-primary">Ingresar</button>
+        <p id="loginError" class="auth-error"></p>
 
-        <p class="login-forgot" id="openReset">¿Olvidaste tu contraseña?</p>
+        <p class="auth-helper">
+          <span id="openReset" class="auth-link">¿Olvidaste tu contraseña?</span>
+        </p>
       </form>
 
-      <!-- REGISTER FORM -->
-      <form id="registerForm" class="auth-form">
-        <div class="form-group">
-          <label>Nombre completo</label>
-          <input type="text" id="regName" placeholder="Carlos Pérez" required />
+      <!-- FORM REGISTER -->
+      <form id="registerForm" class="auth-form" autocomplete="on">
+        <div class="field">
+          <label for="regName">Nombre completo</label>
+          <input id="regName" type="text" class="input" placeholder="Carlos Pérez" required />
         </div>
 
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="regEmail" placeholder="email@example.com" required />
+        <div class="field">
+          <label for="regEmail">Email</label>
+          <input id="regEmail" type="email" class="input" placeholder="email@example.com" required />
         </div>
 
-        <div class="form-group">
-          <label>Contraseña</label>
-          <input type="password" id="regPassword" placeholder="********" required />
+        <div class="field">
+          <label for="regPassword">Contraseña</label>
+          <input id="regPassword" type="password" class="input" placeholder="••••••••" required />
         </div>
 
-        <button type="submit" class="btn-a">Crear cuenta</button>
-        <p id="regError" class="login-error"></p>
+        <button type="submit" class="btn-primary">Crear cuenta</button>
+        <p id="regError" class="auth-error"></p>
       </form>
-    </div>
 
-    <!-- RESET MODAL -->
-    <div id="resetModal" class="reset-modal hidden">
-      <div class="reset-box">
-        <h3>Restablecer contraseña</h3>
-        <input type="email" id="resetEmail" placeholder="Ingresa tu email" />
-        <button id="resetSend" class="btn-a">Enviar enlace</button>
-        <button id="resetClose" class="btn-b">Cerrar</button>
-        <p id="resetMsg"></p>
+      <!-- SECCIÓN OAUTH (OCULTA POR AHORA) -->
+      <div class="auth-social auth-social--hidden">
+        <p class="auth-separator">o continúa con</p>
+
+        <button id="btnGoogle" class="btn-social" type="button">
+          <span class="icon">ⓖ</span>
+          <span>Continuar con Google</span>
+        </button>
+
+        <button id="btnApple" class="btn-social" type="button">
+          <span class="icon"></span>
+          <span>Continuar con Apple</span>
+        </button>
       </div>
-    </div>
 
+    </section>
   </main>
 
-  <!-- Supabase global -->
-  <script type="module" src="/js/supabase.js"></script>
+  <!-- MODAL RESET PASSWORD -->
+  <div id="resetOverlay" class="reset-overlay hidden">
+    <div class="reset-card">
+      <h3 class="reset-title">Restablecer contraseña</h3>
+      <p class="reset-sub">Ingresa tu email y te enviaremos un enlace para crear una nueva contraseña.</p>
 
-  <!-- MAIN AUTH LOGIC -->
+      <div class="field">
+        <label for="resetEmail">Email</label>
+        <input id="resetEmail" type="email" class="input" placeholder="email@example.com" />
+      </div>
+
+      <p id="resetMsg" class="reset-msg"></p>
+
+      <div class="reset-actions">
+        <button id="resetCancel" class="btn-secondary" type="button">Cerrar</button>
+        <button id="resetSend" class="btn-primary" type="button" style="width:auto; padding-inline:18px;">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase -->
   <script type="module">
-  import { supabase } from "/js/supabase.js";
+    import { supabase } from "/js/supabase.js";
 
-  document.addEventListener("DOMContentLoaded", () => {
-
-    /* ──────────────────────────────
-       TABS LOGIN / REGISTER
-    ─────────────────────────────── */
-    const tabLogin = document.getElementById("tabLogin");
-    const tabRegister = document.getElementById("tabRegister");
+    const tabLogin = document.getElementById("tab-login");
+    const tabRegister = document.getElementById("tab-register");
     const loginForm = document.getElementById("loginForm");
     const registerForm = document.getElementById("registerForm");
 
-    tabLogin.onclick = () => {
+    const loginError = document.getElementById("loginError");
+    const regError = document.getElementById("regError");
+
+    const resetOverlay = document.getElementById("resetOverlay");
+    const resetEmail = document.getElementById("resetEmail");
+    const resetMsg = document.getElementById("resetMsg");
+    const resetSend = document.getElementById("resetSend");
+    const resetCancel = document.getElementById("resetCancel");
+    const openReset = document.getElementById("openReset");
+
+    /* ─────────────────────────────────────────
+       TABS LOGIN / REGISTER
+    ───────────────────────────────────────── */
+    tabLogin.addEventListener("click", () => {
       tabLogin.classList.add("active");
       tabRegister.classList.remove("active");
       loginForm.classList.add("active");
       registerForm.classList.remove("active");
-    };
+      loginError.textContent = "";
+      regError.textContent = "";
+    });
 
-    tabRegister.onclick = () => {
+    tabRegister.addEventListener("click", () => {
       tabRegister.classList.add("active");
       tabLogin.classList.remove("active");
       registerForm.classList.add("active");
       loginForm.classList.remove("active");
-    };
+      loginError.textContent = "";
+      regError.textContent = "";
+    });
 
+    /* ─────────────────────────────────────────
+       LOGIN · usa profiles.role (NO JWT manual)
+    ───────────────────────────────────────── */
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      loginError.textContent = "";
 
-/* ──────────────────────────────
-   LOGIN usando JWT (sin tocar profiles)
-────────────────────────────── */
-loginForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
 
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value.trim();
-  const err = document.getElementById("loginError");
+      if (!email || !password) {
+        loginError.textContent = "Completa todos los campos.";
+        return;
+      }
 
-  err.textContent = "";
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-  // 1) Login normal
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        console.error(signInError);
+        loginError.textContent = "Credenciales incorrectas o usuario no encontrado.";
+        return;
+      }
 
-  if (error) {
-    err.textContent = "Credenciales incorrectas";
-    return;
-  }
+      // Obtener usuario actual
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-  // 2) Traer el JWT recién generado
-  const { data: { session } } = await supabase.auth.getSession();
+      if (userError || !user) {
+        console.error(userError);
+        loginError.textContent = "No se pudo obtener la sesión.";
+        return;
+      }
 
-  if (!session || !session.user) {
-    err.textContent = "Error obteniendo sesión";
-    return;
-  }
+      // Leer rol desde profiles (NO desde JWT)
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
 
-  // 3) Leer rol desde JWT (NO desde profiles)
-  const role = session.user.app_metadata?.role || "user";
+      if (profileError) {
+        console.warn("Error leyendo profile.role, se usará 'user' por defecto:", profileError);
+      }
 
-  // 4) Redirecciones por rol
-  if (role === "admin" || role === "coach") {
-    window.location.href = "/admin/index.html";
-    return;
-  }
+      const role = profile?.role || "user";
 
-  // Usuario normal
-  window.location.href = "/dashboard/index.html";
-});
-  
+      // Redirecciones
+      if (role === "admin" || role === "coach") {
+        window.location.href = "/admin/index.html";
+      } else {
+        window.location.href = "/dashboard/index.html";
+      }
+    });
 
-    /* ──────────────────────────────
-       REGISTER
-    ─────────────────────────────── */
+    /* ─────────────────────────────────────────
+       REGISTER · crea/upsert profile + curso bienvenida
+    ───────────────────────────────────────── */
     registerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+      regError.textContent = "";
 
       const name = document.getElementById("regName").value.trim();
       const email = document.getElementById("regEmail").value.trim();
       const password = document.getElementById("regPassword").value.trim();
-      const err = document.getElementById("regError");
 
-      err.textContent = "";
+      if (!name || !email || !password) {
+        regError.textContent = "Completa todos los campos.";
+        return;
+      }
 
-      // 1) Crear usuario
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: name } }
+        options: { data: { full_name: name } },
       });
 
-      if (error) {
-        err.textContent = error.message;
+      if (signUpError) {
+        console.error(signUpError);
+        regError.textContent = signUpError.message || "No se pudo crear la cuenta.";
         return;
       }
 
-      // 2) Obtener usuario (fallback)
-      let user = data.user;
-
+      // Usuario recién creado
+      let user = data?.user;
       if (!user) {
-        const retry = await supabase.auth.getUser();
-        user = retry.data.user;
+        const { data: retry, error: retryErr } = await supabase.auth.getUser();
+        if (retryErr) {
+          console.error(retryErr);
+        }
+        user = retry?.user;
       }
 
       if (!user) {
-        err.textContent = "No se pudo iniciar sesión automáticamente.";
+        regError.textContent = "Cuenta creada, pero no se pudo iniciar sesión automáticamente.";
         return;
       }
 
-      await supabase
+      // Upsert en profiles: rol por defecto 'user'
+      const { error: profileUpsertError } = await supabase
         .from("profiles")
-        .update({ display_name: name })
-        .eq("id", user.id);
+        .upsert(
+          {
+            id: user.id,
+            full_name: name,
+            email,
+            role: "user",
+          },
+          { onConflict: "id" }
+        );
 
-      // 3) Buscar curso-bienvenida
-      const { data: course } = await supabase
+      if (profileUpsertError) {
+        console.warn("Error upsert profiles (se puede revisar RLS):", profileUpsertError);
+      }
+
+      // Buscar curso de bienvenida (mock igual que antes)
+      const { data: course, error: courseError } = await supabase
         .from("courses")
         .select("id, slug")
         .eq("slug", "curso-bienvenida")
         .single();
 
-      // 4) Asignar curso
-      if (course) {
+      if (!courseError && course) {
         await supabase.from("user_courses").insert({
           user_id: user.id,
           course_id: course.id,
-          status: "active"
+          status: "active",
         });
       }
 
-      // 5) Redirigir
       window.location.href = "/dashboard/index.html";
     });
 
-
-    /* ──────────────────────────────
+    /* ─────────────────────────────────────────
        RESET PASSWORD
-    ─────────────────────────────── */
-    const resetModal = document.getElementById("resetModal");
+    ───────────────────────────────────────── */
+    openReset.addEventListener("click", () => {
+      resetMsg.textContent = "";
+      resetEmail.value = "";
+      resetOverlay.classList.remove("hidden");
+    });
 
-    document.getElementById("openReset").onclick = () =>
-      resetModal.classList.remove("hidden");
+    resetCancel.addEventListener("click", () => {
+      resetOverlay.classList.add("hidden");
+    });
 
-    document.getElementById("resetClose").onclick = () =>
-      resetModal.classList.add("hidden");
+    resetSend.addEventListener("click", async () => {
+      resetMsg.textContent = "";
+      const email = resetEmail.value.trim();
 
-    document.getElementById("resetSend").onclick = async () => {
-      const email = document.getElementById("resetEmail").value.trim();
-      const msg = document.getElementById("resetMsg");
+      if (!email) {
+        resetMsg.textContent = "Ingresa un email válido.";
+        return;
+      }
 
       const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) {
+        console.error(error);
+        resetMsg.textContent = "Error al enviar el correo. Revisa el email ingresado.";
+      } else {
+        resetMsg.textContent = "Si el email existe, te hemos enviado un enlace.";
+      }
+    });
 
-      msg.textContent = error ? "Error enviando correo" : "Correo enviado";
-    };
+    /* ─────────────────────────────────────────
+       OAUTH (OCULTO VISUALMENTE, CÓDIGO LISTO)
+    ───────────────────────────────────────── */
+    const btnGoogle = document.getElementById("btnGoogle");
+    const btnApple = document.getElementById("btnApple");
 
-  });
+    if (btnGoogle) {
+      btnGoogle.addEventListener("click", async () => {
+        await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: window.location.origin + "/dashboard/index.html",
+          },
+        });
+      });
+    }
+
+    if (btnApple) {
+      btnApple.addEventListener("click", async () => {
+        await supabase.auth.signInWithOAuth({
+          provider: "apple",
+          options: {
+            redirectTo: window.location.origin + "/dashboard/index.html",
+          },
+        });
+      });
+    }
   </script>
-
 </body>
 </html>

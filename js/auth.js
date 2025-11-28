@@ -1,4 +1,4 @@
-// auth.js
+// /js/auth.js
 import { supabase } from "./supabase.js";
 
 /* -----------------------------------------------------
@@ -6,31 +6,36 @@ import { supabase } from "./supabase.js";
 ----------------------------------------------------- */
 
 export async function getCurrentUser() {
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
-}
-
-export async function logout() {
-  await supabase.auth.signOut();
-  window.location.href = "/index.html";
-}
-
-supabase.auth.onAuthStateChange(async (event) => {
-  if (event === "SIGNED_OUT") {
-    window.location.href = "/index.html";
+  const { data, error } = await supabase.auth.getUser();
+  if (error) {
+    console.error("Error getUser:", error);
+    return null;
   }
-});
+  return data.user;
+}
 
 /* -----------------------------------------------------
-   ROLE ACCESS — usando JWT, no SELECT a profiles
+   ROLE ACCESS — usando tabla profiles.role
+   (NO leemos app_metadata, NO manipulamos JWT)
 ----------------------------------------------------- */
 
 export async function getUserRole() {
-  const { data: { session } } = await supabase.auth.getSession();
-  return session?.user?.app_metadata?.role || "user";
-}
+  const user = await getCurrentUser();
+  if (!user) return null;
 
-/* YA NO CONSULTAMOS LA TABLA profiles para el ROL */
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (error) {
+    console.warn("Error leyendo profiles.role, se asume 'user':", error);
+    return "user";
+  }
+
+  return data?.role || "user";
+}
 
 /* -----------------------------------------------------
    Protecciones de acceso
@@ -39,38 +44,42 @@ export async function getUserRole() {
 export async function requireAuth() {
   const user = await getCurrentUser();
   if (!user) {
-    window.location.href = "/index.html";
+    window.location.href = "/login.html"; // o "/index.html" según tu flujo
     return null;
   }
   return user;
 }
 
 export async function requireAdmin() {
-  await requireAuth();
-  const role = await getUserRole();
+  const user = await requireAuth();
+  if (!user) return;
 
+  const role = await getUserRole();
   if (role !== "admin") {
-    alert("Acceso denegado.");
+    alert("Acceso exclusivo para administradores.");
     window.location.href = "/dashboard/index.html";
   }
 }
 
 export async function requireCoach() {
-  await requireAuth();
-  const role = await getUserRole();
+  const user = await requireAuth();
+  if (!user) return;
 
-  if (role !== "coach") {
+  const role = await getUserRole();
+  if (role !== "coach" && role !== "admin") {
+    // admin también puede ver vista de coach si quieres
     alert("Acceso exclusivo para coaches.");
     window.location.href = "/dashboard/index.html";
   }
 }
 
 export async function requireUser() {
-  await requireAuth();
-  const role = await getUserRole();
+  const user = await requireAuth();
+  if (!user) return;
 
+  const role = await getUserRole();
   if (role !== "user") {
-    alert("Acceso denegado.");
+    alert("Acceso exclusivo para usuarios estándar.");
     window.location.href = "/dashboard/index.html";
   }
 }
@@ -78,19 +87,34 @@ export async function requireUser() {
 /* -----------------------------------------------------
    Información mínima para UI/header
 ----------------------------------------------------- */
+
 export async function loadUserMinimalInfo() {
   const user = await getCurrentUser();
   if (!user) return null;
 
-  const { data: { session } } = await supabase.auth.getSession();
-  const role = session?.user?.app_metadata?.role || "user";
+  const role = await getUserRole();
 
-  // YA NO LEES LA TABLA profiles PARA EL ROL
   return {
     id: user.id,
     email: user.email,
-    name: user.email.split("@")[0],  // o luego lo completamos con profile
+    name: user.email?.split("@")[0] || "Usuario",
     role,
     avatar: null
   };
 }
+
+/* -----------------------------------------------------
+   Logout
+----------------------------------------------------- */
+
+export async function logout() {
+  await supabase.auth.signOut();
+  window.location.href = "/login.html"; // o "/index.html" según tu flujo
+}
+
+// Opcional: redirigir si se desloguea en otra pestaña
+supabase.auth.onAuthStateChange(async (event) => {
+  if (event === "SIGNED_OUT") {
+    window.location.href = "/login.html";
+  }
+});
