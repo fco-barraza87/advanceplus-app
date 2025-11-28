@@ -1,0 +1,103 @@
+/* ------ LAYOUT ------ */
+.app-header{
+  position: sticky; top:0; z-index:10;
+  width:100%; background:rgba(10,15,28,0.65);
+  backdrop-filter: blur(6px);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 20px; border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.brand{ display:flex; align-items:center; gap:10px; font-weight:700; }
+.logo{ font-size:1.3rem }
+.header-actions .btn{ padding:8px 14px }
+
+.container{ width:min(1100px, 92%); margin:24px auto 80px; }
+
+.grid{ display:grid; gap:20px; }
+.grid-2-1{ grid-template-columns: 2fr 1fr; }
+@media (max-width: 880px){ .grid-2-1{ grid-template-columns: 1fr; }}
+
+/* ------ CARDS ------ */
+.card{
+  background:#182f65; border-radius:14px; padding:22px;
+  box-shadow:0 10px 24px rgba(0,0,0,0.25);
+}
+
+/* ------ USER CARD ------ */
+.user-row{ display:flex; align-items:center; gap:14px; margin-bottom:10px; }
+.avatar{
+  width:56px; height:56px; border-radius:50%;
+  background:#0a0f1c; display:grid; place-items:center; font-weight:800;
+  color:#c0a450; border:1px solid rgba(255,255,255,0.08);
+}
+
+.chips{ display:flex; gap:8px; margin:10px 0 6px }
+.chip{ background:#0a1a3d; padding:6px 10px; border-radius:999px; font-weight:600; }
+.chip-gold{ background:#c0a450; color:#0f1e44; }
+
+/* ------ XP PROGRESS ------ */
+.xp-wrap{ margin-top:10px }
+.xp-label{ display:flex; justify-content:space-between; margin-bottom:6px }
+.xp-bar{ height:12px; background:#0b1840; border-radius:999px; overflow:hidden; }
+.xp-fill{
+  height:100%; width:0%;
+  background: linear-gradient(90deg, #c0a450, #e7d18b);
+  border-radius:999px; transition: width .9s ease;
+}
+.xp-next{ margin-top:6px }
+
+/* ------ QUICK STATS ------ */
+.stats{ display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-top:16px }
+.stat{ background:#0d1f4a; border-radius:12px; padding:14px }
+.stat-num{ font-size:1.4rem; font-weight:800 }
+.stat-label{ color:#aab6d6 }
+
+/* ------ BADGES ------ */
+.badges{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px }
+.badge{
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  width:90px; background:#0d1f4a; border-radius:12px; padding:12px;
+  border:1px solid rgba(255,255,255,0.06)
+}
+.badge .icon{ font-size:1.6rem }
+.badge .name{ font-weight:700 }
+
+/* ------ COURSES GRID (Netflix-like) ------ */
+.section-title{ display:flex; align-items:baseline; gap:10px; margin-bottom:12px }
+.courses-card{ padding:18px }
+.courses-grid{
+  display:grid; gap:14px;
+  grid-template-columns: repeat(5, 1fr);
+}
+@media (max-width: 1200px){ .courses-grid{ grid-template-columns: repeat(4, 1fr);} }
+@media (max-width: 900px){ .courses-grid{ grid-template-columns: repeat(3, 1fr);} }
+@media (max-width: 640px){ .courses-grid{ grid-template-columns: repeat(2, 1fr);} }
+
+.course{
+  background:#0d1f4a; border-radius:12px; overflow:hidden;
+  display:flex; flex-direction:column; min-height:180px;
+  border:1px solid rgba(255,255,255,0.06)
+}
+.cover{
+  height:110px; background:#0a0f1c url('/assets/placeholder.png') center/cover no-repeat;
+}
+.course-body{ padding:10px; display:flex; flex-direction:column; gap:6px }
+.course-title{ font-weight:700; font-size:0.95rem; min-height:38px }
+.progress-bar{ height:8px; background:#0b1840; border-radius:999px; overflow:hidden }
+.progress-fill{
+  height:100%; width:0%; background:#c0a450; transition: width .9s ease;
+}
+.progress-label{ font-size:0.85rem }
+
+/* ------ ANIMATIONS ------ */
+.fade-in{ animation: fade .5s ease both }
+.slide-up{ animation: up .6s ease both }
+.slide-down{ animation: down .6s ease both }
+
+@keyframes fade{ from{opacity:0} to{opacity:1} }
+@keyframes up{ from{ opacity:0; transform: translateY(10px)} to{ opacity:1; transform:none } }
+@keyframes down{ from{ opacity:0; transform: translateY(-10px)} to{ opacity:1; transform:none }}
+
+/* Buttons extras */
+.btn-outline{
+  background:transparent; color:#c0a450; border:1px solid #c0a450;
+}

@@ -3,59 +3,77 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard | Advance+</title>
-  <link rel="stylesheet" href="/css/style.css" />
+
+  <title>Advance+ · Dashboard</title>
+
+  <!-- TOKENS GLOBALES -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!-- DASHBOARD CSS -->
+  <link rel="stylesheet" href="/css/dashboard.css">
 </head>
+
 <body class="app-bg">
 
-  <!-- HEADER PREMIUM -->
-  <div id="appHeader"></div>
-  <script type="module">
-    import { loadHeader } from "/components/header.js";
-    loadHeader();
-  </script>
+  <!-- HEADER NUEVO (PREMIUM) -->
+  <header class="ap-header">
+    <div class="ap-header-left">
+      <h1 class="ap-logo">A+</h1>
+      <div class="ap-header-info">
+        <span id="headerUserName" class="ap-header-name">Usuario</span>
+        <span id="headerUserRole" class="ap-header-role">Cargando…</span>
+      </div>
+    </div>
 
-  
-  <!-- ----- MAIN CONTENT ----- -->
-  <main class="dashboard-layout">
+    <button id="btnLogout" class="ap-logout-btn">Cerrar sesión</button>
+  </header>
 
-    <!-- SECCIÓN B — GAMIFICACIÓN -->
-    <section class="dash-section gamification-section">
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="dashboard-wrapper">
+
+    <!-- SECCIÓN A — GAMIFICACIÓN -->
+    <section class="dash-section gamification-box">
       <h2 class="section-title">Tu progreso</h2>
 
       <div class="gamification-grid">
 
-        <div class="card gamification-card">
-          <div class="card-header-row">
+        <!-- XP / NIVEL -->
+        <div class="card gamif-card big-card">
+          <div class="card-row">
             <span class="card-label">Nivel</span>
-            <span id="levelLabel" class="card-value">1</span>
+            <span id="userLevel" class="card-level">1</span>
           </div>
 
-          <div class="xp-row">
-            <div class="xp-info">
-              <span id="xpTotalLabel" class="xp-total">0 XP</span>
-              <span id="xpNextLabel" class="xp-next">100 XP para el siguiente nivel</span>
+          <div class="xp-info-row">
+            <div>
+              <span id="xpTotal" class="xp-total">0 XP</span>
+              <span id="xpNextText" class="xp-next">...</span>
             </div>
+
             <div class="xp-bar">
               <div id="xpBarFill" class="xp-bar-fill"></div>
             </div>
           </div>
         </div>
 
-        <div class="card gamification-card small-card">
-          <div class="card-label">Racha actual</div>
-          <div id="streakCurrent" class="card-big-number">0 🔥</div>
+        <!-- Racha -->
+        <div class="card gamif-card small-card">
+          <span class="card-label">Racha actual</span>
+          <span id="streakCurrent" class="card-number">0 🔥</span>
         </div>
 
-        <div class="card gamification-card small-card">
-          <div class="card-label">Mejor racha</div>
-          <div id="streakBest" class="card-big-number">0 🏆</div>
+        <!-- Mejor racha -->
+        <div class="card gamif-card small-card">
+          <span class="card-label">Mejor racha</span>
+          <span id="streakBest" class="card-number">0 🏆</span>
         </div>
 
       </div>
     </section>
 
-    <!-- SECCIÓN C — CURSOS ACTIVOS -->
+
+    <!-- SECCIÓN B — CURSOS ACTIVOS -->
     <section class="dash-section">
       <div class="section-header-row">
         <h2 class="section-title">Tus retos activos</h2>
@@ -64,45 +82,58 @@
 
       <div id="activeCoursesGrid" class="courses-grid"></div>
 
-      <div class="course-actions">
-
-
       <p id="noActiveMessage" class="empty-message" style="display:none;">
-        Aún no has comenzado ningún reto. Empieza por uno de los cursos recomendados abajo. 💪
+        No has comenzado ningún reto todavía. 🚀  
       </p>
     </section>
 
-    <!-- SECCIÓN D — EXPLORAR RETOS -->
+
+    <!-- SECCIÓN C — EXPLORAR -->
     <section class="dash-section">
-      <div class="section-header-row">
-        <h2 class="section-title">Explorar retos</h2>
-      </div>
+      <h2 class="section-title">Explorar retos</h2>
 
       <div id="availableCoursesGrid" class="courses-grid"></div>
 
       <p id="noAvailableMessage" class="empty-message" style="display:none;">
-        No hay más retos disponibles por ahora. 🚀
+        No hay más retos disponibles en este momento. 🔥
       </p>
     </section>
 
   </main>
 
-  <!-- Router -->
+
+  <!-- TAB BAR MÓVIL -->
+  <nav class="tabbar">
+    <button class="tab-btn active" data-nav="dashboard">
+      <span>🏠</span>
+      <small>Inicio</small>
+    </button>
+
+    <button class="tab-btn" data-nav="courses">
+      <span>📘</span>
+      <small>Retos</small>
+    </button>
+
+    <button class="tab-btn" data-nav="profile">
+      <span>👤</span>
+      <small>Perfil</small>
+    </button>
+
+    <button class="tab-btn" data-nav="stats">
+      <span>📊</span>
+      <small>Progreso</small>
+    </button>
+  </nav>
+
+
+  <!-- ROUTER + LOGICA -->
   <script type="module">
     import { protectUserView } from "/js/router.js";
     protectUserView();
   </script>
 
-  <!-- Dashboard logic -->
+  <!-- NUEVA LÓGICA DASHBOARD -->
   <script type="module" src="/js/dashboard.js"></script>
 
-
-  <script type="module">
-  import { runRouter } from "/js/router.js";
-  runRouter();
-  </script>
-
 </body>
-
-
 </html>
