@@ -1713,3 +1713,44 @@ select option {
   transform: none !important;
   animation: none !important;
 }
+
+
+.progress-bar-container {
+  width: 100%;
+  height: 10px;
+  background: rgba(255,255,255,0.08);
+  border-radius: var(--ap-radius-full);
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--ap-gold), #f3e1ac);
+  border-radius: var(--ap-radius-full);
+  transition: width 0.6s ease;
+}
+
+
+.day-chip.completed {
+  background: var(--ap-gold);
+  color: #0A0F1C;
+  border-color: var(--ap-gold);
+  box-shadow: 0 0 6px rgba(192, 164, 80, 0.5);
+}
+
+.day-chip.active {
+  background: #fff;
+  color: #0A0F1C;
+  border-color: #fff;
+  transform: scale(1.08);
+  font-weight: 700;
+  box-shadow: 0 0 8px rgba(255,255,255,0.3);
+}
+
+.day-chip.locked {
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.3);
+  border-style: dashed;
+}

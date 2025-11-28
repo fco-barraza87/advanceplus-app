@@ -82,15 +82,10 @@ function renderCourseHeader(course, userCourse, progressRows) {
   document.getElementById("courseCategory").textContent =
     course.category || "";
 
-  // XP total ganado en este curso
-  const xpFromUserCourse = userCourse?.xp_gained ?? 0;
-  const xpFromProgress = progressRows.reduce(
-    (sum, row) => sum + (row.xp || 0),
-    0
-  );
+  // XP TOTAL REAL del sistema
+  document.getElementById("courseXpReward").textContent =
+  `+${window.__userXpTotal || 0} XP`;
 
-  const totalXp = xpFromUserCourse || xpFromProgress || 0;
-  document.getElementById("courseXpReward").textContent = `+${totalXp} XP`;
 }
 
 // Progreso general (texto "Progreso: X%")
@@ -106,6 +101,8 @@ function renderCourseProgress(userCourse, lessons, progressRows) {
 
   document.getElementById("courseProgressText").textContent =
     `Progreso: ${pct}%`;
+  document.getElementById("progressBarFill").style.width = `${pct}%`;
+
 }
 
 // Timeline de días
@@ -137,6 +134,10 @@ function renderTimeline(lessons, activeDay, progressRows) {
     };
 
     timeline.appendChild(chip);
+  }
+
+  if (!completedDays.has(d) && d > activeDay) {
+    chip.classList.add("locked");
   }
 }
 
@@ -293,4 +294,7 @@ async function loadUserXp() {
       currentLesson.xp_reward,
       maxDay
     );
+
+  window.__userXpTotal = xpTotal;
+
 })();
