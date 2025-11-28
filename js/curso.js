@@ -207,6 +207,27 @@ async function completeLesson(courseId, userId, day, xp, maxDay) {
   }
 }
 
+/* ============================================
+   OBTENER XP TOTAL DESDE user_stats
+============================================ */
+async function loadUserXp() {
+  const { data: user, error: userError } = await supabase.auth.getUser();
+  if (userError || !user?.user) return 0;
+
+  const userId = user.user.id;
+
+  const { data, error } = await supabase
+    .from("user_stats")
+    .select("xp_total")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error || !data) return 0;
+
+  return data.xp_total || 0;
+}
+
+
 /* ============================================================================
    MAIN
 =========================================================================== */
@@ -220,6 +241,10 @@ async function completeLesson(courseId, userId, day, xp, maxDay) {
     window.location.href = "/dashboard/index.html";
     return;
   }
+
+    // cargar xp REAL del user
+  const xpTotal = await loadUserXp();
+  document.getElementById("courseXpReward").textContent = `+${xpTotal} XP`;
 
   // Usuario actual
   const {
