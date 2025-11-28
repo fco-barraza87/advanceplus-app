@@ -188,6 +188,9 @@ async function completeLesson(courseId, day, xp) {
   loadUserProgress(course.id, day);
 
   // 4. BOTÓN COMPLETAR
-  document.getElementById("btnCompletar").onclick = () =>
-    completeLesson(course.id, day, lesson.xp_reward);
+  document.getElementById("btnCompletar").onclick = () => {
+  console.log("CLICK COMPLETAR → OK");
+  completeLesson(course.id, day, lesson.xp_reward);
+};
+
 })();
