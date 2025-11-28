@@ -1754,3 +1754,17 @@ select option {
   color: rgba(255,255,255,0.3);
   border-style: dashed;
 }
+
+.btn-disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn-course-secondary {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: var(--ap-radius);
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.2);
+}

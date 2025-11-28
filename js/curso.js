@@ -89,21 +89,21 @@ function renderCourseHeader(course, userCourse, progressRows) {
 }
 
 // Progreso general (texto "Progreso: X%")
-function renderCourseProgress(userCourse, lessons, progressRows) {
-  let pct = userCourse?.progress_pct;
+function renderCourseProgress(lessons, progressRows) {
+  const totalDays = lessons.length;
 
-  if (pct == null) {
-    const completedCount = progressRows.filter(r => r.completed).length;
-    pct = lessons.length
-      ? Math.round((completedCount / lessons.length) * 100)
-      : 0;
-  }
+  const completedDays = new Set(
+    progressRows.filter(r => r.completed).map(r => r.day)
+  );
+
+  const pct = Math.round((completedDays.size / totalDays) * 100);
 
   document.getElementById("courseProgressText").textContent =
     `Progreso: ${pct}%`;
-  document.getElementById("progressBarFill").style.width = `${pct}%`;
 
+  document.getElementById("progressBarFill").style.width = `${pct}%`;
 }
+
 
 // Timeline de días
 function renderTimeline(lessons, activeDay, progressRows) {
@@ -140,11 +140,16 @@ function renderTimeline(lessons, activeDay, progressRows) {
 }
 
 // Render de la lección actual
-function renderLesson(lesson) {
-  document.getElementById("lessonDayLabel").textContent = `DÍA ${lesson.day}`;
-  document.getElementById("lessonTitle").textContent = lesson.title;
-  document.getElementById("lessonSubtitle").textContent =
-    lesson.subtitle || "";
+function renderCourseHeader(course) {
+  document.getElementById("courseTitle").textContent = course.title;
+  document.getElementById("courseSubtitle").textContent = course.subtitle || "";
+  document.getElementById("courseCategory").textContent = course.category || "";
+
+  // XP REAL del usuario (ya cargado global)
+  document.getElementById("courseXpReward").textContent =
+    `+${window.__USER_XP || 0} XP`;
+}
+
 
   // Contenido principal
   const htmlBody = (lesson.content_html || "").trim();
@@ -173,7 +178,7 @@ function renderLesson(lesson) {
   // XP de la lección
   document.getElementById("lessonXp").textContent =
     `+${lesson.xp_reward || 0} XP`;
-}
+
 
 /* ============================================================================
    COMPLETAR LECCIÓN (RPC) + AVANZAR AL SIGUIENTE DÍA
@@ -294,5 +299,19 @@ async function loadUserXp() {
     );
 
   window.__userXpTotal = xpTotal;
+
+  const isLastDay = currentLesson.day === maxDay;
+    const btnNext = document.getElementById("btnSiguiente");
+
+    if (isLastDay) {
+    btnNext.style.display = "none";
+    } else {
+    btnNext.onclick = () => {
+        const params = new URLSearchParams(window.location.search);
+        params.set("day", currentLesson.day + 1);
+        window.location.search = params.toString();
+    };
+    }
+
 
 })();
