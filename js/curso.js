@@ -137,11 +137,15 @@ document.getElementById("lessonBody").innerHTML = bodyHtml;
    COMPLETAR LECCIÓN
 ============================================ */
 async function completeLesson(courseId, day, xp) {
-  const { error } = await supabase.rpc("finish_lesson", {
-    p_course_id: courseId,
-    p_day: day,
-    p_xp: xp
-  });
+const { data: session } = await supabase.auth.getUser();
+const userId = session?.user?.id;
+
+const { data, error } = await supabase.rpc("finish_lesson", {
+  p_user_id: userId,
+  p_course_id: courseId,
+  p_day: day,
+  p_xp: xp
+});
 
   if (error) {
     console.error("Error completando lección:", error);
