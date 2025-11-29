@@ -7,58 +7,59 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const { data: session } = await supabase.auth.getUser();
   if (!session?.user) return;
-
   const user = session.user;
 
-  // Obtener perfil de la tabla REAL
-  const { data: profile } = await supabase
+  // Obtener datos desde la tabla real "profiles"
+  const { data: profile, error } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .single();
 
-  const inputFullName = document.getElementById("inputFullName");
-  const inputPais = document.getElementById("inputPais");
-  const inputIdioma = document.getElementById("inputIdioma");
-  const inputNacimiento = document.getElementById("inputNacimiento");
+  if (error) {
+    console.error("Error cargando perfil:", error);
+    return;
+  }
 
+  // Inputs del HTML (los que tú tienes real)
+  const inputFullName = document.getElementById("input_fullname");
+  const inputCountry = document.getElementById("input_country");
+  const pEmail = document.getElementById("p_email");
+  const pCreated = document.getElementById("p_created");
+  
+  // Rellenar valores
   inputFullName.value = profile?.full_name ?? "";
-  inputPais.value = profile?.country ?? "";
-  inputIdioma.value = profile?.language ?? "es";
-  inputNacimiento.value = profile?.birthdate ?? "";
-
-  document.getElementById("inputEmail").value = user.email;
+  inputCountry.value = profile?.country ?? "";
+  pEmail.textContent = user.email;
+  pCreated.textContent = new Date(profile?.created_at).toLocaleDateString();
 
   // Guardar cambios
-  document.getElementById("form-datos").onsubmit = async (e) => {
-    e.preventDefault();
+  document.getElementById("saveProfileBtn").addEventListener("click", async () => {
 
     const updates = {
-      full_name: inputFullName.value,
-      country: inputPais.value,
-      language: inputIdioma.value,
-      birthdate: inputNacimiento.value,
+      full_name: inputFullName.value.trim(),
+      country: inputCountry.value.trim(),
       updated_at: new Date(),
     };
 
-    const { error } = await supabase
+    const { error: updateError } = await supabase
       .from("profiles")
       .update(updates)
       .eq("id", user.id);
 
-    const msg = document.getElementById("datosMsg");
+    const msg = document.getElementById("saveMessage");
 
-    if (error) {
+    if (updateError) {
       msg.textContent = "❌ Error al guardar";
       msg.style.color = "#ff6b6b";
-      console.log(error);
+      console.error(updateError);
       return;
     }
 
-    msg.textContent = "✔ Datos guardados";
+    msg.textContent = "✔ Cambios guardados";
     msg.style.color = "#3ee98a";
 
-    // Refrescar header
+    // Actualizar header automáticamente
     loadUserHeader();
-  };
+  });
 });
