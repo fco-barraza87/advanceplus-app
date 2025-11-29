@@ -42,6 +42,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("p_created").textContent =
     new Date(profile.created_at).toLocaleDateString();
 
+  // Cargar switches
+  const notif = profile.notifications || {};
+
+  document.getElementById("notif_racha").checked = !!notif.notifRacha;
+  document.getElementById("notif_privNombre").checked = !!notif.privNombre;
+  document.getElementById("notif_tema").checked = notif.temaVisual === "auto";
+
+  const goals = profile.goals_json || {};
+
+  document.getElementById("goal_disciplina").checked = !!goals.disciplina;
+  document.getElementById("goal_foco").checked = !!goals.foco;
+  document.getElementById("goal_energia").checked = !!goals.energia;
+
+
   // ---- GUARDAR CAMBIOS ----
   document.getElementById("saveProfileBtn").addEventListener("click", async () => {
 
@@ -65,8 +79,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       language: document.getElementById("input_language").value,
       timezone: document.getElementById("input_timezone").value.trim(),
       preferred_focus_time: document.getElementById("input_focus").value.trim(),
-      notifications,
-      goals_json,
+      notifications: {
+        notifRacha: document.getElementById("notif_racha").checked,
+        privNombre: document.getElementById("notif_privNombre").checked,
+        temaVisual: document.getElementById("notif_tema").checked ? "auto" : "manual"
+      },
+
+      goals_json: {
+        disciplina: document.getElementById("goal_disciplina").checked,
+        foco: document.getElementById("goal_foco").checked,
+        energia: document.getElementById("goal_energia").checked
+      },
+
       updated_at: new Date(),
     };
 

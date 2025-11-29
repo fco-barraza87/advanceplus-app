@@ -65,7 +65,18 @@
             <input id="input_phone" class="profile-input" placeholder="+41..." />
 
             <label>País</label>
-            <input id="input_country" class="profile-input" placeholder="Tu país..." />
+            <select id="input_country" class="profile-input">
+            <option value="">Selecciona tu país</option>
+            <option value="Chile">Chile</option>
+            <option value="Suiza">Suiza</option>
+            <option value="España">España</option>
+            <option value="México">México</option>
+            <option value="Argentina">Argentina</option>
+            <option value="Colombia">Colombia</option>
+            <option value="Perú">Perú</option>
+            <option value="USA">USA</option>
+            <option value="otro">Otro</option>
+            </select>
 
             <!-- 🧠 PREFERENCIAS -->
             <h3 class="section-sub">Preferencias de la app</h3>
@@ -80,32 +91,68 @@
             <input id="input_timezone" class="profile-input" placeholder="Europe/Zurich" />
 
             <label>Focus Time preferido</label>
-            <input id="input_focus" class="profile-input" placeholder="mañana / tarde / noche" />
+                <select id="input_focus" class="profile-input">
+                <option value="">Selecciona</option>
+                <option value="mañana">Mañana</option>
+                <option value="tarde">Tarde</option>
+                <option value="noche">Noche</option>
+            </select>
 
             <!-- 🔔 NOTIFICACIONES -->
             <h3 class="section-sub">Notificaciones</h3>
 
-            <label>Email / Push (JSON)</label>
-            <textarea id="input_notifications" class="profile-input" rows="3"></textarea>
+                <h3 class="section-sub">Notificaciones</h3>
+
+                <div class="switch-row">
+                <label>Notificar racha</label>
+                <input type="checkbox" id="notif_racha" class="switch">
+                </div>
+
+                <div class="switch-row">
+                <label>Privacidad de nombre</label>
+                <input type="checkbox" id="notif_privNombre" class="switch">
+                </div>
+
+                <div class="switch-row">
+                <label>Tema visual automático</label>
+                <input type="checkbox" id="notif_tema" class="switch">
+                </div>
+
 
             <!-- 🎯 OBJETIVOS -->
-            <h3 class="section-sub">Objetivos (JSON)</h3>
-            <textarea id="input_goals" class="profile-input" rows="3"></textarea>
+            <h3 class="section-sub">Objetivos</h3>
+
+            <div class="switch-row">
+            <label>Mejorar disciplina</label>
+            <input type="checkbox" id="goal_disciplina" class="switch">
+            </div>
+
+            <div class="switch-row">
+            <label>Mejorar foco</label>
+            <input type="checkbox" id="goal_foco" class="switch">
+            </div>
+
+            <div class="switch-row">
+            <label>Mejorar energía</label>
+            <input type="checkbox" id="goal_energia" class="switch">
+            </div>
+
 
             <!-- 📨 INFO SOLO LECTURA -->
-            <h3 class="section-sub">Información de cuenta</h3>
+            <h3 class="section-sub">Información de tu cuenta</h3>
 
-            <label>Email</label>
-            <p class="profile-static" id="p_email"></p>
+            <div class="account-info-box">
+            <div>
+                <p class="label-small">Email</p>
+                <p id="p_email" class="profile-static"></p>
+            </div>
 
-            <label>Miembro desde</label>
-            <p class="profile-static" id="p_created"></p>
+            <div>
+                <p class="label-small">Miembro desde</p>
+                <p id="p_created" class="profile-static"></p>
+            </div>
+            </div>
 
-            <!-- 💾 BOTÓN -->
-            <button id="saveProfileBtn" class="btn-save-profile">Guardar cambios</button>
-            <p id="saveMessage" class="save-message"></p>
-
-        </div>
         </section>
 
 
