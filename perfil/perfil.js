@@ -20,12 +20,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // ---- RELLENAR CAMPOS ----
+  // ---- HELPERS ----
   const set = (id, v) => {
     const el = document.getElementById(id);
     if (el) el.value = v ?? "";
   };
+  const setSwitch = (id, v) => { document.getElementById(id).checked = !!v; };
 
+  // ---- RELLENAR CAMPOS ----
   set("input_fullname", profile.full_name);
   set("input_birthdate", profile.birthdate);
   set("input_gender", profile.gender);
@@ -34,41 +36,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   set("input_language", profile.language);
   set("input_timezone", profile.timezone);
   set("input_focus", profile.preferred_focus_time);
-  set("input_notifications", JSON.stringify(profile.notifications || {}, null, 2));
-  set("input_goals", JSON.stringify(profile.goals_json || {}, null, 2));
 
-  // Info solo lectura
+  const notif = profile.notifications || {};
+  setSwitch("notif_racha", notif.notifRacha);
+  setSwitch("notif_privNombre", notif.privNombre);
+  setSwitch("notif_tema", notif.temaVisual === "auto");
+
+  const goals = profile.goals_json || {};
+  setSwitch("goal_disciplina", goals.disciplina);
+  setSwitch("goal_foco", goals.foco);
+  setSwitch("goal_energia", goals.energia);
+
+  // SOLO LECTURA
   document.getElementById("p_email").textContent = profile.email;
   document.getElementById("p_created").textContent =
     new Date(profile.created_at).toLocaleDateString();
 
-  // Cargar switches
-  const notif = profile.notifications || {};
-
-  document.getElementById("notif_racha").checked = !!notif.notifRacha;
-  document.getElementById("notif_privNombre").checked = !!notif.privNombre;
-  document.getElementById("notif_tema").checked = notif.temaVisual === "auto";
-
-  const goals = profile.goals_json || {};
-
-  document.getElementById("goal_disciplina").checked = !!goals.disciplina;
-  document.getElementById("goal_foco").checked = !!goals.foco;
-  document.getElementById("goal_energia").checked = !!goals.energia;
-
-
   // ---- GUARDAR CAMBIOS ----
   document.getElementById("saveProfileBtn").addEventListener("click", async () => {
-
-    let notifications = {};
-    let goals_json = {};
-
-    try {
-      notifications = JSON.parse(document.getElementById("input_notifications").value || "{}");
-    } catch {}
-
-    try {
-      goals_json = JSON.parse(document.getElementById("input_goals").value || "{}");
-    } catch {}
 
     const updates = {
       full_name: document.getElementById("input_fullname").value.trim(),
@@ -79,6 +64,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       language: document.getElementById("input_language").value,
       timezone: document.getElementById("input_timezone").value.trim(),
       preferred_focus_time: document.getElementById("input_focus").value.trim(),
+
       notifications: {
         notifRacha: document.getElementById("notif_racha").checked,
         privNombre: document.getElementById("notif_privNombre").checked,
