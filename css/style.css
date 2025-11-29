@@ -1789,3 +1789,54 @@ select option {
   width: 0%;
   transition: width 0.4s ease;
 }
+
+
+.ap-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  background: #0d1224;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.ap-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ap-header-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.ap-header-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.ap-header-role {
+  font-size: 12px;
+  opacity: 0.7;
+  color: #ccc;
+}
+
+.ap-header-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255,255,255,0.15);
+}
+
+.ap-logout-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.25);
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+}
