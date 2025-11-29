@@ -33,17 +33,24 @@ function getLevelProgress(xpTotal) {
 /* ============================================================
    CARGAR GAMIFICACIÓN REAL
 ============================================================ */
-async function loadGamification() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+async function loadGamification(userId) {
+  if (!userId) {
+    console.warn("loadGamification SIN userId");
+    return;
+  }
 
   const { data: stats, error } = await supabase
     .from("user_stats")
     .select("xp_total, streak_current, streak_best")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .maybeSingle();
 
-  if (error || !stats) return;
+  console.log("stats:", stats);
+
+  if (error || !stats) {
+    console.error("Error cargando stats:", error);
+    return;
+  }
 
   const xp = stats.xp_total || 0;
 
@@ -61,13 +68,7 @@ async function loadGamification() {
     `${stats.streak_best || 0} 🏆`;
 }
 
-async function loadGamification(userId) {
-  const { data: stats, error } = await supabase
-    .from("user_stats")
-    .select("xp_total, streak_current, streak_best")
-    .eq("user_id", userId)
-    .maybeSingle();
-}
+
 
 /* ============================================================
    HEADER — Nombre y Rol
@@ -125,8 +126,11 @@ function setupLogout() {
 
   await loadHeaderInfo();
 
+  await loadGamification(user.id);   // <--- ESTA ES LA LLAVE
+
   await loadCourses(user.id);
 
   setupTabBar();
   setupLogout();
 })();
+
