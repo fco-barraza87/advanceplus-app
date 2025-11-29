@@ -39,13 +39,31 @@
   <section class="dash-section">
     <h2 class="section-title">Mi perfil</h2>
 
-    <div class="card">
-      <p><strong>Nombre:</strong> <span id="p_nombre">Cargando...</span></p>
-      <p><strong>Email:</strong> <span id="p_email">Cargando...</span></p>
-      <p><strong>Rol:</strong> <span id="p_role">Cargando...</span></p>
-      <p><strong>País:</strong> <span id="p_country">Cargando...</span></p>
-      <p><strong>Miembro desde:</strong> <span id="p_created">Cargando...</span></p>
-    </div>
+        <div class="card profile-card">
+
+        <label class="profile-label">Nombre</label>
+        <input id="input_fullname" class="profile-input" type="text" placeholder="Tu nombre..." />
+
+        <label class="profile-label">País</label>
+        <input id="input_country" class="profile-input" type="text" placeholder="Tu país..." />
+
+        <label class="profile-label">Email</label>
+        <p class="profile-static" id="p_email"></p>
+
+        <label class="profile-label">Rol</label>
+        <p class="profile-static" id="p_role"></p>
+
+        <label class="profile-label">Miembro desde</label>
+        <p class="profile-static" id="p_created"></p>
+
+        <button id="saveProfileBtn" class="btn-save-profile">
+            Guardar cambios
+        </button>
+
+        <p id="saveMessage" class="save-message"></p>
+
+        </div>
+
   </section>
 
   </main>

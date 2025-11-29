@@ -1854,3 +1854,61 @@ select option {
   color: #fff;
   cursor: pointer;
 }
+
+
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.profile-label {
+  font-weight: 600;
+  color: #ddd;
+  margin-top: 8px;
+}
+
+.profile-input {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: white;
+  font-size: 15px;
+}
+
+.profile-input::placeholder {
+  color: #aaa;
+}
+
+.profile-static {
+  padding: 6px 0;
+  color: #ccc;
+  font-size: 15px;
+}
+
+.btn-save-profile {
+  margin-top: 15px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  color: #fff;
+  background: #0f1e44;        /* Azul Advance+ */
+  border: 1px solid #1b2b55;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-save-profile:hover {
+  background: #182b5e;
+}
+
+.save-message {
+  margin-top: 8px;
+  color: #5af08a;
+  font-size: 14px;
+  min-height: 18px;
+}
