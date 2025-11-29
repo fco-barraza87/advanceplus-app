@@ -29,9 +29,9 @@ export async function protectUserView() {
 ============================================================ */
 export const ROUTES = {
   dashboard: "/dashboard/index.html",
-  courses: "/retos/index.html",
-  profile: "/dashboard/datos.html",
-  stats: "/progreso/index.html",
+  courses: "/perfil/cursos.html",
+  profile: "/perfil/datos.html",
+  stats: "/perfil/stats.html",
 };
 
 /* ============================================================
