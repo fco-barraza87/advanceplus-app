@@ -10,47 +10,55 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const user = session.user;
 
-  // Obtener perfil
+  // Obtener perfil de la tabla REAL
   const { data: profile } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .single();
 
-  // Rellenar campos
-  document.getElementById("input_fullname").value = profile?.fullname ?? "";
-  document.getElementById("input_country").value = profile?.country ?? "";
+  const inputFullName = document.getElementById("inputFullName");
+  const inputPais = document.getElementById("inputPais");
+  const inputIdioma = document.getElementById("inputIdioma");
+  const inputNacimiento = document.getElementById("inputNacimiento");
 
-  document.getElementById("p_email").textContent = user.email;
-  document.getElementById("p_role").textContent = profile?.role ?? "user";
-  document.getElementById("p_created").textContent =
-    new Date(profile?.created_at).toLocaleDateString();
+  inputFullName.value = profile?.full_name ?? "";
+  inputPais.value = profile?.country ?? "";
+  inputIdioma.value = profile?.language ?? "es";
+  inputNacimiento.value = profile?.birthdate ?? "";
+
+  document.getElementById("inputEmail").value = user.email;
 
   // Guardar cambios
-  document.getElementById("saveProfileBtn").addEventListener("click", async () => {
-    const fullname = document.getElementById("input_fullname").value.trim();
-    const country = document.getElementById("input_country").value.trim();
+  document.getElementById("form-datos").onsubmit = async (e) => {
+    e.preventDefault();
+
+    const updates = {
+      full_name: inputFullName.value,
+      country: inputPais.value,
+      language: inputIdioma.value,
+      birthdate: inputNacimiento.value,
+      updated_at: new Date(),
+    };
 
     const { error } = await supabase
       .from("profiles")
-      .update({
-        fullname,
-        country,
-      })
+      .update(updates)
       .eq("id", user.id);
 
-    const message = document.getElementById("saveMessage");
+    const msg = document.getElementById("datosMsg");
 
     if (error) {
-      message.textContent = "❌ Error al guardar.";
-      message.style.color = "#ff6b6b";
+      msg.textContent = "❌ Error al guardar";
+      msg.style.color = "#ff6b6b";
+      console.log(error);
       return;
     }
 
-    message.textContent = "✔️ Cambios guardados.";
-    message.style.color = "#5af08a";
+    msg.textContent = "✔ Datos guardados";
+    msg.style.color = "#3ee98a";
 
-    // Refrescar header con nombre nuevo
+    // Refrescar header
     loadUserHeader();
-  });
+  };
 });
