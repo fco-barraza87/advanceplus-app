@@ -1772,19 +1772,20 @@ select option {
 .course-progress-wrapper {
   width: 100%;
   margin-top: 6px;
+  margin-bottom: 10px;
 }
 
 .progress-bar-bg {
   width: 100%;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.10);
   height: 6px;
-  border-radius: 4px;
+  border-radius: 999px;
   overflow: hidden;
 }
 
 .progress-bar-fill {
   height: 6px;
-  background: #C0A450;
+  background: linear-gradient(90deg, #C0A450, #F3E1AC);
   width: 0%;
-  transition: width .4s ease;
+  transition: width 0.4s ease;
 }
