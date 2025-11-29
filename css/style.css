@@ -1768,3 +1768,23 @@ select option {
   text-align: center;
   border: 1px solid rgba(255,255,255,0.2);
 }
+
+.course-progress-wrapper {
+  width: 100%;
+  margin-top: 6px;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  background: rgba(255,255,255,0.1);
+  height: 6px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 6px;
+  background: #C0A450;
+  width: 0%;
+  transition: width .4s ease;
+}
