@@ -1,60 +1,46 @@
 import { supabase } from "/js/supabase.js";
 
+function initialsFromName(name) {
+  if (!name) return "U";
+
+  const parts = name.trim().split(" ");
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
 export async function loadUserHeader() {
-  // 1) Obtener usuario actual
-  const { data: authData } = await supabase.auth.getUser();
-  const user = authData?.user;
+  // 1. Obtener sesión
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    window.location.href = "/index.html";
-    return;
-  }
+  if (!user) return;
 
-  const userId = user.id;
-
-  // 2) Cargar perfil desde "profiles"
+  // 2. Traer perfil desde DB
   const { data: profile } = await supabase
     .from("profiles")
     .select("full_name, avatar_url, role")
-    .eq("id", userId)
+    .eq("id", user.id)
     .single();
 
-  // 3) Rellenar UI
+  // 3. Rellenar header
   document.getElementById("headerUserName").textContent =
-    profile?.full_name || "Usuario";
+    profile?.full_name || user.email.split("@")[0];
 
   document.getElementById("headerUserRole").textContent =
-    profile?.role?.toUpperCase() || "USER";
+    (profile?.role || "user").toUpperCase();
 
-    const avatarDiv = document.getElementById("headerAvatar");
+  const avatarBox = document.getElementById("headerAvatar");
 
-    if (profile?.avatar_url) {
-    avatarDiv.innerHTML = `<img src="${profile.avatar_url}" alt="avatar">`;
-    } else {
-    const { initials, bg } = generateInitialAvatar(profile?.full_name || "U S");
-    avatarDiv.style.background = bg;
-    avatarDiv.textContent = initials;
-    }
+  // 4. Mostrar avatar real o iniciales
+  if (profile?.avatar_url) {
+    avatarBox.innerHTML = `<img src="${profile.avatar_url}" alt="avatar">`;
+  } else {
+    avatarBox.textContent = initialsFromName(profile?.full_name || user.email);
+  }
 
-
-  // 4) Botón logout
-  document.getElementById("btnLogout").addEventListener("click", async () => {
+  // Logout
+  document.getElementById("btnLogout").onclick = async () => {
     await supabase.auth.signOut();
     window.location.href = "/index.html";
-  });
-
-    function generateInitialAvatar(name) {
-    const initials = name
-        .split(" ")
-        .map(w => w.charAt(0))
-        .join("")
-        .substring(0, 2)
-        .toUpperCase();
-
-    const colors = ["#C0A450", "#4A90E2", "#50E3C2", "#B96BF5", "#F56262"];
-    const bg = colors[Math.floor(Math.random() * colors.length)];
-
-    return { initials, bg };
-    }
-
+  };
 }
