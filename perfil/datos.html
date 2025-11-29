@@ -13,11 +13,25 @@
 <body class="app-bg">
 
   <!-- HEADER PREMIUM -->
-  <div id="appHeader"></div>
-  <script type="module">
-    import { loadUserHeader } from "/components/user-header.js";
-    loadUserHeader();
-  </script>
+  
+  <!-- HEADER NUEVO (PREMIUM) -->
+<header class="ap-header">
+  <div class="ap-header-left">
+    <h1 class="ap-logo">A+</h1>
+
+    <div class="ap-header-info">
+      <span id="headerUserName" class="ap-header-name">Usuario</span>
+      <span id="headerUserRole" class="ap-header-role">Cargando…</span>
+    </div>
+  </div>
+
+  <!-- Avatar dinámico (imagen o iniciales) -->
+  <div id="headerAvatar" class="ap-header-avatar"></div>
+
+  <button id="btnLogout" class="ap-logout-btn">Cerrar sesión</button>
+</header>
+
+
 
   <!-- CONTENIDO PRINCIPAL -->
   <main class="dashboard-wrapper">
@@ -63,6 +77,11 @@
 
   <!-- JS ESPECÍFICO -->
   <script type="module" src="/perfil/perfil.js"></script>
+
+  <script type="module">
+    import { loadUserHeader } from "/components/user-header.js";
+    loadUserHeader();
+  </script>
 
 </body>
 </html>
