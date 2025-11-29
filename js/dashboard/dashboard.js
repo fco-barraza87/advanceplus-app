@@ -61,6 +61,14 @@ async function loadGamification() {
     `${stats.streak_best || 0} 🏆`;
 }
 
+async function loadGamification(userId) {
+  const { data: stats, error } = await supabase
+    .from("user_stats")
+    .select("xp_total, streak_current, streak_best")
+    .eq("user_id", userId)
+    .maybeSingle();
+}
+
 /* ============================================================
    HEADER — Nombre y Rol
 ============================================================ */
@@ -116,7 +124,7 @@ function setupLogout() {
   if (!user) return;
 
   await loadHeaderInfo();
-  await loadGamification();
+
   await loadCourses(user.id);
 
   setupTabBar();
