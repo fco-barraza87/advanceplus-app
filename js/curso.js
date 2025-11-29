@@ -69,25 +69,30 @@ function renderCourseHeader(course, xpTotal) {
     `+${xpTotal} XP`;
 }
 
-function renderCourseProgress(userCourse, lessons, progressRows) {
-  let pct = 0;
+// Progreso general (texto + barra)
+function renderCourseProgress(lessons, progressRows) {
+  const totalDays = lessons.length;
 
-  if (userCourse?.progress_pct != null) {
-    pct = Math.round(userCourse.progress_pct);
-  } else {
-    const completedRows = progressRows.filter(r => r.completed === true);
-    pct = lessons.length
-      ? Math.round((completedRows.length / lessons.length) * 100)
-      : 0;
-  }
+  // Consideramos completado solo si completed = true Y xp > 0
+  const completedDays = progressRows.filter(r =>
+    r.completed === true && (r.xp ?? 0) > 0
+  ).length;
 
+  const pct = totalDays
+    ? Math.round((completedDays / totalDays) * 100)
+    : 0;
+
+  // Texto
   document.getElementById("courseProgressText").textContent =
     `Progreso: ${pct}%`;
 
-  // barra visual
+  // Barra visual
   const bar = document.getElementById("courseProgressFill");
-  if (bar) bar.style.width = `${pct}%`;
+  if (bar) {
+    bar.style.width = `${pct}%`;
+  }
 }
+
 
 function renderTimeline(lessons, activeDay, progressRows) {
   const timeline = document.getElementById("timelineDays");
@@ -249,7 +254,7 @@ async function completeLesson(courseId, userId, day, xp, maxDay) {
 
   /* ---- RENDER ---- */
   renderCourseHeader(course, userXpTotal);
-  renderCourseProgress(userCourse, lessons, progressRows);
+  renderCourseProgress(lessons, progressRows);
   renderTimeline(lessons, day, progressRows);
   renderLesson(currentLesson, progressRows, maxDay);
 
