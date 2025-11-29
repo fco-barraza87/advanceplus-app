@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!session?.user) return;
   const user = session.user;
 
-  // Obtener datos desde la tabla real "profiles"
   const { data: profile, error } = await supabase
     .from("profiles")
     .select("*")
@@ -21,24 +20,53 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // Inputs del HTML (los que tú tienes real)
-  const inputFullName = document.getElementById("input_fullname");
-  const inputCountry = document.getElementById("input_country");
-  const pEmail = document.getElementById("p_email");
-  const pCreated = document.getElementById("p_created");
-  
-  // Rellenar valores
-  inputFullName.value = profile?.full_name ?? "";
-  inputCountry.value = profile?.country ?? "";
-  pEmail.textContent = user.email;
-  pCreated.textContent = new Date(profile?.created_at).toLocaleDateString();
+  // ---- RELLENAR CAMPOS ----
+  const set = (id, v) => {
+    const el = document.getElementById(id);
+    if (el) el.value = v ?? "";
+  };
 
-  // Guardar cambios
+  set("input_fullname", profile.full_name);
+  set("input_birthdate", profile.birthdate);
+  set("input_gender", profile.gender);
+  set("input_phone", profile.phone);
+  set("input_country", profile.country);
+  set("input_language", profile.language);
+  set("input_timezone", profile.timezone);
+  set("input_focus", profile.preferred_focus_time);
+  set("input_notifications", JSON.stringify(profile.notifications || {}, null, 2));
+  set("input_goals", JSON.stringify(profile.goals_json || {}, null, 2));
+
+  // Info solo lectura
+  document.getElementById("p_email").textContent = profile.email;
+  document.getElementById("p_created").textContent =
+    new Date(profile.created_at).toLocaleDateString();
+
+  // ---- GUARDAR CAMBIOS ----
   document.getElementById("saveProfileBtn").addEventListener("click", async () => {
 
+    let notifications = {};
+    let goals_json = {};
+
+    try {
+      notifications = JSON.parse(document.getElementById("input_notifications").value || "{}");
+    } catch {}
+
+    try {
+      goals_json = JSON.parse(document.getElementById("input_goals").value || "{}");
+    } catch {}
+
     const updates = {
-      full_name: inputFullName.value.trim(),
-      country: inputCountry.value.trim(),
+      full_name: document.getElementById("input_fullname").value.trim(),
+      birthdate: document.getElementById("input_birthdate").value || null,
+      gender: document.getElementById("input_gender").value || null,
+      phone: document.getElementById("input_phone").value.trim(),
+      country: document.getElementById("input_country").value.trim(),
+      language: document.getElementById("input_language").value,
+      timezone: document.getElementById("input_timezone").value.trim(),
+      preferred_focus_time: document.getElementById("input_focus").value.trim(),
+      notifications,
+      goals_json,
       updated_at: new Date(),
     };
 
@@ -56,10 +84,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    msg.textContent = "✔ Cambios guardados";
+    msg.textContent = "✔ Cambios guardados correctamente";
     msg.style.color = "#3ee98a";
 
-    // Actualizar header automáticamente
     loadUserHeader();
   });
 });

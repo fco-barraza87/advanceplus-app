@@ -1912,3 +1912,25 @@ select option {
   font-size: 14px;
   min-height: 18px;
 }
+
+.section-sub {
+  margin-top: 20px;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #e3e6f0;
+  font-size: 17px;
+}
+
+
+
+.profile-input, select.profile-input {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: white;
+}
+
+.profile-input::placeholder {
+  color: #aaa;
+}

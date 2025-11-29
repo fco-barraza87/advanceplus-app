@@ -39,30 +39,75 @@
   <section class="dash-section">
     <h2 class="section-title">Mi perfil</h2>
 
-        <div class="card profile-card">
+        <section class="dash-section">
+        <h2 class="section-title">Mi perfil</h2>
 
-        <label class="profile-label">Nombre</label>
-        <input id="input_fullname" class="profile-input" type="text" placeholder="Tu nombre..." />
+        <div class="profile-card">
 
-        <label class="profile-label">País</label>
-        <input id="input_country" class="profile-input" type="text" placeholder="Tu país..." />
+            <!-- 🧍 DATOS PERSONALES -->
+            <h3 class="section-sub">Datos personales</h3>
 
-        <label class="profile-label">Email</label>
-        <p class="profile-static" id="p_email"></p>
+            <label>Nombre completo</label>
+            <input id="input_fullname" class="profile-input" placeholder="Tu nombre..." />
 
-        <label class="profile-label">Rol</label>
-        <p class="profile-static" id="p_role"></p>
+            <label>Fecha de nacimiento</label>
+            <input id="input_birthdate" type="date" class="profile-input" />
 
-        <label class="profile-label">Miembro desde</label>
-        <p class="profile-static" id="p_created"></p>
+            <label>Género</label>
+            <select id="input_gender" class="profile-input">
+            <option value="">Prefiero no decir</option>
+            <option value="male">Hombre</option>
+            <option value="female">Mujer</option>
+            <option value="other">Otro</option>
+            </select>
 
-        <button id="saveProfileBtn" class="btn-save-profile">
-            Guardar cambios
-        </button>
+            <label>Teléfono</label>
+            <input id="input_phone" class="profile-input" placeholder="+41..." />
 
-        <p id="saveMessage" class="save-message"></p>
+            <label>País</label>
+            <input id="input_country" class="profile-input" placeholder="Tu país..." />
+
+            <!-- 🧠 PREFERENCIAS -->
+            <h3 class="section-sub">Preferencias de la app</h3>
+
+            <label>Idioma</label>
+            <select id="input_language" class="profile-input">
+            <option value="es">Español</option>
+            <option value="en">Inglés</option>
+            </select>
+
+            <label>Zona horaria</label>
+            <input id="input_timezone" class="profile-input" placeholder="Europe/Zurich" />
+
+            <label>Focus Time preferido</label>
+            <input id="input_focus" class="profile-input" placeholder="mañana / tarde / noche" />
+
+            <!-- 🔔 NOTIFICACIONES -->
+            <h3 class="section-sub">Notificaciones</h3>
+
+            <label>Email / Push (JSON)</label>
+            <textarea id="input_notifications" class="profile-input" rows="3"></textarea>
+
+            <!-- 🎯 OBJETIVOS -->
+            <h3 class="section-sub">Objetivos (JSON)</h3>
+            <textarea id="input_goals" class="profile-input" rows="3"></textarea>
+
+            <!-- 📨 INFO SOLO LECTURA -->
+            <h3 class="section-sub">Información de cuenta</h3>
+
+            <label>Email</label>
+            <p class="profile-static" id="p_email"></p>
+
+            <label>Miembro desde</label>
+            <p class="profile-static" id="p_created"></p>
+
+            <!-- 💾 BOTÓN -->
+            <button id="saveProfileBtn" class="btn-save-profile">Guardar cambios</button>
+            <p id="saveMessage" class="save-message"></p>
 
         </div>
+        </section>
+
 
   </section>
 
