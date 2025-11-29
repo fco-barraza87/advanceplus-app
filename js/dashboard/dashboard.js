@@ -2,6 +2,63 @@
 import { supabase } from "/js/supabase.js";
 import { requireAuth, loadUserMinimalInfo, logout } from "/js/auth.js";
 
+
+/* ================================================
+   CARGAR GAMIFICACIÓN REAL DESDE user_stats
+================================================ */
+async function loadGamification() {
+  // 1. Usuario actual
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  // 2. Traer stats reales
+  const { data: stats, error } = await supabase
+    .from("user_stats")
+    .select("xp_total, streak_current, streak_best")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (error || !stats) {
+    console.error("Error cargando stats:", error);
+    return;
+  }
+
+  const xp = stats.xp_total || 0;
+
+  // 3. Calcular nivel
+  let level = 1;
+  let xpForNext = 100;
+
+  let remainingXp = xp;
+  while (remainingXp >= xpForNext) {
+    remainingXp -= xpForNext;
+    level++;
+    xpForNext = level * 100;
+  }
+
+  const xpIntoLevel = remainingXp;
+  const xpRequired = xpForNext;
+  const xpPercent = Math.min((xpIntoLevel / xpRequired) * 100, 100);
+
+  // 4. Renderizar datos
+  document.getElementById("userLevel").textContent = level;
+  document.getElementById("xpTotal").textContent = `${xp} XP`;
+
+  document.getElementById("xpNextText").textContent =
+    `${xpRequired - xpIntoLevel} XP para subir de nivel`;
+
+  document.getElementById("xpBarFill").style.width = `${xpPercent}%`;
+
+  // 5. Rachas
+  document.getElementById("streakCurrent").textContent =
+    `${stats.streak_current || 0} 🔥`;
+  document.getElementById("streakBest").textContent =
+    `${stats.streak_best || 0} 🏆`;
+}
+
+/* EJECUTAR CUANDO CARGUE EL DASHBOARD */
+loadGamification();
+
 /**
  * Fórmula simple para XP por nivel.
  * Puedes ajustarla más adelante sin tocar la estructura.
@@ -50,47 +107,7 @@ async function loadHeaderInfo() {
   if (roleEl) roleEl.textContent = roleLabel;
 }
 
-async function loadGamification(userId) {
-  const levelEl = document.getElementById("userLevel");
-  const xpTotalEl = document.getElementById("xpTotal");
-  const xpNextTextEl = document.getElementById("xpNextText");
-  const xpBarFill = document.getElementById("xpBarFill");
-  const streakCurrentEl = document.getElementById("streakCurrent");
-  const streakBestEl = document.getElementById("streakBest");
 
-  const { data, error } = await supabase
-    .from("user_stats")
-    .select("xp_total, streak_current, streak_best, level")
-    .eq("user_id", userId)
-    .single();
-
-  if (error) {
-    console.warn("No se pudo cargar user_stats, usando valores por defecto:", error.message);
-  }
-
-  const xp_total = data?.xp_total ?? 0;
-  const level = data?.level ?? 1;
-  const streak_current = data?.streak_current ?? 0;
-  const streak_best = data?.streak_best ?? 0;
-
-  if (levelEl) levelEl.textContent = String(level);
-  if (xpTotalEl) xpTotalEl.textContent = `${xp_total} XP`;
-
-  const { pct, xpRemaining, needed } = getLevelProgress(xp_total, level);
-
-  if (xpBarFill) xpBarFill.style.width = `${pct}%`;
-
-  if (xpNextTextEl) {
-    if (xpRemaining <= 0 && xp_total > 0) {
-      xpNextTextEl.textContent = "Nivel máximo alcanzado (ajusta la curva luego si quieres).";
-    } else {
-      xpNextTextEl.textContent = `Te faltan ${xpRemaining} XP para el siguiente nivel (de ${needed} XP).`;
-    }
-  }
-
-  if (streakCurrentEl) streakCurrentEl.textContent = `${streak_current} 🔥`;
-  if (streakBestEl) streakBestEl.textContent = `${streak_best} 🏆`;
-}
 
 async function loadCourses(userId) {
   const activeGrid = document.getElementById("activeCoursesGrid");
