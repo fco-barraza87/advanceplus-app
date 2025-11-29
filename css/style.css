@@ -1829,14 +1829,13 @@ select option {
   height: 42px;
   border-radius: 50%;
   overflow: hidden;
-  background: #222;
+  background: #2b2b2b;
   display: flex;
   justify-content: center;
   align-items: center;
   color: white;
   font-weight: 700;
   font-size: 16px;
-  letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
@@ -1845,6 +1844,7 @@ select option {
   height: 100%;
   object-fit: cover;
 }
+
 
 .ap-logout-btn {
   background: transparent;
