@@ -16,7 +16,7 @@ async function loadUserData() {
 
   const { data: stats } = await supabase
     .from("user_stats")
-    .select("xp_total, streak_current, streak_best, level")
+    .select("xp_total, streak_current, streak_best, level, xp_prev_level, xp_next_level")
     .eq("user_id", user.id)
     .single();
 
@@ -62,7 +62,7 @@ async function getStreakGoal(userId) {
     .eq("status", "active")
     .limit(1);
 
-  if (!active || !active.length) return 21; // default
+  if (!active || !active.length) return 21;
 
   const { data: course } = await supabase
     .from("courses")
@@ -86,7 +86,6 @@ async function renderGamification(stats, userId) {
   const best = stats.streak_best ?? 0;
 
   const goalDays = await getStreakGoal(userId);
-
   const pctRacha = Math.min(100, (streak / goalDays) * 100);
 
   qs("#streakCurrent").textContent = streak;
@@ -95,30 +94,49 @@ async function renderGamification(stats, userId) {
 
   const rachaBar = qs("#streakBarFill");
   if (rachaBar) {
-    setTimeout(() => {
-      rachaBar.style.width = pctRacha + "%";
-    }, 150);
+    setTimeout(() => (rachaBar.style.width = pctRacha + "%"), 150);
   }
 
   /* ------------------------------
-     NIVEL + XP
+     NIVEL + XP (DINÁMICO)
   --------------------------------*/
+
   const xp = stats.xp_total ?? 0;
 
-  const base = 100;
-  const growth = 1.35;
-  const xpForLevel = (lvl) => Math.round(base * growth ** (lvl - 1));
+  // 1) Intentar leer fórmula desde la DB
+  const xpPrev = stats.xp_prev_level;
+  const xpNext = stats.xp_next_level;
 
-  let level = 1;
-  let xpUsed = 0;
-  let xpNeeded = xpForLevel(1);
+  let xpUsed, xpNeeded, level;
 
-  while (xp >= xpUsed + xpNeeded) {
-    xpUsed += xpNeeded;
-    level++;
-    xpNeeded = xpForLevel(level);
+  if (
+    typeof xpPrev === "number" &&
+    typeof xpNext === "number" &&
+    stats.level
+  ) {
+    /* --- ✔️ USAR VALORES DE LA DB (preferido) --- */
+    level = stats.level;
+    xpUsed = xpPrev;
+    xpNeeded = xpNext;
+
+  } else {
+    /* --- ⚠️ FALLBACK LOCAL (tu fórmula antigua) --- */
+    const base = 100;
+    const growth = 1.35;
+    const xpForLevel = (lvl) => Math.round(base * growth ** (lvl - 1));
+
+    level = 1;
+    xpUsed = 0;
+    xpNeeded = xpForLevel(1);
+
+    while (xp >= xpUsed + xpNeeded) {
+      xpUsed += xpNeeded;
+      level++;
+      xpNeeded = xpForLevel(level);
+    }
   }
 
+  // Cálculo final
   const xpIntoLevel = xp - xpUsed;
   const pctXP = Math.min(100, (xpIntoLevel / xpNeeded) * 100);
 
@@ -128,9 +146,7 @@ async function renderGamification(stats, userId) {
 
   const xpBar = qs("#xpFill");
   if (xpBar) {
-    setTimeout(() => {
-      xpBar.style.width = pctXP + "%";
-    }, 200);
+    setTimeout(() => (xpBar.style.width = pctXP + "%"), 200);
   }
 }
 
@@ -350,7 +366,7 @@ async function initDashboard() {
 
   renderUser(profile);
 
-  // 🎯 reemplazo: racha + nivel + barras dinámicas
+  // 🎯 racha + nivel + barras dinámicas (DB-first)
   await renderGamification(stats, user.id);
 
   const active = await loadActiveCourses(user.id);
