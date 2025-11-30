@@ -1,4 +1,3 @@
-// /curso/curso.js
 import { supabase } from "/js/supabase.js";
 
 /* ============================================================================
@@ -39,67 +38,43 @@ async function loadLessons(courseId) {
   return data;
 }
 
-// 3) Cargar user_courses (progreso del curso)
+// 3) Cargar registro user_courses (xp + progreso %)
 async function loadUserCourse(userId, courseId) {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("user_courses")
     .select("progress_pct, xp_gained")
     .eq("user_id", userId)
     .eq("course_id", courseId)
     .maybeSingle();
 
+  if (error) {
+    console.error("Error cargando user_courses:", error);
+  }
+
   return data || null;
 }
 
-// 4) Cargar progreso individual por día
+// 4) Cargar progreso por día (tabla progress)
 async function loadProgress(userId, courseId) {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("progress")
     .select("day, completed, xp")
     .eq("user_id", userId)
     .eq("course_id", courseId);
 
-  return data || [];
-}
-
-/* ============================================================================
-   COMPLETAR LECCIÓN — **NUEVA VERSIÓN CON RPC finish_lesson**
-=========================================================================== */
-
-async function completeLesson(courseId, userId, day, xp_reward, maxDay) {
-  // --- 1) Ejecutar RPC finish_lesson ---
-  const { data, error } = await supabase.rpc("finish_lesson", {
-    p_course_id: courseId,
-    p_user_id: userId,
-    p_day: day,
-    p_xp: xp_reward
-  });
-
   if (error) {
-    console.error("Error finish_lesson:", error);
-    alert("No se pudo marcar esta lección como completada.");
-    return;
+    console.error("Error cargando progress:", error);
+    return [];
   }
 
-  console.log("finish_lesson OK:", data);
-
-  // --- 2) Avanzar al siguiente día ---
-  const nextDay = day + 1;
-
-  if (nextDay <= maxDay) {
-    const params = new URLSearchParams(window.location.search);
-    params.set("day", nextDay);
-    window.location.search = params.toString();
-  } else {
-    alert("🎉 Has completado todo el curso!");
-    window.location.reload();
-  }
+  return data || [];
 }
 
 /* ============================================================================
    RENDER UI
 =========================================================================== */
 
+// Header del curso
 function renderCourseHeader(course, userCourse, progressRows) {
   document.getElementById("courseTitle").textContent = course.title;
   document.getElementById("courseSubtitle").textContent =
@@ -107,6 +82,7 @@ function renderCourseHeader(course, userCourse, progressRows) {
   document.getElementById("courseCategory").textContent =
     course.category || "";
 
+  // XP total ganado en este curso
   const xpFromUserCourse = userCourse?.xp_gained ?? 0;
   const xpFromProgress = progressRows.reduce(
     (sum, row) => sum + (row.xp || 0),
@@ -117,6 +93,7 @@ function renderCourseHeader(course, userCourse, progressRows) {
   document.getElementById("courseXpReward").textContent = `+${totalXp} XP`;
 }
 
+// Progreso general (texto "Progreso: X%")
 function renderCourseProgress(userCourse, lessons, progressRows) {
   let pct = userCourse?.progress_pct;
 
@@ -131,6 +108,7 @@ function renderCourseProgress(userCourse, lessons, progressRows) {
     `Progreso: ${pct}%`;
 }
 
+// Timeline de días
 function renderTimeline(lessons, activeDay, progressRows) {
   const timeline = document.getElementById("timelineDays");
   timeline.innerHTML = "";
@@ -145,8 +123,12 @@ function renderTimeline(lessons, activeDay, progressRows) {
     chip.className = "day-chip";
     chip.textContent = d;
 
-    if (completedDays.has(d)) chip.classList.add("completed");
-    if (d === activeDay) chip.classList.add("active");
+    if (completedDays.has(d)) {
+      chip.classList.add("completed");
+    }
+    if (d === activeDay) {
+      chip.classList.add("active");
+    }
 
     chip.onclick = () => {
       const params = new URLSearchParams(window.location.search);
@@ -158,18 +140,21 @@ function renderTimeline(lessons, activeDay, progressRows) {
   }
 }
 
+// Render de la lección actual
 function renderLesson(lesson) {
   document.getElementById("lessonDayLabel").textContent = `DÍA ${lesson.day}`;
   document.getElementById("lessonTitle").textContent = lesson.title;
   document.getElementById("lessonSubtitle").textContent =
     lesson.subtitle || "";
 
+  // Contenido principal
   const htmlBody = (lesson.content_html || "").trim();
   const textBody = (lesson.text_content || "").trim();
 
   document.getElementById("lessonBody").innerHTML =
     htmlBody || (textBody ? `<p>${textBody}</p>` : "<p>Sin contenido.</p>");
 
+  // Imagen
   if (lesson.image_url) {
     document.getElementById("lessonImageWrapper").style.display = "block";
     document.getElementById("lessonImage").src = lesson.image_url;
@@ -177,6 +162,7 @@ function renderLesson(lesson) {
     document.getElementById("lessonImageWrapper").style.display = "none";
   }
 
+  // Ejercicio
   if ((lesson.exercise_content || "").trim()) {
     document.getElementById("lessonExercise").style.display = "block";
     document.getElementById("lessonExercise").innerHTML =
@@ -185,8 +171,40 @@ function renderLesson(lesson) {
     document.getElementById("lessonExercise").style.display = "none";
   }
 
+  // XP de la lección
   document.getElementById("lessonXp").textContent =
     `+${lesson.xp_reward || 0} XP`;
+}
+
+/* ============================================================================
+   COMPLETAR LECCIÓN (RPC) + AVANZAR AL SIGUIENTE DÍA
+=========================================================================== */
+async function completeLesson(courseId, userId, day, xp, maxDay) {
+  const { error } = await supabase.rpc("finish_lesson", {
+    p_course_id: courseId,
+    p_user_id: userId,
+    p_day: day,
+    p_xp: xp
+  });
+
+  if (error) {
+    console.error("Error completando lección:", error);
+    alert("No se pudo marcar como completado.");
+    return;
+  }
+
+  const nextDay = day + 1;
+
+  if (nextDay <= maxDay) {
+    // Ir al siguiente día del curso
+    const params = new URLSearchParams(window.location.search);
+    params.set("day", nextDay);
+    window.location.search = params.toString();
+  } else {
+    // Último día: mantener en la página, solo refrescar progreso
+    alert("🎉 ¡Has completado este curso!");
+    window.location.reload();
+  }
 }
 
 /* ============================================================================
@@ -203,17 +221,23 @@ function renderLesson(lesson) {
     return;
   }
 
-  const { data: { user } } = await supabase.auth.getUser();
+  // Usuario actual
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
   if (!user) {
     alert("Debes iniciar sesión.");
     window.location.href = "/index.html";
     return;
   }
 
+  // Botón volver
   document.getElementById("btnBack").onclick = () => {
     window.location.href = "/dashboard/index.html";
   };
 
+  // Cargar todo en paralelo
   const [course, lessons, userCourse, progressRows] = await Promise.all([
     loadCourse(courseId),
     loadLessons(courseId),
@@ -229,11 +253,13 @@ function renderLesson(lesson) {
   const maxDay = lessons.reduce((max, l) => Math.max(max, l.day), 0);
   const currentLesson = lessons.find(l => l.day === day) || lessons[0];
 
+  // Render UI
   renderCourseHeader(course, userCourse, progressRows);
   renderCourseProgress(userCourse, lessons, progressRows);
   renderTimeline(lessons, currentLesson.day, progressRows);
   renderLesson(currentLesson);
 
+  // Botón "Marcar como completado"
   document.getElementById("btnCompletar").onclick = () =>
     completeLesson(
       course.id,
