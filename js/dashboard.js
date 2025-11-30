@@ -380,4 +380,33 @@ async function initDashboard() {
 
 }
 
+/* ==================================================
+   10. COACH IA — MENSAJE DEL DÍA
+================================================== */
+async function loadCoachMessage(userId) {
+  const { data, error } = await supabase
+    .from("coach_messages")
+    .select("message, style, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  if (error || !data.length) return;
+
+  const m = data[0];
+
+  qs("#coachMessageText").textContent = m.message;
+  qs("#coachMessageStyle").textContent = `Estilo: ${m.style}`;
+  
+  const sentTime = new Date(m.created_at).toLocaleTimeString("es-ES", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  qs("#coachMessageTime").textContent = `Enviado hoy a las ${sentTime}`;
+
+  qs("#coachMessageCard").style.display = "block";
+}
+
+
 initDashboard();
