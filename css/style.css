@@ -2051,3 +2051,104 @@ select option {
   justify-content: flex-end;
   gap: 8px;
 }
+
+.dashboard-home {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 16px;
+}
+
+/* --- Tarjetas principales --- */
+.dash-card {
+  background: rgba(255,255,255,0.03);
+  border-radius: 16px;
+  padding: 18px 20px;
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+}
+
+/* --- Racha --- */
+.streak-number {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.streak-goal-bar {
+  margin-top: 6px;
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 6px;
+}
+
+.streak-goal-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ap-gold), #e9d9a1);
+  width: 0%;
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+
+/* Pill */
+.dash-pill {
+  background: rgba(255,255,255,0.08);
+  padding: 4px 10px;
+  font-size: 11px;
+  border-radius: 20px;
+  text-align: center;
+  width: fit-content;
+}
+
+/* --- Nivel --- */
+.level-number {
+  font-size: 30px;
+  font-weight: 600;
+}
+
+/* Barra XP */
+.xp-bar {
+  width: 100%;
+  height: 6px;
+  margin: 8px 0;
+  background: rgba(255,255,255,0.12);
+  border-radius: 6px;
+}
+
+.xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ap-gold), #e8d39b);
+  width: 0%;
+  border-radius: 6px;
+  transition: width 0.4s;
+}
+
+/* --- Misión del día --- */
+.mission-card {
+  background: linear-gradient(135deg, rgba(14,18,35,0.65), rgba(25,30,60,0.8));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mission-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.mission-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 25px;
+  border: none;
+  font-weight: 600;
+  font-size: 16px;
+  color: #0a0f1c;
+  background: linear-gradient(90deg, var(--ap-gold), #f2d996);
+  cursor: pointer;
+  transition: transform .2s ease;
+}
+
+.mission-btn:hover {
+  transform: scale(1.04);
+}

@@ -320,6 +320,67 @@ async function initDashboard() {
 
   const available = await loadAvailableCourses(user.id);
   renderAvailableCourses(available);
+
+  await loadMission(user);
+
+}
+
+// nuevo tarjetero de gamificacion
+
+async function loadMission(user) {
+
+  // 1) leer user_courses activo principal
+  const { data: active, error } = await supabase
+    .from("user_courses")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("status", "active")
+    .order("started_at", { ascending: false })
+    .limit(1);
+
+  const card = qs("#missionCard");
+
+  if (!active || !active.length) {
+    card.style.display = "none";
+    return;
+  }
+
+  const courseId = active[0].course_id;
+
+  // 2) leer curso
+  const { data: course } = await supabase
+    .from("courses")
+    .select("*")
+    .eq("id", courseId)
+    .single();
+
+  // 3) leer progreso
+  const { data: progress } = await supabase
+    .from("progress")
+    .select("day, completed")
+    .eq("user_id", user.id)
+    .eq("course_id", courseId)
+    .order("day", { ascending: true });
+
+  let nextDay = 1;
+
+  if (progress?.length) {
+    const completed = progress.filter((p) => p.completed);
+    if (completed.length) nextDay = completed.at(-1).day + 1;
+  }
+
+  if (nextDay > course.duration_days) nextDay = course.duration_days;
+
+  // 4) render
+  qs("#missionTitle").textContent = course.mission_title || "Misión del día";
+  qs("#missionDesc").textContent = course.mission_desc || "Toma el control de tu día.";
+  qs("#missionMeta").textContent = `${course.title} · Día ${nextDay} · ${course.category}`;
+
+  qs("#missionBtn").onclick = () => {
+    window.location.href = `/curso/index.html?c=${courseId}&day=${nextDay}`;
+  };
+
+  card.style.display = "flex";
 }
 
 

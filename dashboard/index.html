@@ -43,41 +43,52 @@
     <section class="dash-section gamification-box">
       <h2 class="section-title">Tu progreso</h2>
 
-      <div class="gamification-grid">
+        <!-- Racha -->
+        <section class="dash-card streak-card">
+            <div class="dash-card-left">
+            <h3>Racha</h3>
+            <p class="streak-number" id="streakCurrent">0 días</p>
+            <p class="streak-best">Tu mejor racha: <span id="streakBest">0 días</span></p>
 
-        <!-- XP / NIVEL -->
-        <div class="card gamif-card big-card">
-          <div class="card-row">
-            <span class="card-label">Nivel</span>
-            <span id="userLevel" class="card-level">1</span>
-          </div>
-
-          <div class="xp-info-row">
-            <div>
-              <span id="xpTotal" class="xp-total">0 XP</span>
-              <span id="xpNextText" class="xp-next">...</span>
+            <div class="streak-goal-bar">
+                <div id="streakGoalFill" class="streak-goal-fill"></div>
             </div>
+            <p class="streak-goal-text">
+                Objetivo: 21 días <span id="streakPercent">0%</span>
+            </p>
+            </div>
+            <div class="dash-pill">En construcción</div>
+        </section>
+
+        <!-- Nivel -->
+        <section class="dash-card level-card">
+            <h3>Nivel A+</h3>
+            <p class="level-number" id="userLevel">1</p>
 
             <div class="xp-bar">
-              <div id="xpBarFill" class="xp-bar-fill"></div>
+            <div id="xpBarFill" class="xp-bar-fill"></div>
             </div>
-          </div>
-        </div>
 
-        <!-- Racha -->
-        <div class="card gamif-card small-card">
-          <span class="card-label">Racha actual</span>
-          <span id="streakCurrent" class="card-number">0 🔥</span>
-        </div>
+            <p class="xp-info">
+            <span id="xpThisLevel">0 / 100 XP</span>
+            <span id="nextLevel">Siguiente: Nivel 2</span>
+            </p>
+        </section>
 
-        <!-- Mejor racha -->
-        <div class="card gamif-card small-card">
-          <span class="card-label">Mejor racha</span>
-          <span id="streakBest" class="card-number">0 🏆</span>
-        </div>
+        <!-- Misión del día -->
+        <section class="dash-card mission-card" id="missionCard" style="display:none;">
+            <h4 class="mission-title" id="missionTitle">Misión del día</h4>
+            <p class="mission-desc" id="missionDesc">Tu misión aparecerá aquí.</p>
+
+            <button id="missionBtn" class="mission-btn">Empezar ahora →</button>
+
+            <p class="mission-meta" id="missionMeta"></p>
+        </section>
 
       </div>
     </section>
+
+
 
 
     <!-- SECCIÓN B — CURSOS ACTIVOS -->
