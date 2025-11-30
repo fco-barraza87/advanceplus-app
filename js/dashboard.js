@@ -33,10 +33,7 @@ function renderUser(profile) {
   const roleEl = qs("#userRole");
   const avatarEl = qs("#userAvatar");
 
-  // Solo asignar si existe
-  if (nameEl) {
-    nameEl.textContent = profile.full_name || "Usuario";
-  }
+  if (nameEl) nameEl.textContent = profile.full_name || "Usuario";
 
   if (roleEl) {
     roleEl.textContent =
@@ -54,29 +51,64 @@ function renderUser(profile) {
   }
 }
 
-
 /* ==================================================
-   3. Racha del usuario
+   3. OBTENER OBJETIVO DE RACHA SEGÚN CURSO ACTIVO
 ================================================== */
-function renderStreak(stats) {
-  if (!stats) return;
+async function getStreakGoal(userId) {
+  const { data: active } = await supabase
+    .from("user_courses")
+    .select("course_id")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .limit(1);
 
-  qs("#streakCurrent").textContent = stats.streak_current ?? 0;
-  qs("#streakBest").textContent = stats.streak_best ?? 0;
+  if (!active || !active.length) return 21; // default
+
+  const { data: course } = await supabase
+    .from("courses")
+    .select("duration_days")
+    .eq("id", active[0].course_id)
+    .single();
+
+  return course?.duration_days ?? 21;
 }
 
 /* ==================================================
-   4. Sistema XP + Nivel A+ (FÓRMULA OFICIAL)
+   4. GAMIFICACIÓN — NIVELES + XP + RACHA DINÁMICA
 ================================================== */
-function renderLevelXP(stats) {
+async function renderGamification(stats, userId) {
+  if (!stats) return;
+
+  /* ------------------------------
+     RACHA
+  --------------------------------*/
+  const streak = stats.streak_current ?? 0;
+  const best = stats.streak_best ?? 0;
+
+  const goalDays = await getStreakGoal(userId);
+
+  const pctRacha = Math.min(100, (streak / goalDays) * 100);
+
+  qs("#streakCurrent").textContent = streak;
+  qs("#streakBest").textContent = best;
+  qs("#streakGoalLabel").textContent = `Objetivo: ${goalDays} días`;
+
+  const rachaBar = qs("#streakBarFill");
+  if (rachaBar) {
+    setTimeout(() => {
+      rachaBar.style.width = pctRacha + "%";
+    }, 150);
+  }
+
+  /* ------------------------------
+     NIVEL + XP
+  --------------------------------*/
   const xp = stats.xp_total ?? 0;
 
   const base = 100;
   const growth = 1.35;
-
   const xpForLevel = (lvl) => Math.round(base * growth ** (lvl - 1));
 
-  // Cálculo de nivel dinámico
   let level = 1;
   let xpUsed = 0;
   let xpNeeded = xpForLevel(1);
@@ -88,78 +120,11 @@ function renderLevelXP(stats) {
   }
 
   const xpIntoLevel = xp - xpUsed;
-  const pct = Math.min(100, (xpIntoLevel / xpNeeded) * 100);
+  const pctXP = Math.min(100, (xpIntoLevel / xpNeeded) * 100);
 
   qs("#userLevel").textContent = level;
   qs("#xpThisLevel").textContent = `${xpIntoLevel} / ${xpNeeded} XP`;
   qs("#nextLevel").textContent = `Siguiente: Nivel ${level + 1}`;
-
-  setTimeout(() => {
-    qs("#xpFill").style.width = `${pct}%`;
-  }, 150);
-}
-
-
-/* ==================================================
-   GAMIFICACIÓN — RACHA + NIVEL + BARRAS
-================================================== */
-async function renderGamification(stats, userId) {
-  if (!stats) return;
-
-  /** ------------------------------
-   *  1) Racha
-   --------------------------------*/
-  const streak = stats.streak_current ?? 0;
-  const best = stats.streak_best ?? 0;
-
-  // Obtener objetivo dinámico
-  const goalDays = await getStreakGoal(userId);
-
-  // Calcular progreso racha
-  const pctRacha = Math.min(100, (streak / goalDays) * 100);
-
-  // Renderizar datos
-  qs("#streakCurrent").textContent = streak;
-  qs("#streakBest").textContent = best;
-
-  qs("#streakGoalLabel").textContent = `Objetivo: ${goalDays} días`;
-
-  // Barra racha
-  const rachaBar = qs("#streakBarFill");
-  if (rachaBar) {
-    setTimeout(() => {
-      rachaBar.style.width = pctRacha + "%";
-    }, 150);
-  }
-
-  /** ------------------------------
-   *  2) Nivel A+
-   --------------------------------*/
-  const xp = stats.xp_total ?? 0;
-
-  const base = 100;
-  const growth = 1.35;
-
-  function xpForLevel(level) {
-    return Math.round(base * Math.pow(growth, level - 1));
-  }
-
-  let xpUsed = 0;
-  let currentLevel = 1;
-  let xpNeeded = xpForLevel(1);
-
-  while (xp >= xpUsed + xpNeeded) {
-    xpUsed += xpNeeded;
-    currentLevel++;
-    xpNeeded = xpForLevel(currentLevel);
-  }
-
-  const xpIntoLevel = xp - xpUsed;
-  const pctXP = Math.min(100, (xpIntoLevel / xpNeeded) * 100);
-
-  qs("#userLevel").textContent = currentLevel;
-  qs("#xpThisLevel").textContent = `${xpIntoLevel} / ${xpNeeded} XP`;
-  qs("#nextLevel").textContent = `Siguiente: Nivel ${currentLevel + 1}`;
 
   const xpBar = qs("#xpFill");
   if (xpBar) {
@@ -170,7 +135,7 @@ async function renderGamification(stats, userId) {
 }
 
 /* ==================================================
-   5. RETOS ACTIVOS (join manual)
+   5. RETOS ACTIVOS
 ================================================== */
 async function loadActiveCourses(userId) {
   const { data: userCourses } = await supabase
@@ -221,6 +186,7 @@ function renderActiveCourses(courses, user) {
         <img src="${cover}" class="course-cover" />
         <span class="course-badge">${course.category}</span>
       </div>
+
       <div class="course-body">
         <div class="course-title">${course.title}</div>
         <div class="course-meta">${course.level || "Todos los niveles"}</div>
@@ -233,7 +199,7 @@ function renderActiveCourses(courses, user) {
         .select("day, completed")
         .eq("user_id", user.id)
         .eq("course_id", course.id)
-        .order("day", { ascending: true });
+        .order("day");
 
       let nextDay = 1;
 
@@ -252,7 +218,7 @@ function renderActiveCourses(courses, user) {
 }
 
 /* ==================================================
-   6. EXPLORAR NUEVOS RETOS
+   6. EXPLORAR RETOS
 ================================================== */
 async function loadAvailableCourses(userId) {
   const { data: all } = await supabase
@@ -260,12 +226,12 @@ async function loadAvailableCourses(userId) {
     .select("*")
     .eq("active", true);
 
-  const { data: my } = await supabase
+  const { data: mine } = await supabase
     .from("user_courses")
     .select("course_id")
     .eq("user_id", userId);
 
-  const owned = new Set((my || []).map((c) => c.course_id));
+  const owned = new Set((mine || []).map((c) => c.course_id));
 
   return all.filter((c) => !owned.has(c.id));
 }
@@ -293,6 +259,7 @@ function renderAvailableCourses(courses) {
         <img src="${cover}" class="course-cover" />
         <span class="course-badge">${course.category}</span>
       </div>
+
       <div class="course-body">
         <div class="course-title">${course.title}</div>
         <div class="course-meta">${course.level}</div>
@@ -371,35 +338,7 @@ function setupLogout() {
 }
 
 /* ==================================================
-   OBTENER OBJETIVO DE RACHA SEGÚN CURSO ACTIVO
-   Si no hay curso → default = 21
-================================================== */
-async function getStreakGoal(userId) {
-  // 1) Buscar el curso ACTIVO
-  const { data: active, error } = await supabase
-    .from("user_courses")
-    .select("course_id")
-    .eq("user_id", userId)
-    .eq("status", "active")
-    .limit(1);
-
-  if (!active || !active.length) {
-    return 21; // objetivo por defecto
-  }
-
-  // 2) Buscar duración del curso
-  const { data: course } = await supabase
-    .from("courses")
-    .select("duration_days")
-    .eq("id", active[0].course_id)
-    .single();
-
-  return course?.duration_days ?? 21;
-}
-
-
-/* ==================================================
-   9. INIT (CARGA GENERAL)
+   9. INIT
 ================================================== */
 async function initDashboard() {
   setupLogout();
@@ -410,8 +349,9 @@ async function initDashboard() {
   const { user, profile, stats } = data;
 
   renderUser(profile);
-  renderStreak(stats);
-  renderLevelXP(stats);
+
+  // 🎯 reemplazo: racha + nivel + barras dinámicas
+  await renderGamification(stats, user.id);
 
   const active = await loadActiveCourses(user.id);
   renderActiveCourses(active, user);
