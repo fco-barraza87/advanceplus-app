@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Advance+ · Dashboard</title>
+
+  <!-- TOKENS GLOBALES -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!-- DASHBOARD CSS -->
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+
+<body class="app-bg">
+
+
+  <!-- HEADER NUEVO (PREMIUM) -->
+<header class="ap-header">
+  <div class="ap-header-left">
+    <h1 class="ap-logo">A+</h1>
+
+    <div class="ap-header-info">
+      <span id="headerUserName" class="ap-header-name">Usuario</span>
+      <span id="headerUserRole" class="ap-header-role">Cargando…</span>
+    </div>
+  </div>
+
+  <!-- Avatar dinámico (imagen o iniciales) -->
+  <div id="headerAvatar" class="ap-header-avatar"></div>
+
+  <button id="btnLogout" class="ap-logout-btn">Cerrar sesión</button>
+</header>
+
+
+
+
+<main class="dashboard-container">
+
+  <h2 class="dash-big-title">Tu progreso</h2>
+
+  <!-- CARD: Racha -->
+  <section class="dash-card">
+    <div class="dash-card-header">
+      <h3>Racha</h3>
+      <span class="dash-chip">🔥 Constancia</span>
+    </div>
+
+    <p class="dash-main-number" id="streakCurrent">0</p>
+
+    <p class="dash-small-text">
+      Tu mejor racha: <span id="streakBest">0</span> 🏆
+    </p>
+
+    <div class="dash-progress-bar">
+      <div id="streakFill" class="dash-progress-fill"></div>
+    </div>
+
+    <p class="dash-small-text">
+      Objetivo: 21 días — <span id="streakPercent">0%</span>
+    </p>
+  </section>
+
+  <!-- CARD: Nivel -->
+  <section class="dash-card">
+    <div class="dash-card-header">
+      <h3>Nivel A+</h3>
+      <span class="dash-chip">✨ XP</span>
+    </div>
+
+    <p class="dash-main-number" id="userLevel">1</p>
+
+    <div class="dash-progress-bar">
+      <div id="xpFill" class="dash-progress-fill"></div>
+    </div>
+
+    <p class="dash-small-text">
+      <span id="xpThisLevel">0 / 100 XP</span> — 
+      <span id="nextLevel">Siguiente: Nivel 2</span>
+    </p>
+  </section>
+
+  <!-- CARD: Misión del día -->
+  <section class="dash-card dash-mission-card" id="missionCard" style="display:none;">
+    <h3 class="dash-card-header">Misión del día</h3>
+
+    <p class="dash-mission-title" id="missionTitle">Tu misión aparecerá aquí</p>
+    <p class="dash-mission-desc" id="missionDesc"></p>
+
+    <button class="dash-btn-gold" id="missionBtn">Empezar ahora →</button>
+
+    <p class="dash-small-text" id="missionMeta"></p>
+  </section>
+
+
+
+
+    <!-- SECCIÓN B — CURSOS ACTIVOS -->
+    <section class="dash-section">
+      <div class="section-header-row">
+        <h2 class="section-title">Tus retos activos</h2>
+        <span id="activeCount" class="section-subtitle"></span>
+      </div>
+
+      <div id="activeCoursesGrid" class="courses-grid"></div>
+
+      <p id="noActiveMessage" class="empty-message" style="display:none;">
+        No has comenzado ningún reto todavía. 🚀  
+      </p>
+    </section>
+
+
+    <!-- SECCIÓN C — EXPLORAR -->
+    <section class="dash-section">
+      <h2 class="section-title">Explorar retos</h2>
+
+      <div id="availableCoursesGrid" class="courses-grid"></div>
+
+      <p id="noAvailableMessage" class="empty-message" style="display:none;">
+        No hay más retos disponibles en este momento. 🔥
+      </p>
+    </section>
+
+  </main>
+
+
+  <!-- TAB BAR MÓVIL -->
+  <nav class="tabbar">
+    <button class="tab-btn active" data-nav="dashboard">
+      <span>🏠</span>
+      <small>Inicio</small>
+    </button>
+
+    <button class="tab-btn" data-nav="courses">
+      <span>📘</span>
+      <small>Retos</small>
+    </button>
+
+    <button class="tab-btn" data-nav="profile">
+      <span>👤</span>
+      <small>Perfil</small>
+    </button>
+
+    <button class="tab-btn" data-nav="stats">
+      <span>📊</span>
+      <small>Progreso</small>
+    </button>
+  </nav>
+
+  <script type="module">
+    import { loadUserHeader } from "/components/user-header.js";
+    loadUserHeader();
+  </script>
+
+  <!-- ROUTER + LOGICA -->
+  <script type="module">
+    import { protectUserView } from "/js/router.js";
+    protectUserView();
+  </script>
+
+  <!-- NUEVA LÓGICA DASHBOARD -->
+  <script type="module" src="/js/dashboard.js"></script>
+
+</body>
+</html>

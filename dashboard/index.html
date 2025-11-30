@@ -10,10 +10,10 @@
   <link rel="stylesheet" href="/css/style.css">
 
   <!-- DASHBOARD CSS -->
-  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/dashboard-user.css">
 </head>
 
-<body class="app-bg">
+<body class="app-bg dashboard-page">
 
 
   <!-- HEADER NUEVO (PREMIUM) -->
@@ -33,96 +33,99 @@
   <button id="btnLogout" class="ap-logout-btn">Cerrar sesión</button>
 </header>
 
+<main class="dashboard-wrapper">
 
-
-
-<main class="dashboard-container">
-
-  <h2 class="dash-big-title">Tu progreso</h2>
-
-  <!-- CARD: Racha -->
-  <section class="dash-card">
-    <div class="dash-card-header">
-      <h3>Racha</h3>
-      <span class="dash-chip">🔥 Constancia</span>
-    </div>
-
-    <p class="dash-main-number" id="streakCurrent">0</p>
-
-    <p class="dash-small-text">
-      Tu mejor racha: <span id="streakBest">0</span> 🏆
-    </p>
-
-    <div class="dash-progress-bar">
-      <div id="streakFill" class="dash-progress-fill"></div>
-    </div>
-
-    <p class="dash-small-text">
-      Objetivo: 21 días — <span id="streakPercent">0%</span>
-    </p>
+  <!-- BLOQUE: Título -->
+  <section class="dash-section">
+    <h2 class="section-title">Tu progreso</h2>
   </section>
 
-  <!-- CARD: Nivel -->
-  <section class="dash-card">
-    <div class="dash-card-header">
-      <h3>Nivel A+</h3>
-      <span class="dash-chip">✨ XP</span>
+  <!-- BLOQUE: Racha -->
+  <section class="dash-section metric-card">
+    <div class="metric-header">
+      <span class="metric-title">Racha</span>
+      <span class="metric-chip metric-chip-soft">🔥 Constancia</span>
     </div>
 
-    <p class="dash-main-number" id="userLevel">1</p>
-
-    <div class="dash-progress-bar">
-      <div id="xpFill" class="dash-progress-fill"></div>
+    <div class="metric-main">
+      <div class="metric-main-value" id="streakCurrent">0</div>
+      <div class="metric-main-sub">Tu mejor racha: <span id="streakBest">0</span> 🏆</div>
     </div>
 
-    <p class="dash-small-text">
-      <span id="xpThisLevel">0 / 100 XP</span> — 
-      <span id="nextLevel">Siguiente: Nivel 2</span>
-    </p>
+    <div class="metric-footer">
+      <span class="metric-footer-label">Objetivo: 21 días — 0%</span>
+      <div class="metric-footer-tag">En construcción</div>
+    </div>
   </section>
 
-  <!-- CARD: Misión del día -->
-  <section class="dash-card dash-mission-card" id="missionCard" style="display:none;">
-    <h3 class="dash-card-header">Misión del día</h3>
+  <!-- BLOQUE: Nivel A+ -->
+  <section class="dash-section metric-card">
+    <div class="metric-header">
+      <span class="metric-title">Nivel A+</span>
+      <span class="metric-chip">⭐ XP</span>
+    </div>
 
-    <p class="dash-mission-title" id="missionTitle">Tu misión aparecerá aquí</p>
-    <p class="dash-mission-desc" id="missionDesc"></p>
+    <div class="metric-main">
+      <div class="metric-main-value" id="userLevel">1</div>
+    </div>
 
-    <button class="dash-btn-gold" id="missionBtn">Empezar ahora →</button>
+    <div class="metric-progress-row">
+      <div class="metric-progress-label" id="xpThisLevel">0 / 100 XP</div>
+      <div class="metric-progress-next" id="nextLevel">Siguiente: Nivel 2</div>
+    </div>
 
-    <p class="dash-small-text" id="missionMeta"></p>
+    <div class="metric-bar">
+      <div class="metric-bar-fill" id="xpFill"></div>
+    </div>
   </section>
 
-
-
-
-    <!-- SECCIÓN B — CURSOS ACTIVOS -->
-    <section class="dash-section">
-      <div class="section-header-row">
-        <h2 class="section-title">Tus retos activos</h2>
-        <span id="activeCount" class="section-subtitle"></span>
-      </div>
-
-      <div id="activeCoursesGrid" class="courses-grid"></div>
-
-      <p id="noActiveMessage" class="empty-message" style="display:none;">
-        No has comenzado ningún reto todavía. 🚀  
+  <!-- BLOQUE: Misión del día -->
+  <section class="dash-section mission-card" id="missionCard" style="display:none;">
+    <div class="mission-left">
+      <p class="mission-tag">Misión del día</p>
+      <h3 class="mission-title" id="missionTitle">Toma el control de tu día.</h3>
+      <p class="mission-desc" id="missionDesc">
+        Pausa, respira y elige una sola prioridad para hoy.
       </p>
-    </section>
+      <p class="mission-meta" id="missionMeta">Curso · Día 1 · enfoque</p>
+    </div>
 
+    <div class="mission-right">
+      <button class="mission-btn" id="missionBtn">
+        Empezar ahora →
+      </button>
+    </div>
+  </section>
 
-    <!-- SECCIÓN C — EXPLORAR -->
-    <section class="dash-section">
-      <h2 class="section-title">Explorar retos</h2>
+  <!-- BLOQUE: Retos activos -->
+  <section class="dash-section retos-section">
+    <div class="section-header-row">
+      <h3 class="section-title">Tus retos activos</h3>
+      <span id="activeCount" class="section-subtitle"></span>
+    </div>
 
-      <div id="availableCoursesGrid" class="courses-grid"></div>
+    <div id="activeCoursesGrid" class="courses-grid"></div>
 
-      <p id="noAvailableMessage" class="empty-message" style="display:none;">
-        No hay más retos disponibles en este momento. 🔥
-      </p>
-    </section>
+    <p id="noActiveMessage" class="empty-message" style="display:none;">
+      No tienes retos activos actualmente. Elige uno para empezar tu transformación. 💥
+    </p>
+  </section>
 
-  </main>
+  <!-- BLOQUE: Explorar retos -->
+  <section class="dash-section retos-section">
+    <div class="section-header-row">
+      <h3 class="section-title">Explorar retos</h3>
+    </div>
+
+    <div id="availableCoursesGrid" class="courses-grid"></div>
+
+    <p id="noAvailableMessage" class="empty-message" style="display:none;">
+      Has desbloqueado todos los retos disponibles por ahora. 🔓
+    </p>
+  </section>
+
+</main>
+
 
 
   <!-- TAB BAR MÓVIL -->
