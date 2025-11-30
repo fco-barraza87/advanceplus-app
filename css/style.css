@@ -2152,3 +2152,109 @@ select option {
 .mission-btn:hover {
   transform: scale(1.04);
 }
+
+
+/* --- DASHBOARD LAYOUT --- */
+.dashboard-container {
+  width: 100%;
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.dash-big-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: -8px;
+}
+
+/* --- CARD BASE --- */
+.dash-card {
+  background: rgba(255,255,255,0.05);
+  border-radius: 18px;
+  padding: 18px 20px 20px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+/* Header chip */
+.dash-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dash-chip {
+  background: rgba(255,255,255,0.15);
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 12px;
+}
+
+/* Main number */
+.dash-main-number {
+  font-size: 42px;
+  font-weight: 700;
+  margin: 10px 0 6px;
+}
+
+/* Small text */
+.dash-small-text {
+  font-size: 14px;
+  opacity: 0.75;
+  margin-top: 6px;
+}
+
+/* Progress bar */
+.dash-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.15);
+  margin: 10px 0;
+  border-radius: 6px;
+}
+.dash-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--ap-gold), #f4de9c);
+  border-radius: 6px;
+  transition: width 0.35s ease-out;
+}
+
+/* Mission card */
+.dash-mission-card {
+  background: linear-gradient(135deg, rgba(14,18,35,0.45), rgba(23,28,55,0.85));
+}
+
+.dash-mission-title {
+  margin-top: 5px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.dash-mission-desc {
+  margin-top: 6px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* Button */
+.dash-btn-gold {
+  background: linear-gradient(90deg, var(--ap-gold), #eedda2);
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 30px;
+  font-size: 15px;
+  font-weight: 600;
+  margin: 12px 0;
+  color: #0a0e1c;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.dash-btn-gold:hover {
+  transform: scale(1.03);
+}

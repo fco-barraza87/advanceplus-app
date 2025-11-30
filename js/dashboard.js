@@ -383,5 +383,75 @@ async function loadMission(user) {
   card.style.display = "flex";
 }
 
+function renderLevelXP(stats) {
+  const xp = stats.xp_total ?? 0;
+  const level = stats.level ?? 1;
+
+  /* Fórmula oficial */
+  const base = 100;
+  const growth = 1.35;
+
+  function xpForLevel(level) {
+    return Math.round(base * Math.pow(growth, level - 1));
+  }
+
+  let xpUsed = 0;
+  let currentLevel = 1;
+  let xpNeeded = xpForLevel(1);
+
+  while (xp >= xpUsed + xpNeeded) {
+    xpUsed += xpNeeded;
+    currentLevel++;
+    xpNeeded = xpForLevel(currentLevel);
+  }
+
+  const xpIntoLevel = xp - xpUsed;
+
+  qs("#userLevel").textContent = currentLevel;
+  qs("#xpThisLevel").textContent = `${xpIntoLevel} / ${xpNeeded} XP`;
+  qs("#nextLevel").textContent = `Siguiente: Nivel ${currentLevel + 1}`;
+
+  const pct = Math.min(100, (xpIntoLevel / xpNeeded) * 100);
+  setTimeout(() => {
+    qs("#xpFill").style.width = pct + "%";
+  }, 200);
+}
+
+
+function renderLevelXP(stats) {
+  const xp = stats.xp_total ?? 0;
+  const level = stats.level ?? 1;
+
+  /* Fórmula oficial */
+  const base = 100;
+  const growth = 1.35;
+
+  function xpForLevel(level) {
+    return Math.round(base * Math.pow(growth, level - 1));
+  }
+
+  let xpUsed = 0;
+  let currentLevel = 1;
+  let xpNeeded = xpForLevel(1);
+
+  while (xp >= xpUsed + xpNeeded) {
+    xpUsed += xpNeeded;
+    currentLevel++;
+    xpNeeded = xpForLevel(currentLevel);
+  }
+
+  const xpIntoLevel = xp - xpUsed;
+
+  qs("#userLevel").textContent = currentLevel;
+  qs("#xpThisLevel").textContent = `${xpIntoLevel} / ${xpNeeded} XP`;
+  qs("#nextLevel").textContent = `Siguiente: Nivel ${currentLevel + 1}`;
+
+  const pct = Math.min(100, (xpIntoLevel / xpNeeded) * 100);
+  setTimeout(() => {
+    qs("#xpFill").style.width = pct + "%";
+  }, 200);
+}
+
+
 
 initDashboard();

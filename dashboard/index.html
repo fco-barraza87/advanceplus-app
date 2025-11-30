@@ -36,57 +36,62 @@
 
 
 
-  <!-- CONTENIDO PRINCIPAL -->
-  <main class="dashboard-wrapper">
+<main class="dashboard-container">
 
-    <!-- SECCIÓN A — GAMIFICACIÓN -->
-    <section class="dash-section gamification-box">
-      <h2 class="section-title">Tu progreso</h2>
+  <h2 class="dash-big-title">Tu progreso</h2>
 
-        <!-- Racha -->
-        <section class="dash-card streak-card">
-            <div class="dash-card-left">
-            <h3>Racha</h3>
-            <p class="streak-number" id="streakCurrent">0 días</p>
-            <p class="streak-best">Tu mejor racha: <span id="streakBest">0 días</span></p>
+  <!-- CARD: Racha -->
+  <section class="dash-card">
+    <div class="dash-card-header">
+      <h3>Racha</h3>
+      <span class="dash-chip">🔥 Constancia</span>
+    </div>
 
-            <div class="streak-goal-bar">
-                <div id="streakGoalFill" class="streak-goal-fill"></div>
-            </div>
-            <p class="streak-goal-text">
-                Objetivo: 21 días <span id="streakPercent">0%</span>
-            </p>
-            </div>
-            <div class="dash-pill">En construcción</div>
-        </section>
+    <p class="dash-main-number" id="streakCurrent">0</p>
 
-        <!-- Nivel -->
-        <section class="dash-card level-card">
-            <h3>Nivel A+</h3>
-            <p class="level-number" id="userLevel">1</p>
+    <p class="dash-small-text">
+      Tu mejor racha: <span id="streakBest">0</span> 🏆
+    </p>
 
-            <div class="xp-bar">
-            <div id="xpBarFill" class="xp-bar-fill"></div>
-            </div>
+    <div class="dash-progress-bar">
+      <div id="streakFill" class="dash-progress-fill"></div>
+    </div>
 
-            <p class="xp-info">
-            <span id="xpThisLevel">0 / 100 XP</span>
-            <span id="nextLevel">Siguiente: Nivel 2</span>
-            </p>
-        </section>
+    <p class="dash-small-text">
+      Objetivo: 21 días — <span id="streakPercent">0%</span>
+    </p>
+  </section>
 
-        <!-- Misión del día -->
-        <section class="dash-card mission-card" id="missionCard" style="display:none;">
-            <h4 class="mission-title" id="missionTitle">Misión del día</h4>
-            <p class="mission-desc" id="missionDesc">Tu misión aparecerá aquí.</p>
+  <!-- CARD: Nivel -->
+  <section class="dash-card">
+    <div class="dash-card-header">
+      <h3>Nivel A+</h3>
+      <span class="dash-chip">✨ XP</span>
+    </div>
 
-            <button id="missionBtn" class="mission-btn">Empezar ahora →</button>
+    <p class="dash-main-number" id="userLevel">1</p>
 
-            <p class="mission-meta" id="missionMeta"></p>
-        </section>
+    <div class="dash-progress-bar">
+      <div id="xpFill" class="dash-progress-fill"></div>
+    </div>
 
-      </div>
-    </section>
+    <p class="dash-small-text">
+      <span id="xpThisLevel">0 / 100 XP</span> — 
+      <span id="nextLevel">Siguiente: Nivel 2</span>
+    </p>
+  </section>
+
+  <!-- CARD: Misión del día -->
+  <section class="dash-card dash-mission-card" id="missionCard" style="display:none;">
+    <h3 class="dash-card-header">Misión del día</h3>
+
+    <p class="dash-mission-title" id="missionTitle">Tu misión aparecerá aquí</p>
+    <p class="dash-mission-desc" id="missionDesc"></p>
+
+    <button class="dash-btn-gold" id="missionBtn">Empezar ahora →</button>
+
+    <p class="dash-small-text" id="missionMeta"></p>
+  </section>
 
 
 
