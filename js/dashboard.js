@@ -404,6 +404,75 @@ async function loadRandomCoachMessage() {
   qs("#coachMessageCard").style.display = "block";
 }
 
+async function loadCoachMessage(userId) {
+  // 1) Último mensaje visto
+  const lastSeen = await getLastSeenMessage(userId);
+
+  // 2) Elegir un nuevo mensaje aleatorio distinto
+  const msg = await getRandomCoachMessage(lastSeen);
+
+  if (!msg) return;
+
+  // 3) Mostrar en dashboard
+  const display = document.querySelector("#coachMessage");
+  if (display) display.textContent = msg.message;
+
+  // 4) Guardar historial
+  await saveMessageHistory(userId, msg.id);
+}
+
+
+async function getLastSeenMessage(userId) {
+  const { data, error } = await supabase
+    .from("coach_messages_history")
+    .select("message_id")
+    .eq("user_id", userId)
+    .order("seen_at", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    console.error("Error obteniendo historial:", error);
+    return null;
+  }
+
+  return data?.length ? data[0].message_id : null;
+}
+
+async function getRandomCoachMessage(excludeId = null) {
+  const { data, error } = await supabase
+    .from("coach_messages_library")
+    .select("id, message, style");
+
+  if (error || !data) {
+    console.error("Error cargando mensajes coach:", error);
+    return null;
+  }
+
+  let pool = data;
+
+  // Excluir último mensaje
+  if (excludeId) {
+    pool = data.filter((m) => m.id !== excludeId);
+  }
+
+  if (!pool.length) return data[0];
+
+  // Random
+  const random = pool[Math.floor(Math.random() * pool.length)];
+
+  return random;
+}
+
+async function saveMessageHistory(userId, messageId) {
+  const { error } = await supabase
+    .from("coach_messages_history")
+    .insert({
+      user_id: userId,
+      message_id: messageId
+    });
+
+  if (error) console.error("Error guardando historial coach:", error);
+}
 
 
 initDashboard();

@@ -286,12 +286,12 @@
    COACH IA – MENSAJE DEL DÍA
 ===================================*/
 .coach-message-card {
-  background: linear-gradient(135deg, #0f1e44, #0a1530);
-  border: 1px solid rgba(192, 164, 80, 0.35);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 18px;
   border-radius: 14px;
-  padding: 20px;
-  margin-top: 10px;
-  box-shadow: 0 0 20px rgba(192, 164, 80, 0.08);
+  margin-bottom: 22px;
+  backdrop-filter: blur(8px);
 }
 
 .coach-message-header {
@@ -331,6 +331,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.coach-msg-text {
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--ap-text);
 }
 
 .coach-style-tag,
