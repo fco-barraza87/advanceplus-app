@@ -1,37 +1,24 @@
 import { supabase } from "/js/supabase.js";
-
 const qs = (sel) => document.querySelector(sel);
 
 /* ==================================================
    1. CARGA DE USUARIO + PROFILE + USER_STATS
 ================================================== */
 async function loadUserData() {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  // Perfil básico
-  const { data: profile, error: pErr } = await supabase
+  const { data: profile } = await supabase
     .from("profiles")
     .select("id, full_name, avatar_url, role")
     .eq("id", user.id)
     .single();
 
-  if (pErr) {
-    console.error("Error cargando profile:", pErr);
-  }
-
-  // Stats oficiales (XP, rachas, nivel)
-  const { data: stats, error: sErr } = await supabase
+  const { data: stats } = await supabase
     .from("user_stats")
     .select("xp_total, streak_current, streak_best, level")
     .eq("user_id", user.id)
     .single();
-
-  if (sErr) {
-    console.error("Error cargando user_stats:", sErr);
-  }
 
   return { user, profile, stats };
 }
@@ -42,295 +29,212 @@ async function loadUserData() {
 function renderUser(profile) {
   if (!profile) return;
 
-  const nameEl = qs("#userName");
-  const roleEl = qs("#userRole");
-  const avatar = qs("#userAvatar");
+  qs("#userName").textContent = profile.full_name || "Usuario";
 
-  if (nameEl) nameEl.textContent = profile.full_name || "Usuario";
+  const roleText =
+    profile.role === "admin"
+      ? "Administrador Advance+"
+      : profile.role === "coach"
+      ? "Coach Advance+"
+      : "Miembro Advance+";
 
-  if (roleEl) {
-    roleEl.textContent =
-      profile.role === "admin"
-        ? "Administrador Advance+"
-        : profile.role === "coach"
-        ? "Coach Advance+"
-        : "Miembro Advance+";
-  }
+  qs("#userRole").textContent = roleText;
 
-  if (avatar && profile.avatar_url) {
+  if (profile.avatar_url) {
+    const avatar = qs("#userAvatar");
     avatar.style.backgroundImage = `url(${profile.avatar_url})`;
-    avatar.style.color = "transparent";
     avatar.style.backgroundSize = "cover";
+    avatar.style.color = "transparent";
   }
 }
 
 /* ==================================================
-   3. GAMIFICACIÓN (XP, NIVEL, RACHAS)
+   3. Racha del usuario
 ================================================== */
-function renderGamification(stats) {
+function renderStreak(stats) {
   if (!stats) return;
 
-  const xp = stats.xp_total ?? 0;
-  const level = stats.level ?? 1;
-  const streakCurrent = stats.streak_current ?? 0;
-  const streakBest = stats.streak_best ?? 0;
-
-  const xpInLevel = xp % 100;
-  const xpToNext = 100 - xpInLevel;
-
-  const levelEl = qs("#levelLabel");
-  const xpTotalEl = qs("#xpTotalLabel");
-  const xpNextEl = qs("#xpNextLabel");
-  const streakCurrentEl = qs("#streakCurrent");
-  const streakBestEl = qs("#streakBest");
-  const bar = qs("#xpBarFill");
-
-  if (levelEl) levelEl.textContent = level;
-  if (xpTotalEl) xpTotalEl.textContent = `${xp} XP`;
-  if (xpNextEl)
-    xpNextEl.textContent = `${xpToNext} XP para el siguiente nivel`;
-  if (streakCurrentEl) streakCurrentEl.textContent = `${streakCurrent} 🔥`;
-  if (streakBestEl) streakBestEl.textContent = `${streakBest} 🏆`;
-
-  if (bar) {
-    const pct = Math.min(100, (xpInLevel / 100) * 100);
-    setTimeout(() => {
-      bar.style.width = `${pct}%`;
-    }, 150);
-  }
+  qs("#streakCurrent").textContent = stats.streak_current ?? 0;
+  qs("#streakBest").textContent = stats.streak_best ?? 0;
 }
 
 /* ==================================================
-   4. CURSOS ACTIVOS (RETOS ACTIVOS)
-   → Join manual, ordenado por started_at
+   4. Sistema XP + Nivel A+ (FÓRMULA OFICIAL)
+================================================== */
+function renderLevelXP(stats) {
+  const xp = stats.xp_total ?? 0;
+
+  const base = 100;
+  const growth = 1.35;
+
+  const xpForLevel = (lvl) => Math.round(base * growth ** (lvl - 1));
+
+  // Cálculo de nivel dinámico
+  let level = 1;
+  let xpUsed = 0;
+  let xpNeeded = xpForLevel(1);
+
+  while (xp >= xpUsed + xpNeeded) {
+    xpUsed += xpNeeded;
+    level++;
+    xpNeeded = xpForLevel(level);
+  }
+
+  const xpIntoLevel = xp - xpUsed;
+  const pct = Math.min(100, (xpIntoLevel / xpNeeded) * 100);
+
+  qs("#userLevel").textContent = level;
+  qs("#xpThisLevel").textContent = `${xpIntoLevel} / ${xpNeeded} XP`;
+  qs("#nextLevel").textContent = `Siguiente: Nivel ${level + 1}`;
+
+  setTimeout(() => {
+    qs("#xpFill").style.width = `${pct}%`;
+  }, 150);
+}
+
+/* ==================================================
+   5. RETOS ACTIVOS (join manual)
 ================================================== */
 async function loadActiveCourses(userId) {
-  const { data: userCourses, error } = await supabase
+  const { data: userCourses } = await supabase
     .from("user_courses")
     .select("course_id, status, started_at")
     .eq("user_id", userId)
     .eq("status", "active")
     .order("started_at", { ascending: false });
 
-  if (error) {
-    console.error("Error cargando user_courses:", error);
-    return [];
-  }
-
-  const activeCourses = [];
+  const list = [];
 
   for (const uc of userCourses || []) {
-    const { data: course, error: cErr } = await supabase
+    const { data: course } = await supabase
       .from("courses")
       .select("id, title, slug, cover_url, category, level, duration_days, active")
       .eq("id", uc.course_id)
       .single();
 
-    if (!cErr && course && course.active) {
-      activeCourses.push(course);
-    }
+    if (course?.active) list.push(course);
   }
 
-  return activeCourses;
+  return list;
 }
 
-function renderActiveCourses(active, currentUser) {
+function renderActiveCourses(courses, user) {
   const grid = qs("#activeCoursesGrid");
-  const msg = qs("#noActiveMessage");
+  const empty = qs("#noActiveMessage");
   const count = qs("#activeCount");
-
-  if (!grid || !msg || !count) return;
 
   grid.innerHTML = "";
 
-  if (!active.length) {
-    msg.style.display = "block";
+  if (!courses.length) {
+    empty.style.display = "block";
     count.textContent = "";
     return;
   }
 
-  msg.style.display = "none";
-  count.textContent = `${active.length} activos`;
+  empty.style.display = "none";
+  count.textContent = `${courses.length} activos`;
 
-  active.forEach((course) => {
+  courses.forEach((course) => {
+    const cover = course.cover_url || "https://via.placeholder.com/600x300.png?text=A+";
+
     const card = document.createElement("article");
     card.className = "course-card clickable";
-    card.dataset.id = course.id;
-
-    const cover =
-      course.cover_url ||
-      "https://via.placeholder.com/600x300.png?text=Advance%2B";
-
     card.innerHTML = `
       <div class="course-cover-wrapper">
         <img src="${cover}" class="course-cover" />
-        <span class="course-badge">${course.category || "Reto"}</span>
+        <span class="course-badge">${course.category}</span>
       </div>
-
       <div class="course-body">
         <div class="course-title">${course.title}</div>
         <div class="course-meta">${course.level || "Todos los niveles"}</div>
       </div>
     `;
 
-    /* ------------------------------------------
-       CLICK → Abrir curso en su día correspondiente
-    ------------------------------------------- */
-    card.addEventListener("click", async () => {
-
-      // 1) Leer progreso del curso (ya creado por el trigger)
-      const { data: progressRows, error } = await supabase
+    card.onclick = async () => {
+      const { data: progress } = await supabase
         .from("progress")
         .select("day, completed")
-        .eq("user_id", currentUser.id)
+        .eq("user_id", user.id)
         .eq("course_id", course.id)
         .order("day", { ascending: true });
 
       let nextDay = 1;
 
-      if (!error && progressRows?.length) {
-        const completed = progressRows.filter((p) => p.completed);
-
-        if (completed.length > 0) {
-          const lastDone = completed[completed.length - 1].day;
-          nextDay = lastDone + 1;
-        }
+      if (progress?.length) {
+        const done = progress.filter((p) => p.completed);
+        if (done.length) nextDay = done.at(-1).day + 1;
       }
 
-      // 2) Nunca pasar del total de días
-      if (nextDay > course.duration_days) {
-        nextDay = course.duration_days;
-      }
+      if (nextDay > course.duration_days) nextDay = course.duration_days;
 
-      // 3) Redirigir al curso
       window.location.href = `/curso/index.html?c=${course.id}&day=${nextDay}`;
-    });
+    };
 
     grid.appendChild(card);
   });
 }
 
-
-
-
 /* ==================================================
-   5. EXPLORAR RETOS (CURSOS DISPONIBLES)
+   6. EXPLORAR NUEVOS RETOS
 ================================================== */
 async function loadAvailableCourses(userId) {
-  const { data: courses, error: cErr } = await supabase
+  const { data: all } = await supabase
     .from("courses")
     .select("*")
     .eq("active", true);
 
-  if (cErr) {
-    console.error("Error cargando courses:", cErr);
-    return [];
-  }
-
-  const { data: myCourses, error: ucErr } = await supabase
+  const { data: my } = await supabase
     .from("user_courses")
     .select("course_id")
     .eq("user_id", userId);
 
-  if (ucErr) {
-    console.error("Error cargando user_courses:", ucErr);
-    return courses || [];
-  }
+  const owned = new Set((my || []).map((c) => c.course_id));
 
-  const ownedIds = new Set((myCourses || []).map((c) => c.course_id));
-
-  return (courses || []).filter((c) => !ownedIds.has(c.id));
+  return all.filter((c) => !owned.has(c.id));
 }
 
 function renderAvailableCourses(courses) {
   const grid = qs("#availableCoursesGrid");
-  const msg = qs("#noAvailableMessage");
-
-  if (!grid || !msg) return;
+  const empty = qs("#noAvailableMessage");
 
   grid.innerHTML = "";
 
   if (!courses.length) {
-    msg.style.display = "block";
+    empty.style.display = "block";
     return;
   }
 
-  msg.style.display = "none";
+  empty.style.display = "none";
 
   courses.forEach((course) => {
+    const cover = course.cover_url || "https://via.placeholder.com/600x300.png?text=A+";
+
     const card = document.createElement("div");
     card.className = "course-card clickable";
-    card.dataset.id = course.id;
-
-    const cover =
-      course.cover_url ||
-      "https://via.placeholder.com/600x300.png?text=Advance%2B";
-
     card.innerHTML = `
       <div class="course-cover-wrapper">
         <img src="${cover}" class="course-cover" />
-        <span class="course-badge">${course.category || "Reto"}</span>
+        <span class="course-badge">${course.category}</span>
       </div>
-
       <div class="course-body">
         <div class="course-title">${course.title}</div>
-        <div class="course-meta">${course.level || ""}</div>
+        <div class="course-meta">${course.level}</div>
       </div>
     `;
 
-    // CLICK EN TODA LA TARJETA
-    card.addEventListener("click", () => {
+    card.onclick = () => {
       window.location.href = `/curso-info/index.html?c=${course.id}`;
-    });
+    };
 
     grid.appendChild(card);
   });
 }
 
-
 /* ==================================================
-   6. LOGOUT
+   7. MISIÓN DEL DÍA
 ================================================== */
-function setupLogout() {
-  const btn = qs("#btnLogout");
-  if (!btn) return;
-
-  btn.onclick = async () => {
-    await supabase.auth.signOut();
-    window.location.href = "/index.html";
-  };
-}
-
-/* ==================================================
-   7. INIT
-================================================== */
-async function initDashboard() {
-  setupLogout();
-
-  const data = await loadUserData();
-  if (!data) return;
-
-  const { user, profile, stats } = data;
-
-  renderUser(profile);
-  renderGamification(stats);
-
-  const active = await loadActiveCourses(user.id);
-  renderActiveCourses(active, user);   // 👈 AGREGAR user
-
-  const available = await loadAvailableCourses(user.id);
-  renderAvailableCourses(available);
-
-  await loadMission(user);
-
-}
-
-// nuevo tarjetero de gamificacion
-
 async function loadMission(user) {
-
-  // 1) leer user_courses activo principal
-  const { data: active, error } = await supabase
+  const { data: active } = await supabase
     .from("user_courses")
     .select("*")
     .eq("user_id", user.id)
@@ -340,38 +244,34 @@ async function loadMission(user) {
 
   const card = qs("#missionCard");
 
-  if (!active || !active.length) {
+  if (!active?.length) {
     card.style.display = "none";
     return;
   }
 
   const courseId = active[0].course_id;
 
-  // 2) leer curso
   const { data: course } = await supabase
     .from("courses")
     .select("*")
     .eq("id", courseId)
     .single();
 
-  // 3) leer progreso
   const { data: progress } = await supabase
     .from("progress")
     .select("day, completed")
     .eq("user_id", user.id)
     .eq("course_id", courseId)
-    .order("day", { ascending: true });
+    .order("day");
 
   let nextDay = 1;
-
   if (progress?.length) {
-    const completed = progress.filter((p) => p.completed);
-    if (completed.length) nextDay = completed.at(-1).day + 1;
+    const done = progress.filter((p) => p.completed);
+    if (done.length) nextDay = done.at(-1).day + 1;
   }
 
   if (nextDay > course.duration_days) nextDay = course.duration_days;
 
-  // 4) render
   qs("#missionTitle").textContent = course.mission_title || "Misión del día";
   qs("#missionDesc").textContent = course.mission_desc || "Toma el control de tu día.";
   qs("#missionMeta").textContent = `${course.title} · Día ${nextDay} · ${course.category}`;
@@ -383,75 +283,38 @@ async function loadMission(user) {
   card.style.display = "flex";
 }
 
-function renderLevelXP(stats) {
-  const xp = stats.xp_total ?? 0;
-  const level = stats.level ?? 1;
-
-  /* Fórmula oficial */
-  const base = 100;
-  const growth = 1.35;
-
-  function xpForLevel(level) {
-    return Math.round(base * Math.pow(growth, level - 1));
-  }
-
-  let xpUsed = 0;
-  let currentLevel = 1;
-  let xpNeeded = xpForLevel(1);
-
-  while (xp >= xpUsed + xpNeeded) {
-    xpUsed += xpNeeded;
-    currentLevel++;
-    xpNeeded = xpForLevel(currentLevel);
-  }
-
-  const xpIntoLevel = xp - xpUsed;
-
-  qs("#userLevel").textContent = currentLevel;
-  qs("#xpThisLevel").textContent = `${xpIntoLevel} / ${xpNeeded} XP`;
-  qs("#nextLevel").textContent = `Siguiente: Nivel ${currentLevel + 1}`;
-
-  const pct = Math.min(100, (xpIntoLevel / xpNeeded) * 100);
-  setTimeout(() => {
-    qs("#xpFill").style.width = pct + "%";
-  }, 200);
+/* ==================================================
+   8. LOGOUT
+================================================== */
+function setupLogout() {
+  qs("#btnLogout").onclick = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/index.html";
+  };
 }
 
+/* ==================================================
+   9. INIT (CARGA GENERAL)
+================================================== */
+async function initDashboard() {
+  setupLogout();
 
-function renderLevelXP(stats) {
-  const xp = stats.xp_total ?? 0;
-  const level = stats.level ?? 1;
+  const data = await loadUserData();
+  if (!data) return;
 
-  /* Fórmula oficial */
-  const base = 100;
-  const growth = 1.35;
+  const { user, profile, stats } = data;
 
-  function xpForLevel(level) {
-    return Math.round(base * Math.pow(growth, level - 1));
-  }
+  renderUser(profile);
+  renderStreak(stats);
+  renderLevelXP(stats);
 
-  let xpUsed = 0;
-  let currentLevel = 1;
-  let xpNeeded = xpForLevel(1);
+  const active = await loadActiveCourses(user.id);
+  renderActiveCourses(active, user);
 
-  while (xp >= xpUsed + xpNeeded) {
-    xpUsed += xpNeeded;
-    currentLevel++;
-    xpNeeded = xpForLevel(currentLevel);
-  }
+  const available = await loadAvailableCourses(user.id);
+  renderAvailableCourses(available);
 
-  const xpIntoLevel = xp - xpUsed;
-
-  qs("#userLevel").textContent = currentLevel;
-  qs("#xpThisLevel").textContent = `${xpIntoLevel} / ${xpNeeded} XP`;
-  qs("#nextLevel").textContent = `Siguiente: Nivel ${currentLevel + 1}`;
-
-  const pct = Math.min(100, (xpIntoLevel / xpNeeded) * 100);
-  setTimeout(() => {
-    qs("#xpFill").style.width = pct + "%";
-  }, 200);
+  await loadMission(user);
 }
-
-
 
 initDashboard();
