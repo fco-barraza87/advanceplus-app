@@ -376,37 +376,34 @@ async function initDashboard() {
   renderAvailableCourses(available);
 
   await loadMission(user);
-  await loadCoachMessage(user.id);
-
+  await loadRandomCoachMessage();
 }
 
 /* ==================================================
-   10. COACH IA — MENSAJE DEL DÍA
+   COACH IA – MENSAJE ALEATORIO DESDE LA LIBRERÍA
 ================================================== */
-async function loadCoachMessage(userId) {
+async function loadRandomCoachMessage() {
   const { data, error } = await supabase
-    .from("coach_messages")
-    .select("message, style, created_at")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(1);
+    .from("coach_messages_library")
+    .select("message, style")
+    .eq("active", true);
 
-  if (error || !data.length) return;
+  if (error || !data || !data.length) {
+    console.warn("No hay mensajes de coach IA o error");
+    return;
+  }
 
-  const m = data[0];
+  // Elegir un mensaje aleatorio
+  const random = data[Math.floor(Math.random() * data.length)];
 
-  qs("#coachMessageText").textContent = m.message;
-  qs("#coachMessageStyle").textContent = `Estilo: ${m.style}`;
-  
-  const sentTime = new Date(m.created_at).toLocaleTimeString("es-ES", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  qs("#coachMessageText").textContent = random.message;
+  qs("#coachMessageStyle").textContent = `Estilo: ${random.style}`;
+  qs("#coachMessageTime").textContent = "Mensaje del día";
 
-  qs("#coachMessageTime").textContent = `Enviado hoy a las ${sentTime}`;
-
+  // Mostrar tarjeta
   qs("#coachMessageCard").style.display = "block";
 }
+
 
 
 initDashboard();
