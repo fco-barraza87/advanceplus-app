@@ -9,25 +9,33 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!session?.user) return;
   const user = session.user;
 
-  // 2) Traer todos los retos disponibles
-  const { data: allCourses } = await supabase
+  // 2) Traer todos los retos disponibles (orden seguro)
+  const { data: allCourses, error: coursesError } = await supabase
     .from("courses")
     .select("*")
-    .order("order_index", { ascending: true });
+    .order("created_at", { ascending: true });
+
+  if (coursesError) {
+    console.error("Error cargando cursos:", coursesError);
+    return;
+  }
 
   // 3) Traer progresos del usuario
-  const { data: userCourses } = await supabase
+  const { data: userCourses, error: userCoursesError } = await supabase
     .from("user_courses")
     .select("*")
     .eq("user_id", user.id);
 
+  if (userCoursesError) {
+    console.error("Error cargando user_courses:", userCoursesError);
+    return;
+  }
+
   // --- HTML containers ---
   const activeContainer = document.getElementById("activeCoursesGrid");
   const exploreContainer = document.getElementById("exploreCoursesGrid");
-
   const activeEmpty = document.getElementById("noActiveMessage");
   const exploreEmpty = document.getElementById("noExploreMessage");
-
   const activeCount = document.getElementById("activeCount");
 
   // 4) Clasificar retos
@@ -43,6 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       explorar.push(course);
     }
   });
+
 
   // ---- RENDER UI ----
 
