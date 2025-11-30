@@ -280,3 +280,64 @@
   font-size: 13px;
   opacity: .75;
 }
+
+
+/* ================================
+   COACH IA – MENSAJE DEL DÍA
+===================================*/
+.coach-message-card {
+  background: linear-gradient(135deg, #0f1e44, #0a1530);
+  border: 1px solid rgba(192, 164, 80, 0.35);
+  border-radius: 14px;
+  padding: 20px;
+  margin-top: 10px;
+  box-shadow: 0 0 20px rgba(192, 164, 80, 0.08);
+}
+
+.coach-message-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.coach-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #f7d98f, #d3b35c);
+  color: #0f1e44;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.coach-title {
+  color: #8ea5d9;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.coach-message-text {
+  font-size: 15px;
+  line-height: 1.45;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+
+.coach-message-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.coach-style-tag,
+.coach-time-tag {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #c5cbe3;
+}

@@ -376,6 +376,8 @@ async function initDashboard() {
   renderAvailableCourses(available);
 
   await loadMission(user);
+  await loadCoachMessage(user.id);
+
 }
 
 initDashboard();
