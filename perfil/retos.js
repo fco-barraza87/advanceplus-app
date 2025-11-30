@@ -1,106 +1,196 @@
 import { supabase } from "/js/supabase.js";
 import { protectUserView } from "/js/router.js";
 
-document.addEventListener("DOMContentLoaded", async () => {
-  await protectUserView();
+const qs = (sel) => document.querySelector(sel);
 
-  // 1) Obtener usuario
-  const { data: session } = await supabase.auth.getUser();
-  if (!session?.user) return;
-  const user = session.user;
+/* ==========================================
+   1. CARGAR RETOS ACTIVOS DESDE user_courses
+========================================== */
+async function loadActiveCourses(userId) {
+  const { data: userCourses, error } = await supabase
+    .from("user_courses")
+    .select("course_id, status, started_at")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .order("started_at", { ascending: false });
 
-  // 2) Traer todos los retos disponibles (orden seguro)
-  const { data: allCourses, error: coursesError } = await supabase
+  if (error) {
+    console.error("Error cargando user_courses:", error);
+    return [];
+  }
+
+  const activeCourses = [];
+
+  for (const uc of userCourses || []) {
+    const { data: course, error: cErr } = await supabase
+      .from("courses")
+      .select(
+        "id, title, slug, cover_url, category, level, duration_days, active"
+      )
+      .eq("id", uc.course_id)
+      .single();
+
+    if (!cErr && course && course.active) {
+      activeCourses.push(course);
+    }
+  }
+
+  return activeCourses;
+}
+
+function renderActiveCoursesRetos(active, currentUser) {
+  const grid = qs("#activeCoursesGrid");
+  const msg = qs("#noActiveCourses");
+
+  if (!grid || !msg) return;
+
+  grid.innerHTML = "";
+
+  if (!active.length) {
+    msg.style.display = "block";
+    return;
+  }
+
+  msg.style.display = "none";
+
+  active.forEach((course) => {
+    const card = document.createElement("article");
+    card.className = "course-card clickable";
+    card.dataset.id = course.id;
+
+    const cover =
+      course.cover_url ||
+      "https://via.placeholder.com/600x300.png?text=Advance%2B";
+
+    card.innerHTML = `
+      <div class="course-cover-wrapper">
+        <img src="${cover}" class="course-cover" />
+        <span class="course-badge">${course.category || "Reto"}</span>
+      </div>
+
+      <div class="course-body">
+        <div class="course-title">${course.title}</div>
+        <div class="course-meta">${course.level || "Todos los niveles"}</div>
+      </div>
+    `;
+
+    // Mismo comportamiento que en el dashboard:
+    card.addEventListener("click", async () => {
+      const { data: progressRows, error } = await supabase
+        .from("progress")
+        .select("day, completed")
+        .eq("user_id", currentUser.id)
+        .eq("course_id", course.id)
+        .order("day", { ascending: true });
+
+      let nextDay = 1;
+
+      if (!error && progressRows?.length) {
+        const completed = progressRows.filter((p) => p.completed);
+        if (completed.length > 0) {
+          const lastDone = completed[completed.length - 1].day;
+          nextDay = lastDone + 1;
+        }
+      }
+
+      if (nextDay > course.duration_days) {
+        nextDay = course.duration_days;
+      }
+
+      window.location.href = `/curso/index.html?c=${course.id}&day=${nextDay}`;
+    });
+
+    grid.appendChild(card);
+  });
+}
+
+/* ==========================================
+   2. RETOS DISPONIBLES (EXPLORAR)
+========================================== */
+async function loadAvailableCourses(userId) {
+  const { data: courses, error: cErr } = await supabase
     .from("courses")
     .select("*")
-    .order("created_at", { ascending: true });
+    .eq("active", true);
 
-  if (coursesError) {
-    console.error("Error cargando cursos:", coursesError);
-    return;
+  if (cErr) {
+    console.error("Error cargando courses:", cErr);
+    return [];
   }
 
-  // 3) Traer progresos del usuario
-  const { data: userCourses, error: userCoursesError } = await supabase
+  const { data: myCourses, error: ucErr } = await supabase
     .from("user_courses")
-    .select("*")
-    .eq("user_id", user.id);
+    .select("course_id")
+    .eq("user_id", userId);
 
-  if (userCoursesError) {
-    console.error("Error cargando user_courses:", userCoursesError);
+  if (ucErr) {
+    console.error("Error cargando user_courses:", ucErr);
+    return courses || [];
+  }
+
+  const ownedIds = new Set((myCourses || []).map((c) => c.course_id));
+  return (courses || []).filter((c) => !ownedIds.has(c.id));
+}
+
+function renderAvailableCoursesRetos(courses) {
+  const grid = qs("#allCoursesGrid");
+  const msg = qs("#noCoursesMessage");
+
+  if (!grid || !msg) return;
+
+  grid.innerHTML = "";
+
+  if (!courses.length) {
+    msg.style.display = "block";
     return;
   }
 
-  // --- HTML containers ---
-  const activeContainer = document.getElementById("activeCoursesGrid");
-  const exploreContainer = document.getElementById("exploreCoursesGrid");
-  const activeEmpty = document.getElementById("noActiveMessage");
-  const exploreEmpty = document.getElementById("noExploreMessage");
-  const activeCount = document.getElementById("activeCount");
+  msg.style.display = "none";
 
-  // 4) Clasificar retos
-  const activos = [];
-  const explorar = [];
+  courses.forEach((course) => {
+    const card = document.createElement("div");
+    card.className = "course-card clickable";
+    card.dataset.id = course.id;
 
-  allCourses.forEach(course => {
-    const match = userCourses?.find(uc => uc.course_id === course.id);
+    const cover =
+      course.cover_url ||
+      "https://via.placeholder.com/600x300.png?text=Advance%2B";
 
-    if (match && match.status === "active") {
-      activos.push(course);
-    } else {
-      explorar.push(course);
-    }
+    card.innerHTML = `
+      <div class="course-cover-wrapper">
+        <img src="${cover}" class="course-cover" />
+        <span class="course-badge">${course.category || "Reto"}</span>
+      </div>
+
+      <div class="course-body">
+        <div class="course-title">${course.title}</div>
+        <div class="course-meta">${course.level || ""}</div>
+      </div>
+    `;
+
+    card.addEventListener("click", () => {
+      window.location.href = `/curso-info/index.html?c=${course.id}`;
+    });
+
+    grid.appendChild(card);
   });
-
-
-  // ---- RENDER UI ----
-
-  // ⭐ Contador activos
-  activeCount.textContent = activos.length;
-
-  // ⭐ Activos
-  if (activos.length === 0) {
-    activeEmpty.style.display = "block";
-  } else {
-    activos.forEach(c => activeContainer.appendChild(renderCourseCard(c, true)));
-  }
-
-  // ⭐ Explorar
-  if (explorar.length === 0) {
-    exploreEmpty.style.display = "block";
-  } else {
-    explorar.forEach(c => exploreContainer.appendChild(renderCourseCard(c, false)));
-  }
-});
-
-
-// --------------------------------------------------------------
-// 🧩 Componente: Tarjeta de curso (reutiliza estilos existentes)
-// --------------------------------------------------------------
-function renderCourseCard(course, isActive) {
-
-  const div = document.createElement("div");
-  div.classList.add("course-card");
-
-  div.innerHTML = `
-    <div class="course-cover-wrapper">
-        <img class="course-cover" src="${course.cover_url}" alt="${course.title}">
-        <span class="course-badge">${course.category}</span>
-    </div>
-
-    <div class="course-body">
-        <h3 class="course-title">${course.title}</h3>
-        <p class="course-meta">${course.level}</p>
-        
-        <div class="course-actions">
-            ${
-              isActive
-                ? `<button class="btn-continue" onclick="location.href='/curso/index.html?id=${course.id}'">Continuar</button>`
-                : `<button class="btn-course" onclick="location.href='/curso-info/index.html?id=${course.id}'">Comenzar</button>`
-            }
-        </div>
-    </div>
-  `;
-
-  return div;
 }
+
+/* ==========================================
+   3. INIT PÁGINA RETOS PERFIL
+========================================== */
+async function initRetosPerfil() {
+  await protectUserView();
+
+  const { data: session } = await supabase.auth.getUser();
+  const user = session?.user;
+  if (!user) return;
+
+  const active = await loadActiveCourses(user.id);
+  renderActiveCoursesRetos(active, user);
+
+  const available = await loadAvailableCourses(user.id);
+  renderAvailableCoursesRetos(available);
+}
+
+document.addEventListener("DOMContentLoaded", initRetosPerfil);
