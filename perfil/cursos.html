@@ -13,24 +13,36 @@
 <body class="app-bg">
 
   <!-- HEADER PREMIUM -->
-  <div id="appHeader"></div>
-  <script type="module">
-    import { loadUserHeader } from "/components/user-header.js";
-    loadUserHeader();
-  </script>
+  
+  <!-- HEADER NUEVO (PREMIUM) -->
+<header class="ap-header">
+  <div class="ap-header-left">
+    <h1 class="ap-logo">A+</h1>
 
-  <!-- CONTENIDO PRINCIPAL -->
-  <main class="dashboard-wrapper">
-    <!-- Aquí va el contenido personalizado -->
-  <section class="dash-section">
+    <div class="ap-header-info">
+      <span id="headerUserName" class="ap-header-name">Usuario</span>
+      <span id="headerUserRole" class="ap-header-role">Cargando…</span>
+    </div>
+  </div>
+
+  <!-- Avatar dinámico (imagen o iniciales) -->
+  <div id="headerAvatar" class="ap-header-avatar"></div>
+
+  <button id="btnLogout" class="ap-logout-btn">Cerrar sesión</button>
+</header>
+
+
+    <section class="dash-section">
     <h2 class="section-title">Todos los retos</h2>
 
     <div id="allCoursesGrid" class="courses-grid"></div>
 
     <p id="noCoursesMessage" class="empty-message" style="display:none;">
-      No hay retos disponibles en este momento.
+        No hay retos disponibles en este momento.
     </p>
-  </section>
+    </section>
+
+
 
 
   </main>
@@ -61,7 +73,12 @@
   </script>
 
   <!-- JS ESPECÍFICO -->
-  <script type="module" src="/js/ARCHIVO.js"></script>
+  <script type="module" src="/perfil/retos.js"></script>
+
+  <script type="module">
+    import { loadUserHeader } from "/components/user-header.js";
+    loadUserHeader();
+  </script>
 
 </body>
 </html>
