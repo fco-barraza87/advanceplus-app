@@ -29,24 +29,31 @@ async function loadUserData() {
 function renderUser(profile) {
   if (!profile) return;
 
-  qs("#userName").textContent = profile.full_name || "Usuario";
+  const nameEl = qs("#userName");
+  const roleEl = qs("#userRole");
+  const avatarEl = qs("#userAvatar");
 
-  const roleText =
-    profile.role === "admin"
-      ? "Administrador Advance+"
-      : profile.role === "coach"
-      ? "Coach Advance+"
-      : "Miembro Advance+";
+  // Solo asignar si existe
+  if (nameEl) {
+    nameEl.textContent = profile.full_name || "Usuario";
+  }
 
-  qs("#userRole").textContent = roleText;
+  if (roleEl) {
+    roleEl.textContent =
+      profile.role === "admin"
+        ? "Administrador Advance+"
+        : profile.role === "coach"
+        ? "Coach Advance+"
+        : "Miembro Advance+";
+  }
 
-  if (profile.avatar_url) {
-    const avatar = qs("#userAvatar");
-    avatar.style.backgroundImage = `url(${profile.avatar_url})`;
-    avatar.style.backgroundSize = "cover";
-    avatar.style.color = "transparent";
+  if (avatarEl && profile.avatar_url) {
+    avatarEl.style.backgroundImage = `url(${profile.avatar_url})`;
+    avatarEl.style.backgroundSize = "cover";
+    avatarEl.style.color = "transparent";
   }
 }
+
 
 /* ==================================================
    3. Racha del usuario
