@@ -9,160 +9,198 @@
   <!-- TOKENS GLOBALES -->
   <link rel="stylesheet" href="/css/style.css">
 
-  <!-- DASHBOARD CSS -->
+  <!-- DASHBOARD CSS (Aislado para el dashboard) -->
   <link rel="stylesheet" href="/css/dashboard-user.css">
 </head>
 
 <body class="app-bg dashboard-page">
 
-
   <!-- HEADER NUEVO (PREMIUM) -->
-<header class="ap-header">
-  <div class="ap-header-left">
-    <h1 class="ap-logo">A+</h1>
+  <header class="ap-header">
+    <div class="ap-header-left">
+      <h1 class="ap-logo">A+</h1>
 
-    <div class="ap-header-info">
-      <span id="headerUserName" class="ap-header-name">Usuario</span>
-      <span id="headerUserRole" class="ap-header-role">Cargando…</span>
-    </div>
-  </div>
-
-  <!-- Avatar dinámico (imagen o iniciales) -->
-  <div id="headerAvatar" class="ap-header-avatar"></div>
-
-  <button id="btnLogout" class="ap-logout-btn">Cerrar sesión</button>
-</header>
-
-<main class="dashboard-wrapper">
-
-  <!-- BLOQUE: Título -->
-  <section class="dash-section">
-    <h2 class="section-title">Tu progreso</h2>
-  </section>
-
-  <!-- BLOQUE: Racha -->
-  <section class="dash-section metric-card">
-    <div class="metric-header">
-      <span class="metric-title">Racha</span>
-      <span class="metric-chip metric-chip-soft">🔥 Constancia</span>
+      <div class="ap-header-info">
+        <span id="headerUserName" class="ap-header-name">Usuario</span>
+        <span id="headerUserRole" class="ap-header-role">Cargando…</span>
+      </div>
     </div>
 
-    <div class="metric-main">
-      <div class="metric-main-value" id="streakCurrent">0</div>
-      <div class="metric-main-sub">Tu mejor racha: <span id="streakBest">0</span> 🏆</div>
-    </div>
+    <div id="headerAvatar" class="ap-header-avatar"></div>
+    <button id="btnLogout" class="ap-logout-btn">Cerrar sesión</button>
+  </header>
 
-    <div class="metric-footer">
-      <span class="metric-footer-label">Objetivo: 21 días — 0%</span>
-      <div class="metric-footer-tag">En construcción</div>
-    </div>
-  </section>
 
-  <!-- BLOQUE: Nivel A+ -->
-  <section class="dash-section metric-card">
-    <div class="metric-header">
-      <span class="metric-title">Nivel A+</span>
-      <span class="metric-chip">⭐ XP</span>
-    </div>
 
-    <div class="metric-main">
-      <div class="metric-main-value" id="userLevel">1</div>
-    </div>
+  <!-- ============================================================
+       MAIN DASHBOARD
+  ============================================================= -->
+  <main class="dashboard-wrapper">
 
-    <div class="metric-progress-row">
-      <div class="metric-progress-label" id="xpThisLevel">0 / 100 XP</div>
-      <div class="metric-progress-next" id="nextLevel">Siguiente: Nivel 2</div>
-    </div>
+    <!-- ========================== -->
+    <!-- TÍTULO PRINCIPAL           -->
+    <!-- ========================== -->
+    <section class="dash-section">
+      <h2 class="section-title">Tu progreso</h2>
+    </section>
 
-    <div class="metric-bar">
-      <div class="metric-bar-fill" id="xpFill"></div>
-    </div>
-  </section>
 
-  <!-- BLOQUE: Misión del día -->
-  <section class="dash-section mission-card" id="missionCard" style="display:none;">
-    <div class="mission-left">
-      <p class="mission-tag">Misión del día</p>
-      <h3 class="mission-title" id="missionTitle">Toma el control de tu día.</h3>
-      <p class="mission-desc" id="missionDesc">
-        Pausa, respira y elige una sola prioridad para hoy.
+    <!-- ========================== -->
+    <!-- BLOQUE Racha               -->
+    <!-- ========================== -->
+    <section class="dash-section metric-card">
+      <div class="metric-header">
+        <span class="metric-title">Racha</span>
+        <span class="metric-chip metric-chip-soft">🔥 Constancia</span>
+      </div>
+
+      <div class="metric-main">
+        <div class="metric-main-value" id="streakCurrent">0</div>
+        <div class="metric-main-sub">
+          Tu mejor racha: <span id="streakBest">0</span> 🏆
+        </div>
+      </div>
+
+      <div class="metric-footer">
+        <span class="metric-footer-label">Objetivo: 21 días</span>
+        <div class="metric-footer-tag">En construcción</div>
+      </div>
+    </section>
+
+
+    <!-- ========================== -->
+    <!-- BLOQUE Nivel A+            -->
+    <!-- ========================== -->
+    <section class="dash-section metric-card">
+
+      <div class="metric-header">
+        <span class="metric-title">Nivel A+</span>
+        <span class="metric-chip">⭐ XP</span>
+      </div>
+
+      <div class="metric-main">
+        <div class="metric-main-value" id="userLevel">1</div>
+      </div>
+
+      <!-- FILA DE TEXTO DEL XP -->
+      <div class="metric-progress-row">
+        <div class="metric-progress-label" id="xpThisLevel">
+          0 / 100 XP
+        </div>
+        <div class="metric-progress-next" id="nextLevel">
+          Siguiente: Nivel 2
+        </div>
+      </div>
+
+      <!-- 🔥 FIX: ESTA ES TU BARRA XP compatible -->
+      <div class="progress-bar">
+        <div class="progress-fill" id="xpFill"></div>
+      </div>
+
+    </section>
+
+
+    <!-- ========================== -->
+    <!-- BLOQUE: MISIÓN DEL DÍA    -->
+    <!-- ========================== -->
+    <section class="dash-section mission-card" id="missionCard" style="display:none;">
+      <div class="mission-left">
+        <p class="mission-tag">Misión del día</p>
+        <h3 class="mission-title" id="missionTitle">Toma el control de tu día.</h3>
+        <p class="mission-desc" id="missionDesc">
+          Pausa, respira y elige una sola prioridad para hoy.
+        </p>
+        <p class="mission-meta" id="missionMeta">Curso · Día 1 · enfoque</p>
+      </div>
+
+      <div class="mission-right">
+        <button class="mission-btn" id="missionBtn">
+          Empezar ahora →
+        </button>
+      </div>
+    </section>
+
+
+
+    <!-- ========================== -->
+    <!-- BLOQUE: RETOS ACTIVOS     -->
+    <!-- ========================== -->
+    <section class="dash-section retos-section">
+      <div class="section-header-row">
+        <h3 class="section-title">Tus retos activos</h3>
+        <span id="activeCount" class="section-subtitle"></span>
+      </div>
+
+      <div id="activeCoursesGrid" class="courses-grid"></div>
+
+      <p id="noActiveMessage" class="empty-message" style="display:none;">
+        No tienes retos activos actualmente. Elige uno para empezar tu transformación. 💥
       </p>
-      <p class="mission-meta" id="missionMeta">Curso · Día 1 · enfoque</p>
-    </div>
-
-    <div class="mission-right">
-      <button class="mission-btn" id="missionBtn">
-        Empezar ahora →
-      </button>
-    </div>
-  </section>
-
-  <!-- BLOQUE: Retos activos -->
-  <section class="dash-section retos-section">
-    <div class="section-header-row">
-      <h3 class="section-title">Tus retos activos</h3>
-      <span id="activeCount" class="section-subtitle"></span>
-    </div>
-
-    <div id="activeCoursesGrid" class="courses-grid"></div>
-
-    <p id="noActiveMessage" class="empty-message" style="display:none;">
-      No tienes retos activos actualmente. Elige uno para empezar tu transformación. 💥
-    </p>
-  </section>
-
-  <!-- BLOQUE: Explorar retos -->
-  <section class="dash-section retos-section">
-    <div class="section-header-row">
-      <h3 class="section-title">Explorar retos</h3>
-    </div>
-
-    <div id="availableCoursesGrid" class="courses-grid"></div>
-
-    <p id="noAvailableMessage" class="empty-message" style="display:none;">
-      Has desbloqueado todos los retos disponibles por ahora. 🔓
-    </p>
-  </section>
-
-</main>
+    </section>
 
 
 
-  <!-- TAB BAR MÓVIL -->
+    <!-- ========================== -->
+    <!-- BLOQUE: EXPLORAR RETOS    -->
+    <!-- ========================== -->
+    <section class="dash-section retos-section">
+      <div class="section-header-row">
+        <h3 class="section-title">Explorar retos</h3>
+      </div>
+
+      <div id="availableCoursesGrid" class="courses-grid"></div>
+
+      <p id="noAvailableMessage" class="empty-message" style="display:none;">
+        Has desbloqueado todos los retos disponibles por ahora. 🔓
+      </p>
+    </section>
+
+  </main>
+
+
+
+
+  <!-- ============================================================
+       TAB BAR — restaurado EXACTAMENTE como las otras páginas
+  ============================================================= -->
   <nav class="tabbar">
-    <button class="tab-btn active" data-nav="dashboard">
+    <button class="tab-btn active" onclick="location.href='/dashboard/index.html'">
       <span>🏠</span>
       <small>Inicio</small>
     </button>
 
-    <button class="tab-btn" data-nav="courses">
+    <button class="tab-btn" onclick="location.href='/retos/index.html'">
       <span>📘</span>
       <small>Retos</small>
     </button>
 
-    <button class="tab-btn" data-nav="profile">
+    <button class="tab-btn" onclick="location.href='/perfil/index.html'">
       <span>👤</span>
       <small>Perfil</small>
     </button>
 
-    <button class="tab-btn" data-nav="stats">
+    <button class="tab-btn" onclick="location.href='/stats/index.html'">
       <span>📊</span>
       <small>Progreso</small>
     </button>
   </nav>
 
+
+
+
+  <!-- HEADER -->
   <script type="module">
     import { loadUserHeader } from "/components/user-header.js";
     loadUserHeader();
   </script>
 
-  <!-- ROUTER + LOGICA -->
+  <!-- ROUTER -->
   <script type="module">
     import { protectUserView } from "/js/router.js";
     protectUserView();
   </script>
 
-  <!-- NUEVA LÓGICA DASHBOARD -->
+  <!-- LÓGICA DASHBOARD -->
   <script type="module" src="/js/dashboard.js"></script>
 
 </body>
