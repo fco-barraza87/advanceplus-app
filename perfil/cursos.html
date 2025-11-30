@@ -25,24 +25,27 @@
     </div>
   </div>
 
-  <!-- Avatar dinámico (imagen o iniciales) -->
-  <div id="headerAvatar" class="ap-header-avatar"></div>
-
-  <button id="btnLogout" class="ap-logout-btn">Cerrar sesión</button>
-</header>
-
-
+    <!-- MIS RETOS ACTIVOS -->
     <section class="dash-section">
-    <h2 class="section-title">Todos los retos</h2>
+      <h2 class="section-title">Tus retos activos</h2>
 
-    <div id="allCoursesGrid" class="courses-grid"></div>
+      <div id="activeCoursesGrid" class="courses-grid"></div>
 
-    <p id="noCoursesMessage" class="empty-message" style="display:none;">
-        No hay retos disponibles en este momento.
-    </p>
+      <p id="noActiveCourses" class="empty-message" style="display:none;">
+        No tienes retos activos actualmente.
+      </p>
     </section>
 
+    <!-- TODOS LOS RETOS -->
+    <section class="dash-section">
+      <h2 class="section-title">Todos los retos</h2>
 
+      <div id="allCoursesGrid" class="courses-grid"></div>
+
+      <p id="noCoursesMessage" class="empty-message" style="display:none;">
+        No hay retos disponibles en este momento.
+      </p>
+    </section>
 
 
   </main>
