@@ -99,6 +99,76 @@ function renderLevelXP(stats) {
   }, 150);
 }
 
+
+/* ==================================================
+   GAMIFICACIÓN — RACHA + NIVEL + BARRAS
+================================================== */
+async function renderGamification(stats, userId) {
+  if (!stats) return;
+
+  /** ------------------------------
+   *  1) Racha
+   --------------------------------*/
+  const streak = stats.streak_current ?? 0;
+  const best = stats.streak_best ?? 0;
+
+  // Obtener objetivo dinámico
+  const goalDays = await getStreakGoal(userId);
+
+  // Calcular progreso racha
+  const pctRacha = Math.min(100, (streak / goalDays) * 100);
+
+  // Renderizar datos
+  qs("#streakCurrent").textContent = streak;
+  qs("#streakBest").textContent = best;
+
+  qs("#streakGoalLabel").textContent = `Objetivo: ${goalDays} días`;
+
+  // Barra racha
+  const rachaBar = qs("#streakBarFill");
+  if (rachaBar) {
+    setTimeout(() => {
+      rachaBar.style.width = pctRacha + "%";
+    }, 150);
+  }
+
+  /** ------------------------------
+   *  2) Nivel A+
+   --------------------------------*/
+  const xp = stats.xp_total ?? 0;
+
+  const base = 100;
+  const growth = 1.35;
+
+  function xpForLevel(level) {
+    return Math.round(base * Math.pow(growth, level - 1));
+  }
+
+  let xpUsed = 0;
+  let currentLevel = 1;
+  let xpNeeded = xpForLevel(1);
+
+  while (xp >= xpUsed + xpNeeded) {
+    xpUsed += xpNeeded;
+    currentLevel++;
+    xpNeeded = xpForLevel(currentLevel);
+  }
+
+  const xpIntoLevel = xp - xpUsed;
+  const pctXP = Math.min(100, (xpIntoLevel / xpNeeded) * 100);
+
+  qs("#userLevel").textContent = currentLevel;
+  qs("#xpThisLevel").textContent = `${xpIntoLevel} / ${xpNeeded} XP`;
+  qs("#nextLevel").textContent = `Siguiente: Nivel ${currentLevel + 1}`;
+
+  const xpBar = qs("#xpFill");
+  if (xpBar) {
+    setTimeout(() => {
+      xpBar.style.width = pctXP + "%";
+    }, 200);
+  }
+}
+
 /* ==================================================
    5. RETOS ACTIVOS (join manual)
 ================================================== */
@@ -299,6 +369,34 @@ function setupLogout() {
     window.location.href = "/index.html";
   };
 }
+
+/* ==================================================
+   OBTENER OBJETIVO DE RACHA SEGÚN CURSO ACTIVO
+   Si no hay curso → default = 21
+================================================== */
+async function getStreakGoal(userId) {
+  // 1) Buscar el curso ACTIVO
+  const { data: active, error } = await supabase
+    .from("user_courses")
+    .select("course_id")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .limit(1);
+
+  if (!active || !active.length) {
+    return 21; // objetivo por defecto
+  }
+
+  // 2) Buscar duración del curso
+  const { data: course } = await supabase
+    .from("courses")
+    .select("duration_days")
+    .eq("id", active[0].course_id)
+    .single();
+
+  return course?.duration_days ?? 21;
+}
+
 
 /* ==================================================
    9. INIT (CARGA GENERAL)
