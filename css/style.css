@@ -2010,3 +2010,44 @@ select option {
 .btn-avatar-delete:hover {
   background: rgba(255,80,80,0.35);
 }
+
+
+.avatar-modal.hidden {
+  display: none;
+}
+
+.avatar-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.avatar-modal-content {
+  background: #040819;
+  border-radius: 16px;
+  padding: 16px;
+  max-width: 420px;
+  width: 90%;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.avatar-crop-container {
+  width: 100%;
+  max-height: 320px;
+  overflow: hidden;
+  margin: 10px 0 14px;
+}
+
+.avatar-crop-container img {
+  max-width: 100%;
+  display: block;
+}
+.avatar-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

@@ -25,6 +25,9 @@
     </div>
   </div>
 
+  <link rel="stylesheet" href="https://unpkg.com/cropperjs@1.6.1/dist/cropper.min.css">
+  <script src="https://unpkg.com/cropperjs@1.6.1/dist/cropper.min.js"></script>
+
   <!-- Avatar dinámico (imagen o iniciales) -->
   <div id="headerAvatar" class="ap-header-avatar"></div>
 
@@ -54,6 +57,20 @@
         </label>
 
         <button id="avatarDelete" class="btn-avatar-delete">Eliminar</button>
+    </div>
+    </div>
+
+    <!-- Modal recorte avatar -->
+    <div id="avatarModal" class="avatar-modal hidden">
+    <div class="avatar-modal-content">
+        <h4>Recorta tu foto</h4>
+        <div class="avatar-crop-container">
+        <img id="avatarCropImage" src="" alt="Recorte avatar">
+        </div>
+        <div class="avatar-modal-actions">
+        <button id="avatarCropCancel" type="button" class="btn-avatar-delete">Cancelar</button>
+        <button id="avatarCropApply" type="button" class="btn-avatar">Aplicar recorte</button>
+        </div>
     </div>
     </div>
 

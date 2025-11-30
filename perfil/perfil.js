@@ -57,34 +57,101 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("avatarPreview").src = profile.avatar_url;
   }
 
-  // Al seleccionar archivo
-document.getElementById("avatarInput").addEventListener("change", async (event) => {
+  const avatarPreview = document.getElementById("avatarPreview");
+
+  // Sincronizar con el avatar del header (para evitar 404 y mantener consistencia)
+  const headerAvatarImg = document.querySelector(".ap-header-avatar img");
+  if (headerAvatarImg && headerAvatarImg.src) {
+    avatarPreview.src = headerAvatarImg.src;
+  } else if (profile.avatar_url) {
+    avatarPreview.src = profile.avatar_url;
+  }
+
+
+let cropper = null;
+const avatarInput = document.getElementById("avatarInput");
+const avatarModal = document.getElementById("avatarModal");
+const avatarCropImage = document.getElementById("avatarCropImage");
+const avatarPreview = document.getElementById("avatarPreview");
+
+avatarInput.addEventListener("change", (event) => {
   const file = event.target.files[0];
   if (!file) return;
 
   // Validar tamaño
   if (file.size > 2 * 1024 * 1024) {
     alert("La imagen no puede superar los 2 MB.");
+    avatarInput.value = "";
     return;
   }
 
-  // Crear imagen para validar dimensiones
-  const img = new Image();
-  img.src = URL.createObjectURL(file);
+  // Mostrar imagen en modal para recorte
+  const url = URL.createObjectURL(file);
+  avatarCropImage.src = url;
 
-  img.onload = async () => {
-    if (img.width > 400 || img.height > 400) {
-      alert("La imagen debe ser máximo 400x400px.");
+  avatarCropImage.onload = () => {
+    // Mostrar modal
+    avatarModal.classList.remove("hidden");
+
+    // Destruir cropper anterior si existía
+    if (cropper) {
+      cropper.destroy();
+    }
+
+    // Crear nuevo cropper (1:1 estilo Instagram)
+    cropper = new Cropper(avatarCropImage, {
+      aspectRatio: 1,
+      viewMode: 1,
+      dragMode: "move",
+      background: false,
+      autoCropArea: 1,
+    });
+  };
+});
+
+// Botón cancelar recorte
+document.getElementById("avatarCropCancel").addEventListener("click", () => {
+  if (cropper) {
+    cropper.destroy();
+    cropper = null;
+  }
+  avatarModal.classList.add("hidden");
+  avatarInput.value = "";
+});
+
+// Botón aplicar recorte
+document.getElementById("avatarCropApply").addEventListener("click", async () => {
+  if (!cropper) return;
+
+  // 1. Canvas recortado 400x400
+  const croppedCanvas = cropper.getCroppedCanvas({
+    width: 400,
+    height: 400,
+  });
+
+  // 2. Aplicar filtro "Estilo Advance+"
+  //    Suavizar / quitar ruido (ligero blur) + brillo/contraste/saturación
+  const filteredCanvas = document.createElement("canvas");
+  filteredCanvas.width = 400;
+  filteredCanvas.height = 400;
+  const fctx = filteredCanvas.getContext("2d");
+
+  fctx.filter = "brightness(1.05) contrast(1.06) saturate(1.04) blur(0.3px)";
+  fctx.drawImage(croppedCanvas, 0, 0, 400, 400);
+
+  filteredCanvas.toBlob(async (blob) => {
+    if (!blob) {
+      alert("Error procesando la imagen.");
       return;
     }
 
     // Nombre único
     const fileName = `${user.id}_${Date.now()}.jpg`;
 
-    // Subir a Supabase Storage
-    const { data, error: uploadError } = await supabase.storage
+    // Subir a Supabase Storage (mismo bucket "avatars")
+    const { error: uploadError } = await supabase.storage
       .from("avatars")
-      .upload(fileName, file, { upsert: true });
+      .upload(fileName, blob, { upsert: true });
 
     if (uploadError) {
       alert("Error subiendo avatar.");
@@ -92,37 +159,55 @@ document.getElementById("avatarInput").addEventListener("change", async (event) 
       return;
     }
 
-    // Obtener URL publica
+    // Obtener URL pública
     const { data: publicUrl } = supabase.storage
       .from("avatars")
       .getPublicUrl(fileName);
 
     // Guardar en profiles
-    await supabase
+    const { error: updateError } = await supabase
       .from("profiles")
       .update({ avatar_url: publicUrl.publicUrl })
       .eq("id", user.id);
 
-    // Mostrar nueva foto
-    document.getElementById("avatarPreview").src = publicUrl.publicUrl;
+    if (updateError) {
+      alert("Error guardando avatar.");
+      console.error(updateError);
+      return;
+    }
 
-    // Actualizar header
+    // Set preview + actualizar header
+    avatarPreview.src = publicUrl.publicUrl;
     loadUserHeader();
-  };
+
+    // Cerrar modal y limpiar
+    if (cropper) {
+      cropper.destroy();
+      cropper = null;
+    }
+    avatarModal.classList.add("hidden");
+    avatarInput.value = "";
+  }, "image/jpeg", 0.9); // calidad 90%
 });
 
 
   document.getElementById("avatarDelete").addEventListener("click", async () => {
-  
-  await supabase
-    .from("profiles")
-    .update({ avatar_url: null })
-    .eq("id", user.id);
+    await supabase
+      .from("profiles")
+      .update({ avatar_url: null })
+      .eq("id", user.id);
 
-  document.getElementById("avatarPreview").src = "/img/avatar-placeholder.png";
+    // Fallback: usa el placeholder del header o deja vacío
+    const headerAvatarImg = document.querySelector(".ap-header-avatar img");
+    if (headerAvatarImg && headerAvatarImg.src) {
+      avatarPreview.src = headerAvatarImg.src;
+    } else {
+      avatarPreview.src = "";
+    }
 
-  loadUserHeader();
-});
+    loadUserHeader();
+  });
+
 
 
   // ---- GUARDAR CAMBIOS ----
