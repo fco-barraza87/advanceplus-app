@@ -1,76 +1,97 @@
 import { supabase } from "/js/supabase.js";
+import { protectUserView } from "/js/router.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // Obtener usuario
+  await protectUserView();
+
+  // 1) Obtener usuario
   const { data: session } = await supabase.auth.getUser();
   if (!session?.user) return;
   const user = session.user;
 
-  // Cargar retos
-  const { data: courses, error } = await supabase
+  // 2) Traer todos los retos disponibles
+  const { data: allCourses } = await supabase
     .from("courses")
     .select("*")
-    .order("id", { ascending: true });
+    .order("order_index", { ascending: true });
 
-  if (error) {
-    console.error("Error cargando retos:", error);
-    return;
+  // 3) Traer progresos del usuario
+  const { data: userCourses } = await supabase
+    .from("user_courses")
+    .select("*")
+    .eq("user_id", user.id);
+
+  // --- HTML containers ---
+  const activeContainer = document.getElementById("activeCoursesGrid");
+  const exploreContainer = document.getElementById("exploreCoursesGrid");
+
+  const activeEmpty = document.getElementById("noActiveMessage");
+  const exploreEmpty = document.getElementById("noExploreMessage");
+
+  const activeCount = document.getElementById("activeCount");
+
+  // 4) Clasificar retos
+  const activos = [];
+  const explorar = [];
+
+  allCourses.forEach(course => {
+    const match = userCourses?.find(uc => uc.course_id === course.id);
+
+    if (match && match.status === "active") {
+      activos.push(course);
+    } else {
+      explorar.push(course);
+    }
+  });
+
+  // ---- RENDER UI ----
+
+  // ⭐ Contador activos
+  activeCount.textContent = activos.length;
+
+  // ⭐ Activos
+  if (activos.length === 0) {
+    activeEmpty.style.display = "block";
+  } else {
+    activos.forEach(c => activeContainer.appendChild(renderCourseCard(c, true)));
   }
 
-  // Separar activos vs todos
-  const active = courses.filter(c => c.progress && c.progress < 100);
-  const available = courses;
-
-  renderCourseList("activeCoursesGrid", "noActiveCourses", active, true);
-  renderCourseList("allCoursesGrid", "noCoursesMessage", available, false);
+  // ⭐ Explorar
+  if (explorar.length === 0) {
+    exploreEmpty.style.display = "block";
+  } else {
+    explorar.forEach(c => exploreContainer.appendChild(renderCourseCard(c, false)));
+  }
 });
 
-/**
- * RENDERIZADOR UNIVERSAL DE CURSOS (USA TU DISEÑO)
- */
-function renderCourseList(gridId, emptyId, list, showProgress) {
-  const container = document.getElementById(gridId);
-  const empty = document.getElementById(emptyId);
 
-  if (!list || list.length === 0) {
-    empty.style.display = "block";
-    return;
-  }
+// --------------------------------------------------------------
+// 🧩 Componente: Tarjeta de curso (reutiliza estilos existentes)
+// --------------------------------------------------------------
+function renderCourseCard(course, isActive) {
 
-  list.forEach(course => {
-    const progress = course.progress ?? 0;
+  const div = document.createElement("div");
+  div.classList.add("course-card");
 
-    const div = document.createElement("div");
-    div.classList.add("course-card");
-    div.onclick = () => {
-      location.href = `/curso-info/index.html?id=${course.id}`;
-    };
-
-    div.innerHTML = `
-      <div class="course-cover-wrapper">
-        <img src="${course.cover_url}" class="course-cover" />
+  div.innerHTML = `
+    <div class="course-cover-wrapper">
+        <img class="course-cover" src="${course.cover_url}" alt="${course.title}">
         <span class="course-badge">${course.category}</span>
-      </div>
+    </div>
 
-      <div class="course-body">
+    <div class="course-body">
         <h3 class="course-title">${course.title}</h3>
-        <p class="course-meta">${course.short_description ?? ""}</p>
-
-        ${showProgress ? `
-          <div class="course-progress-bar">
-            <div class="course-progress-fill" style="width:${progress}%"></div>
-          </div>
-        ` : ""}
-
+        <p class="course-meta">${course.level}</p>
+        
         <div class="course-actions">
-          <button class="btn-course">
-            ${progress === 0 ? "Comenzar" :
-              progress >= 100 ? "Revisar" : "Continuar"}
-          </button>
+            ${
+              isActive
+                ? `<button class="btn-continue" onclick="location.href='/curso/index.html?id=${course.id}'">Continuar</button>`
+                : `<button class="btn-course" onclick="location.href='/curso-info/index.html?id=${course.id}'">Comenzar</button>`
+            }
         </div>
-      </div>
-    `;
+    </div>
+  `;
 
-    container.appendChild(div);
-  });
+  return div;
 }
