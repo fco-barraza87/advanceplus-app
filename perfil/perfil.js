@@ -72,7 +72,7 @@ let cropper = null;
 const avatarInput = document.getElementById("avatarInput");
 const avatarModal = document.getElementById("avatarModal");
 const avatarCropImage = document.getElementById("avatarCropImage");
-const avatarPreview = document.getElementById("avatarPreview");
+
 
 avatarInput.addEventListener("change", (event) => {
   const file = event.target.files[0];
