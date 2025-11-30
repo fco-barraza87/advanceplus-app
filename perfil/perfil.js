@@ -52,6 +52,79 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("p_created").textContent =
     new Date(profile.created_at).toLocaleDateString();
 
+  // Mostrar avatar actual
+  if (profile.avatar_url) {
+    document.getElementById("avatarPreview").src = profile.avatar_url;
+  }
+
+  // Al seleccionar archivo
+document.getElementById("avatarInput").addEventListener("change", async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Validar tamaño
+  if (file.size > 2 * 1024 * 1024) {
+    alert("La imagen no puede superar los 2 MB.");
+    return;
+  }
+
+  // Crear imagen para validar dimensiones
+  const img = new Image();
+  img.src = URL.createObjectURL(file);
+
+  img.onload = async () => {
+    if (img.width > 400 || img.height > 400) {
+      alert("La imagen debe ser máximo 400x400px.");
+      return;
+    }
+
+    // Nombre único
+    const fileName = `${user.id}_${Date.now()}.jpg`;
+
+    // Subir a Supabase Storage
+    const { data, error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(fileName, file, { upsert: true });
+
+    if (uploadError) {
+      alert("Error subiendo avatar.");
+      console.error(uploadError);
+      return;
+    }
+
+    // Obtener URL publica
+    const { data: publicUrl } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(fileName);
+
+    // Guardar en profiles
+    await supabase
+      .from("profiles")
+      .update({ avatar_url: publicUrl.publicUrl })
+      .eq("id", user.id);
+
+    // Mostrar nueva foto
+    document.getElementById("avatarPreview").src = publicUrl.publicUrl;
+
+    // Actualizar header
+    loadUserHeader();
+  };
+});
+
+
+  document.getElementById("avatarDelete").addEventListener("click", async () => {
+  
+  await supabase
+    .from("profiles")
+    .update({ avatar_url: null })
+    .eq("id", user.id);
+
+  document.getElementById("avatarPreview").src = "/img/avatar-placeholder.png";
+
+  loadUserHeader();
+});
+
+
   // ---- GUARDAR CAMBIOS ----
   document.getElementById("saveProfileBtn").addEventListener("click", async () => {
 
