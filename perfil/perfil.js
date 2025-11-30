@@ -52,13 +52,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("p_created").textContent =
     new Date(profile.created_at).toLocaleDateString();
 
-  // Mostrar avatar actual
-  if (profile.avatar_url) {
-    document.getElementById("avatarPreview").src = profile.avatar_url;
-  }
-
-  // Al seleccionar archivo
-document.getElementById("avatarInput").addEventListener("change", async (event) => {
+  document.getElementById("avatarInput").addEventListener("change", async (event) => {
   const file = event.target.files[0];
   if (!file) return;
 
@@ -68,48 +62,76 @@ document.getElementById("avatarInput").addEventListener("change", async (event) 
     return;
   }
 
-  // Crear imagen para validar dimensiones
   const img = new Image();
   img.src = URL.createObjectURL(file);
 
   img.onload = async () => {
-    if (img.width > 400 || img.height > 400) {
-      alert("La imagen debe ser máximo 400x400px.");
-      return;
-    }
 
-    // Nombre único
-    const fileName = `${user.id}_${Date.now()}.jpg`;
+    // --- 1. Tomar el lado más corto (crop cuadrado) ---
+    const side = Math.min(img.width, img.height);
 
-    // Subir a Supabase Storage
-    const { data, error: uploadError } = await supabase.storage
-      .from("avatars")
-      .upload(fileName, file, { upsert: true });
+    const startX = (img.width - side) / 2;
+    const startY = (img.height - side) / 2;
 
-    if (uploadError) {
-      alert("Error subiendo avatar.");
-      console.error(uploadError);
-      return;
-    }
+    // --- 2. Crear canvas cuadrado 400x400 ---
+    const canvas = document.createElement("canvas");
+    canvas.width = 400;
+    canvas.height = 400;
+    const ctx = canvas.getContext("2d");
 
-    // Obtener URL publica
-    const { data: publicUrl } = supabase.storage
-      .from("avatars")
-      .getPublicUrl(fileName);
+    // --- 3. Dibujar imagen recortada y escalada ---
+    ctx.drawImage(
+      img,
+      startX,
+      startY,
+      side,
+      side,
+      0,
+      0,
+      400,
+      400
+    );
 
-    // Guardar en profiles
-    await supabase
-      .from("profiles")
-      .update({ avatar_url: publicUrl.publicUrl })
-      .eq("id", user.id);
+    // --- 4. Convertir a blob JPG comprimido ---
+    canvas.toBlob(async (blob) => {
+      if (!blob) {
+        alert("Error procesando la imagen.");
+        return;
+      }
 
-    // Mostrar nueva foto
-    document.getElementById("avatarPreview").src = publicUrl.publicUrl;
+      // Nombre único
+      const fileName = `${user.id}_${Date.now()}.jpg`;
 
-    // Actualizar header
-    loadUserHeader();
+      // Subir a Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(fileName, blob, { upsert: true });
+
+      if (uploadError) {
+        alert("Error subiendo avatar.");
+        console.error(uploadError);
+        return;
+      }
+
+      // Obtener URL pública
+      const { data: publicUrl } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(fileName);
+
+      // Guardar en profiles
+      await supabase
+        .from("profiles")
+        .update({ avatar_url: publicUrl.publicUrl })
+        .eq("id", user.id);
+
+      // Set preview + actualizar header
+      document.getElementById("avatarPreview").src = publicUrl.publicUrl;
+      loadUserHeader();
+
+    }, "image/jpeg", 0.9); // calidad 90%
   };
 });
+
 
 
   document.getElementById("avatarDelete").addEventListener("click", async () => {
