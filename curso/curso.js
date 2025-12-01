@@ -91,8 +91,13 @@ async function completeLesson(courseId, userId, day, xp_reward, maxDay) {
     params.set("day", nextDay);
     window.location.search = params.toString();
   } else {
-    alert("🎉 Has completado todo el curso!");
-    window.location.reload();
+      // Último día del curso → mostrar popup y volver al dashboard
+      if (nextDay > maxDay) {
+        if (confirm("🎉 ¡Has completado este curso! ¿Volver al dashboard?")) {
+          window.location.href = "/dashboard/index.html";
+        }
+        return;
+      }
   }
 }
 
