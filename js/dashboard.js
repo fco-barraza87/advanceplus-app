@@ -98,56 +98,59 @@ async function renderGamification(stats, userId) {
   }
 
   /* ------------------------------
-     NIVEL + XP (DINÁMICO)
-  --------------------------------*/
+   NIVEL + XP (DINÁMICO)
+--------------------------------*/
 
-  const xp = stats.xp_total ?? 0;
+const xpTotal = stats.xp_total ?? 0;
 
-  // 1) Intentar leer fórmula desde la DB
-  const xpPrev = stats.xp_prev_level;
-  const xpNext = stats.xp_next_level;
+// Intentar leer desde la DB
+const xpPrev = stats.xp_prev_level;
+const xpNext = stats.xp_next_level;
+let level = stats.level;
 
-  let xpUsed, xpNeeded, level;
+// Si la DB devolvió nivel + prev/next → usar eso
+if (
+  typeof xpPrev === "number" &&
+  typeof xpNext === "number" &&
+  typeof level === "number"
+) {
+  // xpNext = XP requerido para llegar al próximo nivel
+  // xpTotal = XP acumulado por el usuario
+} else {
+  // --- FALLBACK LOCAL SI FALTA ALGO ---
+  const base = 100;
+  const growth = 1.35;
+  const xpForLevel = lvl => Math.round(base * Math.pow(growth, lvl - 1));
 
-  if (
-    typeof xpPrev === "number" &&
-    typeof xpNext === "number" &&
-    stats.level
-  ) {
-    /* --- ✔️ USAR VALORES DE LA DB (preferido) --- */
-    level = stats.level;
-    xpUsed = xpPrev;
-    xpNeeded = xpNext;
+  level = 1;
+  let xpReq = xpForLevel(1);
 
-  } else {
-    /* --- ⚠️ FALLBACK LOCAL (tu fórmula antigua) --- */
-    const base = 100;
-    const growth = 1.35;
-    const xpForLevel = (lvl) => Math.round(base * growth ** (lvl - 1));
-
-    level = 1;
-    xpUsed = 0;
-    xpNeeded = xpForLevel(1);
-
-    while (xp >= xpUsed + xpNeeded) {
-      xpUsed += xpNeeded;
-      level++;
-      xpNeeded = xpForLevel(level);
-    }
+  while (xpTotal >= xpReq) {
+    level++;
+    xpReq = xpForLevel(level);
   }
 
-  // Cálculo final
-  const xpIntoLevel = xp - xpUsed;
-  const pctXP = Math.min(100, (xpIntoLevel / xpNeeded) * 100);
+  // fallback: xpNext = requerido para este nivel
+  xpNext = xpReq;
+}
 
-  qs("#userLevel").textContent = level;
-  qs("#xpThisLevel").textContent = `${xpIntoLevel} / ${xpNeeded} XP`;
-  qs("#nextLevel").textContent = `Siguiente: Nivel ${level + 1}`;
+// Porcentaje real basado en XP TOTAL
+const pctXP = Math.min(100, (xpTotal / xpNext) * 100);
 
-  const xpBar = qs("#xpFill");
-  if (xpBar) {
-    setTimeout(() => (xpBar.style.width = pctXP + "%"), 200);
-  }
+// Render en pantalla
+qs("#userLevel").textContent = level;
+qs("#xpThisLevel").textContent = `${xpTotal} / ${xpNext} XP`;
+qs("#nextLevel").textContent = `Siguiente: Nivel ${level + 1}`;
+
+// Animación barra
+const xpBar = qs("#xpFill");
+if (xpBar) {
+  setTimeout(() => {
+    xpBar.style.width = pctXP + "%";
+  }, 150);
+}
+
+ 
 }
 
 /* ==================================================
