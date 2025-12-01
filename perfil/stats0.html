@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Advance+ · Progreso</title>
+
+  <!-- Estilos globales -->
+  <link rel="stylesheet" href="/css/style.css"/>
+
+  <!-- Estilo exclusivo de esta vista -->
+  <link rel="stylesheet" href="/css/stats.css"/>
+</head>
+
+<body class="app-bg dashboard-page">
+
+  <!-- HEADER PREMIUM -->
+  <header class="ap-header">
+    <div class="ap-header-left">
+      <h1 class="ap-logo">A+</h1>
+      <div class="ap-header-info">
+        <span id="headerUserName" class="ap-header-name">Usuario</span>
+        <span id="headerUserRole" class="ap-header-role">Cargando…</span>
+      </div>
+    </div>
+
+    <div id="headerAvatar" class="ap-header-avatar"></div>
+    <button id="btnLogout" class="ap-logout-btn">Cerrar sesión</button>
+  </header>
+
+  <!-- ============================================================ -->
+  <!-- MAIN -->
+  <!-- ============================================================ -->
+
+  <main class="dashboard-wrapper">
+
+    <!-- ======================================================== -->
+    <!-- SECCIÓN 1: PANEL SUPERIOR                                 -->
+    <!-- ======================================================== -->
+    <section class="dash-section stats-section">
+      <h2 class="section-title">Estado actual</h2>
+
+      <div class="stats-grid-top">
+
+        <!-- Nivel -->
+        <div class="stats-card">
+          <p class="stats-label">Nivel A+</p>
+          <div class="stats-value" id="statLevel">1</div>
+          <p class="stats-sub" id="statXPText">0 / 100 XP</p>
+
+          <div class="progress-bar">
+            <div id="xpFill" class="progress-fill"></div>
+          </div>
+        </div>
+
+        <!-- Racha -->
+        <div class="stats-card">
+          <p class="stats-label">Racha</p>
+          <div class="stats-value" id="statStreak">0</div>
+          <p class="stats-sub">Mejor: <span id="statBestStreak">0</span></p>
+
+          <div class="progress-bar">
+            <div id="streakFill" class="progress-fill streak"></div>
+          </div>
+        </div>
+
+        <!-- Cursos completados -->
+        <div class="stats-card">
+          <p class="stats-label">Cursos completados</p>
+          <div class="stats-value" id="statCoursesCompleted">0</div>
+          <p class="stats-sub">Total histórico</p>
+        </div>
+
+        <!-- XP total -->
+        <div class="stats-card">
+          <p class="stats-label">XP total</p>
+          <div class="stats-value" id="statTotalXP">0</div>
+          <p class="stats-sub">Acumulado</p>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ======================================================== -->
+    <!-- SECCIÓN 2: TIMELINE / HITOS                               -->
+    <!-- ======================================================== -->
+    <section class="dash-section stats-section">
+      <h2 class="section-title">Tu camino Advance+</h2>
+
+      <div id="timelineContainer" class="timeline-container">
+        <!-- Se llena dinámicamente -->
+      </div>
+    </section>
+
+
+    <!-- ======================================================== -->
+    <!-- SECCIÓN 3: ESTADÍSTICAS (XP SEMANAL + ACTIVIDAD)          -->
+    <!-- ======================================================== -->
+    <section class="dash-section stats-section">
+      <h2 class="section-title">Actividad y XP</h2>
+
+      <div class="weekly-stats">
+
+        <!-- XP por semanas -->
+        <div class="week-xp-block">
+          <p class="block-title">XP últimas 4 semanas</p>
+          <div id="weekXPBars"></div>
+        </div>
+
+        <!-- Actividad últimos 30 días -->
+        <div class="activity-block">
+          <p class="block-title">Actividad últimos 30 días</p>
+          <div id="activityDots" class="activity-dots"></div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ======================================================== -->
+    <!-- SECCIÓN 4: PROGRESO POR CURSO                             -->
+    <!-- ======================================================== -->
+    <section class="dash-section stats-section">
+      <h2 class="section-title">Progreso por curso</h2>
+
+      <div id="coursesStatsGrid" class="courses-grid"></div>
+
+      <p id="statsNoCourses" class="empty-message" style="display:none;">
+        Aún no has iniciado cursos. ¡Explora un reto y empieza tu progreso! 💥
+      </p>
+    </section>
+
+  </main>
+
+
+  <!-- ============================================================ -->
+  <!--  TABBAR  -->
+  <!-- ============================================================ -->
+  <nav class="tabbar">
+    <button class="tab-btn" onclick="location.href='/dashboard/index.html'">
+      <span>🏠</span>
+      <small>Inicio</small>
+    </button>
+
+    <button class="tab-btn" onclick="location.href='/perfil/cursos.html'">
+      <span>📘</span>
+      <small>Retos</small>
+    </button>
+
+    <button class="tab-btn" onclick="location.href='/perfil/datos.html'">
+      <span>👤</span>
+      <small>Perfil</small>
+    </button>
+
+    <button class="tab-btn active">
+      <span>📊</span>
+      <small>Progreso</small>
+    </button>
+  </nav>
+
+
+
+  <!-- HEADER -->
+  <script type="module">
+    import { loadUserHeader } from "/components/user-header.js";
+    loadUserHeader();
+  </script>
+
+  <!-- ROUTER -->
+  <script type="module">
+    import { protectUserView } from "/js/router.js";
+    protectUserView();
+  </script>
+
+  <!-- JS DE ESTA VISTA -->
+  <script type="module" src="/js/stats.js"></script>
+
+</body>
+</html>

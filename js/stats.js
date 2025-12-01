@@ -1,211 +1,349 @@
+// /js/stats.js
 import { supabase } from "/js/supabase.js";
-const $ = (q) => document.querySelector(q);
 
-/* ============================================================
-   1. CARGAR USER + STATS
-============================================================ */
-async function loadUserData() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
+const qs = (sel) => document.querySelector(sel);
 
-  const { data: stats } = await supabase
-    .from("user_stats")
-    .select("*")
-    .eq("user_id", user.id)
-    .single();
+/* ============================================
+   1. AUTH + CARGA PRINCIPAL
+============================================ */
 
-  return { user, stats };
-}
+async function initStatsPage() {
+  // 1) Usuario actual
+  const {
+    data: { user },
+    error: authErr,
+  } = await supabase.auth.getUser();
 
-/* ============================================================
-   2. CARGAR CURSOS
-============================================================ */
-async function loadUserCourses(userId) {
-  const { data } = await supabase
-    .from("user_courses")
-    .select("course_id, progress_pct, status, xp_gained, courses!inner(id,title,cover_url,category,duration_days)")
-    .eq("user_id", userId);
-
-  return data || [];
-}
-
-/* ============================================================
-   3. PANEL SUPERIOR
-============================================================ */
-function renderTopStats(stats, courses) {
-
-  /* Nivel + XP */
-  $("#statLevel").textContent = stats.level;
-  $("#statTotalXP").textContent = stats.xp_total;
-
-  const xpTotal = stats.xp_total;
-  const xpNext = stats.xp_next_level || 100;
-  $("#statXPText").textContent = `${xpTotal} / ${xpNext} XP`;
-
-  const pctXP = Math.min(100, (xpTotal / xpNext) * 100);
-  $("#xpFill").style.width = pctXP + "%";
-
-  /* Racha */
-  $("#statStreak").textContent = stats.streak_current;
-  $("#statBestStreak").textContent = stats.streak_best;
-
-  const goal = 21; // opcional
-  $("#streakFill").style.width = Math.min(100, stats.streak_current / goal * 100) + "%";
-
-  /* Cursos completados */
-  const completed = courses.filter(c => c.status === "completed").length;
-  $("#statCoursesCompleted").textContent = completed;
-}
-
-/* ============================================================
-   4. TIMELINE
-============================================================ */
-function renderTimeline(stats, courses) {
-  const cont = $("#timelineContainer");
-  cont.innerHTML = "";
-
-  const events = [];
-
-  events.push({ t: "Nivel alcanzado", sub: `Nivel ${stats.level}` });
-  events.push({ t: "Mejor racha", sub: `${stats.streak_best} días` });
-
-  courses.forEach(c => {
-    if (c.status === "completed") {
-      events.push({
-        t: "Curso completado",
-        sub: c.courses.title
-      });
-    }
-  });
-
-  events.forEach(ev => {
-    const div = document.createElement("div");
-    div.className = "timeline-item";
-
-    div.innerHTML = `
-      <div class="timeline-dot"></div>
-      <div class="timeline-title">${ev.t}</div>
-      <div class="timeline-sub">${ev.sub}</div>
-    `;
-
-    cont.appendChild(div);
-  });
-}
-
-/* ============================================================
-   5. XP ÚLTIMAS 4 SEMANAS
-============================================================ */
-async function loadWeeklyXP(userId) {
-  const { data } = await supabase.rpc("xp_last_4_weeks", { p_user_id: userId }) || [];
-  return data || [];
-}
-
-function renderWeeklyXP(weeks) {
-  const cont = $("#weekXPBars");
-  cont.innerHTML = "";
-
-  weeks.forEach((w, i) => {
-    const div = document.createElement("div");
-    div.className = "week-bar";
-    div.innerHTML = `
-      <div class="week-label">Semana ${i+1}: ${w} XP</div>
-      <div class="week-bar-fill" style="width:${Math.min(100, w)}%"></div>
-    `;
-    cont.appendChild(div);
-  });
-}
-
-/* ============================================================
-   6. ACTIVIDAD ÚLTIMOS 30 DÍAS
-============================================================ */
-async function loadActivity(userId) {
-  const { data } = await supabase.rpc("activity_last_30_days", { p_user_id: userId }) || [];
-  return data || [];
-}
-
-function renderActivity(days) {
-  const cont = $("#activityDots");
-  cont.innerHTML = "";
-
-  days.forEach(d => {
-    const dot = document.createElement("div");
-    dot.className = "act-dot" + (d.active ? " active" : "");
-    cont.appendChild(dot);
-  });
-}
-
-/* ============================================================
-   7. PROGRESO POR CURSO
-============================================================ */
-function renderCourseProgress(courses) {
-  const grid = $("#coursesStatsGrid");
-  const empty = $("#statsNoCourses");
-
-  if (!courses.length) {
-    empty.style.display = "block";
+  if (authErr || !user) {
+    window.location.href = "/index.html";
     return;
   }
 
-  empty.style.display = "none";
+  // 2) Carga paralela: stats, progreso 30 días, cursos
+  const since = new Date();
+  since.setDate(since.getDate() - 30);
+  const sinceIso = since.toISOString();
 
-  grid.innerHTML = "";
+  const [{ data: stats }, { data: progressRows }, { data: userCourses }] =
+    await Promise.all([
+      supabase
+        .from("user_stats")
+        .select("xp_total, streak_current, streak_best, level")
+        .eq("user_id", user.id)
+        .single(),
+      supabase
+        .from("progress")
+        .select("day, completed, xp, updated_at")
+        .eq("user_id", user.id)
+        .gte("updated_at", sinceIso),
+      supabase
+        .from("user_courses")
+        .select("status, progress_pct"),
+    ]);
 
-  courses.forEach(c => {
-    const pct = c.progress_pct || 0;
-    const cover = c.courses.cover_url || "https://via.placeholder.com/600x300?text=A+";
+  // Normalizar arrays
+  const progress = progressRows || [];
+  const courses = userCourses || [];
 
-    const div = document.createElement("div");
-    div.className = "course-card";
-    div.innerHTML = `
-      <div class="course-cover-wrapper">
-        <img src="${cover}" class="course-cover"/>
-      </div>
-      <div class="course-body">
-        <div class="course-title">${c.courses.title}</div>
-        <div class="course-meta">${c.courses.category}</div>
+  // 3) Render de cada bloque
+  renderSummary(stats, progress, courses);
+  renderWeeklyXP(progress);
+  renderHeatmap(progress);
+  renderAchievements(stats, progress, courses);
 
-        <div class="progress-bar" style="margin-top:10px;">
-          <div class="progress-fill" style="width:${pct}%;"></div>
+  // 4) Logout (igual que dashboard)
+  setupLogout();
+}
+
+/* ============================================
+   2. LOGOUT
+============================================ */
+
+function setupLogout() {
+  const btn = qs("#btnLogout");
+  if (!btn) return;
+
+  btn.onclick = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/index.html";
+  };
+}
+
+/* ============================================
+   3. RESUMEN GENERAL
+============================================ */
+
+function renderSummary(stats, progress, courses) {
+  if (!stats) return;
+
+  const xpTotal = stats.xp_total ?? 0;
+  const level = stats.level ?? 1;
+  const streak = stats.streak_current ?? 0;
+  const bestStreak = stats.streak_best ?? 0;
+
+  // Días activos en los últimos 30 días
+  const daysSet = new Set();
+  (progress || []).forEach((row) => {
+    const dateStr = toDateKey(row.updated_at);
+    daysSet.add(dateStr);
+  });
+  const activeDays = daysSet.size;
+
+  // Cursos completados (status o progreso_pct >= 95)
+  const doneCourses = (courses || []).filter(
+    (c) =>
+      c.status === "completed" ||
+      (typeof c.progress_pct === "number" && c.progress_pct >= 95)
+  ).length;
+
+  qs("#summaryLevel").textContent = `Nivel ${level}`;
+  qs("#summaryXP").textContent = `${xpTotal} XP`;
+  qs("#summaryStreak").textContent = `${streak} días`;
+  qs("#summaryBestStreak").textContent = `${bestStreak} días`;
+  qs("#summaryActiveDays").textContent = `${activeDays} / 30`;
+  qs("#summaryCoursesDone").textContent = doneCourses.toString();
+}
+
+/* ============================================
+   4. XP SEMANAL (4 SEMANAS)
+============================================ */
+
+function renderWeeklyXP(progress) {
+  const now = new Date();
+  const weeks = [0, 0, 0, 0]; // 0=Hace 4 sem, 3=Esta semana
+
+  (progress || []).forEach((row) => {
+    const xp = row.xp || 0;
+    if (xp <= 0) return;
+
+    const updated = row.updated_at ? new Date(row.updated_at) : null;
+    if (!updated) return;
+
+    const diffMs = now - updated;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays < 0 || diffDays > 27) return;
+
+    const weekFromNow = Math.floor(diffDays / 7); // 0..3 (0 = esta semana)
+    const index = 3 - weekFromNow; // 3 actual, 0 hace 4 semanas
+    if (index < 0 || index > 3) return;
+
+    weeks[index] += xp;
+  });
+
+  const maxXP = Math.max(...weeks, 1);
+
+  const chart = qs("#weeklyChart");
+  if (!chart) return;
+
+  const cols = chart.querySelectorAll(".week-col");
+  cols.forEach((col, i) => {
+    const bar = col.querySelector(".week-bar");
+    const xpLabel = col.querySelector("[data-week-xp]");
+    const xpVal = weeks[i];
+
+    const heightPct = (xpVal / maxXP) * 100;
+    bar.style.height = `${Math.max(10, heightPct)}%`;
+    bar.style.opacity = xpVal > 0 ? 1 : 0.25;
+
+    if (xpLabel) xpLabel.textContent = `${xpVal} XP`;
+  });
+
+  // Resumen de esta semana vs anterior
+  const xpThisWeek = weeks[3];
+  const xpPrevWeek = weeks[2];
+
+  let summary = `Esta semana llevas ${xpThisWeek} XP.`;
+  if (xpPrevWeek > 0) {
+    const diff = xpThisWeek - xpPrevWeek;
+    const pct = Math.round((diff / xpPrevWeek) * 100);
+    if (pct > 0) summary += ` (+${pct}% vs semana anterior)`;
+    else if (pct < 0) summary += ` (${pct}% vs semana anterior)`;
+    else summary += ` (igual que la semana anterior)`;
+  }
+
+  const weeklySummary = qs("#weeklySummary");
+  if (weeklySummary) weeklySummary.textContent = summary;
+}
+
+/* ============================================
+   5. HEATMAP 30 DÍAS
+============================================ */
+
+function renderHeatmap(progress) {
+  const container = qs("#activityHeatmap");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  // Sum XP por día
+  const xpByDay = {};
+  (progress || []).forEach((row) => {
+    const key = toDateKey(row.updated_at);
+    if (!key) return;
+    xpByDay[key] = (xpByDay[key] || 0) + (row.xp || 0);
+  });
+
+  const now = new Date();
+  let activeDays = 0;
+
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    const xp = xpByDay[key] || 0;
+
+    if (xp > 0) activeDays++;
+
+    const cell = document.createElement("div");
+    cell.className = "day-cell";
+
+    const inner = document.createElement("div");
+    inner.classList.add("day-cell-inner");
+
+    const cls =
+      xp === 0
+        ? "heat-none"
+        : xp <= 10
+        ? "heat-low"
+        : xp <= 30
+        ? "heat-med"
+        : "heat-high";
+
+    inner.classList.add(cls);
+    inner.title = `${key}: ${xp} XP`;
+
+    cell.appendChild(inner);
+    container.appendChild(cell);
+  }
+
+  const summary = qs("#heatmapSummary");
+  if (summary) {
+    summary.textContent = `${activeDays} días con actividad en los últimos 30.`;
+  }
+}
+
+/* ============================================
+   6. LOGROS A+
+============================================ */
+
+function renderAchievements(stats, progress, courses) {
+  const list = qs("#achievementsList");
+  if (!list || !stats) return;
+
+  list.innerHTML = "";
+
+  const xpTotal = stats.xp_total ?? 0;
+  const streak = stats.streak_current ?? 0;
+  const bestStreak = stats.streak_best ?? 0;
+
+  // Días activos
+  const daysSet = new Set();
+  (progress || []).forEach((row) => {
+    daysSet.add(toDateKey(row.updated_at));
+  });
+  const activeDays = daysSet.size;
+
+  // Cursos completados
+  const doneCourses = (courses || []).filter(
+    (c) =>
+      c.status === "completed" ||
+      (typeof c.progress_pct === "number" && c.progress_pct >= 95)
+  ).length;
+
+  // Reglas de logros simples
+  const achievements = [
+    {
+      key: "first_day",
+      title: "Despegue A+",
+      desc: "Completaste tu primer día activo dentro de Advance+.",
+      achieved: activeDays >= 1,
+      progressText: activeDays >= 1 ? "1 / 1 día" : `${activeDays} / 1 día`,
+      badge: "🏁 Básico",
+    },
+    {
+      key: "mini_streak",
+      title: "Mini racha",
+      desc: "Mantén una racha de 3 días seguidos entrenando.",
+      achieved: bestStreak >= 3,
+      progressText:
+        bestStreak >= 3 ? `${bestStreak} / 3 días` : `${bestStreak} / 3 días`,
+      badge: "🔥 Constancia",
+    },
+    {
+      key: "streak_7",
+      title: "Semana de enfoque",
+      desc: "Consigue una racha de 7 días seguidos.",
+      achieved: bestStreak >= 7,
+      progressText:
+        bestStreak >= 7 ? `${bestStreak} / 7 días` : `${bestStreak} / 7 días`,
+      badge: "🔥🔥 Disciplina",
+    },
+    {
+      key: "xp_200",
+      title: "XP 200+",
+      desc: "Acumula al menos 200 XP en tus retos.",
+      achieved: xpTotal >= 200,
+      progressText:
+        xpTotal >= 200 ? `${xpTotal} / 200 XP` : `${xpTotal} / 200 XP`,
+      badge: "⭐ Progreso",
+    },
+    {
+      key: "xp_500",
+      title: "XP 500+",
+      desc: "Acumula 500 XP o más. Estás construyendo una nueva identidad.",
+      achieved: xpTotal >= 500,
+      progressText:
+        xpTotal >= 500 ? `${xpTotal} / 500 XP` : `${xpTotal} / 500 XP`,
+      badge: "🌟 Avanzado",
+    },
+    {
+      key: "first_course",
+      title: "Primer reto completado",
+      desc: "Termina un curso completo dentro de Advance+.",
+      achieved: doneCourses >= 1,
+      progressText:
+        doneCourses >= 1
+          ? `${doneCourses} / 1 curso`
+          : `${doneCourses} / 1 curso`,
+      badge: "📘 Reto",
+    },
+  ];
+
+  achievements.forEach((ach) => {
+    const card = document.createElement("article");
+    card.className = "achievement-card";
+    card.classList.add(ach.achieved ? "achieved" : "pending");
+
+    card.innerHTML = `
+      <div class="achievement-header">
+        <div class="achievement-title">
+          ${ach.badge} ${ach.title}
         </div>
-
-        <div class="course-meta" style="margin-top:6px;">
-          ${Math.round(pct)}% — XP: ${c.xp_gained ?? 0}
-        </div>
+        <span class="achievement-badge">
+          ${ach.achieved ? "Completado" : "En progreso"}
+        </span>
       </div>
+      <p class="achievement-desc">${ach.desc}</p>
+      <p class="achievement-progress">${ach.progressText}</p>
     `;
 
-    grid.appendChild(div);
+    list.appendChild(card);
   });
 }
 
-/* ============================================================
-   8. INIT
-============================================================ */
-async function init() {
+/* ============================================
+   UTILIDAD: Normalizar fecha a YYYY-MM-DD
+============================================ */
 
-  const data = await loadUserData();
-  if (!data) return;
-
-  const { user, stats } = data;
-
-  const courses = await loadUserCourses(user.id);
-
-  // panel superior
-  renderTopStats(stats, courses);
-
-  // timeline
-  renderTimeline(stats, courses);
-
-  // XP semanal
-  const weekXP = await loadWeeklyXP(user.id);
-  renderWeeklyXP(weekXP);
-
-  // actividad 30 días
-  const activity = await loadActivity(user.id);
-  renderActivity(activity);
-
-  // progreso por curso
-  renderCourseProgress(courses);
+function toDateKey(dateInput) {
+  if (!dateInput) return null;
+  const d = new Date(dateInput);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString().slice(0, 10);
 }
 
-init();
+/* ============================================
+   INIT
+============================================ */
+
+initStatsPage();

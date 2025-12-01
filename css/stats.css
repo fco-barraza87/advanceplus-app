@@ -1,159 +1,313 @@
 /* ============================================================
-   PROGRESO — Advance+ Premium
-   Solo estilos propios de esta página
+   PÁGINA DE PROGRESO — Advance+ (stats-page)
+   Totalmente aislado dentro de .stats-page
 ============================================================ */
 
-.stats-section {
+/* CONTENEDOR GENERAL */
+.stats-page .stats-wrapper {
+  max-width: 860px;
+  margin: 20px auto 120px auto;
+  padding: 0 18px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
 }
 
-/* ============================
-   GRID SUPERIOR / MÉTRICAS
-============================ */
-
-.stats-grid-top {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 18px;
+/* Secciones base */
+.stats-page .stats-section {
+  background: rgba(10, 15, 35, 0.65);
+  padding: 22px 24px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(8px);
 }
 
-.stats-card {
-  background: rgba(255,255,255,0.06);
-  padding: 16px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  backdrop-filter: blur(6px);
+/* Títulos */
+.stats-page .section-title {
+  font-family: var(--ap-font-heading);
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
 }
 
-.stats-label {
+.stats-page .section-subtitle {
   font-size: 13px;
+  opacity: 0.75;
+}
+
+/* Header fila simple */
+.stats-page .stats-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* ============================================================
+   SECCIÓN 1: RESUMEN GENERAL
+============================================================ */
+
+.stats-page .stats-summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stats-page .stats-summary-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stats-page .stats-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.stats-page .summary-item {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.stats-page .summary-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.6;
+}
+
+.stats-page .summary-value {
+  display: block;
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* ============================================================
+   SECCIÓN 2: XP SEMANAL (BARRAS)
+============================================================ */
+
+.stats-page .weekly-chart {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-end;
+  min-height: 160px;
+}
+
+.stats-page .week-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.stats-page .week-bar {
+  width: 100%;
+  max-width: 40px;
+  height: 20px; /* se ajusta vía JS */
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--ap-gold), #e8d39b);
+  opacity: 0.2;
+  transform-origin: bottom;
+  transition: height 0.6s cubic-bezier(.4,0,.2,1), opacity 0.6s;
+}
+
+.stats-page .week-label {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.stats-page .week-xp {
+  font-size: 11px;
   opacity: 0.8;
 }
 
-.stats-value {
-  font-size: 34px;
-  font-weight: 700;
-  margin-top: -4px;
+/* ============================================================
+   SECCIÓN 3: HEATMAP 30 DÍAS
+============================================================ */
+
+.stats-page .activity-heatmap {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(15, minmax(10px, 1fr));
+  gap: 4px;
 }
 
-.stats-sub {
-  font-size: 13px;
-  opacity: 0.7;
-}
-
-/* Progress bar */
-.progress-bar {
+.stats-page .day-cell {
   width: 100%;
-  background: rgba(255,255,255,0.12);
-  height: 7px;
-  border-radius: 8px;
-  overflow: hidden;
+  padding-top: 100%;
+  border-radius: 4px;
+  position: relative;
 }
 
-.progress-fill {
-  width: 0%;
-  height: 100%;
-  background: linear-gradient(90deg, var(--ap-gold), #eadba6);
-  transition: width .5s ease;
+.stats-page .day-cell-inner {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
 }
 
-.progress-fill.streak {
-  background: linear-gradient(90deg, #ffae00, #ffd27c);
+/* Intensidades */
+.stats-page .heat-none {
+  background: rgba(255, 255, 255, 0.05);
 }
 
-/* ============================
-   TIMELINE
-============================ */
+.stats-page .heat-low {
+  background: rgba(192, 164, 80, 0.35);
+}
 
-.timeline-container {
-  border-left: 2px solid rgba(255,255,255,0.15);
-  padding-left: 18px;
+.stats-page .heat-med {
+  background: rgba(192, 164, 80, 0.6);
+}
+
+.stats-page .heat-high {
+  background: rgba(255, 204, 102, 0.9);
+}
+
+.stats-page .heatmap-legend {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.stats-page .legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   SECCIÓN 4: LOGROS
+============================================================ */
+
+.stats-page .achievements-list {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 10px;
+  margin-top: 6px;
 }
 
-.timeline-item {
-  position: relative;
-  padding-left: 10px;
+.stats-page .achievement-card {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.timeline-dot {
-  position: absolute;
-  left: -20px;
-  top: 4px;
-  width: 12px;
-  height: 12px;
-  background: var(--ap-gold);
-  border-radius: 50%;
-  box-shadow: 0 0 12px rgba(255,215,130,0.6);
+.stats-page .achievement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
 }
 
-.timeline-title {
-  font-weight: 600;
+.stats-page .achievement-title {
   font-size: 14px;
+  font-weight: 600;
 }
 
-.timeline-sub {
-  opacity: 0.7;
+.stats-page .achievement-badge {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.stats-page .achievement-desc {
   font-size: 12px;
+  opacity: 0.8;
+}
+
+.stats-page .achievement-progress {
   margin-top: 2px;
-}
-
-/* ============================
-   XP POR SEMANAS
-============================ */
-
-.week-xp-block .block-title,
-.activity-block .block-title {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 10px;
-}
-
-.week-bar {
-  margin-bottom: 6px;
-}
-
-.week-label {
-  font-size: 12px;
+  font-size: 11px;
   opacity: 0.7;
 }
 
-.week-bar-fill {
-  height: 8px;
-  border-radius: 6px;
-  background: var(--ap-gold);
-  margin-top: 4px;
-  transition: width .4s ease;
+/* Estados */
+.stats-page .achievement-card.achieved {
+  border-color: rgba(192, 164, 80, 0.7);
+  background: radial-gradient(circle at top left,
+              rgba(192, 164, 80, 0.3),
+              rgba(10, 15, 35, 0.8));
 }
 
-/* ============================
-   ACTIVIDAD 30 DÍAS
-============================ */
-
-.activity-dots {
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  gap: 6px;
+.stats-page .achievement-card.achieved .achievement-badge {
+  background: rgba(192, 164, 80, 0.2);
+  color: var(--ap-gold);
 }
 
-.act-dot {
-  width: 16px;
-  height: 16px;
-  border-radius: 6px;
-  background: rgba(255,255,255,0.15);
+.stats-page .achievement-card.pending .achievement-badge {
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.7);
 }
 
-.act-dot.active {
-  background: var(--ap-gold);
+/* ============================================================
+   TABBAR (Mismo estilo que dashboard)
+============================================================ */
+
+.stats-page .tabbar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 74px;
+  background: rgba(15, 20, 40, 0.93);
+  backdrop-filter: blur(14px);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  z-index: 999;
 }
 
-/* ============================
-   CURSOS (grid ya heredada)
-============================ */
+.stats-page .tab-btn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stats-page .tab-btn.active {
+  color: var(--ap-gold);
+}
+
+.stats-page .tab-btn span {
+  font-size: 22px;
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width: 480px) {
+  .stats-page .stats-wrapper {
+    padding: 0 12px;
+    gap: 20px;
+  }
+
+  .stats-page .weekly-chart {
+    gap: 10px;
+  }
+
+  .stats-page .week-bar {
+    max-width: 26px;
+  }
+}
