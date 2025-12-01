@@ -1,6 +1,6 @@
 // /admin/courses.js
 import { supabase } from "/js/supabase.js";
-import { requireAdmin, setAdminHeader } from "/js/admin.js";
+import { requireAdmin, setAdminHeader } from "/admin/js/admin.js";
 
 let currentCourses = [];
 
