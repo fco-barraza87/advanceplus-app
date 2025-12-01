@@ -1,62 +1,144 @@
+<!-- /admin/courses.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestión de Cursos | Advance+</title>
-  <link rel="stylesheet" href="../assets/style.css" />
-  <link rel="stylesheet" href="../assets/admin.css" />
+  <title>Admin · Cursos | Advance+</title>
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
-<body>
-  <header class="admin-header">
-    <h1>📚 Gestión de Cursos</h1>
-    <button id="back" class="btn-secondary">← Volver</button>
-  </header>
+<body class="app-bg">
+  <!-- HEADER GENERAL -->
+  <div id="appHeader"></div>
+  <script type="module">
+    import { loadHeader } from "/components/header.js";
+    loadHeader();
+  </script>
 
-  <main class="admin-dashboard">
-    <section class="card">
-      <h2>Crear nuevo curso</h2>
-      <form id="new-course-form" class="form-grid">
-        <label>
-          Título:
-          <input type="text" id="title" required />
-        </label>
-        <label>
-          Descripción:
-          <textarea id="description" rows="3"></textarea>
-        </label>
-        <label>
-          Imagen de portada:
-          <input type="file" id="cover" accept="image/*" />
-        </label>
-        <label>
-          Estado:
-          <select id="status">
-            <option value="true">Activo</option>
-            <option value="false">Inactivo</option>
-          </select>
-        </label>
-        <button type="submit" class="btn-primary">💾 Crear curso</button>
-      </form>
-    </section>
+  <main class="admin-layout">
+    <section class="admin-page-header"></section>
 
-    <section class="card">
-      <h2>Listado de cursos</h2>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Título</th>
-            <th>Estado</th>
-            <th>Fecha</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="courses-table"></tbody>
-      </table>
+    <section class="admin-content">
+      <div class="admin-panel">
+        <div class="admin-panel-header">
+          <h2>Cursos</h2>
+          <button id="btnNewCourse" class="btn-primary">+ Nuevo curso</button>
+        </div>
+
+        <div class="admin-panel-body">
+          <table class="admin-table" id="coursesTable">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Slug</th>
+                <th>Categoría</th>
+                <th>Días</th>
+                <th>Activo</th>
+              </tr>
+            </thead>
+            <tbody id="coursesTableBody">
+              <!-- filas dinámicas -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="admin-panel">
+        <div class="admin-panel-header">
+          <h2 id="courseFormTitle">Editar curso</h2>
+        </div>
+        <div class="admin-panel-body">
+          <form id="courseForm" class="admin-form">
+            <input type="hidden" id="courseId" />
+
+            <label>
+              Título
+              <input type="text" id="courseTitle" required />
+            </label>
+
+            <label>
+              Slug
+              <input type="text" id="courseSlug" required />
+            </label>
+
+            <label>
+              Subtítulo
+              <input type="text" id="courseSubtitle" />
+            </label>
+
+            <label>
+              Descripción
+              <textarea id="courseDescription" rows="3" required></textarea>
+            </label>
+
+            <label>
+              Categoría
+              <input type="text" id="courseCategory" required />
+            </label>
+
+            <label>
+              Duración (días)
+              <input type="number" id="courseDurationDays" min="1" required />
+            </label>
+
+            <label>
+              Nivel
+              <input type="text" id="courseLevel" required />
+            </label>
+
+            <label>
+              URL portada (cover_url)
+              <input type="text" id="courseCoverUrl" required />
+            </label>
+
+            <label>
+              Precio
+              <input type="number" step="0.01" id="coursePrice" />
+            </label>
+
+            <label>
+              Moneda
+              <input type="text" id="courseCurrency" value="CHF" />
+            </label>
+
+            <label>
+              XP recompensa (xp_reward)
+              <input type="number" id="courseXpReward" />
+            </label>
+
+            <label>
+              Tipo de progresión (progression_type)
+              <input type="text" id="courseProgressionType" value="daily" />
+            </label>
+
+            <label>
+              Tags (separados por coma)
+              <input type="text" id="courseTags" placeholder="enfoque,mentalidad" />
+            </label>
+
+            <label class="checkbox-inline">
+              <input type="checkbox" id="courseActive" checked />
+              Activo
+            </label>
+
+            <label>
+              Visibilidad
+              <select id="courseVisibility">
+                <option value="public">public</option>
+                <option value="private">private</option>
+                <option value="hidden">hidden</option>
+              </select>
+            </label>
+
+            <div class="admin-form-actions">
+              <button type="submit" class="btn-primary">Guardar</button>
+              <button type="button" id="btnResetCourseForm" class="btn-secondary">Limpiar</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </section>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="courses.js"></script>
+  <script type="module" src="/admin/courses.js"></script>
 </body>
 </html>
