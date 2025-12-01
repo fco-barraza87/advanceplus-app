@@ -2424,3 +2424,9 @@ select option {
 .btn-secondary:hover {
   background: rgba(255,255,255,0.35);
 }
+
+.lesson-id {
+  color: #9bb;
+  font-size: 0.75rem;
+  font-family: monospace;
+}

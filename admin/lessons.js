@@ -114,7 +114,7 @@ function renderLessonsTable() {
     tr.classList.add("admin-row-click");
 
         tr.innerHTML = `
-            <td style="font-size:0.75rem; color:#9bb;">${lesson.id}</td>
+            <td class="lesson-id">${lesson.id}</td>
             <td>${lesson.day}</td>
             <td>${lesson.title}</td>
             <td>${lesson.xp_reward ?? 0}</td>
@@ -131,6 +131,11 @@ function renderLessonsTable() {
    FORMULARIO
 ------------------------- */
 function fillLessonForm(lesson) {
+  document.getElementById("lessonMeta").innerHTML = `
+    <strong>ID:</strong> ${lesson.id}<br>
+    <strong>Course ID:</strong> ${lesson.course_id}
+  `;
+
   document.getElementById("lessonFormTitle").textContent = "Editar lección";
 
   document.getElementById("lessonId").value = lesson.id;
@@ -175,6 +180,9 @@ function clearLessonForm() {
   document.getElementById("lessonVideoUrl").value = "";
   document.getElementById("lessonAudioUrl").value = "";
   document.getElementById("lessonMeditationUrl").value = "";
+
+  document.getElementById("lessonMeta").innerHTML = "";
+
 }
 
 /* -------------------------
