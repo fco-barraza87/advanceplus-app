@@ -294,9 +294,13 @@ function renderAvailableCourses(courses) {
 }
 
 /* ==================================================
-   7. MISIÓN DEL DÍA
+   7. MISIÓN DEL DÍA (con oferta si ya no quedan cursos)
 ================================================== */
 async function loadMission(user) {
+  const card = qs("#missionCard");
+  const promoCard = qs("#missionPromoCard");
+
+  // 1. Buscar curso activo más reciente
   const { data: active } = await supabase
     .from("user_courses")
     .select("*")
@@ -305,21 +309,27 @@ async function loadMission(user) {
     .order("started_at", { ascending: false })
     .limit(1);
 
-  const card = qs("#missionCard");
-
+  // Si NO tiene cursos activos → mostrar promoción directamente
   if (!active?.length) {
     card.style.display = "none";
+    promoCard.style.display = "flex";
+
+    qs("#missionPromoBtn").onclick = () =>
+      (window.location.href = "/cursos/index.html");
+
     return;
   }
 
   const courseId = active[0].course_id;
 
+  // 2. Datos del curso
   const { data: course } = await supabase
     .from("courses")
     .select("*")
     .eq("id", courseId)
     .single();
 
+  // 3. Progreso del curso
   const { data: progress } = await supabase
     .from("progress")
     .select("day, completed")
@@ -333,8 +343,41 @@ async function loadMission(user) {
     if (done.length) nextDay = done.at(-1).day + 1;
   }
 
-  if (nextDay > course.duration_days) nextDay = course.duration_days;
+  // 4. Si ya completó todo el curso…
+  if (nextDay > course.duration_days) {
+    // ¿Existen cursos nuevos disponibles?
+    const { data: available } = await supabase
+      .from("courses")
+      .select("id")
+      .eq("active", true)
+      .neq("id", courseId);
 
+    // SI existen cursos → promoción de continuar
+    if (available?.length) {
+      card.style.display = "none";
+      promoCard.style.display = "flex";
+
+      qs("#missionPromoBtn").onclick = () =>
+        (window.location.href = "/cursos/index.html");
+
+      return;
+    }
+
+    // SI NO existen cursos → mensaje de “próximamente”
+    card.style.display = "none";
+    promoCard.style.display = "flex";
+
+    qs("#missionPromoCard .mission-desc").textContent =
+      "Has completado todos los cursos disponibles. Nuevos retos A+ llegarán muy pronto.";
+
+    qs("#missionPromoBtn").textContent = "Volver al inicio";
+    qs("#missionPromoBtn").onclick = () =>
+      (window.location.href = "/dashboard/index.html");
+
+    return;
+  }
+
+  // 5. Si el curso aún NO termina → misión normal
   qs("#missionTitle").textContent = course.mission_title || "Misión del día";
   qs("#missionDesc").textContent = course.mission_desc || "Toma el control de tu día.";
   qs("#missionMeta").textContent = `${course.title} · Día ${nextDay} · ${course.category}`;
@@ -343,8 +386,10 @@ async function loadMission(user) {
     window.location.href = `/curso/index.html?c=${courseId}&day=${nextDay}`;
   };
 
+  promoCard.style.display = "none";
   card.style.display = "flex";
 }
+
 
 /* ==================================================
    8. LOGOUT
