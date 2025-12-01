@@ -1,45 +1,27 @@
-// /admin/progress.js
-import { supabase } from "/js/supabase.js";
-import { requireAdmin, setAdminHeader } from "/admin/js/admin.js";
+// ============================================================
+//  PROGRESS ADMIN — Advance+
+//  Version U3 — 3 Columnas
+// ============================================================
 
-let users = [];
-let courses = [];
+import { supabase } from "/js/supabase.js";
+import { requireAdmin } from "./admin.js";
+
+requireAdmin();
+
+// ============================================================
+//  ESTADO GLOBAL
+// ============================================================
+
 let selectedUser = null;
 let selectedCourse = null;
 
-document.addEventListener("DOMContentLoaded", async () => {
-  await requireAdmin();
-  setAdminHeader("Panel Admin · Progreso", "Control avanzado de usuarios, cursos y progreso por día.");
+// ============================================================
+//  Cargar Usuarios (columna 1)
+// ============================================================
 
-  await loadUsers();
-  await loadAllCourses();
-
-  setupEvents();
-});
-
-/* ============================================================
-   SETUP DE EVENTOS
-============================================================ */
-function setupEvents() {
-  document.getElementById("searchUser").addEventListener("input", filterUsers);
-
-  document.getElementById("btnAddCourse").addEventListener("click", async () => {
-    if (!selectedUser) return alert("Selecciona un usuario primero.");
-
-    const courseId = prompt("Ingresa el ID del curso a asignar:");
-    if (!courseId) return;
-
-    await addCourseToUser(selectedUser.id, courseId);
-    await loadUserCourses(selectedUser.id);
-  });
-}
-
-/* ============================================================
-   USERS
-============================================================ */
 async function loadUsers() {
   const tbody = document.getElementById("usersTableBody");
-  tbody.innerHTML = `<tr><td colspan="6">Cargando usuarios...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="4">Cargando...</td></tr>`;
 
   const { data, error } = await supabase
     .from("profiles")
@@ -47,161 +29,113 @@ async function loadUsers() {
       id,
       full_name,
       email,
-      avatar_url,
-      user_stats:xp_total, 
-      level:user_stats.level
-    `);
+      user_stats (
+        xp_total,
+        level
+      )
+    `)
+    .order("full_name", { ascending: true });
 
   if (error) {
-    console.error(error);
-    tbody.innerHTML = `<tr><td colspan="6">Error cargando usuarios</td></tr>`;
+    console.error("Error cargando usuarios:", error);
+    tbody.innerHTML = `<tr><td colspan="4">Error cargando usuarios</td></tr>`;
     return;
   }
 
-  users = data;
-  renderUsersTable(users);
-}
-
-function renderUsersTable(usersFiltered) {
-  const tbody = document.getElementById("usersTableBody");
   tbody.innerHTML = "";
 
-  usersFiltered.forEach(user => {
+  data.forEach((u) => {
+    const xp = u.user_stats?.xp_total ?? 0;
+    const level = u.user_stats?.level ?? 1;
+
     const tr = document.createElement("tr");
     tr.classList.add("admin-row-click");
-
-    const avatar = user.avatar_url 
-      ? `<img src="${user.avatar_url}" style="width:32px; height:32px; border-radius:50%;">`
-      : `<div style="
-            width:32px; height:32px; border-radius:50%;
-            background:#334; 
-            display:flex; align-items:center; justify-content:center;
-            color:#fff; font-size:0.8rem;">
-            ${user.full_name ? user.full_name.charAt(0).toUpperCase() : "?"}
-         </div>`;
-
     tr.innerHTML = `
-      <td>${avatar}</td>
-      <td>${user.full_name ?? "-"}</td>
-      <td>${user.email}</td>
-      <td>${user.xp_total ?? 0}</td>
-      <td>${user.level ?? 1}</td>
-      <td style="font-size:0.7rem; color:#9bb;">${user.id}</td>
+      <td><div class="avatar-sm">${getInitials(u.full_name)}</div></td>
+      <td>${u.full_name}</td>
+      <td>${u.email}</td>
+      <td>${xp}</td>
     `;
 
-    tr.addEventListener("click", () => {
-      selectedUser = user;
-      loadUserCourses(user.id);
-    });
+    tr.onclick = () => {
+      selectedUser = u;
+      highlightSelectedRow(tr, tbody);
+      loadUserCourses(u.id);
+      clearProgressTable();
+    };
 
     tbody.appendChild(tr);
   });
 }
 
-function filterUsers(e) {
-  const text = e.target.value.toLowerCase();
-  const filtered = users.filter(u =>
-    (u.full_name ?? "").toLowerCase().includes(text) ||
-    (u.email ?? "").toLowerCase().includes(text) ||
-    (u.id ?? "").toLowerCase().includes(text)
-  );
-  renderUsersTable(filtered);
-}
-
-/* ============================================================
-   COURSES
-============================================================ */
-async function loadAllCourses() {
-  const { data } = await supabase
-    .from("courses")
-    .select("id, title, duration_days, xp_reward");
-  courses = data || [];
-}
+// ============================================================
+//  Cargar Cursos del Usuario (columna 2)
+// ============================================================
 
 async function loadUserCourses(userId) {
-  const tbody = document.getElementById("userCoursesTableBody");
-  tbody.innerHTML = `<tr><td colspan="5">Cargando cursos...</td></tr>`;
+  const tbody = document.getElementById("coursesTableBody");
+  tbody.innerHTML = `<tr><td colspan="5">Cargando...</td></tr>`;
 
   const { data, error } = await supabase
     .from("user_courses")
-    .select("*")
+    .select(`
+      id,
+      course_id,
+      status,
+      xp_gained,
+      progress_pct,
+      courses (
+        id,
+        title,
+        progression_type
+      )
+    `)
     .eq("user_id", userId);
 
   if (error) {
-    console.error(error);
+    console.error("Error cargando cursos:", error);
     tbody.innerHTML = `<tr><td colspan="5">Error cargando cursos</td></tr>`;
     return;
   }
 
-  renderUserCoursesTable(data);
-}
-
-function renderUserCoursesTable(userCourses) {
-  const tbody = document.getElementById("userCoursesTableBody");
   tbody.innerHTML = "";
 
-  userCourses.forEach(uc => {
-    const course = courses.find(c => c.id === uc.course_id);
-
+  data.forEach((uc) => {
     const tr = document.createElement("tr");
+    tr.classList.add("admin-row-click");
+
     tr.innerHTML = `
-      <td>${course?.title ?? "Curso eliminado"}</td>
-      <td>${(uc.progress_pct ?? 0)}%</td>
+      <td>${uc.courses.title}</td>
+      <td>${Math.round(uc.progress_pct ?? 0)}%</td>
       <td>${uc.xp_gained ?? 0}</td>
       <td>${uc.status}</td>
       <td>
-        <button class="btn-secondary" onclick="window.progressAdmin.selectCourse('${uc.course_id}')">Ver</button>
-        <button class="btn-secondary" onclick="window.progressAdmin.resetCourse('${uc.course_id}')">Reset</button>
-        <button class="btn-secondary" onclick="window.progressAdmin.removeCourse('${uc.course_id}')">Eliminar</button>
+        <button class="btn-small" data-action="open">Abrir</button>
       </td>
     `;
+
+    tr.querySelector("[data-action='open']").onclick = (e) => {
+      e.stopPropagation();
+      selectedCourse = uc;
+      highlightSelectedRow(tr, tbody);
+      loadCourseProgress(uc.course_id, userId);
+    };
+
     tbody.appendChild(tr);
   });
 }
 
-window.progressAdmin = {
-  selectCourse: async (courseId) => {
-    selectedCourse = courseId;
-    await loadCourseProgress(selectedUser.id, courseId);
-  },
+// ============================================================
+//  Cargar progreso por día (columna 3)
+// ============================================================
 
-  resetCourse: async (courseId) => {
-    if (!confirm("¿Resetear TODO el progreso del curso?")) return;
-
-    await supabase
-      .from("progress")
-      .delete()
-      .eq("user_id", selectedUser.id)
-      .eq("course_id", courseId);
-
-    await loadCourseProgress(selectedUser.id, courseId);
-    alert("Curso reseteado.");
-  },
-
-  removeCourse: async (courseId) => {
-    if (!confirm("¿Eliminar curso del usuario?")) return;
-
-    await supabase
-      .from("user_courses")
-      .delete()
-      .eq("user_id", selectedUser.id)
-      .eq("course_id", courseId);
-
-    await loadUserCourses(selectedUser.id);
-    alert("Curso eliminado.");
-  }
-};
-
-/* ============================================================
-   PROGRESO POR DÍA
-============================================================ */
-
-async function loadCourseProgress(userId, courseId) {
-  document.getElementById("progressTitle").textContent = "Progreso del curso";
+async function loadCourseProgress(courseId, userId) {
+  const tbody = document.getElementById("progressTableBody");
+  tbody.innerHTML = `<tr><td colspan="6">Cargando...</td></tr>`;
 
   const { data: lessons } = await supabase
     .from("lessons")
-    .select("*")
+    .select("day, title, xp_reward")
     .eq("course_id", courseId)
     .order("day");
 
@@ -211,69 +145,98 @@ async function loadCourseProgress(userId, courseId) {
     .eq("user_id", userId)
     .eq("course_id", courseId);
 
-  const merged = lessons.map(lesson => {
-    const p = progress.find(x => x.day === lesson.day);
-    return {
-      day: lesson.day,
-      title: lesson.title,
-      completed: p?.completed ?? false,
-      xp: p?.xp ?? 0,
-      updated_at: p?.updated_at ?? null
-    };
-  });
+  const progressMap = {};
+  progress?.forEach((p) => (progressMap[p.day] = p));
 
-  renderProgressTable(merged);
-}
-
-function renderProgressTable(rows) {
-  const tbody = document.getElementById("progressTableBody");
   tbody.innerHTML = "";
 
-  rows.forEach(r => {
-    const tr = document.createElement("tr");
+  lessons.forEach((lesson) => {
+    const p = progressMap[lesson.day];
 
+    const completed = p?.completed ? "Sí" : "No";
+    const xp = p?.xp ?? 0;
+    const fecha = p?.updated_at
+      ? new Date(p.updated_at).toLocaleDateString()
+      : "-";
+
+    const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${r.day}</td>
-      <td>${r.title}</td>
-      <td>${r.completed ? "✔" : "✘"}</td>
-      <td>${r.xp}</td>
-      <td>${r.updated_at ? new Date(r.updated_at).toLocaleDateString() : "-"}</td>
+      <td>${lesson.day}</td>
+      <td>${lesson.title}</td>
+      <td>${completed}</td>
+      <td>${xp}</td>
+      <td>${fecha}</td>
       <td>
-        <button class="btn-secondary" onclick="window.progressAdmin.completeDay(${r.day})">Completar</button>
-        <button class="btn-secondary" onclick="window.progressAdmin.resetDay(${r.day})">Reset</button>
+        <button class="btn-small" data-action="complete">✔</button>
+        <button class="btn-small btn-danger" data-action="reset">↺</button>
       </td>
     `;
+
+    tr.querySelector("[data-action='complete']").onclick = () =>
+      setProgressDay(userId, courseId, lesson.day, lesson.xp_reward);
+
+    tr.querySelector("[data-action='reset']").onclick = () =>
+      resetProgressDay(userId, courseId, lesson.day);
 
     tbody.appendChild(tr);
   });
 }
 
-window.progressAdmin.completeDay = async (day) => {
-  if (!selectedUser || !selectedCourse) return;
+// ============================================================
+//  Acciones: marcar completado, resetear día
+// ============================================================
 
+async function setProgressDay(userId, courseId, day, xpReward) {
   await supabase
     .from("progress")
     .upsert({
-      user_id: selectedUser.id,
-      course_id: selectedCourse,
-      day: day,
+      user_id: userId,
+      course_id: courseId,
+      day,
       completed: true,
-      xp: 25,
-      updated_at: new Date()
-    }, { onConflict: "user_id,course_id,day" });
+      xp: xpReward,
+      updated_at: new Date().toISOString(),
+    });
 
-  await loadCourseProgress(selectedUser.id, selectedCourse);
-};
+  loadCourseProgress(courseId, userId);
+}
 
-window.progressAdmin.resetDay = async (day) => {
+async function resetProgressDay(userId, courseId, day) {
   await supabase
     .from("progress")
-    .delete()
-    .eq("user_id", selectedUser.id)
-    .eq("course_id", selectedCourse)
+    .update({
+      completed: false,
+      xp: 0,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("user_id", userId)
+    .eq("course_id", courseId)
     .eq("day", day);
 
-  await loadCourseProgress(selectedUser.id, selectedCourse);
-};
+  loadCourseProgress(courseId, userId);
+}
 
-/* END */
+// ============================================================
+//  Helpers
+// ============================================================
+
+function clearProgressTable() {
+  document.getElementById("progressTableBody").innerHTML = "";
+}
+
+function getInitials(name) {
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
+}
+
+function highlightSelectedRow(tr, tbody) {
+  [...tbody.children].forEach((r) => r.classList.remove("selected"));
+  tr.classList.add("selected");
+}
+
+// Ejecutar
+loadUsers();
