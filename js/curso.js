@@ -208,15 +208,20 @@ async function completeLesson(courseId, userId, day, xp, maxDay) {
 
   const nextDay = day + 1;
 
-  if (nextDay <= maxDay) {
-    const params = new URLSearchParams(window.location.search);
-    params.set("day", nextDay);
-    window.location.search = params.toString();
-  } else {
-    alert("🎉 ¡Has completado este curso!");
-    window.location.reload();
+  // ⬇️ Último día del curso
+  if (nextDay > maxDay) {
+    // Popup simple + redirección al dashboard
+    alert("🎉 ¡Has completado este curso! Volverás a tu dashboard para seguir avanzando.");
+    window.location.href = "/dashboard/index.html";
+    return;
   }
+
+  // ⬇️ Aún quedan días → ir al siguiente
+  const params = new URLSearchParams(window.location.search);
+  params.set("day", nextDay);
+  window.location.search = params.toString();
 }
+
 
 /* ============================================================================
    MAIN
