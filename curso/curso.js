@@ -86,20 +86,20 @@ async function completeLesson(courseId, userId, day, xp_reward, maxDay) {
   // --- 2) Avanzar al siguiente día ---
   const nextDay = day + 1;
 
-  if (nextDay <= maxDay) {
-    const params = new URLSearchParams(window.location.search);
-    params.set("day", nextDay);
-    window.location.search = params.toString();
-  } else {
-      // Último día del curso → mostrar popup y volver al dashboard
-      if (nextDay > maxDay) {
-        if (confirm("🎉 ¡Has completado este curso! ¿Volver al dashboard?")) {
-          window.location.href = "/dashboard/index.html";
-        }
-        return;
-      }
+  // ⬇️ Último día del curso
+  if (nextDay > maxDay) {
+    // Popup simple + redirección al dashboard
+    alert("🎉 ¡Has completado este curso! Volverás a tu dashboard para seguir avanzando.");
+    window.location.href = "/dashboard/index.html";
+    return;
   }
+
+  // ⬇️ Aún quedan días → ir al siguiente
+  const params = new URLSearchParams(window.location.search);
+  params.set("day", nextDay);
+  window.location.search = params.toString();
 }
+
 
 /* ============================================================================
    RENDER UI
