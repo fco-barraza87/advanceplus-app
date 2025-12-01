@@ -1,6 +1,6 @@
 // /admin/lessons.js
 import { supabase } from "/js/supabase.js";
-import { requireAdmin, setAdminHeader } from "./admin.js";
+import { requireAdmin, setAdminHeader } from "/admin/js/admin.js";
 
 let courses = [];
 let lessons = [];
