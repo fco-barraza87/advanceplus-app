@@ -2,10 +2,14 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Admin · Progreso | Advance+</title>
-  <link rel="stylesheet" href="/css/style.css" />
-</head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Admin · Progreso | Advance+</title>
 
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/admin.css" /> 
+  <link rel="stylesheet" href="/css/progress.css" /> <!-- Opcional si quieres añadir mejoras -->
+
+</head>
 <body class="app-bg">
 
   <!-- HEADER -->
@@ -15,94 +19,109 @@
     loadHeader();
   </script>
 
-  <main class="admin-layout">
+  <main class="admin-container">
 
-    <section class="admin-page-header"></section>
+    <h1 class="admin-title">Panel Admin · Progreso</h1>
+    <p class="admin-subtitle">Control avanzado de usuarios, cursos y progreso por día.</p>
 
-    <!-- ================================
-         THREE-COLUMN LAYOUT
-    ================================= -->
-    <section class="admin-columns-3">
+    <!-- 
+      ===========================================================
+      3 COLUMNAS (L2)
+      ===========================================================
+    -->
+    <div class="admin-columns">
 
-      <!-- 1) USUARIOS -->
-      <div class="admin-panel col-users">
-        <div class="admin-panel-header">
-          <h2>Usuarios</h2>
-        </div>
+      <!-- 
+        ===========================================================
+        COL 1: USUARIOS
+        ===========================================================
+      -->
+      <div class="admin-panel">
+        <h2 class="admin-panel-title">Usuarios</h2>
 
         <input 
-          id="searchUser" 
           type="text" 
-          placeholder="Buscar usuario por nombre, email o ID..."
-          class="admin-search-input"
+          id="searchUserInput" 
+          class="admin-input" 
+          placeholder="Buscar usuario por nombre, email o ID" 
         />
 
-        <table class="admin-table" id="usersTable">
-          <thead>
-            <tr>
-              <th>Avatar</th>
-              <th>Nombre</th>
-              <th>Email</th>
-              <th>XP</th>
-              <th>Nivel</th>
-              <th>ID</th>
-            </tr>
-          </thead>
-          <tbody id="usersTableBody">
-            <!-- Dinámico -->
-          </tbody>
-        </table>
+        <div class="admin-table-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Avatar</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>XP</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr><td colspan="4">Cargando usuarios...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <!-- 2) CURSOS DEL USUARIO -->
-      <div class="admin-panel col-courses">
+
+      <!-- 
+        ===========================================================
+        COL 2: CURSOS DEL USUARIO
+        ===========================================================
+      -->
+      <div class="admin-panel">
         <div class="admin-panel-header">
-          <h2>Cursos del Usuario</h2>
-          <button id="btnAddCourse" class="btn-primary">+ Agregar Curso</button>
+          <h2 class="admin-panel-title">Cursos del Usuario</h2>
+          <button id="btnAddCourse" class="admin-btn-gold">+ Agregar Curso</button>
         </div>
 
-        <table class="admin-table" id="userCoursesTable">
-          <thead>
-            <tr>
-              <th>Curso</th>
-              <th>Progreso</th>
-              <th>XP</th>
-              <th>Status</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="userCoursesTableBody">
-            <!-- Dinámico -->
-          </tbody>
-        </table>
-
-      </div>
-
-      <!-- 3) PROGRESO POR DÍA -->
-      <div class="admin-panel col-progress">
-        <div class="admin-panel-header">
-          <h2 id="progressTitle">Progreso del Curso</h2>
+        <div class="admin-table-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Curso</th>
+                <th>Progreso</th>
+                <th>XP</th>
+                <th>Status</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="coursesTableBody">
+              <tr><td colspan="5">Seleccione un usuario...</td></tr>
+            </tbody>
+          </table>
         </div>
-
-        <table class="admin-table" id="progressTable">
-          <thead>
-            <tr>
-              <th>Día</th>
-              <th>Título</th>
-              <th>Completado</th>
-              <th>XP</th>
-              <th>Fecha</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="progressTableBody">
-            <!-- Dinámico -->
-          </tbody>
-        </table>
-
       </div>
 
-    </section>
+
+      <!-- 
+        ===========================================================
+        COL 3: PROGRESO DETALLADO DEL CURSO
+        ===========================================================
+      -->
+      <div class="admin-panel">
+        <h2 class="admin-panel-title">Progreso del Curso</h2>
+
+        <div class="admin-table-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Día</th>
+                <th>Título</th>
+                <th>Completado</th>
+                <th>XP</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="progressTableBody">
+              <tr><td colspan="6">Seleccione un curso...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div> <!-- END admin-columns -->
 
   </main>
 
