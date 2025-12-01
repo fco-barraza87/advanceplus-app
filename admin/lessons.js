@@ -113,12 +113,14 @@ function renderLessonsTable() {
     const tr = document.createElement("tr");
     tr.classList.add("admin-row-click");
 
-    tr.innerHTML = `
-      <td>${lesson.day}</td>
-      <td>${lesson.title}</td>
-      <td>${lesson.xp_reward ?? 0}</td>
-      <td>${lesson.duration ?? 0} min</td>
-    `;
+        tr.innerHTML = `
+            <td style="font-size:0.75rem; color:#9bb;">${lesson.id}</td>
+            <td>${lesson.day}</td>
+            <td>${lesson.title}</td>
+            <td>${lesson.xp_reward ?? 0}</td>
+            <td>${lesson.duration ?? 0} min</td>
+        `;
+
 
     tr.addEventListener("click", () => fillLessonForm(lesson));
     tbody.appendChild(tr);
