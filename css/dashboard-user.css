@@ -347,3 +347,74 @@
   background: rgba(255, 255, 255, 0.06);
   color: #c5cbe3;
 }
+
+
+/* =========================================================
+   BLOQUE: Mission Promo (Recomendación de Cursos) A+
+========================================================= */
+
+.mission-promo-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 2rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(14px);
+  align-items: center;
+}
+
+.mission-promo-left {
+  flex: 1;
+}
+
+.mission-promo-tag {
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  color: var(--a-plus-gold);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.mission-promo-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.mission-promo-desc {
+  font-size: 1rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 90%;
+}
+
+.mission-promo-right {
+  display: flex;
+  align-items: center;
+}
+
+.mission-promo-btn {
+  background: var(--a-plus-gold);
+  color: #0f1e44;
+  font-weight: 600;
+  padding: 0.9rem 1.4rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s ease all;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.mission-promo-btn:hover {
+  background: #e8d08a;
+  transform: translateY(-1px);
+}
+
+.mission-promo-btn:active {
+  transform: scale(0.97);
+}
