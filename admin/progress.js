@@ -183,20 +183,38 @@ async function loadUserCourses(userId) {
     tr.querySelector("[data-action='reset']").onclick = async (e) => {
     e.stopPropagation();
 
-    await supabase
-        .from("progress")
-        .update({ completed: false, xp: 0 })
-        .eq("user_id", selectedUser.id)
-        .eq("course_id", uc.course_id);
+    // 1. Tomar el XP actual que tiene este curso
+    const xpActualCurso = uc.xp_gained ?? 0;
 
+    // 2. Restarlo del XP total del usuario
+    if (xpActualCurso > 0) {
+        await supabase.rpc("increment_user_xp_total", {
+        p_user_id: selectedUser.id,
+        p_amount: -xpActualCurso
+        });
+    }
+
+    // 3. Resetear XP del curso
     await supabase
         .from("user_courses")
         .update({ xp_gained: 0 })
         .eq("id", uc.id);
 
+    // 4. Resetear progreso de todos los días del curso
+    await supabase
+        .from("progress")
+        .update({
+        completed: false,
+        xp: 0
+        })
+        .eq("user_id", selectedUser.id)
+        .eq("course_id", uc.course_id);
+
+    // 5. Recargar UI
     loadUserCourses(selectedUser.id);
     clearProgressTable();
     };
+
 
     // Cambiar modo (progression_type)
     tr.querySelector("[data-action='type']").onclick = async (e) => {
