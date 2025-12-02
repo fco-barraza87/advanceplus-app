@@ -471,7 +471,7 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const supa = getSupabaseClient();
         await supa.auth.signOut();
-        window.location.href = "/login.html";
+        window.location.href = "/index.html";
       } catch (err) {
         console.error("Error al cerrar sesión:", err);
         alert("Hubo un problema cerrando sesión.");
