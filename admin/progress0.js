@@ -19,42 +19,23 @@ let selectedCourse = null;
 //  Cargar Usuarios (columna 1)
 // ============================================================
 
-async function loadUsers(filterText = "") {
+async function loadUsers() {
   const tbody = document.getElementById("usersTableBody");
-  tbody.innerHTML = `<tr><td colspan="4">Cargando usuarios...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="4">Cargando...</td></tr>`;
 
-  // 1) Query base de profiles
-  let query = supabase
+  // 1) Obtener perfiles
+  const { data: profiles, error: e1 } = await supabase
     .from("profiles")
-    .select("id, full_name, email, avatar_url")
+    .select("id, full_name, email")
     .order("full_name", { ascending: true });
 
-  const trimmed = filterText.trim();
-
-  if (trimmed !== "") {
-    const f = `%${trimmed}%`;
-    const isUuid = /^[0-9a-fA-F-]{36}$/.test(trimmed);
-
-    const orParts = [
-      `full_name.ilike.${f}`,
-      `email.ilike.${f}`,
-    ];
-    if (isUuid) {
-      orParts.push(`id.eq.${trimmed}`);
-    }
-
-    query = query.or(orParts.join(","));
-  }
-
-  const { data: profiles, error: e1 } = await query;
-
   if (e1) {
-    console.error("Error cargando usuarios:", e1);
+    console.error("Error cargando perfiles:", e1);
     tbody.innerHTML = `<tr><td colspan="4">Error cargando usuarios</td></tr>`;
     return;
   }
 
-  // 2) Traer user_stats (xp_total, level)
+  // 2) Obtener user_stats
   const { data: stats, error: e2 } = await supabase
     .from("user_stats")
     .select("user_id, xp_total, level");
@@ -65,28 +46,24 @@ async function loadUsers(filterText = "") {
     return;
   }
 
+  // 3) Mapear user_stats por ID
   const statsMap = {};
   stats.forEach(s => {
     statsMap[s.user_id] = s;
   });
 
-  // 3) Render tabla
+  // 4) Renderizar la tabla
   tbody.innerHTML = "";
 
   profiles.forEach((u) => {
     const xp = statsMap[u.id]?.xp_total ?? 0;
-    const initials = getInitials(u.full_name);
-
-    const avatarHtml = u.avatar_url
-      ? `<img src="${u.avatar_url}" alt="${u.full_name || ""}" class="avatar-sm avatar-img" />`
-      : `<div class="avatar-sm">${initials}</div>`;
 
     const tr = document.createElement("tr");
     tr.classList.add("admin-row-click");
 
     tr.innerHTML = `
-      <td>${avatarHtml}</td>
-      <td>${u.full_name || "Sin nombre"}</td>
+      <td><div class="avatar-sm">${getInitials(u.full_name)}</div></td>
+      <td>${u.full_name}</td>
       <td>${u.email}</td>
       <td>${xp}</td>
     `;
@@ -101,7 +78,6 @@ async function loadUsers(filterText = "") {
     tbody.appendChild(tr);
   });
 }
-
 
 document.getElementById("btnRefreshUsers").onclick = () => {
   loadUsers();
@@ -508,11 +484,3 @@ document.getElementById("btnConfirmAddCourse").onclick = async () => {
 
   loadUserCourses(selectedUser.id);
 };
-
-
-const searchInput = document.getElementById("searchUserInput");
-if (searchInput) {
-  searchInput.addEventListener("input", (e) => {
-    loadUsers(e.target.value);
-  });
-}
