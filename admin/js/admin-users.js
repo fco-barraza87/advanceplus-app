@@ -396,10 +396,16 @@ tabButtons.forEach((btn) => {
   });
 });
 
-document.getElementById("open-progress-page").onclick = () => {
-  if (!currentSelectedUser) return;
-  window.location.href = `/admin/progress.html?user=${currentSelectedUser.id}`;
-};
+// Botón para abrir página de progreso
+const openProgressBtn = document.getElementById("btn-open-progress");
+
+if (openProgressBtn) {
+  openProgressBtn.onclick = () => {
+    if (!currentSelectedUser) return;
+
+    window.location.href = `/admin/progress.html?user=${currentSelectedUser.id}`;
+  };
+}
 
 
 // ===============================================
