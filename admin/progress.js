@@ -19,65 +19,80 @@ let selectedCourse = null;
 //  Cargar Usuarios (columna 1)
 // ============================================================
 
-async function loadUsers() {
-  const tbody = document.getElementById("usersTableBody");
-  tbody.innerHTML = `<tr><td colspan="4">Cargando...</td></tr>`;
+async function loadUserCourses(userId) {
+  const tbody = document.getElementById("coursesTableBody");
+  tbody.innerHTML = `<tr><td colspan="5">Cargando...</td></tr>`;
 
-  // 1) Obtener perfiles
-  const { data: profiles, error: e1 } = await supabase
-    .from("profiles")
-    .select("id, full_name, email")
-    .order("full_name", { ascending: true });
+  // 1) Obtener cursos asignados
+  const { data: userCourses, error } = await supabase
+    .from("user_courses")
+    .select(`
+      id,
+      course_id,
+      xp_gained,
+      status,
+      courses (
+        id,
+        title
+      )
+    `)
+    .eq("user_id", userId);
 
-  if (e1) {
-    console.error("Error cargando perfiles:", e1);
-    tbody.innerHTML = `<tr><td colspan="4">Error cargando usuarios</td></tr>`;
+  if (error) {
+    console.error("Error cargando cursos:", error);
+    tbody.innerHTML = `<tr><td colspan="5">Error cargando cursos</td></tr>`;
     return;
   }
 
-  // 2) Obtener user_stats
-  const { data: stats, error: e2 } = await supabase
-    .from("user_stats")
-    .select("user_id, xp_total, level");
-
-  if (e2) {
-    console.error("Error cargando stats:", e2);
-    tbody.innerHTML = `<tr><td colspan="4">Error cargando estadísticas</td></tr>`;
-    return;
-  }
-
-  // 3) Mapear user_stats por ID
-  const statsMap = {};
-  stats.forEach(s => {
-    statsMap[s.user_id] = s;
-  });
-
-  // 4) Renderizar la tabla
   tbody.innerHTML = "";
 
-  profiles.forEach((u) => {
-    const xp = statsMap[u.id]?.xp_total ?? 0;
+  for (const uc of userCourses) {
 
+    // 2) Obtener cantidad total de días del curso
+    const { data: lessons } = await supabase
+      .from("lessons")
+      .select("day")
+      .eq("course_id", uc.course_id);
+
+    const totalDays = lessons.length;
+
+    // 3) Obtener días completados por el usuario
+    const { data: progressRows } = await supabase
+      .from("progress")
+      .select("completed")
+      .eq("user_id", userId)
+      .eq("course_id", uc.course_id);
+
+    const completedDays = progressRows.filter(p => p.completed).length;
+
+    // 4) Calcular progreso real %
+    const realPct = totalDays > 0
+      ? Math.round((completedDays / totalDays) * 100)
+      : 0;
+
+    // Render fila
     const tr = document.createElement("tr");
     tr.classList.add("admin-row-click");
 
     tr.innerHTML = `
-      <td><div class="avatar-sm">${getInitials(u.full_name)}</div></td>
-      <td>${u.full_name}</td>
-      <td>${u.email}</td>
-      <td>${xp}</td>
+      <td>${uc.courses.title}</td>
+      <td>${realPct}%</td>
+      <td>${uc.xp_gained ?? 0}</td>
+      <td>${uc.status}</td>
+      <td><button class="btn-small" data-action="open">Abrir</button></td>
     `;
 
-    tr.onclick = () => {
-      selectedUser = u;
+    tr.querySelector("[data-action='open']").onclick = (e) => {
+      e.stopPropagation();
+      selectedCourse = uc;
       highlightSelectedRow(tr, tbody);
-      loadUserCourses(u.id);
-      clearProgressTable();
+      loadCourseProgress(uc.course_id, userId);
     };
 
     tbody.appendChild(tr);
-  });
+  }
 }
+
 
 
 // ============================================================
