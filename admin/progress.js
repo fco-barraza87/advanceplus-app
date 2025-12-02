@@ -121,16 +121,6 @@ async function loadUsers(filterText = "") {
     if (row) row.click();
 }
   });
-    const persistedUserId = localStorage.getItem("admin_selected_user");
-
-    if (persistedUserId) {
-    const match = data.find(u => u.id === persistedUserId);
-    if (match) {
-        // simula el click
-        const row = tbody.querySelector(`tr[data-id='${persistedUserId}']`);
-        if (row) row.click();
-    }
-    }
 
 }
 
