@@ -210,82 +210,57 @@ async function loadUserCourses(userId) {
 
     const ok = confirm(
         `¿Eliminar el curso "${uc.courses.title}" para ${selectedUser.full_name}?\n` +
-        `Se eliminará todo su progreso y se restará el XP ganado en este curso.`
+        `Se borrará TODO su progreso y se restará el XP obtenido en este curso.`
     );
     if (!ok) return;
 
-    // 1. Obtener el XP actual del curso
-    const xpActualCurso = uc.xp_gained ?? 0;
-
-    // 2. Restarlo del XP TOTAL del usuario
-    if (xpActualCurso > 0) {
-        await supabase.rpc("increment_user_xp_total", {
+    const { error } = await supabase.rpc("admin_delete_course", {
         p_user_id: selectedUser.id,
-        p_amount: -xpActualCurso
-        });
+        p_course_id: uc.course_id
+    });
+
+    if (error) {
+        console.error("Error al eliminar curso:", error);
+        alert("Hubo un error al eliminar el curso.");
+        return;
     }
 
-    // 3. Eliminar progreso del curso
-    await supabase
-        .from("progress")
-        .delete()
-        .eq("user_id", selectedUser.id)
-        .eq("course_id", uc.course_id);
-
-    // 4. Eliminar la fila user_course
-    await supabase
-        .from("user_courses")
-        .delete()
-        .eq("id", uc.id);
-
-    // 5. Refrescar UI
+    // Refrescar UI
     loadUserCourses(selectedUser.id);
     clearProgressTable();
-    loadUsers(); // <-- refresca XP total en la primera columna
+    loadUsers(); // refrescar XP total en panel usuarios
     };
+
 
 
     // Resetear curso completo
     tr.querySelector("[data-action='reset']").onclick = async (e) => {
     e.stopPropagation();
 
-      const ok = confirm(
-    `¿Resetear TODO el progreso del curso "${uc.courses.title}" para ${selectedUser.full_name}?\n` +
-    `Se pondrán todos los días como no completados y el XP de este curso se llevará a 0.`
+    const ok = confirm(
+        `¿Resetear TODO el progreso del curso "${uc.courses.title}" para ${selectedUser.full_name}?\n` +
+        `Esto pondrá todos los días como no completados y restará el XP del curso.`
     );
     if (!ok) return;
 
-    // 1. Tomar el XP actual que tiene este curso
-    const xpActualCurso = uc.xp_gained ?? 0;
-
-    // 2. Restarlo del XP total del usuario
-    if (xpActualCurso > 0) {
-        await supabase.rpc("increment_user_xp_total", {
+    // RPC transaccional
+    const { error } = await supabase.rpc("admin_reset_course", {
         p_user_id: selectedUser.id,
-        p_amount: -xpActualCurso
-        });
+        p_course_id: uc.course_id
+    });
+
+    if (error) {
+        console.error("Error al resetear curso:", error);
+        alert("Hubo un error al resetear el curso.");
+        return;
     }
 
-    // 3. Resetear XP del curso
-    await supabase
-        .from("user_courses")
-        .update({ xp_gained: 0 })
-        .eq("id", uc.id);
-
-    // 4. Resetear progreso de todos los días del curso
-    await supabase
-        .from("progress")
-        .update({
-        completed: false,
-        xp: 0
-        })
-        .eq("user_id", selectedUser.id)
-        .eq("course_id", uc.course_id);
-
-    // 5. Recargar UI
+    // refrescar UI
     loadUserCourses(selectedUser.id);
     clearProgressTable();
+    loadUsers(); // refrescar XP total del usuario
     };
+
 
 
     // Cambiar modo (progression_type)
