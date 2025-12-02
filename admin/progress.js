@@ -23,33 +23,44 @@ async function loadUsers() {
   const tbody = document.getElementById("usersTableBody");
   tbody.innerHTML = `<tr><td colspan="4">Cargando...</td></tr>`;
 
-  const { data, error } = await supabase
+  // 1) Obtener perfiles
+  const { data: profiles, error: e1 } = await supabase
     .from("profiles")
-    .select(`
-      id,
-      full_name,
-      email,
-      user_stats (
-        xp_total,
-        level
-      )
-    `)
+    .select("id, full_name, email")
     .order("full_name", { ascending: true });
 
-  if (error) {
-    console.error("Error cargando usuarios:", error);
+  if (e1) {
+    console.error("Error cargando perfiles:", e1);
     tbody.innerHTML = `<tr><td colspan="4">Error cargando usuarios</td></tr>`;
     return;
   }
 
+  // 2) Obtener user_stats
+  const { data: stats, error: e2 } = await supabase
+    .from("user_stats")
+    .select("user_id, xp_total, level");
+
+  if (e2) {
+    console.error("Error cargando stats:", e2);
+    tbody.innerHTML = `<tr><td colspan="4">Error cargando estadísticas</td></tr>`;
+    return;
+  }
+
+  // 3) Mapear user_stats por ID
+  const statsMap = {};
+  stats.forEach(s => {
+    statsMap[s.user_id] = s;
+  });
+
+  // 4) Renderizar la tabla
   tbody.innerHTML = "";
 
-  data.forEach((u) => {
-    const xp = u.user_stats?.xp_total ?? 0;
-    const level = u.user_stats?.level ?? 1;
+  profiles.forEach((u) => {
+    const xp = statsMap[u.id]?.xp_total ?? 0;
 
     const tr = document.createElement("tr");
     tr.classList.add("admin-row-click");
+
     tr.innerHTML = `
       <td><div class="avatar-sm">${getInitials(u.full_name)}</div></td>
       <td>${u.full_name}</td>
@@ -67,6 +78,7 @@ async function loadUsers() {
     tbody.appendChild(tr);
   });
 }
+
 
 // ============================================================
 //  Cargar Cursos del Usuario (columna 2)
