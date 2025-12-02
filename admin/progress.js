@@ -19,57 +19,69 @@ let selectedCourse = null;
 //  Cargar Usuarios (columna 1)
 // ============================================================
 
-async function loadUsers() {
+async function loadUsers(filterText = "") {
   const tbody = document.getElementById("usersTableBody");
-  tbody.innerHTML = `<tr><td colspan="4">Cargando...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="4">Cargando usuarios...</td></tr>`;
 
-  // 1) Obtener perfiles
-  const { data: profiles, error: e1 } = await supabase
+  let query = supabase
     .from("profiles")
-    .select("id, full_name, email")
+    .select(`
+      id,
+      full_name,
+      email,
+      avatar_url,
+      user_stats ( xp_total, level )
+    `)
     .order("full_name", { ascending: true });
 
-  if (e1) {
-    console.error("Error cargando perfiles:", e1);
+  // Si hay búsqueda, aplicamos filtros
+  if (filterText.trim() !== "") {
+    const f = `%${filterText.trim()}%`;
+
+    query = supabase
+      .from("profiles")
+      .select(`
+        id,
+        full_name,
+        email,
+        avatar_url,
+        user_stats ( xp_total, level )
+      `)
+      .or(`full_name.ilike.${f},email.ilike.${f},id.eq.${filterText.trim()}`)
+      .order("full_name", { ascending: true });
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Error cargando usuarios:", error);
     tbody.innerHTML = `<tr><td colspan="4">Error cargando usuarios</td></tr>`;
     return;
   }
 
-  // 2) Obtener user_stats
-  const { data: stats, error: e2 } = await supabase
-    .from("user_stats")
-    .select("user_id, xp_total, level");
-
-  if (e2) {
-    console.error("Error cargando stats:", e2);
-    tbody.innerHTML = `<tr><td colspan="4">Error cargando estadísticas</td></tr>`;
-    return;
-  }
-
-  // 3) Mapear user_stats por ID
-  const statsMap = {};
-  stats.forEach(s => {
-    statsMap[s.user_id] = s;
-  });
-
-  // 4) Renderizar la tabla
   tbody.innerHTML = "";
 
-  profiles.forEach((u) => {
-    const xp = statsMap[u.id]?.xp_total ?? 0;
-
+  data.forEach((u) => {
     const tr = document.createElement("tr");
     tr.classList.add("admin-row-click");
 
+    const xp = u.user_stats?.xp_total ?? 0;
+    const initials = (u.full_name || "?")
+      .split(" ")
+      .map((n) => n[0]?.toUpperCase())
+      .join("")
+      .slice(0, 2);
+
     tr.innerHTML = `
-      <td><div class="avatar-sm">${getInitials(u.full_name)}</div></td>
-      <td>${u.full_name}</td>
+      <td><div class="avatar-circle">${initials}</div></td>
+      <td>${u.full_name || "Sin nombre"}</td>
       <td>${u.email}</td>
       <td>${xp}</td>
     `;
 
     tr.onclick = () => {
       selectedUser = u;
+      selectedCourse = null;
       highlightSelectedRow(tr, tbody);
       loadUserCourses(u.id);
       clearProgressTable();
@@ -78,6 +90,7 @@ async function loadUsers() {
     tbody.appendChild(tr);
   });
 }
+
 
 document.getElementById("btnRefreshUsers").onclick = () => {
   loadUsers();
@@ -484,3 +497,10 @@ document.getElementById("btnConfirmAddCourse").onclick = async () => {
 
   loadUserCourses(selectedUser.id);
 };
+
+// Activar busqueda en tiempo real
+document.getElementById("searchUserInput").addEventListener("keyup", (e) => {
+  const text = e.target.value;
+  loadUsers(text);
+});
+
