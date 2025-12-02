@@ -208,26 +208,42 @@ async function loadUserCourses(userId) {
     tr.querySelector("[data-action='delete']").onclick = async (e) => {
     e.stopPropagation();
 
-      const ok = confirm(
-    `¿Eliminar el curso "${uc.courses.title}" para ${selectedUser.full_name}? 
-    Se borrará también todo su progreso de este curso.`
+    const ok = confirm(
+        `¿Eliminar el curso "${uc.courses.title}" para ${selectedUser.full_name}?\n` +
+        `Se eliminará todo su progreso y se restará el XP ganado en este curso.`
     );
     if (!ok) return;
 
-    await supabase
-        .from("user_courses")
-        .delete()
-        .eq("id", uc.id);
+    // 1. Obtener el XP actual del curso
+    const xpActualCurso = uc.xp_gained ?? 0;
 
+    // 2. Restarlo del XP TOTAL del usuario
+    if (xpActualCurso > 0) {
+        await supabase.rpc("increment_user_xp_total", {
+        p_user_id: selectedUser.id,
+        p_amount: -xpActualCurso
+        });
+    }
+
+    // 3. Eliminar progreso del curso
     await supabase
         .from("progress")
         .delete()
         .eq("user_id", selectedUser.id)
         .eq("course_id", uc.course_id);
 
+    // 4. Eliminar la fila user_course
+    await supabase
+        .from("user_courses")
+        .delete()
+        .eq("id", uc.id);
+
+    // 5. Refrescar UI
     loadUserCourses(selectedUser.id);
     clearProgressTable();
+    loadUsers(); // <-- refresca XP total en la primera columna
     };
+
 
     // Resetear curso completo
     tr.querySelector("[data-action='reset']").onclick = async (e) => {
