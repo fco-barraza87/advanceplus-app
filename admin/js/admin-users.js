@@ -359,6 +359,7 @@ tabButtons.forEach((btn) => {
 // ===============================================
 //        GUARDAR ESTADÍSTICAS (XP / RACHAS)
 // ===============================================
+
 const saveStatsBtn = document.getElementById("save-stats");
 const statsStatus = document.getElementById("stats-save-status");
 
@@ -369,16 +370,15 @@ if (saveStatsBtn) {
     statsStatus.textContent = "Guardando...";
 
     const newStats = {
-        xp_total: Number(document.getElementById("stat-xp-total").value),
-        streak_current: Number(document.getElementById("stat-streak-current").value),
-        streak_best: Number(document.getElementById("stat-streak-best").value)
+      xp_total: Number(document.getElementById("stat-xp-total").value),
+      streak_current: Number(document.getElementById("stat-streak-current").value),
+      streak_best: Number(document.getElementById("stat-streak-best").value)
     };
 
-
     const { error } = await supabase
-      .from("profiles")
+      .from("user_stats")
       .update(newStats)
-      .eq("id", currentSelectedUser.id);
+      .eq("user_id", currentSelectedUser.id);
 
     if (error) {
       console.error("Error guardando estadísticas:", error);
@@ -392,5 +392,4 @@ if (saveStatsBtn) {
     loadUsers();
   });
 }
-
 
