@@ -17,7 +17,7 @@
 </head>
 <body>
   <div class="admin-shell">
-    <!-- Barra superior -->
+    <!-- Barra superior 
     <header class="admin-header">
       <div class="admin-header-left">
         <div class="brand-mark">
@@ -31,7 +31,51 @@
       <div class="admin-header-right">
         <div id="current-role-pill" class="role-pill role-pill--unknown">Cargando...</div>
       </div>
-    </header>
+    </header> -->
+
+        <!-- Barra superior -->
+    <header class="admin-header">
+      <div class="admin-header-left">
+        <div class="brand-mark">
+          <div class="brand-logo">A+</div>
+          <div class="brand-text">
+            <span class="brand-title">Advance+</span>
+            <span class="brand-subtitle">Panel Admin · Usuarios</span>
+          </div>
+        </div>
+      </div>
+            <!-- Navegación superior -->
+      <nav class="admin-nav">
+        <a href="/admin/index.html" class="nav-link nav-link--active">Dashboard</a>
+        <a href="/admin/users.html" class="nav-link">Usuarios</a>
+        <a href="/admin/courses.html" class="nav-link">Cursos</a>
+        <a href="/admin/lessons.html" class="nav-link">Lecciones</a>
+        <a href="/admin/progress.html" class="nav-link">Progreso</a>
+        <a href="/admin/marketing.html" class="nav-link">Marketing</a>
+        <a href="/admin/settings.html" class="nav-link">Settings</a>
+      </nav>
+
+      <div class="admin-header-right">
+        <div id="current-role-pill" class="role-pill role-pill--unknown">Cargando...</div>
+        <button id="admin-logout-btn" class="admin-dropdown-item">Cerrar sesión</button>
+      </div>
+    </header> 
+
+        <!-- Header admin 
+    <header class="admin-header">
+      
+      <div class="admin-header-right">
+        <div class="admin-user-menu">
+          <div id="admin-role-pill" class="role-pill role-pill--unknown">Cargando...</div>
+          <button id="admin-user-toggle" class="admin-user-btn">▾</button>
+
+          <div id="admin-user-dropdown" class="admin-user-dropdown admin-user-dropdown--hidden">
+            <button id="admin-logout-btn" class="admin-dropdown-item">Cerrar sesión</button>
+          </div>
+        </div>
+      </div>
+
+    </header>-->
 
     <!-- Contenido principal -->
     <main class="admin-main">
