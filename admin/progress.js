@@ -208,6 +208,12 @@ async function loadUserCourses(userId) {
     tr.querySelector("[data-action='delete']").onclick = async (e) => {
     e.stopPropagation();
 
+      const ok = confirm(
+    `¿Eliminar el curso "${uc.courses.title}" para ${selectedUser.full_name}? 
+    Se borrará también todo su progreso de este curso.`
+    );
+    if (!ok) return;
+
     await supabase
         .from("user_courses")
         .delete()
@@ -226,6 +232,12 @@ async function loadUserCourses(userId) {
     // Resetear curso completo
     tr.querySelector("[data-action='reset']").onclick = async (e) => {
     e.stopPropagation();
+
+      const ok = confirm(
+    `¿Resetear TODO el progreso del curso "${uc.courses.title}" para ${selectedUser.full_name}?\n` +
+    `Se pondrán todos los días como no completados y el XP de este curso se llevará a 0.`
+    );
+    if (!ok) return;
 
     // 1. Tomar el XP actual que tiene este curso
     const xpActualCurso = uc.xp_gained ?? 0;
@@ -269,6 +281,12 @@ async function loadUserCourses(userId) {
         "daily": "strict",
         "strict": "free"
     };
+
+   const ok = confirm(
+    `Modo actual del curso "${uc.courses.title}": ${actual}\n` +
+    `¿Cambiar a modo: ${next}?`
+    );
+    if (!ok) return;
 
     const next = nextMap[uc.courses.progression_type] ?? "free";
 
