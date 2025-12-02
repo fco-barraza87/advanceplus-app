@@ -79,6 +79,17 @@ async function loadUsers() {
   });
 }
 
+document.getElementById("btnRefreshUsers").onclick = () => {
+  loadUsers();
+};
+
+document.getElementById("btnRefreshUsers").onclick = () => {
+  const btn = document.getElementById("btnRefreshUsers");
+  btn.textContent = "⏳";
+  setTimeout(() => (btn.textContent = "🔄"), 400);
+
+  loadUsers();
+};
 
 // ============================================================
 //  Cargar Cursos del Usuario (columna 2)
