@@ -15,6 +15,15 @@ requireAdmin();
 let selectedUser = null;
 let selectedCourse = null;
 
+// Debounce de busqueda
+function debounce(fn, delay = 300) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
 // ============================================================
 //  Cargar Usuarios (columna 1)
 // ============================================================
@@ -512,7 +521,12 @@ document.getElementById("btnConfirmAddCourse").onclick = async () => {
 
 const searchInput = document.getElementById("searchUserInput");
 if (searchInput) {
+  const debouncedSearch = debounce((value) => {
+    loadUsers(value);
+  }, 300);
+
   searchInput.addEventListener("input", (e) => {
-    loadUsers(e.target.value);
+    debouncedSearch(e.target.value);
   });
 }
+
