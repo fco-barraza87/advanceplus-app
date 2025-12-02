@@ -93,6 +93,8 @@ async function loadUsers(filterText = "") {
     const tr = document.createElement("tr");
     tr.classList.add("admin-row-click");
 
+    tr.dataset.id = u.id;
+
     tr.innerHTML = `
       <td>${avatarHtml}</td>
       <td>${u.full_name || "Sin nombre"}</td>
@@ -101,14 +103,35 @@ async function loadUsers(filterText = "") {
     `;
 
     tr.onclick = () => {
-      selectedUser = u;
+    selectedUser = u;
+
+    // Persistencia
+    localStorage.setItem("admin_selected_user", u.id);
+    localStorage.removeItem("admin_selected_course");
       highlightSelectedRow(tr, tbody);
       loadUserCourses(u.id);
       clearProgressTable();
     };
 
     tbody.appendChild(tr);
+    const persistedUserId = localStorage.getItem("admin_selected_user");
+
+    if (persistedUserId) {
+      const row = tbody.querySelector(`tr[data-id="${persistedUserId}"]`);
+    if (row) row.click();
+}
   });
+    const persistedUserId = localStorage.getItem("admin_selected_user");
+
+    if (persistedUserId) {
+    const match = data.find(u => u.id === persistedUserId);
+    if (match) {
+        // simula el click
+        const row = tbody.querySelector(`tr[data-id='${persistedUserId}']`);
+        if (row) row.click();
+    }
+    }
+
 }
 
 
@@ -200,6 +223,10 @@ async function loadUserCourses(userId) {
     tr.querySelector("[data-action='open']").onclick = (e) => {
       e.stopPropagation();
       selectedCourse = uc;
+
+      // Persistencia
+      localStorage.setItem("admin_selected_course", uc.course_id);
+
       highlightSelectedRow(tr, tbody);
       loadCourseProgress(uc.course_id, userId);
     };
