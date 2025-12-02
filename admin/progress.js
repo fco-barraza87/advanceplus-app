@@ -114,14 +114,16 @@ async function loadUsers(filterText = "") {
     };
 
     tbody.appendChild(tr);
+
+  });
+
     const persistedUserId = localStorage.getItem("admin_selected_user");
 
     if (persistedUserId) {
       const row = tbody.querySelector(`tr[data-id="${persistedUserId}"]`);
     if (row) row.click();
 }
-  });
-
+  
 }
 
 
