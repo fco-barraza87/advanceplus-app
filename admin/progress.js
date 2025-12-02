@@ -4,7 +4,7 @@
 // ============================================================
 
 import { supabase } from "/js/supabase.js";
-import { requireAdmin } from "./admin.js";
+import { requireAdmin } from "/admin/js/admin.js";
 
 requireAdmin();
 
