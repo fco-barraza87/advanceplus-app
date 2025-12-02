@@ -106,33 +106,36 @@ async function loadCurrentAdminProfile() {
 // ===============================================
 //          CARGAR LISTA DE USUARIOS
 // ===============================================
+// ===============================================
+//          CARGAR LISTA DE USUARIOS
+// ===============================================
 async function loadUsers() {
   showLoading();
 
-  // Traemos perfiles + un JOIN a user_stats
   const { data, error } = await supabase
     .from("profiles")
     .select(`
-        id,
-        full_name,
-        email,
-        role,
-        avatar_url,
-        country,
-        pais,
-        language,
-        idioma,
-        timezone,
-        goals_json,
-        preferred_focus_time,
-        notifications,
-        updated_at,
-        user_stats (
-          xp_total,
-          streak_current,
-          streak_best,
-          level
-        )
+      id,
+      full_name,
+      email,
+      role,
+      avatar_url,
+      country,
+      pais,
+      language,
+      idioma,
+      timezone,
+      goals_json,
+      preferred_focus_time,
+      notifications,
+      updated_at,
+      user_stats (
+        xp_total,
+        streak_current,
+        streak_best,
+        level,
+        last_claimed_reward
+      )
     `);
 
   hideLoading();
@@ -142,14 +145,18 @@ async function loadUsers() {
     return;
   }
 
-  // Normalizamos para que sea más fácil usar:
-  allUsers = data.map(u => ({
-    ...u,
-    xp_total: u.user_stats?.xp_total ?? 0,
-    streak_current: u.user_stats?.streak_current ?? 0,
-    streak_best: u.user_stats?.streak_best ?? 0,
-    level: u.user_stats?.level ?? 0
-  }));
+  // 🔹 “Aplanamos” los datos de user_stats para seguir usando u.xp_total, u.streak_current, etc.
+  allUsers = (data || []).map((u) => {
+    const stats = u.user_stats?.[0] || u.user_stats || {}; // por si Supabase devuelve array
+    return {
+      ...u,
+      xp_total: stats.xp_total ?? 0,
+      streak_current: stats.streak_current ?? 0,
+      streak_best: stats.streak_best ?? 0,
+      level: stats.level ?? 1,
+      last_reward_at: stats.last_claimed_reward ?? null,
+    };
+  });
 
   filteredUsers = [...allUsers];
 
@@ -273,17 +280,33 @@ function openUserDetail(user) {
     user.notifications ?? "";
 
   // Estadísticas (usamos los campos de profiles)
-  document.getElementById("stat-xp-total").value = user.xp_total;
-  document.getElementById("stat-streak-current").value = user.streak_current;
-  document.getElementById("stat-streak-best").value = user.streak_best;
-  document.getElementById("stat-level").textContent = user.level;
-
   //document.getElementById("stat-xp-total").value = user.xp_total ?? 0;
   //document.getElementById("stat-streak-current").value =
   //  user.streak_current ?? 0;
   //document.getElementById("stat-streak-best").value = user.streak_best ?? 0;
   //const lastRewardEl = document.getElementById("stat-last-reward");
   //if (lastRewardEl) lastRewardEl.textContent = "–";
+
+    // Estadísticas (usamos los campos mapeados desde user_stats)
+  document.getElementById("stat-xp-total").value = user.xp_total ?? 0;
+  document.getElementById("stat-streak-current").value =
+    user.streak_current ?? 0;
+  document.getElementById("stat-streak-best").value = user.streak_best ?? 0;
+
+  // 🔹 Nivel
+  const levelEl = document.getElementById("stat-level");
+  if (levelEl) levelEl.textContent = user.level ?? "–";
+
+  // 🔹 Última recompensa
+  const lastRewardEl = document.getElementById("stat-last-reward");
+  if (lastRewardEl) {
+    lastRewardEl.textContent = user.last_reward_at
+      ? formatDate(user.last_reward_at)
+      : "–";
+  }
+
+
+
 }
 
 function closePanel() {
@@ -406,7 +429,7 @@ if (saveStatsBtn) {
     statsStatus.textContent = "✔ Guardado";
     setTimeout(() => (statsStatus.textContent = ""), 2000);
 
-    loadUsers();
+    loadUsers(); // vuelve a leer stats ya actualizados
   });
 }
 
