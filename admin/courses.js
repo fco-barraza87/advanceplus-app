@@ -160,3 +160,25 @@ async function saveCourse() {
   clearCourseForm();
   await loadCourses();
 }
+
+
+// ============================================================
+//               BOTÓN CERRAR SESIÓN (ADMIN)
+// ============================================================
+
+document.addEventListener("DOMContentLoaded", () => {
+  const logoutBtn = document.getElementById("admin-logout-btn");
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async () => {
+      try {
+        const supa = getSupabaseClient();
+        await supa.auth.signOut();
+        window.location.href = "/index.html";
+      } catch (err) {
+        console.error("Error al cerrar sesión:", err);
+        alert("Hubo un problema cerrando sesión.");
+      }
+    });
+  }
+});

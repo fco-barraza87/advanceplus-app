@@ -5,14 +5,60 @@
   <meta charset="UTF-8" />
   <title>Admin · Cursos | Advance+</title>
   <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/admin/css/index.css" />
+
+  
 </head>
-<body class="app-bg">
-  <!-- HEADER GENERAL -->
-  <div id="appHeader"></div>
-  <script type="module">
-    import { loadHeader } from "/components/header.js";
-    loadHeader();
-  </script>
+<body>
+  <div class="admin-shell">
+    <!-- Barra superior 
+    <header class="admin-header">
+      <div class="admin-header-left">
+        <div class="brand-mark">
+          <div class="brand-logo">A+</div>
+          <div class="brand-text">
+            <span class="brand-title">Advance+</span>
+            <span class="brand-subtitle">Panel Admin · Usuarios</span>
+          </div>
+        </div>
+      </div>
+      <div class="admin-header-right">
+        <div id="current-role-pill" class="role-pill role-pill--unknown">Cargando...</div>
+      </div>
+    </header> -->
+
+        <!-- Barra superior -->
+    <header class="admin-header">
+      <div class="admin-header-left">
+        <div class="brand-mark">
+          <div class="brand-logo">A+</div>
+          <div class="brand-text">
+            <span class="brand-title">Advance+</span>
+            <span class="brand-subtitle">Panel Admin · Usuarios</span>
+          </div>
+        </div>
+      </div>
+            <!-- Navegación superior -->
+      <nav class="admin-nav">
+        <a href="/admin/index.html" class="nav-link">Dashboard</a>
+        <a href="/admin/users.html" class="nav-link nav-link--active">Usuarios</a>
+        <a href="/admin/courses.html" class="nav-link">Cursos</a>
+        <a href="/admin/lessons.html" class="nav-link">Lecciones</a>
+        <a href="/admin/progress.html" class="nav-link">Progreso</a>
+        <a href="/admin/marketing.html" class="nav-link">Marketing</a>
+        <a href="/admin/settings.html" class="nav-link">Settings</a>
+      </nav>
+
+      <div class="admin-header-right">
+        <div id="current-role-pill" class="role-pill role-pill--unknown">Cargando...</div>
+        <div class="admin-logout-wrapper">
+          <button id="admin-logout-btn" class="btn btn-ghost small">
+            Cerrar sesión
+          </button>
+        </div>
+
+      </div>
+    </header> 
 
   <main class="admin-layout">
     <section class="admin-page-header"></section>
