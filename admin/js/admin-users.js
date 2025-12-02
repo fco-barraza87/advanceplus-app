@@ -109,7 +109,8 @@ async function loadCurrentAdminProfile() {
 async function loadUsers() {
   showLoading();
 
-    const { data, error } = await supabase
+  // Traemos perfiles + un JOIN a user_stats
+  const { data, error } = await supabase
     .from("profiles")
     .select(`
         id,
@@ -122,15 +123,17 @@ async function loadUsers() {
         language,
         idioma,
         timezone,
-        xp_total,
-        streak_current,
-        streak_best,
         goals_json,
         preferred_focus_time,
         notifications,
-        updated_at
+        updated_at,
+        user_stats (
+          xp_total,
+          streak_current,
+          streak_best,
+          level
+        )
     `);
-
 
   hideLoading();
 
@@ -139,12 +142,21 @@ async function loadUsers() {
     return;
   }
 
-  allUsers = data;
+  // Normalizamos para que sea más fácil usar:
+  allUsers = data.map(u => ({
+    ...u,
+    xp_total: u.user_stats?.xp_total ?? 0,
+    streak_current: u.user_stats?.streak_current ?? 0,
+    streak_best: u.user_stats?.streak_best ?? 0,
+    level: u.user_stats?.level ?? 0
+  }));
+
   filteredUsers = [...allUsers];
 
   updateSummaryCards();
   renderTable();
 }
+
 
 // ===============================================
 //              CARDS SUPERIORES
@@ -261,12 +273,17 @@ function openUserDetail(user) {
     user.notifications ?? "";
 
   // Estadísticas (usamos los campos de profiles)
-  document.getElementById("stat-xp-total").value = user.xp_total ?? 0;
-  document.getElementById("stat-streak-current").value =
-    user.streak_current ?? 0;
-  document.getElementById("stat-streak-best").value = user.streak_best ?? 0;
-  const lastRewardEl = document.getElementById("stat-last-reward");
-  if (lastRewardEl) lastRewardEl.textContent = "–";
+  document.getElementById("stat-xp-total").value = user.xp_total;
+  document.getElementById("stat-streak-current").value = user.streak_current;
+  document.getElementById("stat-streak-best").value = user.streak_best;
+  document.getElementById("stat-level").textContent = user.level;
+
+  //document.getElementById("stat-xp-total").value = user.xp_total ?? 0;
+  //document.getElementById("stat-streak-current").value =
+  //  user.streak_current ?? 0;
+  //document.getElementById("stat-streak-best").value = user.streak_best ?? 0;
+  //const lastRewardEl = document.getElementById("stat-last-reward");
+  //if (lastRewardEl) lastRewardEl.textContent = "–";
 }
 
 function closePanel() {
