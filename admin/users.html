@@ -11,25 +11,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
   <!-- CSS específico del módulo -->
-  <script type="module">
-    import "/admin/components/admin-header.js";
-
-    // Esperar a que el header se cargue (100ms es suficiente)
-    setTimeout(() => {
-      import("/admin/js/admin-users.js");
-    }, 100);
-  </script>
-
-
+  <link rel="stylesheet" href="/admin/css/users.css" />
 
   
 </head>
 <body>
   <div class="admin-shell">
-    <div id="admin-header"></div>
-    <script type="module" src="/admin/components/admin-header.js"></script>
-
-    <!-- Barra superior 
+    <!-- Barra superior -->
     <header class="admin-header">
       <div class="admin-header-left">
         <div class="brand-mark">
@@ -43,7 +31,7 @@
       <div class="admin-header-right">
         <div id="current-role-pill" class="role-pill role-pill--unknown">Cargando...</div>
       </div>
-    </header>-->
+    </header>
 
     <!-- Contenido principal -->
     <main class="admin-main">
