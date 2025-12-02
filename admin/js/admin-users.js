@@ -458,20 +458,24 @@ function activateNavCurrentPage() {
   });
 }
 
-// ==========================================================
-// 2. Menú usuario (dropdown) + Logout
-// ==========================================================
-function setupUserMenu() {
-  const toggle = document.getElementById("admin-user-toggle");
-  const dropdown = document.getElementById("admin-user-dropdown");
+
+// ============================================================
+//               BOTÓN CERRAR SESIÓN (ADMIN)
+// ============================================================
+
+document.addEventListener("DOMContentLoaded", () => {
   const logoutBtn = document.getElementById("admin-logout-btn");
 
-  toggle.onclick = () => {
-    dropdown.classList.toggle("admin-user-dropdown--hidden");
-  };
-
-  logoutBtn.onclick = async () => {
-    await window.supabase.auth.signOut();
-    window.location.href = "/login.html";
-  };
-}
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async () => {
+      try {
+        const supa = getSupabaseClient();
+        await supa.auth.signOut();
+        window.location.href = "/login.html";
+      } catch (err) {
+        console.error("Error al cerrar sesión:", err);
+        alert("Hubo un problema cerrando sesión.");
+      }
+    });
+  }
+});

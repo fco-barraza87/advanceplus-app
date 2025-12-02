@@ -2527,3 +2527,14 @@ select option {
   border-radius: 50%;
 }
 
+.admin-logout-wrapper {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.admin-logout-wrapper .btn {
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
