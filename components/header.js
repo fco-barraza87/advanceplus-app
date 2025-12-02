@@ -13,6 +13,17 @@ export async function loadHeader() {
         <div class="header-logo">Advance+</div>
       </div>
 
+                  <!-- Navegación superior -->
+      <nav class="admin-nav">
+        <a href="/admin/index.html" class="nav-link">Dashboard</a>
+        <a href="/admin/users.html" class="nav-link nav-link--active">Usuarios</a>
+        <a href="/admin/courses.html" class="nav-link">Cursos</a>
+        <a href="/admin/lessons.html" class="nav-link">Lecciones</a>
+        <a href="/admin/progress.html" class="nav-link">Progreso</a>
+        <a href="/admin/marketing.html" class="nav-link">Marketing</a>
+        <a href="/admin/settings.html" class="nav-link">Settings</a>
+      </nav>
+
       <div class="header-right">
         <div class="header-user clickable" id="headerProfileBtn">
           <div id="headerAvatar" class="header-avatar">
