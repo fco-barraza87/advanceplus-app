@@ -77,6 +77,14 @@ async function loadUsers() {
 
     tbody.appendChild(tr);
   });
+
+  //5) verlos avatar
+    const searchInput = document.getElementById("searchUserInput");
+    const avatarHtml = u.avatar_url
+    ? `<img src="${u.avatar_url}" alt="${u.full_name || ""}" class="avatar-sm avatar-img" />`
+    : `<div class="avatar-sm">${initials}</div>`;
+
+
 }
 
 document.getElementById("btnRefreshUsers").onclick = () => {
