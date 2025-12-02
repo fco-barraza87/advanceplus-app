@@ -199,34 +199,91 @@ async function loadCourseProgress(courseId, userId) {
 // ============================================================
 
 async function setProgressDay(userId, courseId, day, xpReward) {
+  // 1. Obtener registro existente del día
+  const { data: existing } = await supabase
+    .from("progress")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("course_id", courseId)
+    .eq("day", day)
+    .single();
+
+  // Si NO existe, NO creamos nada
+  if (!existing) {
+    console.warn("No existe progreso para este día, no se creará uno nuevo.");
+    return;
+  }
+
+  // Si ya estaba completado, no sumamos XP otra vez
+  const xpToAdd = existing.completed ? 0 : xpReward;
+
+  // 2. Actualizar el día
   await supabase
     .from("progress")
-    .upsert({
-      user_id: userId,
-      course_id: courseId,
-      day,
+    .update({
       completed: true,
       xp: xpReward,
-      updated_at: new Date().toISOString(),
-    });
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", existing.id);
+
+  // 3. Actualizar XP del curso (suma)
+  await supabase.rpc("increment_user_course_xp", {
+    p_user_id: userId,
+    p_course_id: courseId,
+    p_amount: xpToAdd
+  });
+
+  // 4. Actualizar XP total del usuario (suma)
+  await supabase.rpc("increment_user_xp_total", {
+    p_user_id: userId,
+    p_amount: xpToAdd
+  });
 
   loadCourseProgress(courseId, userId);
 }
 
 async function resetProgressDay(userId, courseId, day) {
+  const { data: existing } = await supabase
+    .from("progress")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("course_id", courseId)
+    .eq("day", day)
+    .single();
+
+  if (!existing) return;
+
+  const xpToSubtract = existing.completed ? existing.xp ?? 0 : 0;
+
+  // 1. Actualizar el día
   await supabase
     .from("progress")
     .update({
       completed: false,
       xp: 0,
-      updated_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     })
-    .eq("user_id", userId)
-    .eq("course_id", courseId)
-    .eq("day", day);
+    .eq("id", existing.id);
+
+  // 2. Restar XP del curso
+  await supabase.rpc("increment_user_course_xp", {
+    p_user_id: userId,
+    p_course_id: courseId,
+    p_amount: -xpToSubtract
+  });
+
+  // 3. Restar XP total
+  await supabase.rpc("increment_user_xp_total", {
+    p_user_id: userId,
+    p_amount: -xpToSubtract
+  });
 
   loadCourseProgress(courseId, userId);
 }
+
+
+
 
 // ============================================================
 //  Helpers
