@@ -140,12 +140,18 @@ async function loadUserCourses(userId) {
     tr.classList.add("admin-row-click");
 
     tr.innerHTML = `
-      <td>${uc.courses.title}</td>
-      <td>${realPct}%</td>
-      <td>${uc.xp_gained ?? 0}</td>
-      <td>${uc.status}</td>
-      <td><button class="btn-small" data-action="open">Abrir</button></td>
+    <td>${uc.courses.title}</td>
+    <td>${realPct}%</td>
+    <td>${uc.xp_gained ?? 0}</td>
+    <td>${uc.status}</td>
+    <td>
+        <button class="btn-small" data-action="open">Abrir</button>
+        <button class="btn-small btn-danger" data-action="delete">Eliminar</button>
+        <button class="btn-small" data-action="reset">Reset</button>
+        <button class="btn-small" data-action="type">Modo</button>
+    </td>
     `;
+
 
     tr.querySelector("[data-action='open']").onclick = (e) => {
       e.stopPropagation();
@@ -153,6 +159,65 @@ async function loadUserCourses(userId) {
       highlightSelectedRow(tr, tbody);
       loadCourseProgress(uc.course_id, userId);
     };
+
+    // Eliminar curso
+    tr.querySelector("[data-action='delete']").onclick = async (e) => {
+    e.stopPropagation();
+
+    await supabase
+        .from("user_courses")
+        .delete()
+        .eq("id", uc.id);
+
+    await supabase
+        .from("progress")
+        .delete()
+        .eq("user_id", selectedUser.id)
+        .eq("course_id", uc.course_id);
+
+    loadUserCourses(selectedUser.id);
+    clearProgressTable();
+    };
+
+    // Resetear curso completo
+    tr.querySelector("[data-action='reset']").onclick = async (e) => {
+    e.stopPropagation();
+
+    await supabase
+        .from("progress")
+        .update({ completed: false, xp: 0 })
+        .eq("user_id", selectedUser.id)
+        .eq("course_id", uc.course_id);
+
+    await supabase
+        .from("user_courses")
+        .update({ xp_gained: 0 })
+        .eq("id", uc.id);
+
+    loadUserCourses(selectedUser.id);
+    clearProgressTable();
+    };
+
+    // Cambiar modo (progression_type)
+    tr.querySelector("[data-action='type']").onclick = async (e) => {
+    e.stopPropagation();
+
+    const nextMap = {
+        "free": "daily",
+        "daily": "strict",
+        "strict": "free"
+    };
+
+    const next = nextMap[uc.courses.progression_type] ?? "free";
+
+    await supabase
+        .from("courses")
+        .update({ progression_type: next })
+        .eq("id", uc.course_id);
+
+    loadUserCourses(selectedUser.id);
+    };
+        
 
     tbody.appendChild(tr);
   }
@@ -331,3 +396,62 @@ function highlightSelectedRow(tr, tbody) {
 
 // Ejecutar
 loadUsers();
+
+// Modal DOM
+const modalAdd = document.getElementById("modalAddCourse");
+const selectCourseToAdd = document.getElementById("selectCourseToAdd");
+const btnAddCourse = document.getElementById("btnAddCourse");
+
+// Abrir modal
+btnAddCourse.onclick = async () => {
+  if (!selectedUser) return alert("Seleccione un usuario primero.");
+
+  modalAdd.classList.remove("hidden");
+
+  // cargar cursos activos
+  const { data: courses } = await supabase
+    .from("courses")
+    .select("id, title")
+    .eq("active", true)
+    .order("title");
+
+  selectCourseToAdd.innerHTML = "";
+  courses.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.id;
+    opt.textContent = c.title;
+    selectCourseToAdd.appendChild(opt);
+  });
+};
+
+// Cerrar modal
+document.getElementById("btnCancelAddCourse").onclick = () => {
+  modalAdd.classList.add("hidden");
+};
+
+
+document.getElementById("btnConfirmAddCourse").onclick = async () => {
+
+  const courseId = selectCourseToAdd.value;
+  if (!courseId) return;
+
+  // 1. Insertar en user_courses
+  const { error } = await supabase
+    .from("user_courses")
+    .insert({
+      user_id: selectedUser.id,
+      course_id: courseId,
+      status: "active",
+      xp_gained: 0,
+      progress_pct: 0
+    });
+
+  if (error) {
+    alert("Este curso ya está agregado o hubo un error.");
+    return;
+  }
+
+  modalAdd.classList.add("hidden");
+
+  loadUserCourses(selectedUser.id);
+};
