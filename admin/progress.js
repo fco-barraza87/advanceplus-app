@@ -88,18 +88,17 @@ async function loadUserCourses(userId) {
   const tbody = document.getElementById("coursesTableBody");
   tbody.innerHTML = `<tr><td colspan="5">Cargando...</td></tr>`;
 
-  const { data, error } = await supabase
+  // 1) Obtener cursos asignados
+  const { data: userCourses, error } = await supabase
     .from("user_courses")
     .select(`
       id,
       course_id,
-      status,
       xp_gained,
-      progress_pct,
+      status,
       courses (
         id,
-        title,
-        progression_type
+        title
       )
     `)
     .eq("user_id", userId);
@@ -112,18 +111,40 @@ async function loadUserCourses(userId) {
 
   tbody.innerHTML = "";
 
-  data.forEach((uc) => {
+  for (const uc of userCourses) {
+
+    // 2) Obtener cantidad total de días del curso
+    const { data: lessons } = await supabase
+      .from("lessons")
+      .select("day")
+      .eq("course_id", uc.course_id);
+
+    const totalDays = lessons.length;
+
+    // 3) Obtener días completados por el usuario
+    const { data: progressRows } = await supabase
+      .from("progress")
+      .select("completed")
+      .eq("user_id", userId)
+      .eq("course_id", uc.course_id);
+
+    const completedDays = progressRows.filter(p => p.completed).length;
+
+    // 4) Calcular progreso real %
+    const realPct = totalDays > 0
+      ? Math.round((completedDays / totalDays) * 100)
+      : 0;
+
+    // Render fila
     const tr = document.createElement("tr");
     tr.classList.add("admin-row-click");
 
     tr.innerHTML = `
       <td>${uc.courses.title}</td>
-      <td>${Math.round(uc.progress_pct ?? 0)}%</td>
+      <td>${realPct}%</td>
       <td>${uc.xp_gained ?? 0}</td>
       <td>${uc.status}</td>
-      <td>
-        <button class="btn-small" data-action="open">Abrir</button>
-      </td>
+      <td><button class="btn-small" data-action="open">Abrir</button></td>
     `;
 
     tr.querySelector("[data-action='open']").onclick = (e) => {
@@ -134,8 +155,9 @@ async function loadUserCourses(userId) {
     };
 
     tbody.appendChild(tr);
-  });
+  }
 }
+
 
 // ============================================================
 //  Cargar progreso por día (columna 3)
