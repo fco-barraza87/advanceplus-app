@@ -20,7 +20,7 @@ let filteredUsers = [];
 let currentSelectedUser = null;
 
 // Elementos UI
-const rolePill = document.getElementById("current-role-pill");
+const rolePill = document.getElementById("admin-role-pill");
 const tableBody = document.getElementById("users-table-body");
 const emptyState = document.getElementById("users-empty-state");
 const loadingOverlay = document.getElementById("users-loading");

@@ -11,8 +11,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
   <!-- CSS específico del módulo -->
-  <link rel="stylesheet" href="/admin/css/users.css" />
-  <link rel="stylesheet" href="/admin/css/index.css" />
+  <script type="module">
+    import "/admin/components/admin-header.js";
+
+    // Esperar a que el header se cargue (100ms es suficiente)
+    setTimeout(() => {
+      import("/admin/js/admin-users.js");
+    }, 100);
+  </script>
+
 
 
   
