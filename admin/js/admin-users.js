@@ -458,20 +458,24 @@ function activateNavCurrentPage() {
   });
 }
 
-// ==========================================================
-// 2. Menú usuario (dropdown) + Logout
-// ==========================================================
-function setupUserMenu() {
-  const toggle = document.getElementById("admin-user-toggle");
-  const dropdown = document.getElementById("admin-user-dropdown");
+// ===============================
+// CERRAR SESIÓN (Admin)
+// ===============================
+document.addEventListener("DOMContentLoaded", () => {
   const logoutBtn = document.getElementById("admin-logout-btn");
+  const dropdown = document.getElementById("admin-user-dropdown");
+  const toggleBtn = document.getElementById("admin-user-toggle");
 
-  toggle.onclick = () => {
-    dropdown.classList.toggle("admin-user-dropdown--hidden");
-  };
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      dropdown.classList.toggle("admin-user-dropdown--hidden");
+    });
+  }
 
-  logoutBtn.onclick = async () => {
-    await window.supabase.auth.signOut();
-    window.location.href = "/login.html";
-  };
-}
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async () => {
+      await supabase.auth.signOut();
+      window.location.href = "/login.html";
+    });
+  }
+});
