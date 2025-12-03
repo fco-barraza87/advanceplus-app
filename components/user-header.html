@@ -1,15 +1,33 @@
-<header class="ap-header">
-  <div class="ap-header-left">
-    <h1 class="ap-logo">A+</h1>
-
-    <div class="ap-header-info">
-      <span id="headerUserName" class="ap-header-name">Usuario</span>
-      <span id="headerUserRole" class="ap-header-role">Cargando…</span>
+<header class="admin-header">
+  <div class="admin-header-left">
+    <div class="brand-mark">
+      <div class="brand-logo">A+</div>
+      <div class="brand-text">
+        <span class="brand-title">Advance+</span>
+        <span class="brand-subtitle">Panel Admin</span>
+      </div>
     </div>
   </div>
 
-  <img id="headerAvatar" class="ap-header-avatar" src="/img/default-avatar.png" alt="avatar">
+  <!-- Navegación superior -->
+  <nav class="admin-nav">
+    <a href="/admin/index.html"   class="nav-link" data-page="index">Dashboard</a>
+    <a href="/admin/users.html"   class="nav-link" data-page="users">Usuarios</a>
+    <a href="/admin/courses.html" class="nav-link" data-page="courses">Cursos</a>
+    <a href="/admin/lessons.html" class="nav-link" data-page="lessons">Lecciones</a>
+    <a href="/admin/progress.html" class="nav-link" data-page="progress">Progreso</a>
+    <a href="/admin/marketing.html" class="nav-link" data-page="marketing">Marketing</a>
+    <a href="/admin/settings.html" class="nav-link" data-page="settings">Settings</a>
+  </nav>
 
-  <button id="btnLogout" class="ap-logout-btn">Cerrar sesión</button>
+  <div class="admin-header-right">
+    <div class="admin-user-menu">
+      <div id="admin-role-pill" class="role-pill role-pill--unknown">Cargando...</div>
+      <button id="admin-user-toggle" class="admin-user-btn">▾</button>
+
+      <div id="admin-user-dropdown" class="admin-user-dropdown admin-user-dropdown--hidden">
+        <button id="admin-logout-btn" class="admin-dropdown-item">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
 </header>
->
