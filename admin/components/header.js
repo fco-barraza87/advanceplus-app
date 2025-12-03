@@ -106,7 +106,7 @@ function attachLogoutEvent() {
 
   btn.addEventListener("click", async () => {
     await supabase.auth.signOut();
-    window.location.href = "/login.html";
+    window.location.href = "/index.html";
   });
 }
 
