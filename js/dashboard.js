@@ -242,7 +242,19 @@ function renderActiveCourses(courses, user) {
 async function loadAvailableCourses(userId) {
   const { data: all } = await supabase
     .from("courses")
-    .select("*")
+    .select(`
+      id,
+      title,
+      short_promise,
+      hero_image_url,
+      thumbnail_url,
+      badge_text,
+      price_chf,
+      sale_price_chf,
+      reviews_average,
+      reviews_count,
+      active
+    `)
     .eq("active", true);
 
   const { data: mine } = await supabase
@@ -254,6 +266,52 @@ async function loadAvailableCourses(userId) {
 
   return all.filter((c) => !owned.has(c.id));
 }
+
+
+/* ============================================================
+   TARJETA PREMIUM — MASTERCLASS + MINDVALLEY
+============================================================ */
+
+function renderPremiumCourseCard(course) {
+  const card = document.createElement("div");
+  card.className = "course-card-premium";
+
+  const hero = course.hero_image_url || course.thumbnail_url || "https://via.placeholder.com/600x300?text=A+";
+
+  card.innerHTML = `
+    <div class="card-bg" style="background-image: url('${hero}')"></div>
+
+    <div class="card-content">
+
+      ${course.badge_text ? `<div class="card-badge">${course.badge_text}</div>` : ""}
+
+      <h3 class="card-title">${course.title}</h3>
+
+      <p class="card-promise">${course.short_promise || ""}</p>
+
+      <div class="card-rating">
+        ⭐ ${course.reviews_average || "5.0"} · ${course.reviews_count || 0} reseñas
+      </div>
+
+      <div class="card-price">
+        ${
+          course.sale_price_chf
+            ? `<del>${course.price_chf} CHF</del> ${course.sale_price_chf} CHF`
+            : `${course.price_chf || 0} CHF`
+        }
+      </div>
+
+      <div class="card-btn">Ver reto →</div>
+    </div>
+  `;
+
+  card.onclick = () => {
+    window.location.href = `/curso-info.html?id=${course.id}`;
+  };
+
+  return card;
+}
+
 
 function renderAvailableCourses(courses) {
   const grid = qs("#availableCoursesGrid");
@@ -269,26 +327,7 @@ function renderAvailableCourses(courses) {
   empty.style.display = "none";
 
   courses.forEach((course) => {
-    const cover = course.cover_url || "https://via.placeholder.com/600x300.png?text=A+";
-
-    const card = document.createElement("div");
-    card.className = "course-card clickable";
-    card.innerHTML = `
-      <div class="course-cover-wrapper">
-        <img src="${cover}" class="course-cover" />
-        <span class="course-badge">${course.category}</span>
-      </div>
-
-      <div class="course-body">
-        <div class="course-title">${course.title}</div>
-        <div class="course-meta">${course.level}</div>
-      </div>
-    `;
-
-    card.onclick = () => {
-      window.location.href = `/curso-info/index.html?c=${course.id}`;
-    };
-
+    const card = renderPremiumCourseCard(course);
     grid.appendChild(card);
   });
 }
