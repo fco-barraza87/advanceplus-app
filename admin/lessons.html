@@ -3,154 +3,150 @@
 <head>
   <meta charset="UTF-8" />
   <title>Admin · Lecciones | Advance+</title>
-  <link rel="stylesheet" href="/css/style.css" />
+
+  <!-- Tipografías -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- CSS del panel admin -->
+  <link rel="stylesheet" href="/admin/css/index.css" />
 </head>
 
-<body class="app-bg">
+<body>
 
-  <!-- HEADER -->
-  <div id="appHeader"></div>
-  <script type="module">
-    import { loadHeader } from "/components/header.js";
-    loadHeader();
-  </script>
+  <div class="admin-shell">
 
-  <main class="admin-layout">
+    <!-- HEADER ADMIN UNIFICADO -->
+    <div id="admin-header"></div>
+    <script type="module" src="/admin/components/header.js"></script>
 
-    <!-- Título y subtítulo -->
-    <section class="admin-page-header"></section>
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="admin-main">
 
-    <section class="admin-content">
+      <!-- Hero title de página -->
+      <section class="hero-section">
+        <div>
+          <h1 class="hero-title">Panel Admin · Lecciones</h1>
+          <p class="hero-subtitle">Ver, crear y editar lecciones.</p>
+        </div>
+      </section>
 
-      <!-- PANEL IZQUIERDO: Lista de cursos + lista de lecciones -->
-      <div class="admin-panel">
+      <!-- CONTENIDO ADMIN -->
+      <section class="admin-content">
 
-        <div class="admin-panel-header">
-          <h2>Lecciones</h2>
+        <!-- PANEL IZQUIERDO -->
+        <div class="admin-panel">
 
-          <label style="color:white;">
-            Curso:
-            <select id="lessonsCourseSelect"></select>
-          </label>
+          <div class="admin-panel-header">
+            <h2>Lecciones</h2>
 
-          <button id="btnNewLesson" class="btn-primary">+ Nueva lección</button>
+            <label style="color:white;">
+              Curso:
+              <select id="lessonsCourseSelect"></select>
+            </label>
+
+            <button id="btnNewLesson" class="btn-primary">+ Nueva lección</button>
+          </div>
+
+          <div class="admin-panel-body">
+            <table class="admin-table" id="lessonsTable">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Día</th>
+                  <th>Título</th>
+                  <th>XP</th>
+                  <th>Duración</th>
+                </tr>
+              </thead>
+              <tbody id="lessonsTableBody"></tbody>
+            </table>
+          </div>
         </div>
 
-        <div class="admin-panel-body">
-          <table class="admin-table" id="lessonsTable">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Día</th>
-                <th>Título</th>
-                <th>XP</th>
-                <th>Duración</th>
-              </tr>
-            </thead>
-            <tbody id="lessonsTableBody">
-              <!-- dinámico -->
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <!-- PANEL DERECHO -->
+        <div class="admin-panel">
 
-      <!-- PANEL DERECHO: Formulario -->
-      <div class="admin-panel">
+          <div class="admin-panel-header">
+            <h2 id="lessonFormTitle">Editar lección</h2>
+          </div>
 
-        <div class="admin-panel-header">
-          <h2 id="lessonFormTitle">Editar lección</h2>
-        </div>
-
-        <div class="admin-panel-body">
-            <p id="lessonMeta"
-                style="color:#aab; font-size:0.85rem; margin:0 0 15px 0;">
-            </p>
+          <div class="admin-panel-body">
+            <p id="lessonMeta" class="lesson-meta"></p>
 
             <form id="lessonForm" class="admin-form">
 
-            <input type="hidden" id="lessonId" />
-            <input type="hidden" id="lessonCourseId" />
+              <input type="hidden" id="lessonId" />
+              <input type="hidden" id="lessonCourseId" />
 
-            <label>
-              Día
-              <input type="number" id="lessonDay" min="1" required />
-            </label>
+              <label>Día
+                <input type="number" id="lessonDay" min="1" required />
+              </label>
 
-            <label>
-              Título
-              <input type="text" id="lessonTitle" required />
-            </label>
+              <label>Título
+                <input type="text" id="lessonTitle" required />
+              </label>
 
-            <label>
-              Subtítulo
-              <input type="text" id="lessonSubtitle" />
-            </label>
+              <label>Subtítulo
+                <input type="text" id="lessonSubtitle" />
+              </label>
 
-            <label>
-              Duración (min)
-              <input type="number" id="lessonDuration" min="0" />
-            </label>
+              <label>Duración (min)
+                <input type="number" id="lessonDuration" min="0" />
+              </label>
 
-            <label>
-              XP recompensa
-              <input type="number" id="lessonXpReward" min="0" />
-            </label>
+              <label>XP recompensa
+                <input type="number" id="lessonXpReward" min="0" />
+              </label>
 
-            <label>
-              Tags (separados por coma)
-              <input type="text" id="lessonTags" placeholder="enfoque,claridad" />
-            </label>
+              <label>Tags
+                <input type="text" id="lessonTags" placeholder="enfoque,claridad" />
+              </label>
 
-            <!-- Campos grandes ocupan 2 columnas -->
-            <label>
-              Content HTML
-              <textarea id="lessonContentHtml" rows="4"></textarea>
-            </label>
+              <label>Content HTML
+                <textarea id="lessonContentHtml" rows="4"></textarea>
+              </label>
 
-            <label>
-              Texto (text_content)
-              <textarea id="lessonTextContent" rows="3"></textarea>
-            </label>
+              <label>Texto (text_content)
+                <textarea id="lessonTextContent" rows="3"></textarea>
+              </label>
 
-            <label>
-              Ejercicio (exercise_content)
-              <textarea id="lessonExerciseContent" rows="3"></textarea>
-            </label>
+              <label>Ejercicio (exercise_content)
+                <textarea id="lessonExerciseContent" rows="3"></textarea>
+              </label>
 
-            <label>
-              Imagen (image_url)
-              <input type="text" id="lessonImageUrl" />
-            </label>
+              <label>Imagen
+                <input type="text" id="lessonImageUrl" />
+              </label>
 
-            <label>
-              Video (video_url)
-              <input type="text" id="lessonVideoUrl" />
-            </label>
+              <label>Video
+                <input type="text" id="lessonVideoUrl" />
+              </label>
 
-            <label>
-              Audio (audio_url)
-              <input type="text" id="lessonAudioUrl" />
-            </label>
+              <label>Audio
+                <input type="text" id="lessonAudioUrl" />
+              </label>
 
-            <label>
-              Meditación (meditation_url)
-              <input type="text" id="lessonMeditationUrl" />
-            </label>
+              <label>Meditación
+                <input type="text" id="lessonMeditationUrl" />
+              </label>
 
-            <div class="admin-form-actions">
-              <button type="submit" class="btn-primary">Guardar</button>
-              <button type="button" id="btnResetLessonForm" class="btn-secondary">Limpiar</button>
-            </div>
+              <div class="admin-form-actions">
+                <button type="submit" class="btn-primary">Guardar</button>
+                <button type="button" id="btnResetLessonForm" class="btn-secondary">Limpiar</button>
+              </div>
 
-          </form>
+            </form>
+          </div>
         </div>
 
-      </div>
+      </section>
 
-    </section>
-
-  </main>
+    </main>
+  </div>
 
   <script type="module" src="/admin/lessons.js"></script>
+
 </body>
 </html>
