@@ -7,138 +7,138 @@
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/admin/css/index.css" />
 </head>
-<body class="app-bg">
-  <div class="admin-shell"></div>
+<body>
+  <div class="admin-shell">
 
-  <!-- 🔥 NUEVO HEADER ADMIN MODULAR -->
-  <div id="admin-header"></div>
-  <script type="module" src="/admin/components/header.js"></script>
+    <!-- HEADER ADMIN PREMIUM -->
+    <div id="admin-header"></div>
+    <script type="module" src="/admin/components/header.js"></script>
 
-  <main class="admin-layout">
-    <section class="admin-page-header"></section>
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="admin-main">
 
-    <section class="admin-content">
-      <div class="admin-panel">
-        <div class="admin-panel-header">
-          <h2>Cursos</h2>
-          <button id="btnNewCourse" class="btn-primary">+ Nuevo curso</button>
+      <!-- Hero / título de página -->
+      <section class="hero-section">
+        <div>
+          <h1 class="hero-title">Panel Admin · Cursos</h1>
+          <p class="hero-subtitle">Ver, crear y editar cursos.</p>
+        </div>
+      </section>
+
+      <!-- PANEL PRINCIPAL -->
+      <section class="admin-content">
+
+        <!-- Lista de cursos -->
+        <div class="admin-panel">
+          <div class="admin-panel-header">
+            <h2>Cursos</h2>
+            <button id="btnNewCourse" class="btn-primary">+ Nuevo curso</button>
+          </div>
+
+          <div class="admin-panel-body">
+            <table class="admin-table" id="coursesTable">
+              <thead>
+                <tr>
+                  <th>Título</th>
+                  <th>Slug</th>
+                  <th>Categoría</th>
+                  <th>Días</th>
+                  <th>Activo</th>
+                </tr>
+              </thead>
+              <tbody id="coursesTableBody">
+                <!-- filas dinámicas -->
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <div class="admin-panel-body">
-          <table class="admin-table" id="coursesTable">
-            <thead>
-              <tr>
-                <th>Título</th>
-                <th>Slug</th>
-                <th>Categoría</th>
-                <th>Días</th>
-                <th>Activo</th>
-              </tr>
-            </thead>
-            <tbody id="coursesTableBody">
-              <!-- filas dinámicas -->
-            </tbody>
-          </table>
+        <!-- Editor de curso -->
+        <div class="admin-panel">
+          <div class="admin-panel-header">
+            <h2 id="courseFormTitle">Editar curso</h2>
+          </div>
+
+          <div class="admin-panel-body">
+            <form id="courseForm" class="admin-form">
+              <input type="hidden" id="courseId" />
+
+              <label>Título
+                <input type="text" id="courseTitle" required />
+              </label>
+
+              <label>Slug
+                <input type="text" id="courseSlug" required />
+              </label>
+
+              <label>Subtítulo
+                <input type="text" id="courseSubtitle" />
+              </label>
+
+              <label>Descripción
+                <textarea id="courseDescription" rows="3" required></textarea>
+              </label>
+
+              <label>Categoría
+                <input type="text" id="courseCategory" required />
+              </label>
+
+              <label>Duración (días)
+                <input type="number" id="courseDurationDays" min="1" required />
+              </label>
+
+              <label>Nivel
+                <input type="text" id="courseLevel" required />
+              </label>
+
+              <label>URL portada (cover_url)
+                <input type="text" id="courseCoverUrl" required />
+              </label>
+
+              <label>Precio
+                <input type="number" step="0.01" id="coursePrice" />
+              </label>
+
+              <label>Moneda
+                <input type="text" id="courseCurrency" value="CHF" />
+              </label>
+
+              <label>XP recompensa
+                <input type="number" id="courseXpReward" />
+              </label>
+
+              <label>Progresión
+                <input type="text" id="courseProgressionType" value="daily" />
+              </label>
+
+              <label>Tags
+                <input type="text" id="courseTags" placeholder="enfoque,mentalidad" />
+              </label>
+
+              <label class="checkbox-inline">
+                <input type="checkbox" id="courseActive" checked />
+                Activo
+              </label>
+
+              <label>Visibilidad
+                <select id="courseVisibility">
+                  <option value="public">public</option>
+                  <option value="private">private</option>
+                  <option value="hidden">hidden</option>
+                </select>
+              </label>
+
+              <div class="admin-form-actions">
+                <button type="submit" class="btn-primary">Guardar</button>
+                <button type="button" id="btnResetCourseForm" class="btn-secondary">Limpiar</button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
 
-      <div class="admin-panel">
-        <div class="admin-panel-header">
-          <h2 id="courseFormTitle">Editar curso</h2>
-        </div>
-        <div class="admin-panel-body">
-          <form id="courseForm" class="admin-form">
-            <input type="hidden" id="courseId" />
-
-            <label>
-              Título
-              <input type="text" id="courseTitle" required />
-            </label>
-
-            <label>
-              Slug
-              <input type="text" id="courseSlug" required />
-            </label>
-
-            <label>
-              Subtítulo
-              <input type="text" id="courseSubtitle" />
-            </label>
-
-            <label>
-              Descripción
-              <textarea id="courseDescription" rows="3" required></textarea>
-            </label>
-
-            <label>
-              Categoría
-              <input type="text" id="courseCategory" required />
-            </label>
-
-            <label>
-              Duración (días)
-              <input type="number" id="courseDurationDays" min="1" required />
-            </label>
-
-            <label>
-              Nivel
-              <input type="text" id="courseLevel" required />
-            </label>
-
-            <label>
-              URL portada (cover_url)
-              <input type="text" id="courseCoverUrl" required />
-            </label>
-
-            <label>
-              Precio
-              <input type="number" step="0.01" id="coursePrice" />
-            </label>
-
-            <label>
-              Moneda
-              <input type="text" id="courseCurrency" value="CHF" />
-            </label>
-
-            <label>
-              XP recompensa (xp_reward)
-              <input type="number" id="courseXpReward" />
-            </label>
-
-            <label>
-              Tipo de progresión (progression_type)
-              <input type="text" id="courseProgressionType" value="daily" />
-            </label>
-
-            <label>
-              Tags (separados por coma)
-              <input type="text" id="courseTags" placeholder="enfoque,mentalidad" />
-            </label>
-
-            <label class="checkbox-inline">
-              <input type="checkbox" id="courseActive" checked />
-              Activo
-            </label>
-
-            <label>
-              Visibilidad
-              <select id="courseVisibility">
-                <option value="public">public</option>
-                <option value="private">private</option>
-                <option value="hidden">hidden</option>
-              </select>
-            </label>
-
-            <div class="admin-form-actions">
-              <button type="submit" class="btn-primary">Guardar</button>
-              <button type="button" id="btnResetCourseForm" class="btn-secondary">Limpiar</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </section>
-  </main>
+      </section>
+    </main>
+  </div>
 
   <script type="module" src="/admin/courses.js"></script>
 </body>
-</html>
