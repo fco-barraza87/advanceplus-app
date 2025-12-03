@@ -10,16 +10,15 @@
   <link rel="stylesheet" href="/css/progress.css" /> <!-- Opcional si quieres añadir mejoras -->
 
 </head>
-<body class="app-bg">
+<body>
 
-  <!-- HEADER -->
-  <div id="appHeader"></div>
-  <script type="module">
-    import { loadHeader } from "/components/header.js";
-    loadHeader();
-  </script>
+  <div class="admin-shell">
 
-  <main class="admin-container">
+    <!-- HEADER ADMIN UNIFICADO -->
+    <div id="admin-header"></div>
+    <script type="module" src="/admin/components/header.js"></script>
+
+  <main class="admin-main">
 
     <h1 class="admin-title">Panel Admin · Progreso</h1>
     <p class="admin-subtitle">Control avanzado de usuarios, cursos y progreso por día.</p>
