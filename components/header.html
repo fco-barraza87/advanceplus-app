@@ -165,15 +165,13 @@ document.addEventListener("click", (e) => {
   const avatar = document.getElementById("headerAvatar");
   const menu = document.getElementById("userMenu");
 
-  if (!avatar || !menu) return;
-
   if (avatar.contains(e.target)) {
     menu.classList.toggle("hidden");
-  } 
-  else if (!menu.contains(e.target)) {
+  } else if (!menu.contains(e.target)) {
     menu.classList.add("hidden");
   }
 });
+
 
 /* ============================================================
    LOGOUT MINI MENÚ (ÚNICO SISTEMA DE LOGOUT)
