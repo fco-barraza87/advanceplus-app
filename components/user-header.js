@@ -21,7 +21,21 @@ export async function loadUserHeader() {
 
   // 3. Activar botón logout
   attachUserLogoutEvent();
+
+  attachLogoutEvent();
+
 }
+
+function attachLogoutEvent() {
+  const btn = document.querySelector("#btnLogout");
+  if (!btn) return;
+
+  btn.onclick = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/index.html";
+  };
+}
+
 
 // ===============================================================
 //  RENDER: NOMBRE + AVATAR + ROL EN HEADER

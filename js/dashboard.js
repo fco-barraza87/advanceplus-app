@@ -433,18 +433,13 @@ async function loadMission(user) {
 /* ==================================================
    8. LOGOUT
 ================================================== */
-function setupLogout() {
-  qs("#btnLogout").onclick = async () => {
-    await supabase.auth.signOut();
-    window.location.href = "/index.html";
-  };
-}
+
 
 /* ==================================================
    9. INIT
 ================================================== */
 async function initDashboard() {
-  setupLogout();
+
 
   const data = await loadUserData();
   if (!data) return;
