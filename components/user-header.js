@@ -1,116 +1,75 @@
 // ===============================================================
-//  HEADER ADMIN — CARGA DINÁMICA
+//  HEADER USUARIO — CARGA DINÁMICA
 // ===============================================================
 
 import { supabase } from "/js/supabase.js";
 
-async function loadAdminHeader() {
-  const container = document.getElementById("admin-header");
+// ===============================================================
+//  FUNCIÓN PRINCIPAL (SE EXPORTA)
+// ===============================================================
+export async function loadUserHeader() {
+  const container = document.getElementById("appHeader");
   if (!container) return;
 
-  // 1. Cargar archivo header.html
-  const res = await fetch("/admin/components/header.html");
+  // 1. Cargar HTML del header del usuario
+  const res = await fetch("/components/header.html");
   const html = await res.text();
   container.innerHTML = html;
 
-  // 2. Activar navegación según URL
-  highlightActiveLink();
+  // 2. Cargar datos del usuario en el header
+  await renderUserHeaderData();
 
-  // 3. Cargar rol del admin
-  await loadAdminRole();
-
-  // 4. Activar menú usuario
-  attachUserMenuEvents();
-
-  // 5. Activar logout
-  attachLogoutEvent();
+  // 3. Activar botón logout
+  attachUserLogoutEvent();
 }
 
 // ===============================================================
-//  HIGHLIGHT ACTIVE PAGE
+//  RENDER: NOMBRE + AVATAR + ROL EN HEADER
 // ===============================================================
-function highlightActiveLink() {
-  const path = window.location.pathname.toLowerCase();
-
-  document.querySelectorAll(".admin-nav .nav-link").forEach(link => {
-    const slug = link.dataset.page.toLowerCase();
-    if (path.includes(slug)) {
-      link.classList.add("nav-link--active");
-    }
-  });
-}
-
-// ===============================================================
-//  LOAD CURRENT ADMIN ROLE
-// ===============================================================
-async function loadAdminRole() {
-  const { data: { session } } = await supabase.auth.getSession();
-  const pill = document.getElementById("admin-role-pill");
-
-  if (!session || !pill) {
-    pill.textContent = "Sin sesión";
-    return;
-  }
+async function renderUserHeaderData() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
-    .eq("id", session.user.id)
+    .select("full_name, role, avatar_url")
+    .eq("id", user.id)
     .single();
 
-  if (!profile) {
-    pill.textContent = "Error";
-    return;
+  if (!profile) return;
+
+  // Nombre
+  const nameEl = document.getElementById("headerUserName");
+  if (nameEl) nameEl.textContent = profile.full_name || "Usuario";
+
+  // Rol
+  const roleEl = document.getElementById("headerUserRole");
+  if (roleEl) {
+    roleEl.textContent =
+      profile.role === "admin"
+        ? "Administrador"
+        : profile.role === "coach"
+        ? "Coach"
+        : "Miembro Advance+";
   }
 
-  pill.classList.remove("role-pill--admin", "role-pill--coach");
-
-  if (profile.role === "admin") {
-    pill.textContent = "Admin";
-    pill.classList.add("role-pill--admin");
-  } else if (profile.role === "coach") {
-    pill.textContent = "Coach";
-    pill.classList.add("role-pill--coach");
-  } else {
-    pill.textContent = profile.role;
+  // Avatar
+  const avatarEl = document.getElementById("headerAvatar");
+  if (avatarEl && profile.avatar_url) {
+    avatarEl.style.backgroundImage = `url('${profile.avatar_url}')`;
+    avatarEl.style.backgroundSize = "cover";
   }
-}
-
-// ===============================================================
-//  USER MENU DROPDOWN
-// ===============================================================
-function attachUserMenuEvents() {
-  const toggle = document.getElementById("admin-user-toggle");
-  const dropdown = document.getElementById("admin-user-dropdown");
-
-  if (!toggle || !dropdown) return;
-
-  toggle.addEventListener("click", () => {
-    dropdown.classList.toggle("admin-user-dropdown--hidden");
-  });
-
-  // Cerrar al clicar fuera
-  document.addEventListener("click", (e) => {
-    if (!dropdown.contains(e.target) && !toggle.contains(e.target)) {
-      dropdown.classList.add("admin-user-dropdown--hidden");
-    }
-  });
 }
 
 // ===============================================================
 //  LOGOUT
 // ===============================================================
-function attachLogoutEvent() {
-  const btn = document.getElementById("admin-logout-btn");
+function attachUserLogoutEvent() {
+  const btn = document.getElementById("btnLogout");
   if (!btn) return;
 
   btn.addEventListener("click", async () => {
     await supabase.auth.signOut();
-    window.location.href = "/login.html";
+    window.location.href = "/index.html";
   });
 }
-
-// ===============================================================
-//  INICIAR
-// ===============================================================
-loadAdminHeader();
