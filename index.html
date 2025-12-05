@@ -24,11 +24,7 @@
       --transition-med: 0.22s ease-out;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       min-height: 100vh;
@@ -41,12 +37,7 @@
       padding: 16px;
     }
 
-    /* SHELL MOBILE FIRST */
-    .auth-shell {
-      width: 100%;
-      max-width: 420px;
-      margin: 0 auto;
-    }
+    .auth-shell { width: 100%; max-width: 420px; margin: 0 auto; }
 
     .auth-card {
       background: var(--color-panel);
@@ -56,67 +47,40 @@
       padding: 22px 18px 20px;
       backdrop-filter: blur(18px);
     }
-
     @media (min-width: 768px) {
-      .auth-card {
-        padding: 26px 24px 24px;
-      }
+      .auth-card { padding: 26px 24px 24px; }
     }
 
-    /* HEADER */
     .auth-logo {
-      width: 72px;
-      height: 72px;
-      border-radius: 999px;
-      margin: 0 auto 10px;
+      width: 72px; height: 72px; border-radius: 999px; margin: 0 auto 10px;
       background: radial-gradient(circle at 30% 0%, #FDF7E3 0, #C0A450 38%, #0F1E44 85%);
       border: 1px solid rgba(248, 250, 252, 0.6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       font-family: 'Montserrat', system-ui, sans-serif;
-      font-size: 32px;
-      font-weight: 700;
-      color: #0F172A;
+      font-size: 32px; font-weight: 700; color: #0F172A;
       box-shadow: 0 14px 35px rgba(0, 0, 0, 0.7);
     }
 
     .auth-title {
       font-family: 'Montserrat', system-ui, sans-serif;
-      font-size: 22px;
-      font-weight: 600;
-      text-align: center;
-      letter-spacing: 0.04em;
-      margin-bottom: 4px;
+      font-size: 22px; font-weight: 600; text-align: center;
+      letter-spacing: 0.04em; margin-bottom: 4px;
     }
-
     .auth-subtitle {
-      text-align: center;
-      font-size: 13px;
-      color: var(--color-text-muted);
+      text-align: center; font-size: 13px; color: var(--color-text-muted);
       margin-bottom: 18px;
     }
 
-    /* TABS LOGIN / REGISTER */
     .auth-tabs {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 18px;
+      display: flex; justify-content: center; gap: 12px; margin-bottom: 18px;
     }
-
     .auth-tab {
       font-family: 'Montserrat', system-ui, sans-serif;
-      font-size: 13px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      cursor: pointer;
-      border: 1px solid transparent;
-      color: rgba(249, 250, 251, 0.75);
-      background: transparent;
+      font-size: 13px; padding: 6px 12px; border-radius: 999px;
+      cursor: pointer; border: 1px solid transparent;
+      color: rgba(249, 250, 251, 0.75); background: transparent;
       transition: var(--transition-med);
     }
-
     .auth-tab.active {
       color: #F9FAFB;
       border-color: rgba(192, 164, 80, 0.9);
@@ -124,246 +88,93 @@
       box-shadow: 0 0 0 1px rgba(15,23,42,0.9);
     }
 
-    /* FORMULARIOS */
-    .auth-form {
-      display: none;
-      display: none;
-    }
+    .auth-form { display: none; }
+    .auth-form.active { display: block; }
 
-    .auth-form.active {
-      display: block;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 14px;
-    }
-
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
     .field label {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: rgba(249, 250, 251, 0.82);
+      font-size: 12px; text-transform: uppercase;
+      letter-spacing: 0.12em; color: rgba(249, 250, 251, 0.82);
     }
 
     .input {
-      width: 100%;
-      padding: 11px 12px;
-      border-radius: var(--radius-md);
+      width: 100%; padding: 11px 12px; border-radius: var(--radius-md);
       border: 1px solid rgba(148, 163, 184, 0.55);
-      background: rgba(15, 23, 42, 0.9);
-      color: var(--color-text-main);
-      font-size: 14px;
-      outline: none;
-      transition: var(--transition-med);
+      background: rgba(15, 23, 42, 0.9); color: var(--color-text-main);
+      font-size: 14px; outline: none; transition: var(--transition-med);
     }
-
-    .input::placeholder {
-      color: rgba(148, 163, 184, 0.9);
-    }
-
+    .input::placeholder { color: rgba(148, 163, 184, 0.9); }
     .input:focus {
       border-color: rgba(192, 164, 80, 0.9);
       box-shadow: 0 0 0 1px rgba(192, 164, 80, 0.35);
       background: rgba(15, 23, 42, 0.95);
     }
 
-    /* BOTONES PRINCIPALES */
     .btn-primary {
-      width: 100%;
-      margin-top: 4px;
-      padding: 11px 14px;
-      border-radius: 999px;
-      border: none;
+      width: 100%; margin-top: 4px; padding: 11px 14px;
+      border-radius: 999px; border: none;
       background: linear-gradient(to right, #FDF7DD, #C0A450);
-      color: #111827;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 14px 32px rgba(0,0,0,0.7);
+      color: #111827; font-size: 14px; font-weight: 600;
+      cursor: pointer; box-shadow: 0 14px 32px rgba(0,0,0,0.7);
       transition: var(--transition-med);
     }
+    .btn-primary:hover { filter: brightness(1.05); transform: translateY(-1px); }
 
-    .btn-primary:hover {
-      filter: brightness(1.05);
-      transform: translateY(-1px);
-    }
-
-    /* ERRORES Y LINKS */
     .auth-error {
-      color: #F97373;
-      font-size: 13px;
-      text-align: center;
-      min-height: 18px;
-      margin-top: 8px;
+      color: #F97373; font-size: 13px; text-align: center;
+      min-height: 18px; margin-top: 8px;
     }
 
-    .auth-helper {
-      text-align: center;
-      font-size: 13px;
-      margin-top: 12px;
-    }
+    .auth-helper { text-align: center; font-size: 13px; margin-top: 12px; }
+    .auth-link { color: var(--color-gold); text-decoration: none; cursor: pointer; }
+    .auth-link:hover { text-decoration: underline; }
 
-    .auth-link {
-      color: var(--color-gold);
-      text-decoration: none;
-      cursor: pointer;
-    }
+    .auth-social { margin-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+    .auth-social--hidden { display: none; }
 
-    .auth-link:hover {
-      text-decoration: underline;
-    }
-
-    /* SOCIAL (OCULTAS POR AHORA) */
-    .auth-social {
-      margin-top: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .auth-social--hidden {
-      display: none; /* 👈 oculto ahora, se puede quitar luego */
-    }
-
-    .btn-social {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.7);
-      background: rgba(15,23,42,0.9);
-      color: var(--color-text-main);
-      font-size: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: var(--transition-med);
-    }
-
-    .btn-social span.icon {
-      font-size: 16px;
-    }
-
-    .btn-social:hover {
-      background: rgba(15,23,42,0.98);
-      border-color: rgba(229,231,235,0.95);
-    }
-
-    .auth-separator {
-      margin-top: 14px;
-      margin-bottom: 10px;
-      font-size: 12px;
-      color: var(--color-text-muted);
-      text-align: center;
-      position: relative;
-    }
-
-    .auth-separator::before,
-    .auth-separator::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      width: 32%;
-      height: 1px;
-      background: rgba(148, 163, 184, 0.45);
-    }
-
-    .auth-separator::before {
-      left: 0;
-    }
-
-    .auth-separator::after {
-      right: 0;
-    }
-
-    /* RESET PASSWORD MODAL */
     .reset-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.65);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      z-index: 50;
+      position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px; z-index: 50;
     }
-
-    .reset-overlay.hidden {
-      display: none;
-    }
+    .reset-overlay.hidden { display: none; }
 
     .reset-card {
-      width: 100%;
-      max-width: 360px;
-      background: var(--color-panel-soft);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-xl);
-      padding: 18px 18px 16px;
-      box-shadow: var(--shadow-soft);
-      backdrop-filter: blur(16px);
+      width: 100%; max-width: 360px;
+      background: var(--color-panel-soft); border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl); padding: 18px 18px 16px;
+      box-shadow: var(--shadow-soft); backdrop-filter: blur(16px);
     }
+    .reset-title { font-family: 'Montserrat'; font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .reset-sub { font-size: 13px; color: var(--color-text-muted); margin-bottom: 12px; }
 
-    .reset-title {
-      font-family: 'Montserrat';
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .reset-sub {
-      font-size: 13px;
-      color: var(--color-text-muted);
-      margin-bottom: 12px;
-    }
-
-    .reset-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 10px;
-    }
+    .reset-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
 
     .btn-secondary {
-      padding: 8px 14px;
-      border-radius: 999px;
+      padding: 8px 14px; border-radius: 999px;
       border: 1px solid rgba(148, 163, 184, 0.8);
-      background: transparent;
-      color: var(--color-text-main);
-      font-size: 13px;
-      cursor: pointer;
+      background: transparent; color: var(--color-text-main);
+      font-size: 13px; cursor: pointer;
     }
+    .btn-secondary:hover { background: rgba(15,23,42,0.9); }
 
-    .btn-secondary:hover {
-      background: rgba(15,23,42,0.9);
-    }
-
-    .reset-msg {
-      font-size: 13px;
-      margin-top: 6px;
-    }
+    .reset-msg { font-size: 13px; margin-top: 6px; }
   </style>
 </head>
 
 <body>
   <main class="auth-shell">
     <section class="auth-card">
-
-      <!-- LOGO / TITULO -->
       <div class="auth-logo">A+</div>
       <h1 class="auth-title">Advance+</h1>
       <p class="auth-subtitle">Accede a tu cuenta para continuar tu progreso.</p>
 
-      <!-- TABS -->
       <div class="auth-tabs">
         <button id="tab-login" class="auth-tab active" type="button">Iniciar sesión</button>
         <button id="tab-register" class="auth-tab" type="button">Crear cuenta</button>
       </div>
 
-      <!-- FORM LOGIN -->
+      <!-- LOGIN -->
       <form id="loginForm" class="auth-form active" autocomplete="on">
         <div class="field">
           <label for="loginEmail">Email</label>
@@ -383,7 +194,7 @@
         </p>
       </form>
 
-      <!-- FORM REGISTER -->
+      <!-- REGISTER -->
       <form id="registerForm" class="auth-form" autocomplete="on">
         <div class="field">
           <label for="regName">Nombre completo</label>
@@ -403,26 +214,10 @@
         <button type="submit" class="btn-primary">Crear cuenta</button>
         <p id="regError" class="auth-error"></p>
       </form>
-
-      <!-- SECCIÓN OAUTH (OCULTA POR AHORA) -->
-      <div class="auth-social auth-social--hidden">
-        <p class="auth-separator">o continúa con</p>
-
-        <button id="btnGoogle" class="btn-social" type="button">
-          <span class="icon">ⓖ</span>
-          <span>Continuar con Google</span>
-        </button>
-
-        <button id="btnApple" class="btn-social" type="button">
-          <span class="icon"></span>
-          <span>Continuar con Apple</span>
-        </button>
-      </div>
-
     </section>
   </main>
 
-  <!-- MODAL RESET PASSWORD -->
+  <!-- MODAL RESET -->
   <div id="resetOverlay" class="reset-overlay hidden">
     <div class="reset-card">
       <h3 class="reset-title">Restablecer contraseña</h3>
@@ -442,71 +237,131 @@
     </div>
   </div>
 
-<script type="module">
-  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+  <!-- ========= LÓGICA CON SUPABASE (SIN /js/supabase.js) ========= -->
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-  const supabase = createClient(
-    "https://lmlfvbzukymtkcyfromr.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtbGZ2Ynp1a3ltdGtjeWZyb21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI5NjA3MzksImV4cCI6MjA3ODUzNjczOX0.VtetQ9jdaG6ZIDNGKsaTqxllET0nBZBrYDmZgfEdpLU"
-  );
+    const supabase = createClient(
+      "https://lmlfvbzukymtkcyfromr.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtbGZ2Ynp1a3ltdGtjeWZyb21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI5NjA3MzksImV4cCI6MjA3ODUzNjczOX0.VtetQ9jdaG6ZIDNGKsaTqxllET0nBZBrYDmZgfEdpLU"
+    );
 
-  window.supabase = supabase; // para depurar
+    window.supabase = supabase; // solo para depurar
 
-  /* ----------------------
-     LOGIN
-  ----------------------- */
-  const loginForm = document.getElementById("loginForm");
-  const loginError = document.getElementById("loginError");
+    const tabLogin = document.getElementById("tab-login");
+    const tabRegister = document.getElementById("tab-register");
+    const loginForm = document.getElementById("loginForm");
+    const registerForm = document.getElementById("registerForm");
+    const loginError = document.getElementById("loginError");
+    const regError = document.getElementById("regError");
 
-  loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    loginError.textContent = "";
+    const resetOverlay = document.getElementById("resetOverlay");
+    const resetEmail = document.getElementById("resetEmail");
+    const resetMsg = document.getElementById("resetMsg");
+    const resetSend = document.getElementById("resetSend");
+    const resetCancel = document.getElementById("resetCancel");
+    const openReset = document.getElementById("openReset");
 
-    const email = document.getElementById("loginEmail").value;
-    const password = document.getElementById("loginPassword").value;
-
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (error) {
-      loginError.textContent = "Credenciales incorrectas.";
-      console.error(error);
-      return;
-    }
-
-    window.location.href = "/dashboard/index.html";
-  });
-
-  /* ----------------------
-     REGISTER
-  ----------------------- */
-  const registerForm = document.getElementById("registerForm");
-  const regError = document.getElementById("regError");
-
-  registerForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    regError.textContent = "";
-
-    const full_name = document.getElementById("regName").value;
-    const email = document.getElementById("regEmail").value;
-    const password = document.getElementById("regPassword").value;
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name }
-      }
+    // Tabs
+    tabLogin.addEventListener("click", () => {
+      tabLogin.classList.add("active");
+      tabRegister.classList.remove("active");
+      loginForm.classList.add("active");
+      registerForm.classList.remove("active");
+      loginError.textContent = "";
+      regError.textContent = "";
     });
 
-    if (error) {
-      regError.textContent = error.message;
-      console.error(error);
-      return;
-    }
+    tabRegister.addEventListener("click", () => {
+      tabRegister.classList.add("active");
+      tabLogin.classList.remove("active");
+      registerForm.classList.add("active");
+      loginForm.classList.remove("active");
+      loginError.textContent = "";
+      regError.textContent = "";
+    });
 
-    window.location.href = "/dashboard/index.html";
-  });
-</script>
+    // LOGIN
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      loginError.textContent = "";
 
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+
+      if (!email || !password) {
+        loginError.textContent = "Completa todos los campos.";
+        return;
+      }
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        console.error(error);
+        loginError.textContent = "Credenciales incorrectas o usuario no encontrado.";
+        return;
+      }
+
+      window.location.href = "/dashboard/index.html";
+    });
+
+    // REGISTER
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      regError.textContent = "";
+
+      const name = document.getElementById("regName").value.trim();
+      const email = document.getElementById("regEmail").value.trim();
+      const password = document.getElementById("regPassword").value.trim();
+
+      if (!name || !email || !password) {
+        regError.textContent = "Completa todos los campos.";
+        return;
+      }
+
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: name } },
+      });
+
+      if (error) {
+        console.error(error);
+        regError.textContent = error.message || "No se pudo crear la cuenta.";
+        return;
+      }
+
+      window.location.href = "/dashboard/index.html";
+    });
+
+    // RESET PASSWORD
+    openReset.addEventListener("click", () => {
+      resetMsg.textContent = "";
+      resetEmail.value = "";
+      resetOverlay.classList.remove("hidden");
+    });
+
+    resetCancel.addEventListener("click", () => {
+      resetOverlay.classList.add("hidden");
+    });
+
+    resetSend.addEventListener("click", async () => {
+      resetMsg.textContent = "";
+      const email = resetEmail.value.trim();
+
+      if (!email) {
+        resetMsg.textContent = "Ingresa un email válido.";
+        return;
+      }
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) {
+        console.error(error);
+        resetMsg.textContent = "Error al enviar el correo. Revisa el email ingresado.";
+      } else {
+        resetMsg.textContent = "Si el email existe, te hemos enviado un enlace.";
+      }
+    });
+  </script>
 </body>
 </html>
