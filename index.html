@@ -444,6 +444,7 @@
 
   <!-- Supabase -->
   <script type="module">
+    import { supabase } from "/js/supabase.js";
 
     const tabLogin = document.getElementById("tab-login");
     const tabRegister = document.getElementById("tab-register");
@@ -674,17 +675,5 @@
       });
     }
   </script>
-
-      <script type="module">
-  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-
-  const supabase = createClient(
-    "https://lmlfvbzukymtkcyfromr.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-  );
-
-  window.supabase = supabase;
-  console.log("Supabase listo:", supabase);
-</script>
 </body>
 </html>
