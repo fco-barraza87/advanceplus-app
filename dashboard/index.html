@@ -161,13 +161,17 @@
     </button>
   </nav>
 
-  <!-- HEADER -->
+    <!-- 1. Cliente supabase -->
+  <script type="module" src="/js/supabase.js"></script>
+
+    <!-- HEADER -->
   <script type="module">
     import { loadUserHeader } from "/components/user-header.js";
     loadUserHeader();
   </script>
 
-  <!-- ROUTER / PROTECCIÓN -->
+
+    <!-- ROUTER / PROTECCIÓN -->
   <script type="module">
     import { protectUserView } from "/js/router.js";
     protectUserView();
@@ -175,10 +179,6 @@
 
   <!-- LÓGICA DASHBOARD -->
   <script type="module" src="/js/dashboard.js"></script>
-
-    <!-- 1. Cliente supabase -->
-  <script type="module" src="/js/supabase.js"></script>
-
 
 </body>
 </html>
