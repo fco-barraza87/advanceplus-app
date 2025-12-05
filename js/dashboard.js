@@ -1,4 +1,5 @@
 import { supabase } from "/js/supabase.js";
+
 const qs = (sel) => document.querySelector(sel);
 
 /* ==================================================
@@ -24,14 +25,14 @@ async function loadUserData() {
 }
 
 /* ==================================================
-   2. HEADER USUARIO
+   2. HEADER USUARIO (usa elementos del header global)
 ================================================== */
 function renderUser(profile) {
   if (!profile) return;
 
-  const nameEl = qs("#userName");
-  const roleEl = qs("#userRole");
-  const avatarEl = qs("#userAvatar");
+  const nameEl = qs("#headerUserName");  // en user-header.js
+  const roleEl = qs("#headerUserRole");
+  const avatarEl = qs("#headerUserAvatar");
 
   if (nameEl) nameEl.textContent = profile.full_name || "Usuario";
 
@@ -47,7 +48,7 @@ function renderUser(profile) {
   if (avatarEl && profile.avatar_url) {
     avatarEl.style.backgroundImage = `url(${profile.avatar_url})`;
     avatarEl.style.backgroundSize = "cover";
-    avatarEl.style.color = "transparent";
+    avatarEl.textContent = "";
   }
 }
 
@@ -86,75 +87,75 @@ async function renderGamification(stats, userId) {
   const best = stats.streak_best ?? 0;
 
   const goalDays = await getStreakGoal(userId);
-  const pctRacha = Math.min(100, (streak / goalDays) * 100);
+  const pctRacha = Math.min(100, goalDays > 0 ? (streak / goalDays) * 100 : 0);
 
-  qs("#streakCurrent").textContent = streak;
-  qs("#streakBest").textContent = best;
-  qs("#streakGoalLabel").textContent = `Objetivo: ${goalDays} días`;
-
+  const streakCurrentEl = qs("#streakCurrent");
+  const streakBestEl = qs("#streakBest");
+  const streakGoalLabelEl = qs("#streakGoalLabel");
   const rachaBar = qs("#streakBarFill");
+
+  if (streakCurrentEl) streakCurrentEl.textContent = streak;
+  if (streakBestEl) streakBestEl.textContent = best;
+  if (streakGoalLabelEl) streakGoalLabelEl.textContent = `Objetivo: ${goalDays} días`;
+
   if (rachaBar) {
-    setTimeout(() => (rachaBar.style.width = pctRacha + "%"), 150);
+    setTimeout(() => {
+      rachaBar.style.width = pctRacha + "%";
+    }, 150);
   }
 
   /* ------------------------------
-   NIVEL + XP (DINÁMICO)
---------------------------------*/
+     NIVEL + XP (DINÁMICO)
+  --------------------------------*/
+  const xpTotal = stats.xp_total ?? 0;
 
-const xpTotal = stats.xp_total ?? 0;
+  let xpPrev = stats.xp_prev_level;
+  let xpNext = stats.xp_next_level;
+  let level = stats.level;
 
-// Intentar leer desde la DB
-const xpPrev = stats.xp_prev_level;
-const xpNext = stats.xp_next_level;
-let level = stats.level;
+  if (
+    typeof xpPrev === "number" &&
+    typeof xpNext === "number" &&
+    typeof level === "number"
+  ) {
+    // usamos los valores calculados en la DB
+  } else {
+    // fallback local: fórmula
+    const base = 100;
+    const growth = 1.35;
+    const xpForLevel = (lvl) => Math.round(base * Math.pow(growth, lvl - 1));
 
-// Si la DB devolvió nivel + prev/next → usar eso
-if (
-  typeof xpPrev === "number" &&
-  typeof xpNext === "number" &&
-  typeof level === "number"
-) {
-  // xpNext = XP requerido para llegar al próximo nivel
-  // xpTotal = XP acumulado por el usuario
-} else {
-  // --- FALLBACK LOCAL SI FALTA ALGO ---
-  const base = 100;
-  const growth = 1.35;
-  const xpForLevel = lvl => Math.round(base * Math.pow(growth, lvl - 1));
+    level = 1;
+    let xpReq = xpForLevel(1);
 
-  level = 1;
-  let xpReq = xpForLevel(1);
+    while (xpTotal >= xpReq) {
+      level++;
+      xpReq = xpForLevel(level);
+    }
 
-  while (xpTotal >= xpReq) {
-    level++;
-    xpReq = xpForLevel(level);
+    xpNext = xpReq;
   }
 
-  // fallback: xpNext = requerido para este nivel
-  xpNext = xpReq;
-}
+  const pctXP = Math.min(100, xpNext > 0 ? (xpTotal / xpNext) * 100 : 0);
 
-// Porcentaje real basado en XP TOTAL
-const pctXP = Math.min(100, (xpTotal / xpNext) * 100);
+  const levelEl = qs("#userLevel");
+  const xpThisLevelEl = qs("#xpThisLevel");
+  const nextLevelEl = qs("#nextLevel");
+  const xpBar = qs("#xpFill");
 
-// Render en pantalla
-qs("#userLevel").textContent = level;
-qs("#xpThisLevel").textContent = `${xpTotal} / ${xpNext} XP`;
-qs("#nextLevel").textContent = `Siguiente: Nivel ${level + 1}`;
+  if (levelEl) levelEl.textContent = level ?? 1;
+  if (xpThisLevelEl) xpThisLevelEl.textContent = `${xpTotal} / ${xpNext || 0} XP`;
+  if (nextLevelEl) nextLevelEl.textContent = `Siguiente: Nivel ${(level || 1) + 1}`;
 
-// Animación barra
-const xpBar = qs("#xpFill");
-if (xpBar) {
-  setTimeout(() => {
-    xpBar.style.width = pctXP + "%";
-  }, 150);
-}
-
- 
+  if (xpBar) {
+    setTimeout(() => {
+      xpBar.style.width = pctXP + "%";
+    }, 150);
+  }
 }
 
 /* ==================================================
-   5. RETOS ACTIVOS
+   5. RETOS ACTIVOS (CARRUSEL)
 ================================================== */
 async function loadActiveCourses(userId) {
   const { data: userCourses } = await supabase
@@ -180,35 +181,37 @@ async function loadActiveCourses(userId) {
 }
 
 function renderActiveCourses(courses, user) {
-  const grid = qs("#activeCoursesGrid");
-  const empty = qs("#noActiveMessage");
-  const count = qs("#activeCount");
+  const carousel = qs("#activeChallengesCarousel");
+  const empty = qs("#noActiveChallenges");
+  const count = qs("#activeChallengesCount");
 
-  grid.innerHTML = "";
+  if (!carousel || !empty || !count) return;
+
+  carousel.innerHTML = "";
 
   if (!courses.length) {
     empty.style.display = "block";
-    count.textContent = "";
+    count.textContent = "0 activos";
     return;
   }
 
   empty.style.display = "none";
-  count.textContent = `${courses.length} activos`;
+  count.textContent = `${courses.length} activo${courses.length > 1 ? "s" : ""}`;
 
   courses.forEach((course) => {
     const cover = course.cover_url || "https://via.placeholder.com/600x300.png?text=A+";
 
     const card = document.createElement("article");
-    card.className = "course-card clickable";
+    card.className = "course-card clickable carousel-item";
     card.innerHTML = `
       <div class="course-cover-wrapper">
-        <img src="${cover}" class="course-cover" />
-        <span class="course-badge">${course.category}</span>
+        <img src="${cover}" class="course-cover" alt="${course.title}" />
+        <span class="course-badge">${course.category || "Reto"}</span>
       </div>
-
       <div class="course-body">
         <div class="course-title">${course.title}</div>
         <div class="course-meta">${course.level || "Todos los niveles"}</div>
+        <div class="course-day">Duración: ${course.duration_days || "—"} días</div>
       </div>
     `;
 
@@ -227,12 +230,14 @@ function renderActiveCourses(courses, user) {
         if (done.length) nextDay = done.at(-1).day + 1;
       }
 
-      if (nextDay > course.duration_days) nextDay = course.duration_days;
+      if (nextDay > (course.duration_days || 1)) {
+        nextDay = course.duration_days || 1;
+      }
 
       window.location.href = `/curso/index.html?c=${course.id}&day=${nextDay}`;
     };
 
-    grid.appendChild(card);
+    carousel.appendChild(card);
   });
 }
 
@@ -264,35 +269,27 @@ async function loadAvailableCourses(userId) {
 
   const owned = new Set((mine || []).map((c) => c.course_id));
 
-  return all.filter((c) => !owned.has(c.id));
+  return (all || []).filter((c) => !owned.has(c.id));
 }
 
-
-/* ============================================================
-   TARJETA PREMIUM — MASTERCLASS + MINDVALLEY
-============================================================ */
-
 function renderPremiumCourseCard(course) {
-  const card = document.createElement("div");
+  const card = document.createElement("article");
   card.className = "course-card-premium";
 
-  const hero = course.hero_image_url || course.thumbnail_url || "https://via.placeholder.com/600x300?text=A+";
+  const hero =
+    course.hero_image_url ||
+    course.thumbnail_url ||
+    "https://via.placeholder.com/600x300?text=A+";
 
   card.innerHTML = `
     <div class="card-bg" style="background-image: url('${hero}')"></div>
-
     <div class="card-content">
-
       ${course.badge_text ? `<div class="card-badge">${course.badge_text}</div>` : ""}
-
       <h3 class="card-title">${course.title}</h3>
-
       <p class="card-promise">${course.short_promise || ""}</p>
-
       <div class="card-rating">
         ⭐ ${course.reviews_average || "5.0"} · ${course.reviews_count || 0} reseñas
       </div>
-
       <div class="card-price">
         ${
           course.sale_price_chf
@@ -300,7 +297,6 @@ function renderPremiumCourseCard(course) {
             : `${course.price_chf || 0} CHF`
         }
       </div>
-
       <div class="card-btn">Ver reto →</div>
     </div>
   `;
@@ -312,10 +308,11 @@ function renderPremiumCourseCard(course) {
   return card;
 }
 
-
 function renderAvailableCourses(courses) {
-  const grid = qs("#availableCoursesGrid");
+  const grid = qs("#coursesGrid");
   const empty = qs("#noAvailableMessage");
+
+  if (!grid || !empty) return;
 
   grid.innerHTML = "";
 
@@ -333,13 +330,15 @@ function renderAvailableCourses(courses) {
 }
 
 /* ==================================================
-   7. MISIÓN DEL DÍA (con oferta si ya no quedan cursos)
+   7. MISIÓN DEL DÍA
 ================================================== */
 async function loadMission(user) {
   const card = qs("#missionCard");
   const promoCard = qs("#missionPromoCard");
 
-  // 1. Buscar curso activo más reciente
+  if (!card || !promoCard) return;
+
+  // 1. Curso activo más reciente
   const { data: active } = await supabase
     .from("user_courses")
     .select("*")
@@ -348,14 +347,15 @@ async function loadMission(user) {
     .order("started_at", { ascending: false })
     .limit(1);
 
-  // Si NO tiene cursos activos → mostrar promoción directamente
+  // Si NO tiene cursos activos → promo directa
   if (!active?.length) {
     card.style.display = "none";
     promoCard.style.display = "flex";
 
-    qs("#missionPromoBtn").onclick = () =>
-      (window.location.href = "/cursos/index.html");
-
+    const promoBtn = qs("#missionPromoBtn");
+    if (promoBtn) {
+      promoBtn.onclick = () => (window.location.href = "/perfil/cursos.html");
+    }
     return;
   }
 
@@ -367,6 +367,12 @@ async function loadMission(user) {
     .select("*")
     .eq("id", courseId)
     .single();
+
+  if (!course) {
+    card.style.display = "none";
+    promoCard.style.display = "flex";
+    return;
+  }
 
   // 3. Progreso del curso
   const { data: progress } = await supabase
@@ -383,72 +389,101 @@ async function loadMission(user) {
   }
 
   // 4. Si ya completó todo el curso…
-  if (nextDay > course.duration_days) {
-    // ¿Existen cursos nuevos disponibles?
+  if (nextDay > (course.duration_days || 1)) {
     const { data: available } = await supabase
       .from("courses")
       .select("id")
       .eq("active", true)
       .neq("id", courseId);
 
-    // SI existen cursos → promoción de continuar
-    if (available?.length) {
-      card.style.display = "none";
-      promoCard.style.display = "flex";
+    const promoBtn = qs("#missionPromoBtn");
 
-      qs("#missionPromoBtn").onclick = () =>
-        (window.location.href = "/cursos/index.html");
-
-      return;
-    }
-
-    // SI NO existen cursos → mensaje de “próximamente”
     card.style.display = "none";
     promoCard.style.display = "flex";
 
-    qs("#missionPromoCard .mission-desc").textContent =
-      "Has completado todos los cursos disponibles. Nuevos retos A+ llegarán muy pronto.";
-
-    qs("#missionPromoBtn").textContent = "Volver al inicio";
-    qs("#missionPromoBtn").onclick = () =>
-      (window.location.href = "/dashboard/index.html");
+    if (available?.length) {
+      if (promoBtn) {
+        promoBtn.textContent = "Ver más retos";
+        promoBtn.onclick = () => (window.location.href = "/perfil/cursos.html");
+      }
+    } else {
+      const promoDesc = promoCard.querySelector(".mission-desc");
+      if (promoDesc) {
+        promoDesc.textContent =
+          "Has completado todos los cursos disponibles. Nuevos retos A+ llegarán muy pronto.";
+      }
+      if (promoBtn) {
+        promoBtn.textContent = "Volver al inicio";
+        promoBtn.onclick = () => (window.location.href = "/dashboard/index.html");
+      }
+    }
 
     return;
   }
 
-  // 5. Si el curso aún NO termina → misión normal
-  qs("#missionTitle").textContent = course.mission_title || "Misión del día";
-  qs("#missionDesc").textContent = course.mission_desc || "Toma el control de tu día.";
-  qs("#missionMeta").textContent = `${course.title} · Día ${nextDay} · ${course.category}`;
+  // 5. Curso aún en progreso → misión normal
+  const titleEl = qs("#missionTitle");
+  const descEl = qs("#missionDesc");
+  const metaEl = qs("#missionMeta");
+  const btnEl = qs("#missionBtn");
 
-  qs("#missionBtn").onclick = () => {
-    window.location.href = `/curso/index.html?c=${courseId}&day=${nextDay}`;
-  };
+  if (titleEl) titleEl.textContent = course.mission_title || "Misión del día";
+  if (descEl)
+    descEl.textContent =
+      course.mission_desc || "Toma el control de tu día con esta acción clave.";
+  if (metaEl)
+    metaEl.textContent = `${course.title} · Día ${nextDay} · ${
+      course.category || "Reto"
+    }`;
+
+  if (btnEl) {
+    btnEl.onclick = () => {
+      window.location.href = `/curso/index.html?c=${courseId}&day=${nextDay}`;
+    };
+  }
 
   promoCard.style.display = "none";
   card.style.display = "flex";
 }
 
-
 /* ==================================================
-   8. LOGOUT
+   8. COACH IA – MENSAJE ALEATORIO
 ================================================== */
+async function loadRandomCoachMessage() {
+  const { data, error } = await supabase
+    .from("coach_messages_library")
+    .select("message, style")
+    .eq("active", true);
 
+  if (error || !data || !data.length) {
+    console.warn("No hay mensajes de coach IA o error", error);
+    return;
+  }
+
+  const random = data[Math.floor(Math.random() * data.length)];
+
+  const textEl = qs("#coachMessageText");
+  const styleEl = qs("#coachMessageStyle");
+  const timeEl = qs("#coachMessageTime");
+  const cardEl = qs("#coachMessageCard");
+
+  if (textEl) textEl.textContent = random.message;
+  if (styleEl) styleEl.textContent = `Estilo: ${random.style}`;
+  if (timeEl) timeEl.textContent = "Mensaje del día";
+
+  if (cardEl) cardEl.style.display = "block";
+}
 
 /* ==================================================
-   9. INIT
+   9. INIT DASHBOARD
 ================================================== */
 async function initDashboard() {
-
-
   const data = await loadUserData();
   if (!data) return;
 
   const { user, profile, stats } = data;
 
   renderUser(profile);
-
-  // 🎯 racha + nivel + barras dinámicas (DB-first)
   await renderGamification(stats, user.id);
 
   const active = await loadActiveCourses(user.id);
@@ -460,101 +495,5 @@ async function initDashboard() {
   await loadMission(user);
   await loadRandomCoachMessage();
 }
-
-/* ==================================================
-   COACH IA – MENSAJE ALEATORIO DESDE LA LIBRERÍA
-================================================== */
-async function loadRandomCoachMessage() {
-  const { data, error } = await supabase
-    .from("coach_messages_library")
-    .select("message, style")
-    .eq("active", true);
-
-  if (error || !data || !data.length) {
-    console.warn("No hay mensajes de coach IA o error");
-    return;
-  }
-
-  // Elegir un mensaje aleatorio
-  const random = data[Math.floor(Math.random() * data.length)];
-
-  qs("#coachMessageText").textContent = random.message;
-  qs("#coachMessageStyle").textContent = `Estilo: ${random.style}`;
-  qs("#coachMessageTime").textContent = "Mensaje del día";
-
-  // Mostrar tarjeta
-  qs("#coachMessageCard").style.display = "block";
-}
-
-async function loadCoachMessage(userId) {
-  // 1) Último mensaje visto
-  const lastSeen = await getLastSeenMessage(userId);
-
-  // 2) Elegir un nuevo mensaje aleatorio distinto
-  const msg = await getRandomCoachMessage(lastSeen);
-
-  if (!msg) return;
-
-  // 3) Mostrar en dashboard
-  const display = document.querySelector("#coachMessage");
-  if (display) display.textContent = msg.message;
-
-  // 4) Guardar historial
-  await saveMessageHistory(userId, msg.id);
-}
-
-
-async function getLastSeenMessage(userId) {
-  const { data, error } = await supabase
-    .from("coach_messages_history")
-    .select("message_id")
-    .eq("user_id", userId)
-    .order("seen_at", { ascending: false })
-    .limit(1);
-
-  if (error) {
-    console.error("Error obteniendo historial:", error);
-    return null;
-  }
-
-  return data?.length ? data[0].message_id : null;
-}
-
-async function getRandomCoachMessage(excludeId = null) {
-  const { data, error } = await supabase
-    .from("coach_messages_library")
-    .select("id, message, style");
-
-  if (error || !data) {
-    console.error("Error cargando mensajes coach:", error);
-    return null;
-  }
-
-  let pool = data;
-
-  // Excluir último mensaje
-  if (excludeId) {
-    pool = data.filter((m) => m.id !== excludeId);
-  }
-
-  if (!pool.length) return data[0];
-
-  // Random
-  const random = pool[Math.floor(Math.random() * pool.length)];
-
-  return random;
-}
-
-async function saveMessageHistory(userId, messageId) {
-  const { error } = await supabase
-    .from("coach_messages_history")
-    .insert({
-      user_id: userId,
-      message_id: messageId
-    });
-
-  if (error) console.error("Error guardando historial coach:", error);
-}
-
 
 initDashboard();

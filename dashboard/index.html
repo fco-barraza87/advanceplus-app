@@ -6,17 +6,10 @@
 
   <title>Advance+ · Dashboard</title>
 
-  <!-- TOKENS GLOBALES 
-  <link rel="stylesheet" href="/css/style.css">-->
-
-  <!-- DASHBOARD CSS (Aislado para el dashboard) 
-  <link rel="stylesheet" href="/css/dashboard-user.css">-->
-
+  <!-- TOKENS GLOBALES + ESTILOS -->
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/dashboard.css">
-  <link rel="stylesheet" href="/css/courses.css"><!-- si muestras cursos -->
-
-
+  <link rel="stylesheet" href="/css/courses.css">
 </head>
 
 <body class="app-bg dashboard-page">
@@ -24,82 +17,128 @@
   <!-- HEADER NUEVO (PREMIUM) -->
   <div id="appHeader"></div>
 
+  <!-- MAIN DASHBOARD -->
+  <main class="dashboard-main">
+    <div class="dashboard-wrapper">
 
+      <!-- 1. TU PROGRESO -->
+      <section class="dash-section gamification-section">
+        <h2 class="section-title">Tu progreso</h2>
 
+        <div class="gamification-grid">
+          <!-- Card Racha -->
+          <article class="card" id="cardStreak">
+            <div class="card-header-row">
+              <span class="card-label">Racha activa</span>
+              <span class="card-label" id="streakGoalLabel">Objetivo: 21 días</span>
+            </div>
 
-  <!-- ============================================================
-       MAIN DASHBOARD
-  ============================================================= -->
- <main class="app-bg dashboard-page">
-  <div class="dashboard-wrapper">
+            <div class="streak-number" id="streakCurrent">0</div>
 
-    <!-- 1. TU PROGRESO -->
-    <section class="dash-section gamification-section">
-      <h2 class="section-title">Tu progreso</h2>
-      <div class="gamification-grid">
-        <!-- Card Racha -->
-        <div class="card" id="cardStreak">
-          <!-- contenido racha -->
+            <div class="xp-info">
+              <span>Mejor racha</span>
+              <span id="streakBest">0</span>
+            </div>
+
+            <div class="streak-goal-bar">
+              <div class="streak-goal-fill" id="streakBarFill"></div>
+            </div>
+          </article>
+
+          <!-- Card Nivel -->
+          <article class="card" id="cardLevel">
+            <div class="card-header-row">
+              <span class="card-label">Nivel Advance+</span>
+            </div>
+
+            <div class="card-value" id="userLevel">1</div>
+
+            <div class="xp-row">
+              <div class="xp-info">
+                <span id="xpThisLevel">0 / 100 XP</span>
+                <span id="nextLevel">Siguiente: Nivel 2</span>
+              </div>
+              <div class="xp-bar">
+                <div class="xp-bar-fill" id="xpFill"></div>
+              </div>
+            </div>
+          </article>
         </div>
-        <!-- Card Nivel -->
-        <div class="card" id="cardLevel">
-          <!-- contenido nivel -->
+      </section>
+
+      <!-- 2. MISIÓN DEL DÍA -->
+      <section class="dash-section">
+        <h2 class="section-title">Misión del día</h2>
+
+        <!-- Misión normal -->
+        <article id="missionCard" class="mission-card">
+          <div class="mission-header">
+            <span class="dash-pill" id="missionMeta">Cargando...</span>
+          </div>
+          <h3 class="mission-title" id="missionTitle">Cargando misión...</h3>
+          <p class="mission-desc" id="missionDesc">
+            Estamos preparando tu próxima misión A+.
+          </p>
+          <button id="missionBtn" class="mission-btn">
+            Ir a la lección
+          </button>
+        </article>
+
+        <!-- Promo cuando no hay curso activo o has terminado todo -->
+        <article id="missionPromoCard" class="mission-card" style="display:none;">
+          <h3 class="mission-title">Activa tu siguiente reto</h3>
+          <p class="mission-desc">
+            Aún no tienes un reto activo, o ya terminaste todos tus cursos.
+            Elige tu próximo programa y sigue avanzando.
+          </p>
+          <button id="missionPromoBtn" class="mission-btn">
+            Ver todos los retos
+          </button>
+        </article>
+      </section>
+
+      <!-- 3. COACH IA - MENSAJE DE HOY -->
+      <section class="dash-section">
+        <h2 class="section-title">Coach IA · Mensaje de hoy</h2>
+
+        <article id="coachMessageCard" class="coach-message-card" style="display:none;">
+          <p class="coach-message-style" id="coachMessageStyle"></p>
+          <p class="coach-message-text" id="coachMessageText"></p>
+          <p class="coach-message-meta" id="coachMessageTime"></p>
+        </article>
+      </section>
+
+      <!-- 4. TUS RETOS ACTIVOS (CARRUSEL) -->
+      <section class="dash-section">
+        <div class="section-header-row">
+          <h2 class="section-title">Tus retos activos</h2>
+          <span id="activeChallengesCount" class="section-subtitle">0 activos</span>
         </div>
-        <!-- (si quieres) un 3er slot: días activos / XP hoy -->
-      </div>
-    </section>
 
-    <!-- 2. MISIÓN DEL DÍA -->
-    <section class="dash-section">
-      <h2 class="section-title">Misión del día</h2>
-      <div id="missionCard" class="mission-card">
-        <!-- misión se rellena desde dashboard.js -->
-      </div>
-    </section>
+        <div id="activeChallengesCarousel" class="courses-carousel">
+          <!-- tarjetas horizontales por JS -->
+        </div>
 
-    <!-- 3. COACH IA - MENSAJE DE HOY -->
-    <section class="dash-section">
-      <div id="coachMessageCard" class="coach-message-card">
-        <!-- mensaje coach ia se rellena por JS -->
-      </div>
-    </section>
+        <p id="noActiveChallenges" class="empty-message" style="display:none;">
+          Aún no tienes retos activos. Empieza con AI7 o el Curso de Bienvenida.
+        </p>
+      </section>
 
-    <!-- 4. TUS RETOS ACTIVOS (CARRUSEL) -->
-    <section class="dash-section">
-      <div class="section-header-row">
-        <h2 class="section-title">Tus retos activos</h2>
-        <span id="activeChallengesCount" class="section-subtitle">0 activos</span>
-      </div>
+      <!-- 5. EXPLORAR RETOS (GRID) -->
+      <section class="dash-section">
+        <h2 class="section-title">Explorar retos</h2>
+        <div id="coursesGrid" class="courses-grid">
+          <!-- tarjetas de cursos por JS -->
+        </div>
+        <p id="noAvailableMessage" class="empty-message" style="display:none;">
+          Muy pronto llegarán más retos Advance+.
+        </p>
+      </section>
 
-      <div id="activeChallengesCarousel" class="courses-carousel">
-        <!-- aquí van las tarjetas horizontales -->
-      </div>
-      <p id="noActiveChallenges" class="empty-message" style="display:none;">
-        Aún no tienes retos activos. Empieza con AI7 o el Curso de Bienvenida.
-      </p>
-    </section>
+    </div>
+  </main>
 
-    <!-- 5. EXPLORAR RETOS (GRID) -->
-    <section class="dash-section">
-      <h2 class="section-title">Explorar retos</h2>
-      <div id="coursesGrid" class="courses-grid">
-        <!-- tarjetas de cursos -->
-      </div>
-    </section>
-
-  </div>
-
-  <!-- TABBAR -->
-  <nav class="tabbar">
-    <!-- botones Inicio / Retos / Perfil / Progreso -->
-  </nav>
-</main>
-
-
-
-  <!-- ============================================================
-       TAB BAR — restaurado EXACTAMENTE como las otras páginas
-  ============================================================= -->
+  <!-- TABBAR (SOLO UNA VEZ) -->
   <nav class="tabbar">
     <button class="tab-btn active" onclick="location.href='/dashboard/index.html'">
       <span>🏠</span>
@@ -122,16 +161,13 @@
     </button>
   </nav>
 
-
-
-
   <!-- HEADER -->
   <script type="module">
     import { loadUserHeader } from "/components/user-header.js";
     loadUserHeader();
   </script>
 
-  <!-- ROUTER -->
+  <!-- ROUTER / PROTECCIÓN -->
   <script type="module">
     import { protectUserView } from "/js/router.js";
     protectUserView();
