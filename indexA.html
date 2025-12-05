@@ -442,71 +442,238 @@
     </div>
   </div>
 
-<script type="module">
-  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+  <!-- Supabase -->
+  <script type="module">
+    import { supabase } from "/js/supabase.js";
 
-  const supabase = createClient(
-    "https://lmlfvbzukymtkcyfromr.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtbGZ2Ynp1a3ltdGtjeWZyb21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI5NjA3MzksImV4cCI6MjA3ODUzNjczOX0.VtetQ9jdaG6ZIDNGKsaTqxllET0nBZBrYDmZgfEdpLU"
-  );
+    const tabLogin = document.getElementById("tab-login");
+    const tabRegister = document.getElementById("tab-register");
+    const loginForm = document.getElementById("loginForm");
+    const registerForm = document.getElementById("registerForm");
 
-  window.supabase = supabase; // para depurar
+    const loginError = document.getElementById("loginError");
+    const regError = document.getElementById("regError");
 
-  /* ----------------------
-     LOGIN
-  ----------------------- */
-  const loginForm = document.getElementById("loginForm");
-  const loginError = document.getElementById("loginError");
+    const resetOverlay = document.getElementById("resetOverlay");
+    const resetEmail = document.getElementById("resetEmail");
+    const resetMsg = document.getElementById("resetMsg");
+    const resetSend = document.getElementById("resetSend");
+    const resetCancel = document.getElementById("resetCancel");
+    const openReset = document.getElementById("openReset");
 
-  loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    loginError.textContent = "";
+    /* ─────────────────────────────────────────
+       TABS LOGIN / REGISTER
+    ───────────────────────────────────────── */
+    tabLogin.addEventListener("click", () => {
+      tabLogin.classList.add("active");
+      tabRegister.classList.remove("active");
+      loginForm.classList.add("active");
+      registerForm.classList.remove("active");
+      loginError.textContent = "";
+      regError.textContent = "";
+    });
 
-    const email = document.getElementById("loginEmail").value;
-    const password = document.getElementById("loginPassword").value;
+    tabRegister.addEventListener("click", () => {
+      tabRegister.classList.add("active");
+      tabLogin.classList.remove("active");
+      registerForm.classList.add("active");
+      loginForm.classList.remove("active");
+      loginError.textContent = "";
+      regError.textContent = "";
+    });
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    /* ─────────────────────────────────────────
+       LOGIN · usa profiles.role (NO JWT manual)
+    ───────────────────────────────────────── */
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      loginError.textContent = "";
 
-    if (error) {
-      loginError.textContent = "Credenciales incorrectas.";
-      console.error(error);
-      return;
-    }
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
 
-    window.location.href = "/dashboard/index.html";
-  });
+      if (!email || !password) {
+        loginError.textContent = "Completa todos los campos.";
+        return;
+      }
 
-  /* ----------------------
-     REGISTER
-  ----------------------- */
-  const registerForm = document.getElementById("registerForm");
-  const regError = document.getElementById("regError");
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-  registerForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    regError.textContent = "";
+      if (signInError) {
+        console.error(signInError);
+        loginError.textContent = "Credenciales incorrectas o usuario no encontrado.";
+        return;
+      }
 
-    const full_name = document.getElementById("regName").value;
-    const email = document.getElementById("regEmail").value;
-    const password = document.getElementById("regPassword").value;
+      // Obtener usuario actual
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name }
+      if (userError || !user) {
+        console.error(userError);
+        loginError.textContent = "No se pudo obtener la sesión.";
+        return;
+      }
+
+      // Leer rol desde profiles (NO desde JWT)
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) {
+        console.warn("Error leyendo profile.role, se usará 'user' por defecto:", profileError);
+      }
+
+      const role = profile?.role || "user";
+
+      // Redirecciones
+      if (role === "admin" || role === "coach") {
+        window.location.href = "/admin/index.html";
+      } else {
+        window.location.href = "/dashboard/index.html";
       }
     });
 
-    if (error) {
-      regError.textContent = error.message;
-      console.error(error);
-      return;
+    /* ─────────────────────────────────────────
+       REGISTER · crea/upsert profile + curso bienvenida
+    ───────────────────────────────────────── */
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      regError.textContent = "";
+
+      const name = document.getElementById("regName").value.trim();
+      const email = document.getElementById("regEmail").value.trim();
+      const password = document.getElementById("regPassword").value.trim();
+
+      if (!name || !email || !password) {
+        regError.textContent = "Completa todos los campos.";
+        return;
+      }
+
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: name } },
+      });
+
+      if (signUpError) {
+        console.error(signUpError);
+        regError.textContent = signUpError.message || "No se pudo crear la cuenta.";
+        return;
+      }
+
+      // Usuario recién creado
+      let user = data?.user;
+      if (!user) {
+        const { data: retry, error: retryErr } = await supabase.auth.getUser();
+        if (retryErr) {
+          console.error(retryErr);
+        }
+        user = retry?.user;
+      }
+
+      if (!user) {
+        regError.textContent = "Cuenta creada, pero no se pudo iniciar sesión automáticamente.";
+        return;
+      }
+
+      // Upsert en profiles: rol por defecto 'user'
+      const { error: profileUpsertError } = await supabase
+        .from("profiles")
+        .upsert(
+          {
+            id: user.id,
+            full_name: name,
+            email,
+            role: "user",
+          },
+          { onConflict: "id" }
+        );
+
+      if (profileUpsertError) {
+        console.warn("Error upsert profiles (se puede revisar RLS):", profileUpsertError);
+      }
+
+      // Buscar curso de bienvenida (mock igual que antes)
+      const { data: course, error: courseError } = await supabase
+        .from("courses")
+        .select("id, slug")
+        .eq("slug", "curso-bienvenida")
+        .single();
+
+      if (!courseError && course) {
+        await supabase.from("user_courses").insert({
+          user_id: user.id,
+          course_id: course.id,
+          status: "active",
+        });
+      }
+
+      window.location.href = "/dashboard/index.html";
+    });
+
+    /* ─────────────────────────────────────────
+       RESET PASSWORD
+    ───────────────────────────────────────── */
+    openReset.addEventListener("click", () => {
+      resetMsg.textContent = "";
+      resetEmail.value = "";
+      resetOverlay.classList.remove("hidden");
+    });
+
+    resetCancel.addEventListener("click", () => {
+      resetOverlay.classList.add("hidden");
+    });
+
+    resetSend.addEventListener("click", async () => {
+      resetMsg.textContent = "";
+      const email = resetEmail.value.trim();
+
+      if (!email) {
+        resetMsg.textContent = "Ingresa un email válido.";
+        return;
+      }
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) {
+        console.error(error);
+        resetMsg.textContent = "Error al enviar el correo. Revisa el email ingresado.";
+      } else {
+        resetMsg.textContent = "Si el email existe, te hemos enviado un enlace.";
+      }
+    });
+
+    /* ─────────────────────────────────────────
+       OAUTH (OCULTO VISUALMENTE, CÓDIGO LISTO)
+    ───────────────────────────────────────── */
+    const btnGoogle = document.getElementById("btnGoogle");
+    const btnApple = document.getElementById("btnApple");
+
+    if (btnGoogle) {
+      btnGoogle.addEventListener("click", async () => {
+        await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: window.location.origin + "/dashboard/index.html",
+          },
+        });
+      });
     }
 
-    window.location.href = "/dashboard/index.html";
-  });
-</script>
-
+    if (btnApple) {
+      btnApple.addEventListener("click", async () => {
+        await supabase.auth.signInWithOAuth({
+          provider: "apple",
+          options: {
+            redirectTo: window.location.origin + "/dashboard/index.html",
+          },
+        });
+      });
+    }
+  </script>
 </body>
 </html>
