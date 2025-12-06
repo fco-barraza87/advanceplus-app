@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advance+ · App</title>
+
+  <!-- Opcional: CSS para un pequeño loader elegante -->
+  <style>
+    body {
+      margin: 0;
+      background: #0F1E44;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Inter, sans-serif;
+    }
+    .loading {
+      font-size: 1.2rem;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="loading">Cargando tu espacio de entrenamiento...</div>
+
+  <script type="module">
+    import { getCurrentUserWithProfile } from "/js/auth.js";
+    import { redirectByRole } from "/js/router.js";
+
+    async function initApp() {
+      const data = await getCurrentUserWithProfile();
+
+      // No hay sesión → login
+      if (!data) {
+        window.location.href = "/auth/login.html";
+        return;
+      }
+
+      const { profile } = data;
+
+      // Redirigir automáticamente según rol
+      redirectByRole(profile.role);
+    }
+
+    initApp();
+  </script>
+</body>
+</html>
