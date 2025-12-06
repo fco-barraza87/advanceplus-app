@@ -1,69 +1,84 @@
 // ===============================================================
-//  HEADER USUARIO — CARGA DINÁMICA
+//  HEADER USUARIO — CARGA DINÁMICA (VERSIÓN ESTABLE DEFINITIVA)
+// ===============================================================
+
+// 🔥 IMPORTA EL CLIENTE *DIRECTO* SIEMPRE
+import { supabase } from "/js/supabase.js";
+
+// ===============================================================
+//  CARGAR HEADER + ESPERAR A QUE EXISTA EN EL DOM
 // ===============================================================
 export async function loadUserHeader() {
-  const container = document.getElementById("appHeader");
-  if (!container) return;
+  try {
+    const container = document.getElementById("appHeader");
+    if (!container) return;
 
-  // 1. Cargar HTML del header
-  const res = await fetch("/components/header.html");
-  container.innerHTML = await res.text();
+    // 1. Descargar HTML
+    const res = await fetch("/components/header.html");
+    const html = await res.text();
+    container.innerHTML = html;
 
-  // *** FIX CRÍTICO ***
-  // Esperar a que el DOM agregue realmente los elementos insertados
-  await new Promise(requestAnimationFrame);
+    // 2. SOLO después del HTML → render
+    await renderUserHeaderData();
 
-  // 2. Render de datos
-  await renderUserHeaderData();
+    // 3. Activar menú avatar
+    setupAvatarMenu();
 
-  // 3. Activar menú
-  setupAvatarMenu();
+    // 4. Logout
+    setupLogoutButtons();
 
-  // 4. Activar logout
-  setupLogoutButtons();
+  } catch (err) {
+    console.error("❌ Error cargando header:", err);
+  }
 }
 
-
 // ===============================================================
-//  RENDER INFO
+//  RENDER DE LA INFO DEL USUARIO
 // ===============================================================
 async function renderUserHeaderData() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  try {
+    // ⚡ Asegura sesión válida
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, role, avatar_url")
-    .eq("id", user.id)
-    .single();
+    // Obtener datos del perfil
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, role, avatar_url")
+      .eq("id", user.id)
+      .single();
 
-  if (!profile) return;
+    if (!profile) return;
 
-  const nameEl = document.getElementById("headerUserName");
-  const roleEl = document.getElementById("headerUserRole");
-  const avatarEl = document.getElementById("headerAvatar");
+    // Aplicar al DOM
+    const nameEl  = document.getElementById("headerUserName");
+    const roleEl  = document.getElementById("headerUserRole");
+    const avatarEl = document.getElementById("headerAvatar");
 
-  if (nameEl) nameEl.textContent = profile.full_name;
-  if (roleEl) {
-    roleEl.textContent =
-      profile.role === "admin"
-        ? "Administrador"
-        : profile.role === "coach"
-        ? "Coach"
-        : "Miembro Advance+";
-  }
+    if (nameEl) nameEl.textContent = profile.full_name || "Usuario";
 
-  if (avatarEl) {
-    if (profile.avatar_url) {
+    if (roleEl) {
+      roleEl.textContent =
+        profile.role === "admin"
+          ? "Administrador"
+          : profile.role === "coach"
+          ? "Coach"
+          : "Miembro Advance+";
+    }
+
+    if (avatarEl && profile.avatar_url) {
       avatarEl.style.backgroundImage = `url('${profile.avatar_url}')`;
       avatarEl.style.backgroundSize = "cover";
       avatarEl.style.color = "transparent";
     }
+
+  } catch (err) {
+    console.error("❌ Error renderizando datos del header:", err);
   }
 }
 
 // ===============================================================
-//  MENU AVATAR — FIX DEFINITIVO
+//  MENÚ AVATAR
 // ===============================================================
 function setupAvatarMenu() {
   const avatar = document.getElementById("headerAvatar");
@@ -71,32 +86,28 @@ function setupAvatarMenu() {
 
   if (!avatar || !menu) return;
 
-  // Al hacer clic en avatar → abrir/cerrar menú
   avatar.addEventListener("click", (e) => {
     e.stopPropagation();
     menu.classList.toggle("hidden");
   });
 
-  // Cerrar al hacer clic fuera
   document.addEventListener("click", (e) => {
-    if (!menu.contains(e.target)) {
+    if (!menu.contains(e.target) && e.target !== avatar) {
       menu.classList.add("hidden");
     }
   });
 }
 
 // ===============================================================
-//  LOGOUT (botón principal y botón del menú)
+//  LOGOUT
 // ===============================================================
 function setupLogoutButtons() {
-  const btn1 = document.getElementById("btnLogout");
-  const btn2 = document.getElementById("logoutMiniBtn");
+  const btnMini = document.getElementById("logoutMiniBtn");
 
   const logout = async () => {
     await supabase.auth.signOut();
     window.location.href = "/index.html";
   };
 
-  if (btn1) btn1.onclick = logout;
-  if (btn2) btn2.onclick = logout;
+  if (btnMini) btnMini.onclick = logout;
 }
