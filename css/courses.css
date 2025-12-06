@@ -1,96 +1,161 @@
-/* ===============================================
-   COURSES / RETOS
-================================================ */
+/* ============================================================
+   Advance+ · Estilos de Cursos / Retos (premium)
+============================================================ */
+
+/* ============================================================
+   TARJETAS BASE
+============================================================ */
+
+.course-card {
+  background: var(--color-primary-dark);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  transition: var(--transition-normal);
+}
+
+.course-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* ------------------------------------------------------------
+   Portada opcional
+------------------------------------------------------------ */
+
+.course-cover {
+  width: 100%;
+  height: 140px;
+  border-radius: var(--radius-md);
+  background-size: cover;
+  background-position: center;
+  margin-bottom: var(--space-sm);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ------------------------------------------------------------
+   Títulos y textos
+------------------------------------------------------------ */
+
+.course-title {
+  color: var(--color-white);
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.course-desc {
+  color: var(--color-gray-1);
+  font-size: var(--text-sm);
+  line-height: var(--line-normal);
+}
+
+/* ------------------------------------------------------------
+   Pills de metadata (categoría, nivel, duración)
+------------------------------------------------------------ */
+
+.course-meta-row {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.course-pill {
+  padding: var(--space-xs) var(--space-sm);
+  background: rgba(255,255,255,0.08);
+  border-radius: var(--radius-round);
+  font-size: var(--text-xs);
+  color: var(--color-white-muted);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  user-select: none;
+}
+
+/* ------------------------------------------------------------
+   BOTONES
+------------------------------------------------------------ */
+
+.course-btn {
+  align-self: flex-start;
+  margin-top: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  background: var(--gradient-cyan);
+  color: var(--color-primary-dark);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.course-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* ============================================================
+   GRID — EXPLORAR RETOS
+============================================================ */
+
+.courses-grid {
+  display: grid;
+  gap: var(--space-lg);
+  margin-top: var(--space-md);
+}
+
+@media (min-width: 600px) {
+  .courses-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 960px) {
+  .courses-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ============================================================
+   CARRUSEL — RETOS ACTIVOS
+============================================================ */
 
 .courses-carousel {
   display: flex;
-  gap: 0.8rem;
+  gap: var(--space-md);
   overflow-x: auto;
-  padding-bottom: 0.2rem;
+  padding-bottom: var(--space-xs);
+  padding-right: var(--space-xs);
 }
 
 .courses-carousel::-webkit-scrollbar {
   height: 6px;
 }
 
-.courses-carousel::-webkit-scrollbar-track {
-  background: transparent;
-}
-
 .courses-carousel::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.2);
-  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  border-radius: var(--radius-round);
 }
 
-.courses-grid {
-  display: grid;
-  gap: 1rem;
-}
-
-@media (min-width: 640px) {
-  .courses-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 960px) {
-  .courses-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-.course-card {
-  background: rgba(8, 16, 42, 1);
-  border-radius: 14px;
-  padding: 0.9rem 1rem;
-  border: 1px solid rgba(255,255,255,0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
+/* ============================================================
+   PLACEHOLDER / ESTADO VACÍO
+============================================================ */
 
 .course-card.placeholder {
-  border-style: dashed;
-  border-color: rgba(255,255,255,0.3);
+  text-align: center;
+  border: 1px dashed rgba(255,255,255,0.25);
+  padding: var(--space-lg);
 }
 
-.course-title {
-  font-size: 0.95rem;
-  color: #ffffff;
-  margin: 0;
+.course-card.placeholder h3 {
+  color: var(--color-white);
+  font-size: var(--text-md);
 }
 
-.course-subtitle {
-  font-size: 0.8rem;
-  color: #cfd4ff;
-}
-
-.course-meta-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.78rem;
-  color: #9fa8e6;
-}
-
-.course-pill {
-  display: inline-block;
-  padding: 0.15rem 0.55rem;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  background: rgba(255,255,255,0.08);
-  color: #e5e9ff;
-}
-
-.course-btn {
-  margin-top: 0.4rem;
-  align-self: flex-start;
-  padding: 0.45rem 0.9rem;
-  border-radius: 999px;
-  border: none;
-  font-size: 0.8rem;
-  cursor: pointer;
-  background: #34a0ff;
-  color: #04102e;
-  font-weight: 600;
+.course-card.placeholder p {
+  color: var(--color-gray-2);
+  font-size: var(--text-sm);
 }
