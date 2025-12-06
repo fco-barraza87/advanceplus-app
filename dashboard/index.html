@@ -161,24 +161,23 @@
     </button>
   </nav>
 
-    <!-- 1. Cliente supabase -->
-  <script type="module" src="/js/supabase.js"></script>
+<!-- 1. Cliente supabase -->
+<script type="module" src="/js/supabase.js"></script>
 
-    <!-- HEADER -->
-  <script type="module">
-    import { loadUserHeader } from "/components/user-header.js";
-    loadUserHeader();
-  </script>
+<!-- HEADER -->
+<script type="module">
+  import { loadUserHeader } from "/components/user-header.js";
+  loadUserHeader();
+</script>
 
+<!-- ROUTER / PROTECCIÓN -->
+<script type="module">
+  import { protectUserView } from "/js/router.js";
+  protectUserView();
+</script>
 
-    <!-- ROUTER / PROTECCIÓN -->
-  <script type="module">
-    import { protectUserView } from "/js/router.js";
-    protectUserView();
-  </script>
-
-  <!-- LÓGICA DASHBOARD -->
-  <script type="module" src="/js/dashboard.js"></script>
+<!-- LÓGICA DASHBOARD -->
+<script type="module" src="/js/dashboard.js"></script>
 
 </body>
 </html>
