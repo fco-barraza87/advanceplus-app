@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Advance+ · Dashboard</title>
+
+  <!-- ESTILOS -->
+  <!-- Puedes mantener los antiguos mientras migramos -->
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/courses.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+
+<body class="app-bg dashboard-page">
+
+  <!-- HEADER GLOBAL A+ -->
+  <div id="appHeader"></div>
+
+  <!-- MAIN DASHBOARD -->
+  <main class="dashboard-main">
+    <div class="dashboard-wrapper">
+
+      <!-- 1. TU PROGRESO -->
+      <section class="dash-section gamification-section">
+        <h2 class="section-title">Tu progreso</h2>
+
+        <div class="gamification-grid">
+          <!-- Card Racha -->
+          <article class="card" id="cardStreak">
+            <div class="card-header-row">
+              <span class="card-label">Racha activa</span>
+              <span class="card-label" id="streakGoalLabel">Objetivo: 21 días</span>
+            </div>
+
+            <div class="streak-number" id="streakCurrent">0</div>
+
+            <div class="xp-info">
+              <span>Mejor racha</span>
+              <span id="streakBest">0</span>
+            </div>
+
+            <div class="streak-goal-bar">
+              <div class="streak-goal-fill" id="streakBarFill"></div>
+            </div>
+          </article>
+
+          <!-- Card Nivel -->
+          <article class="card" id="cardLevel">
+            <div class="card-header-row">
+              <span class="card-label">Nivel Advance+</span>
+            </div>
+
+            <div class="card-value" id="userLevel">1</div>
+
+            <div class="xp-row">
+              <div class="xp-info">
+                <span id="xpThisLevel">0 / 100 XP</span>
+                <span id="nextLevel">Siguiente: Nivel 2</span>
+              </div>
+              <div class="xp-bar">
+                <div class="xp-bar-fill" id="xpFill"></div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- 2. MISIÓN DEL DÍA -->
+      <section class="dash-section">
+        <h2 class="section-title">Misión del día</h2>
+
+        <!-- Misión normal -->
+        <article id="missionCard" class="mission-card">
+          <div class="mission-header">
+            <span class="dash-pill" id="missionMeta">Cargando...</span>
+          </div>
+          <h3 class="mission-title" id="missionTitle">Cargando misión...</h3>
+          <p class="mission-desc" id="missionDesc">
+            Estamos preparando tu próxima misión A+.
+          </p>
+          <button id="missionBtn" class="mission-btn">
+            Ir a la lección
+          </button>
+        </article>
+
+        <!-- Promo cuando no hay curso activo -->
+        <article id="missionPromoCard" class="mission-card" style="display:none;">
+          <h3 class="mission-title">Activa tu siguiente reto</h3>
+          <p class="mission-desc">
+            Aún no tienes un reto activo, o ya terminaste todos tus cursos.
+            Elige tu próximo programa y sigue avanzando.
+          </p>
+          <button id="missionPromoBtn" class="mission-btn">
+            Ver todos los retos
+          </button>
+        </article>
+      </section>
+
+      <!-- 3. COACH IA - MENSAJE DE HOY -->
+      <section class="dash-section">
+        <h2 class="section-title">Coach IA · Mensaje de hoy</h2>
+
+        <article id="coachMessageCard" class="coach-message-card" style="display:none;">
+          <p class="coach-message-style" id="coachMessageStyle"></p>
+          <p class="coach-message-text" id="coachMessageText"></p>
+          <p class="coach-message-meta" id="coachMessageTime"></p>
+        </article>
+
+        <p id="coachMessageEmpty" class="empty-message">
+          Muy pronto verás aquí mensajes personalizados de tu Coach IA.
+        </p>
+      </section>
+
+      <!-- 4. TUS RETOS ACTIVOS (CARRUSEL) -->
+      <section class="dash-section">
+        <div class="section-header-row">
+          <h2 class="section-title">Tus retos activos</h2>
+          <span id="activeChallengesCount" class="section-subtitle">0 activos</span>
+        </div>
+
+        <div id="activeChallengesCarousel" class="courses-carousel">
+          <!-- tarjetas horizontales por JS -->
+        </div>
+
+        <p id="noActiveChallenges" class="empty-message">
+          Aún no tienes retos activos. Empieza con AI7 o el Curso de Bienvenida.
+        </p>
+      </section>
+
+      <!-- 5. EXPLORAR RETOS (GRID) -->
+      <section class="dash-section">
+        <h2 class="section-title">Explorar retos</h2>
+        <div id="coursesGrid" class="courses-grid">
+          <!-- tarjetas de cursos por JS -->
+        </div>
+        <p id="noAvailableMessage" class="empty-message">
+          Muy pronto llegarán más retos Advance+.
+        </p>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- TABBAR (Desktop + Mobile) -->
+  <nav class="tabbar">
+    <button class="tab-btn active" onclick="location.href='/dashboard/index.html'">
+      <span>🏠</span>
+      <small>Inicio</small>
+    </button>
+
+    <button class="tab-btn" onclick="location.href='/curso/index.html'">
+      <span>📘</span>
+      <small>Retos</small>
+    </button>
+
+    <button class="tab-btn" onclick="location.href='/perfil/index.html'">
+      <span>👤</span>
+      <small>Perfil</small>
+    </button>
+
+    <button class="tab-btn" onclick="location.href='/perfil/datos.html'">
+      <span>📊</span>
+      <small>Progreso</small>
+    </button>
+  </nav>
+
+  <!-- PROTECCIÓN POR ROL -->
+  <script type="module">
+    import { protectPage } from "/js/router.js";
+    protectPage({ allowedRoles: ["user"] });
+  </script>
+
+  <!-- HEADER GLOBAL -->
+  <script type="module">
+    import { loadHeader } from "/components/header.js";
+    loadHeader();
+  </script>
+
+  <!-- LÓGICA DASHBOARD USER -->
+  <script type="module" src="/js/dashboard-user.js"></script>
+
+</body>
+</html>
