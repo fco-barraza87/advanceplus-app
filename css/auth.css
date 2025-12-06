@@ -1,66 +1,71 @@
+/* ============================================================
+   Advance+ · Auth UI (login & register)
+============================================================ */
+
 .auth-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  padding: var(--space-lg);
 }
 
-.auth-box {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.15);
-  padding: 2rem;
-  width: 95%;
-  max-width: 380px;
-  border-radius: 12px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.4);
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--color-primary);
+  padding: var(--space-xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(255,255,255,0.06);
 }
 
-.auth-title {
-  font-size: 1.8rem;
-  margin-bottom: 0.3rem;
+.auth-header {
   text-align: center;
-  color: white;
+  margin-bottom: var(--space-lg);
 }
 
-.auth-subtitle {
-  text-align: center;
-  color: #bbbbbb;
-  margin-bottom: 1.5rem;
-  font-size: 0.9rem;
+.auth-logo {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--color-accent-cyan);
+  margin-bottom: var(--space-sm);
 }
 
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
+.auth-header h2 {
+  font-size: var(--text-xl);
+  color: var(--color-white);
+  margin-bottom: var(--space-xs);
 }
 
-.auth-form input {
-  padding: 0.7rem 1rem;
-  border-radius: 8px;
-  border: none;
-  outline: none;
+.auth-header p {
+  color: var(--color-gray-2);
+  font-size: var(--text-sm);
+}
+
+.auth-field {
+  margin-bottom: var(--space-md);
+}
+
+.auth-field label {
+  display: block;
+  margin-bottom: var(--space-xs);
+  color: var(--color-gray-1);
+  font-size: var(--text-sm);
 }
 
 .auth-btn {
-  margin-top: 0.8rem;
   width: 100%;
+  margin-top: var(--space-sm);
 }
 
 .auth-switch {
-  margin-top: 1rem;
   text-align: center;
-  color: #cccccc;
+  margin-top: var(--space-md);
+  font-size: var(--text-sm);
+  color: var(--color-gray-2);
 }
 
 .auth-switch a {
-  color: #4aa3ff;
-  text-decoration: underline;
-}
-
-.auth-message {
-  margin-top: 1rem;
-  text-align: center;
-  font-size: 0.9rem;
-  color: #ffdddd;
+  color: var(--color-accent-cyan);
 }

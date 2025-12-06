@@ -3,64 +3,93 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Registro · Advance+</title>
+  <title>Crear cuenta · Advance+</title>
 
-  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/components.css">
   <link rel="stylesheet" href="/css/auth.css">
 </head>
 
 <body class="app-bg">
 
   <main class="auth-container">
-    <div class="auth-box">
 
-      <h1 class="auth-title">Crear cuenta</h1>
-      <p class="auth-subtitle">Comienza tu transformación</p>
+    <div class="auth-card">
 
-      <!-- FORM REGISTRO -->
+      <div class="auth-header">
+        <h1 class="auth-logo">A+</h1>
+        <h2>Crea tu cuenta</h2>
+        <p>Comienza tu entrenamiento hoy</p>
+      </div>
+
       <form id="registerForm" class="auth-form">
-        <label>Nombre completo</label>
-        <input type="text" id="full_name" placeholder="Tu nombre" required />
 
-        <label>Email</label>
-        <input type="email" id="email" placeholder="tu@correo.com" required />
+        <div class="auth-field">
+          <label>Nombre completo</label>
+          <input type="text" id="name" class="input" placeholder="Tu nombre" required>
+        </div>
 
-        <label>Contraseña</label>
-        <input type="password" id="password" placeholder="••••••••" required />
+        <div class="auth-field">
+          <label>Email</label>
+          <input type="email" id="email" class="input" placeholder="correo@email.com" required>
+        </div>
 
-        <button type="submit" class="btn-primary auth-btn">Crear cuenta</button>
+        <div class="auth-field">
+          <label>Contraseña</label>
+          <input type="password" id="password" class="input" placeholder="********" required>
+        </div>
+
+        <button class="btn btn-primary auth-btn" type="submit">Crear cuenta</button>
+
+        <p class="auth-switch">
+          ¿Ya tienes una cuenta?
+          <a href="/auth/login.html">Iniciar sesión</a>
+        </p>
+
       </form>
 
-      <p class="auth-switch">
-        ¿Ya tienes cuenta?  
-        <a href="/auth/login.html">Inicia sesión</a>
-      </p>
-
-      <p id="authMessage" class="auth-message"></p>
     </div>
+
   </main>
 
   <script type="module">
-    import { signUp } from "/js/auth.js";
+    import { supabase } from "/js/supabase.js";
 
     const form = document.getElementById("registerForm");
-    const msg  = document.getElementById("authMessage");
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      msg.textContent = "Creando cuenta...";
 
-      const fullName = document.getElementById("full_name").value.trim();
-      const email    = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
 
-      try {
-        await signUp(email, password, fullName);
-        msg.textContent = "Cuenta creada. Redirigiendo...";
-        window.location.href = "/auth/login.html";
-      } catch (error) {
-        msg.textContent = error.message ?? "Error al registrarte";
+      // Crear usuario
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) {
+        alert("Error al crear cuenta: " + error.message);
+        return;
       }
+
+      // Crear perfil en tabla public.profiles
+      const userId = data?.user?.id;
+
+      if (userId) {
+        await supabase.from("profiles").insert({
+          id: userId,
+          full_name: name,
+          email,
+          role: "user"
+        });
+      }
+
+      alert("Cuenta creada. Revisa tu correo si es necesario confirmar.");
+      window.location.href = "/auth/login.html";
     });
   </script>
 
