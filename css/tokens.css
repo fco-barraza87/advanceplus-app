@@ -1,0 +1,90 @@
+/* ============================================================
+   Advance+ · Estilos globales base
+   Esta hoja define el fondo, tipografía y resets comunes.
+   De aquí parte todo el diseño de la plataforma.
+============================================================ */
+
+/* 1. RESET SUAVE */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #0F1E44; /* color principal Advance+ */
+  color: #FFFFFF;
+}
+
+/* 2. CONTENEDORES GENERALES */
+.app-bg {
+  background: #0F1E44;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* 3. TIPOGRAFÍA GENERAL */
+h1, h2, h3, h4, h5 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+p, span, small {
+  font-weight: 400;
+}
+
+/* 4. BOTONES GENERALES */
+.btn-primary {
+  background: #4AF2C5;
+  color: #051135;
+  border: none;
+  padding: 0.7rem 1.2rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #34d8ad;
+}
+
+/* 5. ENLACES */
+a {
+  color: #4AF2C5;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+/* 6. INPUTS BASE */
+input, select, textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 0.65rem 0.9rem;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  outline: none;
+}
+
+input::placeholder {
+  color: rgba(255,255,255,0.45);
+}
+
+/* 7. UTILIDADES */
+.hidden {
+  display: none !important;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
