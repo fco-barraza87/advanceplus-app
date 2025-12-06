@@ -1,25 +1,28 @@
 // ===============================================================
 //  HEADER USUARIO — CARGA DINÁMICA
 // ===============================================================
-import { supabase } from "/js/supabase.js";
-
 export async function loadUserHeader() {
   const container = document.getElementById("appHeader");
   if (!container) return;
 
-  // 1. Cargar HTML
+  // 1. Cargar HTML del header
   const res = await fetch("/components/header.html");
   container.innerHTML = await res.text();
+
+  // *** FIX CRÍTICO ***
+  // Esperar a que el DOM agregue realmente los elementos insertados
+  await new Promise(requestAnimationFrame);
 
   // 2. Render de datos
   await renderUserHeaderData();
 
-  // 3. Activar menú avatar
+  // 3. Activar menú
   setupAvatarMenu();
 
   // 4. Activar logout
   setupLogoutButtons();
 }
+
 
 // ===============================================================
 //  RENDER INFO
