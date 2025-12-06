@@ -1,16 +1,17 @@
-/* ===============================================
-   LAYOUT GENERAL DASHBOARD
-================================================ */
+/* ============================================================
+   Advance+ · Dashboard (Diseño premium)
+============================================================ */
 
 .dashboard-page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--color-primary-dark);
 }
 
 .dashboard-main {
   flex: 1;
-  padding: 1rem 1rem 4.5rem; /* deja espacio para la tabbar */
+  padding: var(--space-md) var(--space-md) calc(64px + var(--space-md));
 }
 
 .dashboard-wrapper {
@@ -18,25 +19,26 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--space-lg);
 }
 
-/* ===============================================
-   SECCIONES
-================================================ */
+/* ============================================================
+   SECCIONES GENERALES
+============================================================ */
 
 .dash-section {
-  background: rgba(15, 30, 68, 0.9);
-  border-radius: 16px;
-  padding: 1.2rem 1.3rem;
-  border: 1px solid rgba(255,255,255,0.06);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  background: var(--color-primary);
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: var(--shadow-card);
 }
 
 .section-title {
-  font-size: 1.1rem;
-  color: #ffffff;
-  margin-bottom: 0.9rem;
+  color: var(--color-white);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  margin-bottom: var(--space-md);
 }
 
 .section-header-row {
@@ -46,21 +48,17 @@
 }
 
 .section-subtitle {
-  font-size: 0.85rem;
-  color: #b2c0ff;
+  font-size: var(--text-sm);
+  color: var(--color-gray-2);
 }
 
-/* ===============================================
-   GAMIFICACIÓN — Racha y Nivel
-================================================ */
-
-.gamification-section {
-  /* nada especial extra por ahora */
-}
+/* ============================================================
+   GAMIFICACIÓN (Racha + Nivel)
+============================================================ */
 
 .gamification-grid {
   display: grid;
-  gap: 1rem;
+  gap: var(--space-md);
 }
 
 @media (min-width: 768px) {
@@ -70,208 +68,219 @@
 }
 
 .card {
-  background: rgba(8, 16, 42, 1);
-  border-radius: 14px;
-  padding: 1rem 1.1rem;
-  border: 1px solid rgba(255,255,255,0.05);
+  background: var(--color-primary-dark);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: var(--shadow-soft);
+  transition: var(--transition-normal);
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
 }
 
 .card-header-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-sm);
 }
 
 .card-label {
-  font-size: 0.8rem;
-  color: #b4c2ff;
+  color: var(--color-gray-2);
+  font-size: var(--text-xs);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
 .streak-number {
-  font-size: 2.6rem;
+  font-size: 2.8rem;
   font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 0.5rem;
+  color: var(--color-white);
+  margin-bottom: var(--space-sm);
 }
 
 .xp-info {
   display: flex;
   justify-content: space-between;
-  font-size: 0.85rem;
-  color: #d8ddff;
-  margin-bottom: 0.6rem;
+  font-size: var(--text-sm);
+  color: var(--color-gray-1);
+  margin-bottom: var(--space-sm);
 }
+
+/* BARRA DE RACHA */
 
 .streak-goal-bar {
   width: 100%;
-  height: 8px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.05);
+  height: 10px;
+  border-radius: var(--radius-round);
+  background: rgba(255,255,255,0.1);
   overflow: hidden;
 }
 
 .streak-goal-fill {
   height: 100%;
   width: 0%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #ffd166, #ff9f1c);
-  transition: width 0.35s ease-out;
+  background: var(--gradient-gold);
+  border-radius: var(--radius-round);
+  transition: width 0.4s ease-out;
 }
 
+/* NIVEL */
+
 .card-value {
-  font-size: 2.4rem;
+  font-size: 2.6rem;
+  color: var(--color-white);
   font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 0.3rem;
+  margin-bottom: var(--space-sm);
 }
 
 .xp-row {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: var(--space-xs);
 }
 
 .xp-bar {
   width: 100%;
-  height: 8px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.05);
+  height: 10px;
+  background: rgba(255,255,255,0.1);
+  border-radius: var(--radius-round);
   overflow: hidden;
 }
 
 .xp-bar-fill {
   height: 100%;
   width: 0%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #4af2c5, #34a0ff);
-  transition: width 0.35s ease-out;
+  background: var(--gradient-cyan);
+  border-radius: var(--radius-round);
+  transition: width 0.4s ease-out;
 }
 
-/* ===============================================
+/* ============================================================
    MISIÓN DEL DÍA
-================================================ */
+============================================================ */
 
 .mission-card {
-  background: rgba(8, 16, 42, 1);
-  border-radius: 14px;
-  padding: 1rem 1.1rem;
-  border: 1px solid rgba(255,255,255,0.05);
+  background: var(--color-primary-dark);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-soft);
 }
 
 .mission-header {
-  margin-bottom: 0.6rem;
+  margin-bottom: var(--space-sm);
 }
 
 .dash-pill {
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  background: rgba(255,255,255,0.08);
-  color: #e5e9ff;
+  padding: var(--space-xs) var(--space-sm);
+  background: rgba(255,255,255,0.1);
+  border-radius: var(--radius-round);
+  font-size: var(--text-xs);
+  color: var(--color-white-muted);
 }
 
 .mission-title {
-  font-size: 1rem;
-  color: #ffffff;
-  margin: 0.4rem 0;
+  font-size: var(--text-lg);
+  color: var(--color-white);
+  margin-bottom: var(--space-xs);
 }
 
 .mission-desc {
-  font-size: 0.9rem;
-  color: #cfd4ff;
-  margin-bottom: 0.9rem;
+  font-size: var(--text-sm);
+  color: var(--color-gray-1);
+  margin-bottom: var(--space-md);
 }
 
 .mission-btn {
-  display: inline-block;
-  padding: 0.55rem 1.1rem;
-  border-radius: 999px;
-  border: none;
-  font-size: 0.9rem;
-  cursor: pointer;
-  background: #4af2c5;
-  color: #051135;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--gradient-blue);
+  color: var(--color-white);
   font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: none;
+  transition: var(--transition-normal);
 }
 
-/* ===============================================
-   COACH IA
-================================================ */
+.mission-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* ============================================================
+   COACH IA — MENSAJE DEL DÍA
+============================================================ */
 
 .coach-message-card {
-  background: rgba(8, 16, 42, 1);
-  border-radius: 14px;
-  padding: 1rem 1.1rem;
+  background: var(--color-primary-dark);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
   border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: var(--shadow-soft);
 }
 
 .coach-message-style {
-  font-size: 0.85rem;
-  color: #b2c0ff;
-  margin-bottom: 0.5rem;
+  color: var(--color-gray-2);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-xs);
 }
 
 .coach-message-text {
-  font-size: 0.95rem;
-  color: #ffffff;
-  margin-bottom: 0.5rem;
+  color: var(--color-white);
+  font-size: var(--text-md);
+  margin-bottom: var(--space-xs);
 }
 
 .coach-message-meta {
-  font-size: 0.8rem;
-  color: #9aa3d9;
+  color: var(--color-gray-3);
+  font-size: var(--text-xs);
 }
 
-/* ===============================================
-   MENSAJES VACÍOS
-================================================ */
+/* ============================================================
+   RETOS ACTIVOS (CARRUSEL)
+============================================================ */
+
+.courses-carousel {
+  display: flex;
+  gap: var(--space-md);
+  overflow-x: auto;
+  padding-bottom: var(--space-xs);
+}
+
+.courses-carousel::-webkit-scrollbar {
+  height: 6px;
+}
+
+.courses-carousel::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.12);
+  border-radius: var(--radius-round);
+}
+
+/* ============================================================
+   EXPLORAR RETOS (GRID)
+============================================================ */
+
+.courses-grid {
+  display: grid;
+  gap: var(--space-md);
+}
+
+@media (min-width: 600px) {
+  .courses-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 960px) {
+  .courses-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
 
 .empty-message {
-  font-size: 0.9rem;
-  color: #b4b9de;
-  margin-top: 0.4rem;
-}
-
-/* ===============================================
-   TABBAR (FIJA ABAJO)
-================================================ */
-
-.tabbar {
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 62px;
-  background: rgba(8, 16, 42, 0.96);
-  border-top: 1px solid rgba(255,255,255,0.08);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  z-index: 40;
-  backdrop-filter: blur(10px);
-}
-
-.tab-btn {
-  background: none;
-  border: none;
-  color: #d3dcff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.1rem;
-  font-size: 0.8rem;
-  cursor: pointer;
-  padding: 0;
-}
-
-.tab-btn span {
-  font-size: 1.1rem;
-}
-
-.tab-btn.active {
-  color: #4af2c5;
+  font-size: var(--text-sm);
+  color: var(--color-gray-2);
 }
