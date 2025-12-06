@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro · Advance+</title>
+
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+
+<body class="app-bg">
+
+  <main class="auth-container">
+    <div class="auth-box">
+
+      <h1 class="auth-title">Crear cuenta</h1>
+      <p class="auth-subtitle">Comienza tu transformación</p>
+
+      <!-- FORM REGISTRO -->
+      <form id="registerForm" class="auth-form">
+        <label>Nombre completo</label>
+        <input type="text" id="full_name" placeholder="Tu nombre" required />
+
+        <label>Email</label>
+        <input type="email" id="email" placeholder="tu@correo.com" required />
+
+        <label>Contraseña</label>
+        <input type="password" id="password" placeholder="••••••••" required />
+
+        <button type="submit" class="btn-primary auth-btn">Crear cuenta</button>
+      </form>
+
+      <p class="auth-switch">
+        ¿Ya tienes cuenta?  
+        <a href="/auth/login.html">Inicia sesión</a>
+      </p>
+
+      <p id="authMessage" class="auth-message"></p>
+    </div>
+  </main>
+
+  <script type="module">
+    import { signUp } from "/js/auth.js";
+
+    const form = document.getElementById("registerForm");
+    const msg  = document.getElementById("authMessage");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      msg.textContent = "Creando cuenta...";
+
+      const fullName = document.getElementById("full_name").value.trim();
+      const email    = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      try {
+        await signUp(email, password, fullName);
+        msg.textContent = "Cuenta creada. Redirigiendo...";
+        window.location.href = "/auth/login.html";
+      } catch (error) {
+        msg.textContent = error.message ?? "Error al registrarte";
+      }
+    });
+  </script>
+
+</body>
+</html>
