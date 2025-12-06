@@ -15,7 +15,35 @@
 <body class="app-bg dashboard-page">
 
   <!-- HEADER NUEVO (PREMIUM) -->
-  <div id="appHeader"></div>
+    <header id="apHeader" class="ap-header">
+
+      <!-- IZQUIERDA -->
+      <div class="ap-header-left">
+        <div class="ap-logo">A+</div>
+
+        <div class="ap-header-info">
+          <span id="headerUserName" class="ap-header-name">Usuario</span>
+          <span id="headerUserRole" class="ap-header-role">Miembro Advance+</span>
+        </div>
+      </div>
+
+      <!-- AVATAR + MENÚ -->
+      <div class="ap-header-right">
+        <div id="headerAvatar" class="ap-header-avatar">U</div>
+
+        <!-- MENU DESPLEGABLE -->
+        <div id="userMenu" class="ap-user-menu hidden">
+          <button onclick="location.href='/perfil/datos.html'">👤 Ver perfil</button>
+          <button onclick="location.href='/perfil/cursos.html'">📘 Mis retos</button>
+          <button onclick="location.href='/perfil/configuracion.html'">⚙️ Configuración</button>
+
+          <div class="menu-divider"></div>
+
+          <button id="logoutMiniBtn" class="logout-btn">🚪 Cerrar sesión</button>
+        </div>
+      </div>
+
+    </header>
 
   <!-- MAIN DASHBOARD -->
   <main class="dashboard-main">
@@ -178,6 +206,57 @@
 
 <!-- LÓGICA DASHBOARD -->
 <script type="module" src="/js/dashboard.js"></script>
+
+<script type="module">
+import { supabase } from "/js/supabase.js";
+
+async function renderUserHeader() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, role, avatar_url")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) return;
+
+  document.getElementById("headerUserName").textContent = profile.full_name;
+  document.getElementById("headerUserRole").textContent =
+    profile.role === "admin" ? "Administrador" :
+    profile.role === "coach" ? "Coach" : "Miembro Advance+";
+
+  const avatar = document.getElementById("headerAvatar");
+  if (profile.avatar_url) {
+    avatar.style.backgroundImage = `url('${profile.avatar_url}')`;
+    avatar.style.backgroundSize = "cover";
+    avatar.style.color = "transparent";
+  }
+}
+
+// Menu
+const avatar = document.getElementById("headerAvatar");
+const menu = document.getElementById("userMenu");
+if (avatar && menu) {
+  avatar.addEventListener("click", e => {
+    e.stopPropagation();
+    menu.classList.toggle("hidden");
+  });
+  document.addEventListener("click", e => {
+    if (!menu.contains(e.target)) menu.classList.add("hidden");
+  });
+}
+
+// Logout
+document.getElementById("logoutMiniBtn")?.addEventListener("click", async () => {
+  await supabase.auth.signOut();
+  window.location.href = "/index.html";
+});
+
+renderUserHeader();
+</script>
+
 
 </body>
 </html>
