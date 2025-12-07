@@ -1,27 +1,23 @@
 // /js/router.js
-
 import { getCurrentUserWithProfile } from "./auth.js";
 
-/**
- * Protege una página según roles permitidos.
- * 
- * Example:
- * protectPage({ allowedRoles: ["user"] });
- * protectPage({ allowedRoles: ["admin"] });
- */
+/* ============================================================
+   PROTEGER UNA PÁGINA (por rol)
+   Example:
+      protectPage({ allowedRoles: ["user"] });
+============================================================ */
 export async function protectPage({ allowedRoles = [] } = {}) {
-  
   const data = await getCurrentUserWithProfile();
 
-  // No hay sesión → login
-  if (!data) {
+  // No está logueado → login
+  if (!data || !data.profile) {
     window.location.href = "/auth/login.html";
     return;
   }
 
   const { profile } = data;
 
-  // Si no cumple el rol → enviar a su dashboard correcto
+  // Si el rol del usuario no está permitido → redirigir
   if (!allowedRoles.includes(profile.role)) {
     redirectByRole(profile.role);
     return;
@@ -29,19 +25,25 @@ export async function protectPage({ allowedRoles = [] } = {}) {
 }
 
 /* ============================================================
-   Redirección automática según rol
+   REDIRECCIÓN SEGÚN ROL
 ============================================================ */
-export function redirectByRole(role) {
-  switch (role) {
-    case "admin":
-      window.location.href = "/dashboard/admin.html";
-      break;
+export function redirectByRole(role = "user") {
+  const routes = {
+    admin: "/dashboard/admin.html",
+    coach: "/dashboard/coach.html",
+    user: "/dashboard/index.html",
+  };
 
-    case "coach":
-      window.location.href = "/dashboard/coach.html";
-      break;
+  window.location.href = routes[role] ?? routes.user;
+}
 
-    default:
-      window.location.href = "/dashboard/index.html";
+/* ============================================================
+   REDIRECCIÓN SI YA HAY UNA SESIÓN ACTIVA
+   (útil para login y register)
+============================================================ */
+export async function redirectIfLoggedIn() {
+  const data = await getCurrentUserWithProfile();
+  if (data && data.profile) {
+    redirectByRole(data.profile.role);
   }
 }
