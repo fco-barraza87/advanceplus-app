@@ -4,15 +4,17 @@ import { getCurrentUserWithProfile, logout } from "/js/auth.js";
 import { redirectByRole } from "/js/router.js";
 
 /* ============================================================
-   HEADER PRINCIPAL ADVANCE+
+   HEADER ADVANCE+ · V2 PREMIUM
+   Modular, seguro, con roles y resaltado activo
 ============================================================ */
+
 export async function loadHeader() {
   const container = document.getElementById("appHeader");
   if (!container) return;
 
+  // Obtener sesión + perfil
   const data = await getCurrentUserWithProfile();
 
-  // Si no hay usuario → enviamos al login
   if (!data) {
     window.location.href = "/auth/login.html";
     return;
@@ -24,42 +26,67 @@ export async function loadHeader() {
   const avatar = profile.avatar_url ?? "/img/default-avatar.png";
   const role = profile.role ?? "user";
 
+  // Obtener ruta actual para resaltar el ítem correcto
+  const currentPath = window.location.pathname;
+
+  /* ------------------------------------------------------------
+     NAVIGACIÓN POR ROL
+  ------------------------------------------------------------ */
+
+  const navUser = [
+    { label: "Inicio", url: "/dashboard/index.html" },
+    { label: "Mis Cursos", url: "/curso/index.html" },
+    { label: "Perfil", url: "/perfil/index.html" },
+  ];
+
+  const navCoach = [
+    { label: "Panel Coach", url: "/dashboard/coach.html" },
+    { label: "Perfil", url: "/perfil/index.html" },
+  ];
+
+  const navAdmin = [
+    { label: "Admin", url: "/dashboard/admin.html" },
+    { label: "Coach", url: "/dashboard/coach.html" },
+    { label: "Perfil", url: "/perfil/index.html" },
+  ];
+
+  const menus = {
+    user: navUser,
+    coach: navCoach,
+    admin: navAdmin,
+  };
+
+  const navItems = menus[role]
+    .map((item) => {
+      const isActive = currentPath.includes(item.url) ? "active-link" : "";
+      return `<a href="${item.url}" class="${isActive}">${item.label}</a>`;
+    })
+    .join("");
+
+  /* ------------------------------------------------------------
+     HEADER FINAL
+  ------------------------------------------------------------ */
+
   container.innerHTML = `
     <header class="ap-header">
 
-      <!-- LOGO -->
+      <!-- LOGO A+ -->
       <div class="ap-header-left" onclick="window.location.href='/dashboard/index.html'">
         <h1 class="ap-logo">A+</h1>
       </div>
 
-      <!-- MENÚ DE NAVEGACIÓN (depende del rol) -->
+      <!-- MENÚ -->
       <nav class="ap-nav">
-        ${role === "user" ? `
-          <a href="/dashboard/index.html">Inicio</a>
-          <a href="/curso/index.html">Mis Cursos</a>
-          <a href="/perfil/index.html">Perfil</a>
-        ` : ""}
-
-        ${role === "coach" ? `
-          <a href="/dashboard/coach.html">Panel Coach</a>
-          <a href="/perfil/index.html">Perfil</a>
-        ` : ""}
-
-        ${role === "admin" ? `
-          <a href="/dashboard/admin.html">Admin</a>
-          <a href="/dashboard/coach.html">Coach</a>
-          <a href="/perfil/index.html">Perfil</a>
-        ` : ""}
+        ${navItems}
       </nav>
 
-      <!-- PERFIL / AVATAR -->
+      <!-- DROPDOWN PERFIL -->
       <div class="ap-header-right">
         <div class="ap-user-menu">
           <img src="${avatar}" class="ap-avatar" id="apAvatarBtn" />
 
           <div class="ap-dropdown" id="apDropdown">
             <p class="ap-user-name">${fullName}</p>
-
             <button id="logoutBtn" class="ap-logout-btn">Cerrar sesión</button>
           </div>
         </div>
@@ -68,18 +95,22 @@ export async function loadHeader() {
     </header>
   `;
 
-  // EVENTOS
+  /* ------------------------------------------------------------
+     EVENTOS DEL HEADER
+  ------------------------------------------------------------ */
+
+  // Logout
   document.getElementById("logoutBtn").addEventListener("click", logout);
 
-  // Menú desplegable avatar
+  // Toggle dropdown
   const avatarBtn = document.getElementById("apAvatarBtn");
   const dropdown = document.getElementById("apDropdown");
 
-  avatarBtn.addEventListener("click", () => {
+  avatarBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
     dropdown.classList.toggle("show");
   });
 
-  window.addEventListener("click", (e) => {
-    if (!avatarBtn.contains(e.target)) dropdown.classList.remove("show");
-  });
+  // Cerrar si haces click fuera
+  document.addEventListener("click", () => dropdown.classList.remove("show"));
 }

@@ -265,3 +265,11 @@
   transform: translateY(-2px);
   color: var(--color-white);
 }
+
+
+.ap-nav a.active-link {
+  color: var(--color-white);
+  font-weight: 600;
+  border-bottom: 2px solid var(--color-accent-cyan);
+  padding-bottom: 2px;
+}
