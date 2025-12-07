@@ -1,143 +1,478 @@
 // /js/dashboard-user.js
+import { supabase } from "/js/supabase.js";
 
-import { getCurrentUserWithProfile } from "./auth.js";
+const qs = (sel) => document.querySelector(sel);
 
-/* ============================================================
-   Fórmula de XP y niveles (reutilizada)
-============================================================ */
-function xpForLevel(level) {
-  const base = 100;
-  const growth = 1.35;
-  return Math.round(base * Math.pow(growth, level - 1));
+/* ==================================================
+   1. CARGA DE USUARIO + PROFILE + USER_STATS
+================================================== */
+async function loadUserData() {
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) return null;
+
+  // Perfil básico + métricas de respaldo
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, full_name, avatar_url, role, xp_total, streak_current, streak_best")
+    .eq("id", user.id)
+    .single();
+
+  // Stats avanzadas (si existe user_stats)
+  const { data: stats } = await supabase
+    .from("user_stats")
+    .select("xp_total, streak_current, streak_best, level, xp_prev_level, xp_next_level")
+    .eq("user_id", user.id)
+    .single();
+
+  return { user, profile, stats };
 }
 
-function getLevelProgress(xpTotal) {
-  let level = 1;
-  let xpUsed = 0;
-  let xpNeeded = xpForLevel(level);
+/* ==================================================
+   2. OBJETIVO DE RACHA SEGÚN CURSO ACTIVO
+================================================== */
+async function getStreakGoal(userId) {
+  const { data: active } = await supabase
+    .from("user_courses")
+    .select("course_id")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .limit(1);
 
-  while (xpTotal >= xpUsed + xpNeeded) {
-    xpUsed += xpNeeded;
-    level++;
-    xpNeeded = xpForLevel(level);
+  if (!active || !active.length) return 21;
+
+  const { data: course } = await supabase
+    .from("courses")
+    .select("duration_days")
+    .eq("id", active[0].course_id)
+    .single();
+
+  return course?.duration_days ?? 21;
+}
+
+/* ==================================================
+   3. GAMIFICACIÓN — NIVELES + XP + RACHA
+================================================== */
+async function renderGamification(stats, profile, userId) {
+  // Fallback: si no hay user_stats, usamos profiles
+  const xpTotal = stats?.xp_total ?? profile?.xp_total ?? 0;
+  const streak = stats?.streak_current ?? profile?.streak_current ?? 0;
+  const best = stats?.streak_best ?? profile?.streak_best ?? 0;
+
+  /* ---------- RACHA ---------- */
+  const goalDays = await getStreakGoal(userId);
+  const pctRacha = Math.min(100, goalDays > 0 ? (streak / goalDays) * 100 : 0);
+
+  const streakCurrentEl = qs("#streakCurrent");
+  const streakBestEl = qs("#streakBest");
+  const streakGoalLabelEl = qs("#streakGoalLabel");
+  const rachaBar = qs("#streakBarFill");
+
+  if (streakCurrentEl) streakCurrentEl.textContent = streak;
+  if (streakBestEl) streakBestEl.textContent = best;
+  if (streakGoalLabelEl) streakGoalLabelEl.textContent = `Objetivo: ${goalDays} días`;
+
+  if (rachaBar) {
+    setTimeout(() => {
+      rachaBar.style.width = pctRacha + "%";
+    }, 150);
   }
 
-  const xpIntoLevel = xpTotal - xpUsed;
-  const xpRemaining = xpNeeded - xpIntoLevel;
-  const pct = Math.min(100, (xpIntoLevel / xpNeeded) * 100);
+  /* ---------- NIVEL + XP ---------- */
+  let xpPrev = stats?.xp_prev_level;
+  let xpNext = stats?.xp_next_level;
+  let level = stats?.level;
 
-  return { level, xpIntoLevel, xpRemaining, pct, xpNeeded };
-}
+  if (
+    typeof xpPrev === "number" &&
+    typeof xpNext === "number" &&
+    typeof level === "number"
+  ) {
+    // usamos los valores calculados en la DB (user_stats)
+  } else {
+    // fallback local: fórmula
+    const base = 100;
+    const growth = 1.35;
+    const xpForLevel = (lvl) => Math.round(base * Math.pow(growth, lvl - 1));
 
-/* ============================================================
-   Inicializar Dashboard User
-============================================================ */
-async function initDashboard() {
-  const data = await getCurrentUserWithProfile();
-  if (!data) return;
-  const { profile } = data;
+    level = 1;
+    let xpReq = xpForLevel(1);
 
-  renderGamification(profile);
-  renderMissionPlaceholder();
-  renderChallengesPlaceholder();
-}
+    while (xpTotal >= xpReq) {
+      level++;
+      xpReq = xpForLevel(level);
+    }
 
-function renderGamification(profile) {
-  const xpTotal = profile.xp_total ?? 0;
-  const streakCurrent = profile.streak_current ?? 0;
-  const streakBest = profile.streak_best ?? 0;
-
-  // Streak
-  const streakCurrentEl = document.getElementById("streakCurrent");
-  const streakBestEl = document.getElementById("streakBest");
-  const streakBarFill = document.getElementById("streakBarFill");
-
-  if (streakCurrentEl) streakCurrentEl.textContent = streakCurrent;
-  if (streakBestEl) streakBestEl.textContent = streakBest;
-
-  const goalDays = 21;
-  const streakPct = Math.max(0, Math.min(100, (streakCurrent / goalDays) * 100));
-  if (streakBarFill) streakBarFill.style.width = `${streakPct}%`;
-
-  // XP / Nivel
-  const { level, xpIntoLevel, xpRemaining, pct, xpNeeded } = getLevelProgress(xpTotal);
-
-  const levelEl = document.getElementById("userLevel");
-  const xpThisLevelEl = document.getElementById("xpThisLevel");
-  const nextLevelEl = document.getElementById("nextLevel");
-  const xpFillEl = document.getElementById("xpFill");
-
-  if (levelEl) levelEl.textContent = level;
-  if (xpThisLevelEl) xpThisLevelEl.textContent = `${xpIntoLevel} / ${xpNeeded} XP`;
-  if (nextLevelEl) nextLevelEl.textContent = `Siguiente: Nivel ${level + 1}`;
-  if (xpFillEl) xpFillEl.style.width = `${pct}%`;
-}
-
-/* ============================================================
-   Misión del día (placeholder mientras no haya DB de cursos)
-============================================================ */
-function renderMissionPlaceholder() {
-  const missionCard = document.getElementById("missionCard");
-  const promoCard = document.getElementById("missionPromoCard");
-  const missionMeta = document.getElementById("missionMeta");
-  const missionTitle = document.getElementById("missionTitle");
-  const missionDesc = document.getElementById("missionDesc");
-  const missionBtn = document.getElementById("missionBtn");
-  const missionPromoBtn = document.getElementById("missionPromoBtn");
-
-  // De momento mostramos un estado neutro hasta integrar DB real
-  if (missionMeta) missionMeta.textContent = "Próximamente";
-  if (missionTitle) missionTitle.textContent = "Tu próxima misión está en camino";
-  if (missionDesc) missionDesc.textContent = "Muy pronto verás aquí la misión diaria de tu reto activo.";
-
-  if (missionBtn) {
-    missionBtn.addEventListener("click", () => {
-      // Más adelante: ir a la lección actual del curso activo
-      window.location.href = "/curso/index.html";
-    });
+    xpNext = xpReq;
   }
 
-  if (missionPromoBtn) {
-    missionPromoBtn.addEventListener("click", () => {
-      window.location.href = "/curso/index.html";
-    });
-  }
+  const pctXP = Math.min(100, xpNext > 0 ? (xpTotal / xpNext) * 100 : 0);
 
-  // Por ahora, asumimos que no hay lógica real de curso activo
-  if (missionCard) missionCard.style.display = "block";
-  if (promoCard) promoCard.style.display = "none";
+  const levelEl = qs("#userLevel");
+  const xpThisLevelEl = qs("#xpThisLevel");
+  const nextLevelEl = qs("#nextLevel");
+  const xpBar = qs("#xpFill");
+
+  if (levelEl) levelEl.textContent = level ?? 1;
+  if (xpThisLevelEl) xpThisLevelEl.textContent = `${xpTotal} / ${xpNext || 0} XP`;
+  if (nextLevelEl) nextLevelEl.textContent = `Siguiente: Nivel ${(level || 1) + 1}`;
+
+  if (xpBar) {
+    setTimeout(() => {
+      xpBar.style.width = pctXP + "%";
+    }, 150);
+  }
 }
 
-/* ============================================================
-   Retos activos / Explorar retos (placeholders)
-   Más adelante se conectan a las tablas reales de cursos.
-============================================================ */
-function renderChallengesPlaceholder() {
-  const activeCarousel = document.getElementById("activeChallengesCarousel");
-  const activeCountEl = document.getElementById("activeChallengesCount");
-  const noActiveEl = document.getElementById("noActiveChallenges");
+/* ==================================================
+   4. RETOS ACTIVOS (CARRUSEL)
+================================================== */
+async function loadActiveCourses(userId) {
+  const { data: userCourses } = await supabase
+    .from("user_courses")
+    .select("course_id, status, started_at")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .order("started_at", { ascending: false });
 
-  const coursesGrid = document.getElementById("coursesGrid");
-  const noAvailableEl = document.getElementById("noAvailableMessage");
+  const list = [];
 
-  // De momento, mostramos que no hay retos activos.
-  if (activeCarousel) activeCarousel.innerHTML = "";
-  if (activeCountEl) activeCountEl.textContent = "0 activos";
-  if (noActiveEl) noActiveEl.style.display = "block";
+  for (const uc of userCourses || []) {
+    const { data: course } = await supabase
+      .from("courses")
+      .select("id, title, slug, cover_url, category, level, duration_days, active")
+      .eq("id", uc.course_id)
+      .single();
 
-  if (coursesGrid) {
-    coursesGrid.innerHTML = `
-      <div class="course-card placeholder">
-        <h3>Muy pronto</h3>
-        <p>Estamos preparando los retos AI7, AI21 y muchos más para ti.</p>
+    if (course?.active) list.push(course);
+  }
+
+  return list;
+}
+
+function renderActiveCourses(courses, user) {
+  const carousel = qs("#activeChallengesCarousel");
+  const empty = qs("#noActiveChallenges");
+  const count = qs("#activeChallengesCount");
+
+  if (!carousel || !empty || !count) return;
+
+  carousel.innerHTML = "";
+
+  if (!courses.length) {
+    empty.style.display = "block";
+    count.textContent = "0 activos";
+    return;
+  }
+
+  empty.style.display = "none";
+  count.textContent = `${courses.length} activo${courses.length > 1 ? "s" : ""}`;
+
+  courses.forEach((course) => {
+    const cover =
+      course.cover_url || "https://via.placeholder.com/600x300.png?text=A+";
+
+    const card = document.createElement("article");
+    card.className = "course-card clickable carousel-item";
+    card.innerHTML = `
+      <div class="course-cover">
+        <img src="${cover}" alt="${course.title}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" />
       </div>
+      <div class="course-title">${course.title}</div>
+      <div class="course-meta">${course.level || "Todos los niveles"}</div>
+      <div class="course-day">Duración: ${course.duration_days || "—"} días</div>
     `;
-  }
 
-  if (noAvailableEl) noAvailableEl.style.display = "none";
+    card.onclick = async () => {
+      const { data: progress } = await supabase
+        .from("progress")
+        .select("day, completed")
+        .eq("user_id", user.id)
+        .eq("course_id", course.id)
+        .order("day");
+
+      let nextDay = 1;
+
+      if (progress?.length) {
+        const done = progress.filter((p) => p.completed);
+        if (done.length) nextDay = done.at(-1).day + 1;
+      }
+
+      if (nextDay > (course.duration_days || 1)) {
+        nextDay = course.duration_days || 1;
+      }
+
+      window.location.href = `/curso/index.html?c=${course.id}&day=${nextDay}`;
+    };
+
+    carousel.appendChild(card);
+  });
 }
 
-/* ============================================================
-   Ejecutar al cargar
-============================================================ */
+/* ==================================================
+   5. EXPLORAR RETOS
+================================================== */
+async function loadAvailableCourses(userId) {
+  const { data: all } = await supabase
+    .from("courses")
+    .select(`
+      id,
+      title,
+      short_promise,
+      hero_image_url,
+      thumbnail_url,
+      badge_text,
+      price_chf,
+      sale_price_chf,
+      reviews_average,
+      reviews_count,
+      active
+    `)
+    .eq("active", true);
+
+  const { data: mine } = await supabase
+    .from("user_courses")
+    .select("course_id")
+    .eq("user_id", userId);
+
+  const owned = new Set((mine || []).map((c) => c.course_id));
+
+  return (all || []).filter((c) => !owned.has(c.id));
+}
+
+function renderPremiumCourseCard(course) {
+  const card = document.createElement("article");
+  card.className = "course-card premium-course-card";
+
+  const hero =
+    course.hero_image_url ||
+    course.thumbnail_url ||
+    "https://via.placeholder.com/600x300?text=A+";
+
+  card.innerHTML = `
+    <div class="course-cover" style="background-image:url('${hero}');background-size:cover;background-position:center;"></div>
+    <div class="course-title">${course.title}</div>
+    <p class="course-desc">${course.short_promise || ""}</p>
+    <div class="course-meta-row">
+      ${
+        course.badge_text
+          ? `<span class="course-pill">${course.badge_text}</span>`
+          : ""
+      }
+      <span class="course-pill">
+        ⭐ ${course.reviews_average || "5.0"} · ${course.reviews_count || 0} reseñas
+      </span>
+    </div>
+    <div class="course-price">
+      ${
+        course.sale_price_chf
+          ? `<del>${course.price_chf} CHF</del> ${course.sale_price_chf} CHF`
+          : `${course.price_chf || 0} CHF`
+      }
+    </div>
+    <button class="course-btn">Ver reto →</button>
+  `;
+
+  card.onclick = () => {
+    // Más adelante podemos crear una página de detalle.
+    window.location.href = `/curso/index.html?c=${course.id}`;
+  };
+
+  return card;
+}
+
+function renderAvailableCourses(courses) {
+  const grid = qs("#coursesGrid");
+  const empty = qs("#noAvailableMessage");
+
+  if (!grid || !empty) return;
+
+  grid.innerHTML = "";
+
+  if (!courses.length) {
+    empty.style.display = "block";
+    return;
+  }
+
+  empty.style.display = "none";
+
+  courses.forEach((course) => {
+    const card = renderPremiumCourseCard(course);
+    grid.appendChild(card);
+  });
+}
+
+/* ==================================================
+   6. MISIÓN DEL DÍA
+================================================== */
+async function loadMission(user) {
+  const card = qs("#missionCard");
+  const promoCard = qs("#missionPromoCard");
+
+  if (!card || !promoCard) return;
+
+  // 1. Curso activo más reciente
+  const { data: active } = await supabase
+    .from("user_courses")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("status", "active")
+    .order("started_at", { ascending: false })
+    .limit(1);
+
+  const promoBtn = qs("#missionPromoBtn");
+
+  // Si NO tiene cursos activos → promo directa
+  if (!active?.length) {
+    card.style.display = "none";
+    promoCard.style.display = "flex";
+
+    if (promoBtn) {
+      promoBtn.textContent = "Ver retos disponibles";
+      promoBtn.onclick = () => (window.location.href = "/curso/index.html");
+    }
+    return;
+  }
+
+  const courseId = active[0].course_id;
+
+  // 2. Datos del curso
+  const { data: course } = await supabase
+    .from("courses")
+    .select("*")
+    .eq("id", courseId)
+    .single();
+
+  if (!course) {
+    card.style.display = "none";
+    promoCard.style.display = "flex";
+    if (promoBtn) {
+      promoBtn.textContent = "Ver retos disponibles";
+      promoBtn.onclick = () => (window.location.href = "/curso/index.html");
+    }
+    return;
+  }
+
+  // 3. Progreso del curso
+  const { data: progress } = await supabase
+    .from("progress")
+    .select("day, completed")
+    .eq("user_id", user.id)
+    .eq("course_id", courseId)
+    .order("day");
+
+  let nextDay = 1;
+  if (progress?.length) {
+    const done = progress.filter((p) => p.completed);
+    if (done.length) nextDay = done.at(-1).day + 1;
+  }
+
+  // 4. Si ya completó todo el curso…
+  if (nextDay > (course.duration_days || 1)) {
+    const { data: available } = await supabase
+      .from("courses")
+      .select("id")
+      .eq("active", true)
+      .neq("id", courseId);
+
+    card.style.display = "none";
+    promoCard.style.display = "flex";
+
+    if (available?.length) {
+      if (promoBtn) {
+        promoBtn.textContent = "Ver más retos";
+        promoBtn.onclick = () => (window.location.href = "/curso/index.html");
+      }
+    } else {
+      const promoDesc = promoCard.querySelector(".mission-desc");
+      if (promoDesc) {
+        promoDesc.textContent =
+          "Has completado todos los cursos disponibles. Nuevos retos A+ llegarán muy pronto.";
+      }
+      if (promoBtn) {
+        promoBtn.textContent = "Volver al inicio";
+        promoBtn.onclick = () => (window.location.href = "/dashboard/index.html");
+      }
+    }
+
+    return;
+  }
+
+  // 5. Curso aún en progreso → misión normal
+  const titleEl = qs("#missionTitle");
+  const descEl = qs("#missionDesc");
+  const metaEl = qs("#missionMeta");
+  const btnEl = qs("#missionBtn");
+
+  if (titleEl) titleEl.textContent = course.mission_title || "Misión del día";
+  if (descEl)
+    descEl.textContent =
+      course.mission_desc ||
+      "Toma el control de tu día con esta acción clave.";
+  if (metaEl)
+    metaEl.textContent = `${course.title} · Día ${nextDay} · ${
+      course.category || "Reto"
+    }`;
+
+  if (btnEl) {
+    btnEl.onclick = () => {
+      window.location.href = `/curso/index.html?c=${courseId}&day=${nextDay}`;
+    };
+  }
+
+  promoCard.style.display = "none";
+  card.style.display = "flex";
+}
+
+/* ==================================================
+   7. COACH IA – MENSAJE DEL DÍA
+================================================== */
+async function loadRandomCoachMessage() {
+  const textEl = qs("#coachMessageText");
+  const styleEl = qs("#coachMessageStyle");
+  const timeEl = qs("#coachMessageTime");
+  const cardEl = qs("#coachMessageCard");
+  const emptyEl = qs("#coachMessageEmpty");
+
+  const { data, error } = await supabase
+    .from("coach_messages_library")
+    .select("message, style")
+    .eq("active", true);
+
+  if (error || !data || !data.length) {
+    if (cardEl) cardEl.style.display = "none";
+    if (emptyEl) emptyEl.style.display = "block";
+    return;
+  }
+
+  const random = data[Math.floor(Math.random() * data.length)];
+
+  if (textEl) textEl.textContent = random.message;
+  if (styleEl) styleEl.textContent = `Estilo: ${random.style}`;
+  if (timeEl) timeEl.textContent = "Mensaje del día";
+
+  if (emptyEl) emptyEl.style.display = "none";
+  if (cardEl) cardEl.style.display = "block";
+}
+
+/* ==================================================
+   8. INIT DASHBOARD
+================================================== */
+async function initDashboard() {
+  const data = await loadUserData();
+  if (!data) return;
+
+  const { user, profile, stats } = data;
+
+  await renderGamification(stats, profile, user.id);
+
+  const active = await loadActiveCourses(user.id);
+  renderActiveCourses(active, user);
+
+  const available = await loadAvailableCourses(user.id);
+  renderAvailableCourses(available);
+
+  await loadMission(user);
+  await loadRandomCoachMessage();
+}
+
 initDashboard();
