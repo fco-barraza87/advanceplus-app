@@ -1,31 +1,30 @@
 /* ============================================================
-   Advance+ · Estilos globales base
-   Esta hoja define el fondo, tipografía y resets comunes.
-   De aquí parte todo el diseño de la plataforma.
+   Advance+ · Estilos Globales (Limpios y Compatibles)
 ============================================================ */
 
-/* 1. RESET SUAVE */
+/* RESET SUAVE */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* BASE */
 html, body {
   height: 100%;
   font-family: 'Inter', system-ui, sans-serif;
-  background: #0F1E44; /* color principal Advance+ */
   color: #FFFFFF;
+  background: var(--color-primary-dark); /* usa tokens */
 }
 
-/* 2. CONTENEDORES GENERALES */
+/* CONTENEDOR GENERAL */
 .app-bg {
-  background: #0F1E44;
   min-height: 100vh;
   width: 100%;
+  background: var(--color-primary-dark);
 }
 
-/* 3. TIPOGRAFÍA GENERAL */
+/* TIPOGRAFÍA GENERAL */
 h1, h2, h3, h4, h5 {
   font-weight: 600;
   letter-spacing: -0.02em;
@@ -35,9 +34,9 @@ p, span, small {
   font-weight: 400;
 }
 
-/* 4. BOTONES GENERALES */
+/* BOTÓN BASE (el resto va en components.css) */
 .btn-primary {
-  background: #4AF2C5;
+  background: var(--accent-cyan, #4AF2C5);
   color: #051135;
   border: none;
   padding: 0.7rem 1.2rem;
@@ -48,12 +47,12 @@ p, span, small {
 }
 
 .btn-primary:hover {
-  background: #34d8ad;
+  filter: brightness(1.15);
 }
 
-/* 5. ENLACES */
+/* ENLACES */
 a {
-  color: #4AF2C5;
+  color: var(--accent-cyan, #4AF2C5);
   text-decoration: none;
   transition: opacity 0.2s;
 }
@@ -62,23 +61,23 @@ a:hover {
   opacity: 0.8;
 }
 
-/* 6. INPUTS BASE */
+/* INPUTS BASE (NO modifican layouts avanzados) */
 input, select, textarea {
   width: 100%;
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.12);
   padding: 0.65rem 0.9rem;
   border-radius: 8px;
-  color: white;
-  font-size: 1rem;
+  color: #fff;
   outline: none;
+  font-size: 1rem;
 }
 
 input::placeholder {
   color: rgba(255,255,255,0.45);
 }
 
-/* 7. UTILIDADES */
+/* UTILIDADES */
 .hidden {
   display: none !important;
 }
