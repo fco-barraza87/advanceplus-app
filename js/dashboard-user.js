@@ -201,7 +201,7 @@ function renderActiveCourses(courses, user) {
         nextDay = course.duration_days || 1;
       }
 
-      window.location.href = `/curso/index.html?c=${course.id}&day=${nextDay}`;
+      window.location.href = `/curso/lesson.html?c=${course.id}&day=${nextDay}`;
     };
 
     carousel.appendChild(card);
@@ -415,7 +415,7 @@ async function loadMission(user) {
 
   if (btnEl) {
     btnEl.onclick = () => {
-      window.location.href = `/curso/index.html?c=${courseId}&day=${nextDay}`;
+      window.location.href = `/curso/lesson.html?c=${course.id}&day=${nextDay}`;
     };
   }
 
