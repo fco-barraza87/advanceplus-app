@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lección · Advance+</title>
+
+  <!-- Estilos globales -->
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/tokens.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <link rel="stylesheet" href="/css/courses.css" />
+</head>
+
+<body class="app-bg">
+
+  <!-- HEADER -->
+  <div id="appHeader"></div>
+  <script type="module">
+    import { loadHeader } from "/components/header.js";
+    loadHeader();
+  </script>
+
+  <main class="lesson-container">
+
+    <!-- Portada y título -->
+    <section class="lesson-header">
+      <h1 id="lessonTitle">Cargando…</h1>
+      <p id="lessonSubtitle" class="lesson-subtitle"></p>
+      <p id="lessonMeta" class="lesson-meta"></p>
+    </section>
+
+    <!-- Contenido dinámico -->
+    <section id="lessonContent" class="lesson-content"></section>
+
+    <!-- Audio -->
+    <section id="lessonAudioSection" class="lesson-media hidden">
+      <h3 class="lesson-media-title">Audio</h3>
+      <audio id="lessonAudio" controls></audio>
+    </section>
+
+    <!-- Video -->
+    <section id="lessonVideoSection" class="lesson-media hidden">
+      <h3 class="lesson-media-title">Video</h3>
+      <video id="lessonVideo" controls></video>
+    </section>
+
+    <!-- Meditación -->
+    <section id="lessonMeditationSection" class="lesson-media hidden">
+      <h3 class="lesson-media-title">Meditación guiada</h3>
+      <audio id="lessonMeditation" controls></audio>
+    </section>
+
+    <!-- Botón completar -->
+    <div class="lesson-actions">
+      <button id="completeLessonBtn" class="btn btn-primary">Completar lección ✓</button>
+    </div>
+
+  </main>
+
+  <!-- TABBAR -->
+  <div id="appTabbar"></div>
+  <script type="module">
+    import { loadTabbar } from "/components/tabbar.js";
+    loadTabbar("courses");
+  </script>
+
+  <!-- JS LÓGICA -->
+  <script type="module">
+    import { supabase } from "/js/supabase.js";
+    import { getCurrentUser } from "/js/auth.js";
+
+    /* UTIL */
+    const qs = (sel) => document.querySelector(sel);
+
+    /* ----------------------------------------------
+       1. Leer parámetros: ?c=courseId&day=3
+    ------------------------------------------------*/
+    const params = new URLSearchParams(window.location.search);
+    const courseId = params.get("c");
+    const day = Number(params.get("day"));
+    if (!courseId || !day) {
+      alert("Lección no válida");
+      window.location.href = "/dashboard/index.html";
+    }
+
+    /* ----------------------------------------------
+       2. Cargar usuario, lección, progresos
+    ------------------------------------------------*/
+    let user = null;
+    let lesson = null;
+    let course = null;
+
+    async function loadData() {
+      const u = await getCurrentUser();
+      if (!u) {
+        window.location.href = "/auth/login.html";
+        return;
+      }
+      user = u;
+
+      // Lección
+      const { data: lessons } = await supabase
+        .from("lessons")
+        .select("*")
+        .eq("course_id", courseId)
+        .eq("day", day)
+        .limit(1);
+
+      if (!lessons || !lessons.length) {
+        alert("Lección no encontrada");
+        window.location.href = "/dashboard/index.html";
+      }
+
+      lesson = lessons[0];
+
+      // Curso
+      const { data: c } = await supabase
+        .from("courses")
+        .select("title, duration_days")
+        .eq("id", courseId)
+        .single();
+
+      course = c;
+    }
+
+    /* ----------------------------------------------
+       3. Renderizar la lección en pantalla
+    ------------------------------------------------*/
+    function renderLesson() {
+      qs("#lessonTitle").textContent = lesson.title;
+      qs("#lessonSubtitle").textContent = lesson.subtitle || "";
+      qs("#lessonMeta").textContent = `${course.title} · Día ${day}`;
+
+      // Contenido principal (HTML permitido)
+      qs("#lessonContent").innerHTML = lesson.content_html || "<p>Sin contenido.</p>";
+
+      // Audio
+      if (lesson.audio_url) {
+        qs("#lessonAudioSection").classList.remove("hidden");
+        qs("#lessonAudio").src = lesson.audio_url;
+      }
+
+      // Video
+      if (lesson.video_url) {
+        qs("#lessonVideoSection").classList.remove("hidden");
+        qs("#lessonVideo").src = lesson.video_url;
+      }
+
+      // Meditación
+      if (lesson.meditation_url) {
+        qs("#lessonMeditationSection").classList.remove("hidden");
+        qs("#lessonMeditation").src = lesson.meditation_url;
+      }
+    }
+
+    /* ----------------------------------------------
+       4. COMPLETAR LECCIÓN
+    ------------------------------------------------*/
+    async function completeLesson() {
+      // Guardar progreso
+      await supabase.from("progress").upsert({
+        user_id: user.id,
+        course_id: courseId,
+        day,
+        completed: true,
+      });
+
+      // Sumar XP
+      if (lesson.xp_reward) {
+        await supabase.rpc("add_xp", {
+          user_id_input: user.id,
+          xp_amount: lesson.xp_reward,
+        });
+      }
+
+      // Ir al siguiente día o terminar
+      const nextDay = day + 1;
+
+      if (nextDay <= course.duration_days) {
+        window.location.href = `/curso/lesson.html?c=${courseId}&day=${nextDay}`;
+      } else {
+        alert("¡Has completado el reto!");
+        window.location.href = "/dashboard/index.html";
+      }
+    }
+
+    /* ----------------------------------------------
+       5. INIT
+    ------------------------------------------------*/
+    (async function init() {
+      await loadData();
+      renderLesson();
+
+      qs("#completeLessonBtn").addEventListener("click", completeLesson);
+    })();
+  </script>
+
+</body>
+</html>
