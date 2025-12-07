@@ -1,9 +1,9 @@
 /* ============================================================
-   Advance+ · Estilos de Cursos / Retos (premium)
+   Advance+ · Cursos y Retos (Diseño premium optimizado)
 ============================================================ */
 
 /* ============================================================
-   TARJETAS BASE
+   TARJETA PRINCIPAL DE RETO / CURSO
 ============================================================ */
 
 .course-card {
@@ -24,12 +24,12 @@
 }
 
 /* ------------------------------------------------------------
-   Portada opcional
+   PORTADA DEL CURSO (si existe)
 ------------------------------------------------------------ */
 
 .course-cover {
   width: 100%;
-  height: 140px;
+  height: 160px;
   border-radius: var(--radius-md);
   background-size: cover;
   background-position: center;
@@ -38,44 +38,48 @@
 }
 
 /* ------------------------------------------------------------
-   Títulos y textos
+   TEXTO Y TITULOS
 ------------------------------------------------------------ */
 
 .course-title {
   color: var(--color-white);
   font-size: var(--text-md);
   font-weight: 600;
+  line-height: 1.2;
 }
 
 .course-desc {
   color: var(--color-gray-1);
   font-size: var(--text-sm);
   line-height: var(--line-normal);
+  margin-top: -2px;
 }
 
 /* ------------------------------------------------------------
-   Pills de metadata (categoría, nivel, duración)
+   PILLS (categoría, duración, dificultad)
 ------------------------------------------------------------ */
 
 .course-meta-row {
   display: flex;
   gap: var(--space-sm);
   flex-wrap: wrap;
+  margin-top: var(--space-xs);
 }
 
 .course-pill {
   padding: var(--space-xs) var(--space-sm);
-  background: rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.10);
   border-radius: var(--radius-round);
   font-size: var(--text-xs);
   color: var(--color-white-muted);
   font-weight: 500;
   letter-spacing: 0.03em;
+  border: 1px solid rgba(255,255,255,0.12);
   user-select: none;
 }
 
 /* ------------------------------------------------------------
-   BOTONES
+   BOTÓN PRINCIPAL DE ACCESO / CONTINUAR
 ------------------------------------------------------------ */
 
 .course-btn {
@@ -127,8 +131,13 @@
   display: flex;
   gap: var(--space-md);
   overflow-x: auto;
-  padding-bottom: var(--space-xs);
+  padding-bottom: var(--space-sm);
   padding-right: var(--space-xs);
+  scroll-snap-type: x mandatory;
+}
+
+.course-card {
+  scroll-snap-align: start;
 }
 
 .courses-carousel::-webkit-scrollbar {
@@ -136,12 +145,12 @@
 }
 
 .courses-carousel::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.15);
   border-radius: var(--radius-round);
 }
 
 /* ============================================================
-   PLACEHOLDER / ESTADO VACÍO
+   ESTADOS VACÍOS
 ============================================================ */
 
 .course-card.placeholder {
