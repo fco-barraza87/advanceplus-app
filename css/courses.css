@@ -168,3 +168,49 @@
   color: var(--color-gray-2);
   font-size: var(--text-sm);
 }
+
+/* ============================================================
+   LAYOUT PÁGINA DE CURSOS
+============================================================ */
+
+.courses-page .dash-section + .dash-section {
+  margin-top: var(--space-lg);
+}
+
+.course-price {
+  margin-top: var(--space-sm);
+  font-size: var(--text-sm);
+  color: var(--color-accent-gold);
+}
+
+.course-price del {
+  color: var(--color-gray-2);
+  margin-right: 0.35rem;
+  font-size: var(--text-xs);
+}
+
+/* Progreso dentro de la card (retos activos) */
+.course-progress-row {
+  margin-top: var(--space-sm);
+}
+
+.course-progress-label {
+  font-size: var(--text-xs);
+  color: var(--color-gray-2);
+  margin-bottom: 0.25rem;
+}
+
+.course-progress-bar {
+  width: 100%;
+  height: 8px;
+  border-radius: var(--radius-round);
+  background: rgba(255,255,255,0.12);
+  overflow: hidden;
+}
+
+.course-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-round);
+  background: var(--gradient-cyan);
+  width: 0%;
+}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Advance+ · Tus retos</title>
+
+  <!-- ESTILOS GLOBALES -->
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/courses.css">
+</head>
+
+<body class="app-bg dashboard-page">
+
+  <!-- HEADER GLOBAL -->
+  <div id="appHeader"></div>
+
+  <main class="dashboard-main">
+    <div class="dashboard-wrapper courses-page">
+
+      <!-- TÍTULO PRINCIPAL -->
+      <section class="dash-section">
+        <h1 class="section-title">Tus retos Advance+</h1>
+        <p class="section-subtitle">
+          Gestiona tus retos activos y descubre nuevos programas para seguir avanzando.
+        </p>
+      </section>
+
+      <!-- RETOS ACTIVOS -->
+      <section class="dash-section">
+        <div class="section-header-row">
+          <h2 class="section-title">Retos activos</h2>
+          <span id="activeCoursesCount" class="section-subtitle">0 activos</span>
+        </div>
+
+        <div id="activeCoursesGrid" class="courses-grid">
+          <!-- tarjetas de retos activos por JS -->
+        </div>
+
+        <p id="noActiveCoursesMessage" class="empty-message">
+          Aún no tienes retos activos. Activa tu primer programa para empezar a sumar XP.
+        </p>
+      </section>
+
+      <!-- EXPLORAR TODOS LOS RETOS -->
+      <section class="dash-section">
+        <h2 class="section-title">Explorar todos los retos</h2>
+        <p class="section-subtitle">
+          Elige el siguiente paso en tu entrenamiento: disciplina, enfoque, energía, alimentación y más.
+        </p>
+
+        <div id="allCoursesGrid" class="courses-grid">
+          <!-- tarjetas de todos los cursos por JS -->
+        </div>
+
+        <p id="noCoursesMessage" class="empty-message">
+          Muy pronto llegarán más retos Advance+ a tu biblioteca.
+        </p>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- TABBAR GLOBAL -->
+  <nav class="tabbar">
+    <button class="tab-btn" onclick="location.href='/dashboard/index.html'">
+      <span>🏠</span>
+      <small>Inicio</small>
+    </button>
+
+    <button class="tab-btn active" onclick="location.href='/curso/index.html'">
+      <span>📘</span>
+      <small>Retos</small>
+    </button>
+
+    <button class="tab-btn" onclick="location.href='/perfil/index.html'">
+      <span>👤</span>
+      <small>Perfil</small>
+    </button>
+
+    <button class="tab-btn" onclick="location.href='/perfil/datos.html'">
+      <span>📊</span>
+      <small>Progreso</small>
+    </button>
+  </nav>
+
+  <!-- PROTECCIÓN POR ROL -->
+  <script type="module">
+    import { protectPage } from "/js/router.js";
+    protectPage({ allowedRoles: ["user"] });
+  </script>
+
+  <!-- HEADER -->
+  <script type="module">
+    import { loadHeader } from "/components/header.js";
+    loadHeader();
+  </script>
+
+  <!-- LÓGICA DE CURSOS -->
+  <script type="module" src="/js/course-index.js"></script>
+
+</body>
+</html>
