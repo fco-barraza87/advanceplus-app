@@ -124,72 +124,37 @@ async function renderGamification(stats, profile, userId) {
 }
 
 /* ==================================================
-   CURSOS ACTIVOS (VERSIÓN CORRECTA)
-==================================================== */
-
-/**
- * Obtiene TODOS los cursos activos del usuario.
- * NO filtra por "active" en la tabla courses,
- * porque si el usuario lo tiene activo → debe mostrarse igual.
- */
+   4. RETOS ACTIVOS (CARRUSEL)
+================================================== */
 async function loadActiveCourses(userId) {
-  const { data: active } = await supabase
+  const { data: userCourses } = await supabase
     .from("user_courses")
     .select("course_id, status, started_at")
     .eq("user_id", userId)
     .eq("status", "active")
-    .order("started_at", { ascending: true });
-
-  if (!active) return [];
+    .order("started_at", { ascending: false });
 
   const list = [];
 
-  for (const uc of active) {
+  for (const uc of userCourses || []) {
     const { data: course } = await supabase
       .from("courses")
-      .select("*")
+      .select("id, title, slug, cover_url, category, level, duration_days, active")
       .eq("id", uc.course_id)
       .single();
 
-    if (course) list.push(course);
+    if (course?.active) list.push(course);
   }
 
   return list;
 }
 
-/**
- * Cálculo EXACTO del siguiente día basado en progress:
- * nextDay = primer day donde completed = false
- */
-async function getNextLesson(userId, courseId, durationDays) {
-  const { data: progress } = await supabase
-    .from("progress")
-    .select("day, completed")
-    .eq("user_id", userId)
-    .eq("course_id", courseId)
-    .order("day");
-
-  if (!progress || progress.length === 0) return 1;
-
-  // Buscar primer día incompleto
-  const firstIncomplete = progress.find(p => p.completed === false);
-
-  if (firstIncomplete) return firstIncomplete.day;
-
-  // Si todos están completos → devolver último día
-  return durationDays;
-}
-
-
-/**
- * Renderiza todos los cursos activos correctamente
- */
 function renderActiveCourses(courses, user) {
   const carousel = qs("#activeChallengesCarousel");
   const empty = qs("#noActiveChallenges");
   const count = qs("#activeChallengesCount");
 
-  if (!carousel) return;
+  if (!carousel || !empty || !count) return;
 
   carousel.innerHTML = "";
 
@@ -203,29 +168,40 @@ function renderActiveCourses(courses, user) {
   count.textContent = `${courses.length} activo${courses.length > 1 ? "s" : ""}`;
 
   courses.forEach((course) => {
-    const cover = course.cover_url || "/img/default-cover.png";
+    const cover =
+      course.cover_url || "https://via.placeholder.com/600x300.png?text=A+";
 
     const card = document.createElement("article");
     card.className = "course-card clickable carousel-item";
     card.innerHTML = `
       <div class="course-cover">
-        <img src="${cover}" alt="${course.title}" />
+        <img src="${cover}" alt="${course.title}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" />
       </div>
-
       <div class="course-title">${course.title}</div>
       <div class="course-meta">${course.level || "Todos los niveles"}</div>
       <div class="course-day">Duración: ${course.duration_days || "—"} días</div>
     `;
 
-    // Al hacer clic → ir a siguiente lección REAL
     card.onclick = async () => {
-      const nextDay = await getNextLesson(
-        user.id,
-        course.id,
-        course.duration_days
-      );
+      const { data: progress } = await supabase
+        .from("progress")
+        .select("day, completed")
+        .eq("user_id", user.id)
+        .eq("course_id", course.id)
+        .order("day");
 
-      window.location.href = `/curso/index.html?c=${course.id}&day=${nextDay}`;
+      let nextDay = 1;
+
+      if (progress?.length) {
+        const done = progress.filter((p) => p.completed);
+        if (done.length) nextDay = done.at(-1).day + 1;
+      }
+
+      if (nextDay > (course.duration_days || 1)) {
+        nextDay = course.duration_days || 1;
+      }
+
+      window.location.href = `/curso/lesson.html?c=${course.id}&day=${nextDay}`;
     };
 
     carousel.appendChild(card);
@@ -326,71 +302,126 @@ function renderAvailableCourses(courses) {
 }
 
 /* ==================================================
-   MISIÓN DEL DÍA (CORREGIDA)
-==================================================== */
+   6. MISIÓN DEL DÍA
+================================================== */
 async function loadMission(user) {
   const card = qs("#missionCard");
   const promoCard = qs("#missionPromoCard");
-  const promoBtn = qs("#missionPromoBtn");
 
-  const { data: activeUserCourses } = await supabase
+  if (!card || !promoCard) return;
+
+  // 1. Curso activo más reciente
+  const { data: active } = await supabase
     .from("user_courses")
-    .select("course_id, started_at, status")
+    .select("*")
     .eq("user_id", user.id)
     .eq("status", "active")
-    .order("started_at", { ascending: true });
+    .order("started_at", { ascending: false })
+    .limit(1);
 
-  if (!activeUserCourses?.length) {
-    // No tiene cursos → mostrar promo
+  const promoBtn = qs("#missionPromoBtn");
+
+  // Si NO tiene cursos activos → promo directa
+  if (!active?.length) {
     card.style.display = "none";
     promoCard.style.display = "flex";
-    promoBtn.onclick = () => window.location.href = "/curso/index.html";
+
+    if (promoBtn) {
+      promoBtn.textContent = "Ver retos disponibles";
+      promoBtn.onclick = () => (window.location.href = "/curso/index.html");
+    }
     return;
   }
 
-  // Seleccionar el primer curso activo (el más antiguo)
-  const chosen = activeUserCourses[0];
+  const courseId = active[0].course_id;
 
+  // 2. Datos del curso
   const { data: course } = await supabase
     .from("courses")
     .select("*")
-    .eq("id", chosen.course_id)
+    .eq("id", courseId)
     .single();
 
-  if (!course) return;
-
-  const nextDay = await getNextLesson(
-    user.id,
-    course.id,
-    course.duration_days
-  );
-
-  // COMPLETADO → mostrar promo
-  if (nextDay > course.duration_days) {
+  if (!course) {
     card.style.display = "none";
     promoCard.style.display = "flex";
-    promoBtn.onclick = () => window.location.href = "/curso/index.html";
+    if (promoBtn) {
+      promoBtn.textContent = "Ver retos disponibles";
+      promoBtn.onclick = () => (window.location.href = "/curso/index.html");
+    }
     return;
   }
 
-  // Mostrar misión real
-  card.style.display = "flex";
+  // 3. Progreso del curso
+  const { data: progress } = await supabase
+    .from("progress")
+    .select("day, completed")
+    .eq("user_id", user.id)
+    .eq("course_id", courseId)
+    .order("day");
+
+  let nextDay = 1;
+  if (progress?.length) {
+    const done = progress.filter((p) => p.completed);
+    if (done.length) nextDay = done.at(-1).day + 1;
+  }
+
+  // 4. Si ya completó todo el curso…
+  if (nextDay > (course.duration_days || 1)) {
+    const { data: available } = await supabase
+      .from("courses")
+      .select("id")
+      .eq("active", true)
+      .neq("id", courseId);
+
+    card.style.display = "none";
+    promoCard.style.display = "flex";
+
+    if (available?.length) {
+      if (promoBtn) {
+        promoBtn.textContent = "Ver más retos";
+        promoBtn.onclick = () => (window.location.href = "/curso/index.html");
+      }
+    } else {
+      const promoDesc = promoCard.querySelector(".mission-desc");
+      if (promoDesc) {
+        promoDesc.textContent =
+          "Has completado todos los cursos disponibles. Nuevos retos A+ llegarán muy pronto.";
+      }
+      if (promoBtn) {
+        promoBtn.textContent = "Volver al inicio";
+        promoBtn.onclick = () => (window.location.href = "/dashboard/index.html");
+      }
+    }
+
+    return;
+  }
+
+  // 5. Curso aún en progreso → misión normal
+  const titleEl = qs("#missionTitle");
+  const descEl = qs("#missionDesc");
+  const metaEl = qs("#missionMeta");
+  const btnEl = qs("#missionBtn");
+
+  if (titleEl) titleEl.textContent = course.mission_title || "Misión del día";
+  if (descEl)
+    descEl.textContent =
+      course.mission_desc ||
+      "Toma el control de tu día con esta acción clave.";
+  if (metaEl)
+    metaEl.textContent = `${course.title} · Día ${nextDay} · ${
+      course.category || "Reto"
+    }`;
+
+  if (btnEl) {
+    btnEl.onclick = () => {
+      window.location.href = `/curso/lesson.html?c=${course.id}&day=${nextDay}`;
+    };
+  }
+
   promoCard.style.display = "none";
-
-  qs("#missionTitle").textContent =
-    course.mission_title || "Misión del día";
-
-  qs("#missionDesc").textContent =
-    course.mission_desc || "Toma el control de tu día con esta acción clave.";
-
-  qs("#missionMeta").textContent =
-    `${course.title} · Día ${nextDay}`;
-
-  qs("#missionBtn").onclick = () => {
-    window.location.href = `/curso/index.html?c=${course.id}&day=${nextDay}`;
-  };
+  card.style.display = "flex";
 }
-
 
 /* ==================================================
    7. COACH IA – MENSAJE DEL DÍA
