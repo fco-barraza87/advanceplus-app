@@ -6,89 +6,86 @@
 
   <title>Advance+ · Dashboard</title>
 
-  <!-- ESTILOS -->
-  <!-- Puedes mantener los antiguos mientras migramos -->
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/tokens.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/dashboard.css">
-    <link rel="stylesheet" href="/css/courses.css">
-
+  <!-- ESTILOS GLOBALES -->
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/courses.css">
 </head>
 
 <body class="app-bg dashboard-page">
 
-  <!-- HEADER GLOBAL A+ -->
+  <!-- HEADER GLOBAL -->
   <div id="appHeader"></div>
 
-  <!-- MAIN DASHBOARD -->
   <main class="dashboard-main">
     <div class="dashboard-wrapper">
 
-      <!-- 1. TU PROGRESO -->
-      <section class="dash-section gamification-section">
-        <h2 class="section-title">Tu progreso</h2>
+      <!-- HERO VISUAL GRANDE -->
+      <section class="dash-hero">
+        <div class="dash-hero-inner">
 
-        <div class="gamification-grid">
-          <!-- Card Racha -->
-          <article class="card" id="cardStreak">
-            <div class="card-header-row">
-              <span class="card-label">Racha activa</span>
-              <span class="card-label" id="streakGoalLabel">Objetivo: 21 días</span>
+          <div class="dash-hero-left">
+            <p class="hero-kicker">Bienvenido de vuelta</p>
+            <h1 class="hero-title">Tu entrenamiento de hoy</h1>
+            <p class="hero-subtitle">
+              Suma XP, mantiene tu racha activa y avanza en tus retos Advance+.
+            </p>
+          </div>
+
+          <div class="dash-hero-right">
+            <div class="hero-stats-grid">
+
+              <!-- Racha -->
+              <article class="hero-card">
+                <span class="hero-card-label">Racha activa</span>
+                <div class="hero-card-value" id="streakCurrent">0</div>
+                <p class="hero-card-meta">
+                  Mejor racha: <span id="streakBest">0</span> días
+                </p>
+                <div class="streak-goal-bar">
+                  <div class="streak-goal-fill" id="streakBarFill"></div>
+                </div>
+                <p class="hero-card-meta small">Objetivo: 21 días</p>
+              </article>
+
+              <!-- Nivel -->
+              <article class="hero-card">
+                <span class="hero-card-label">Nivel Advance+</span>
+                <div class="hero-card-value" id="userLevel">1</div>
+                <p class="hero-card-meta" id="xpThisLevel">0 / 100 XP</p>
+                <p class="hero-card-meta" id="nextLevel">Siguiente: Nivel 2</p>
+                <div class="xp-bar">
+                  <div class="xp-bar-fill" id="xpFill"></div>
+                </div>
+              </article>
+
             </div>
+          </div>
 
-            <div class="streak-number" id="streakCurrent">0</div>
-
-            <div class="xp-info">
-              <span>Mejor racha</span>
-              <span id="streakBest">0</span>
-            </div>
-
-            <div class="streak-goal-bar">
-              <div class="streak-goal-fill" id="streakBarFill"></div>
-            </div>
-          </article>
-
-          <!-- Card Nivel -->
-          <article class="card" id="cardLevel">
-            <div class="card-header-row">
-              <span class="card-label">Nivel Advance+</span>
-            </div>
-
-            <div class="card-value" id="userLevel">1</div>
-
-            <div class="xp-row">
-              <div class="xp-info">
-                <span id="xpThisLevel">0 / 100 XP</span>
-                <span id="nextLevel">Siguiente: Nivel 2</span>
-              </div>
-              <div class="xp-bar">
-                <div class="xp-bar-fill" id="xpFill"></div>
-              </div>
-            </div>
-          </article>
         </div>
       </section>
 
-      <!-- 2. MISIÓN DEL DÍA -->
+      <!-- MISIÓN DEL DÍA -->
       <section class="dash-section">
         <h2 class="section-title">Misión del día</h2>
 
         <!-- Misión normal -->
         <article id="missionCard" class="mission-card">
           <div class="mission-header">
-            <span class="dash-pill" id="missionMeta">Cargando...</span>
+            <span class="dash-pill" id="missionMeta">Próximamente</span>
           </div>
-          <h3 class="mission-title" id="missionTitle">Cargando misión...</h3>
+          <h3 class="mission-title" id="missionTitle">Tu próxima misión está en camino</h3>
           <p class="mission-desc" id="missionDesc">
-            Estamos preparando tu próxima misión A+.
+            Muy pronto verás aquí la misión diaria de tu reto activo.
           </p>
           <button id="missionBtn" class="mission-btn">
             Ir a la lección
           </button>
         </article>
 
-        <!-- Promo cuando no hay curso activo -->
+        <!-- Promo cuando no haya curso activo -->
         <article id="missionPromoCard" class="mission-card" style="display:none;">
           <h3 class="mission-title">Activa tu siguiente reto</h3>
           <p class="mission-desc">
@@ -101,7 +98,7 @@
         </article>
       </section>
 
-      <!-- 3. COACH IA - MENSAJE DE HOY -->
+      <!-- COACH IA -->
       <section class="dash-section">
         <h2 class="section-title">Coach IA · Mensaje de hoy</h2>
 
@@ -116,7 +113,7 @@
         </p>
       </section>
 
-      <!-- 4. TUS RETOS ACTIVOS (CARRUSEL) -->
+      <!-- RETOS ACTIVOS -->
       <section class="dash-section">
         <div class="section-header-row">
           <h2 class="section-title">Tus retos activos</h2>
@@ -132,7 +129,7 @@
         </p>
       </section>
 
-      <!-- 5. EXPLORAR RETOS (GRID) -->
+      <!-- EXPLORAR RETOS -->
       <section class="dash-section">
         <h2 class="section-title">Explorar retos</h2>
         <div id="coursesGrid" class="courses-grid">
@@ -146,7 +143,7 @@
     </div>
   </main>
 
-  <!-- TABBAR (Desktop + Mobile) -->
+  <!-- TABBAR GLOBAL -->
   <nav class="tabbar">
     <button class="tab-btn active" onclick="location.href='/dashboard/index.html'">
       <span>🏠</span>
@@ -175,13 +172,13 @@
     protectPage({ allowedRoles: ["user"] });
   </script>
 
-  <!-- HEADER GLOBAL -->
+  <!-- HEADER -->
   <script type="module">
     import { loadHeader } from "/components/header.js";
     loadHeader();
   </script>
 
-  <!-- LÓGICA DASHBOARD USER -->
+  <!-- LÓGICA DASHBOARD -->
   <script type="module" src="/js/dashboard-user.js"></script>
 
 </body>
