@@ -607,12 +607,36 @@ async function init() {
     } else {
       if (completeBtn) {
         completeBtn.onclick = async () => {
+          // 1. Guardar reflexión
           await saveReflection(user.id, courseId, lesson);
+
+          // 2. Guardar progreso
           await completeLesson(user.id, course, lesson);
+
+          // 3. Guardar feedback automáticamente si existe algo
+          await saveFeedback(user.id, courseId, lesson);
+
+          // 4. Animación A+
           launchConfetti();
           highlightLesson();
-          openFeedbackModal();
+
+          // 5. Ver si procede mindset
+          const redirectInfo = await computeNextDayForRedirect(
+            user.id,
+            course,
+            lesson.day
+          );
+
+          const alreadyLogged = await hasMindsetLogForToday(user.id);
+
+          if (alreadyLogged) {
+            redirectAfterLesson(course, lesson, redirectInfo);
+          } else {
+            pendingRedirect = { course, lesson, redirectInfo };
+            openMindsetModal();
+          }
         };
+
       }
     }
 
