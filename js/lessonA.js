@@ -9,18 +9,6 @@ function getQueryParam(key) {
 }
 
 /* ==========================================
-   Helpers de fecha
-========================================== */
-function todayISO() {
-  // Usamos la fecha local del navegador (suficiente para MVP)
-  const d = new Date();
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-/* ==========================================
    1. Usuario actual
 ========================================== */
 async function getCurrentUser() {
@@ -63,6 +51,7 @@ async function loadLessonData(userId, courseId, day) {
   console.log("[lesson] lesson result:", { lesson, lErr });
 
   if (lErr) {
+    // aquí veremos si es RLS, 406, etc.
     throw new Error("Error cargando lección: " + lErr.message);
   }
   if (!lesson) {
@@ -108,6 +97,7 @@ async function loadLessonData(userId, courseId, day) {
   return { course, lesson, progress, reflection };
 }
 
+
 /* ==========================================
    Guardar reflexión (upsert real y seguro)
 ========================================== */
@@ -118,6 +108,7 @@ async function saveReflection(userId, courseId, lesson) {
   const content = textarea.value.trim();
 
   try {
+    // Buscar si ya existe reflexión del usuario para esta lección
     const { data: existing } = await supabase
       .from("lesson_reflections")
       .select("id")
@@ -127,11 +118,14 @@ async function saveReflection(userId, courseId, lesson) {
       .maybeSingle();
 
     if (existing?.id) {
+      // UPDATE
       await supabase
         .from("lesson_reflections")
         .update({ content })
         .eq("id", existing.id);
+
     } else {
+      // INSERT
       await supabase.from("lesson_reflections").insert({
         user_id: userId,
         course_id: courseId,
@@ -140,10 +134,12 @@ async function saveReflection(userId, courseId, lesson) {
         content
       });
     }
+
   } catch (e) {
     console.error("❌ Error guardando reflexión:", e);
   }
 }
+
 
 /* ==========================================
    4. Render lección
@@ -183,7 +179,7 @@ function renderLessonContent(lesson) {
     if (lesson.content_html) {
       contentEl.innerHTML = lesson.content_html;
     } else if (lesson.text_content) {
-      contentEl.innerHTML = lesson.text_content;
+      contentEl.innerHTML = lesson.text_content; // puede traer HTML
     } else {
       contentEl.textContent =
         "Muy pronto verás aquí el contenido completo de esta lección.";
@@ -361,24 +357,28 @@ async function computeNextDayForRedirect(userId, course, currentDay) {
    CONFETTI PREMIUM A+
 ========================================== */
 function launchConfetti() {
-  const num = 22;
+  const num = 22; // ligero, mobile-friendly
 
   for (let i = 0; i < num; i++) {
     const piece = document.createElement("div");
     piece.className = "confetti-piece";
 
+    // Movimiento aleatorio
     piece.style.left = `${50 + (Math.random() * 40 - 20)}%`;
     piece.style.setProperty("--x-move", `${Math.random() * 120 - 60}px`);
 
+    // Colores premium A+
     const colors = ["#C9A86A", "#E9D2A6", "#F1E5C9", "#fff"];
     piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
 
     document.body.appendChild(piece);
 
+    // Eliminar después de la animación
     setTimeout(() => piece.remove(), 2600);
   }
 }
 
+/* Glow al completar */
 function highlightLesson() {
   const section = document.querySelector(".lesson-content-section");
   if (!section) return;
@@ -387,165 +387,6 @@ function highlightLesson() {
   setTimeout(() => section.classList.remove("lesson-glow"), 1600);
 }
 
-/* ==========================================
-   MINDSET LOGS
-========================================== */
-
-let pendingRedirect = null;
-
-function openMindsetModal() {
-  const modal = qs("#mindsetModal");
-  if (!modal) return;
-  modal.classList.remove("hidden");
-
-  // Siempre empezamos en paso 1
-  goToMindsetStep(1);
-}
-
-function closeMindsetModal() {
-  const modal = qs("#mindsetModal");
-  if (!modal) return;
-  modal.classList.add("hidden");
-}
-
-function goToMindsetStep(step) {
-  const step1 = qs("#mindsetStep1");
-  const step2 = qs("#mindsetStep2");
-
-  if (!step1 || !step2) return;
-
-  if (step === 1) {
-    step1.classList.remove("hidden");
-    step2.classList.add("hidden");
-  } else {
-    step1.classList.add("hidden");
-    step2.classList.remove("hidden");
-  }
-}
-
-async function hasMindsetLogForToday(userId) {
-  const today = todayISO();
-  try {
-    const { data, error } = await supabase
-      .from("mindset_logs")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("log_date", today)
-      .maybeSingle();
-
-    if (error) {
-      console.warn("[lesson] Error comprobando mindset_logs:", error);
-      return false;
-    }
-
-    return !!data;
-  } catch (e) {
-    console.warn("[lesson] Error inesperado en hasMindsetLogForToday:", e);
-    return false;
-  }
-}
-
-async function saveMindsetLog(userId) {
-  const today = todayISO();
-
-  const moodRow = qs("#mindsetMoodRow");
-  const moodValue = moodRow?.dataset.selected
-    ? Number(moodRow.dataset.selected)
-    : null;
-
-  const focus = Number(qs("#mindsetFocus")?.value || 0);
-  const energia = Number(qs("#mindsetEnergy")?.value || 0);
-  const motivacion = Number(qs("#mindsetMotivation")?.value || 0);
-  const claridad = Number(qs("#mindsetClarity")?.value || 0);
-  const confianza = Number(qs("#mindsetConfidence")?.value || 0);
-
-  const best = qs("#mindsetNoteBest")?.value.trim() || "";
-  const challenge = qs("#mindsetNoteChallenge")?.value.trim() || "";
-  const decision = qs("#mindsetNoteDecision")?.value.trim() || "";
-
-  const notes =
-    best || challenge || decision
-      ? JSON.stringify({ best, challenge, decision })
-      : null;
-
-  try {
-    // upsert por (user_id, log_date) → asumiendo unique constraint
-    await supabase.from("mindset_logs").upsert(
-      {
-        user_id: userId,
-        log_date: today,
-        mood: moodValue,
-        focus,
-        energia,
-        motivacion,
-        claridad,
-        confianza,
-        notes
-      },
-      { onConflict: "user_id,log_date" }
-    );
-
-    console.log("[lesson] mindset_logs guardado");
-  } catch (e) {
-    console.warn("[lesson] No se pudo guardar mindset_logs:", e);
-  }
-}
-
-function initMindsetUI() {
-  // mood buttons
-  const moodRow = qs("#mindsetMoodRow");
-  if (moodRow) {
-    moodRow.dataset.selected = "3"; // neutro por defecto
-    Array.from(moodRow.children).forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const val = btn.dataset.value;
-        moodRow.dataset.selected = val;
-        Array.from(moodRow.children).forEach((b) =>
-          b.classList.toggle("active", b === btn)
-        );
-      });
-    });
-  }
-
-  // sliders
-  const sliders = [
-    { id: "mindsetFocus", labelId: "mindsetFocusValue" },
-    { id: "mindsetEnergy", labelId: "mindsetEnergyValue" },
-    { id: "mindsetMotivation", labelId: "mindsetMotivationValue" },
-    { id: "mindsetClarity", labelId: "mindsetClarityValue" },
-    { id: "mindsetConfidence", labelId: "mindsetConfidenceValue" }
-  ];
-
-  sliders.forEach(({ id, labelId }) => {
-    const input = qs("#" + id);
-    const label = qs("#" + labelId);
-    if (!input || !label) return;
-
-    const update = () => {
-      label.textContent = `${input.value} / 5`;
-    };
-
-    input.addEventListener("input", update);
-    update();
-  });
-}
-
-function redirectAfterLesson(course, lesson, redirectInfo) {
-  const { nextDay, totalDays, finished } = redirectInfo;
-
-  if (finished && lesson.day >= totalDays) {
-    window.location.href = `/curso/index.html?c=${course.id}`;
-  } else {
-    window.location.href = `/curso/lesson.html?c=${course.id}&day=${nextDay}`;
-  }
-}
-
-function redirectFromMindset() {
-  if (!pendingRedirect) return;
-  const { course, lesson, redirectInfo } = pendingRedirect;
-  redirectAfterLesson(course, lesson, redirectInfo);
-  pendingRedirect = null;
-}
 
 /* ==========================================
    9. INIT
@@ -578,37 +419,46 @@ async function init() {
     );
 
     /* ============================
-       Cargar reflexión previa
+    Cargar reflexión previa
     ============================ */
     const reflectionInput = qs("#lessonReflectionInput");
 
     if (reflectionInput) {
-      if (reflection?.content) {
+    if (reflection?.content) {
         reflectionInput.value = reflection.content;
-      }
-
-      reflectionInput.addEventListener("blur", () => {
-        saveReflection(user.id, courseId, lesson);
-      });
-
-      // Auto-save cada 5 segundos
-      setInterval(() => {
-        saveReflection(user.id, courseId, lesson);
-      }, 5000);
     }
+
+    // Autoguardado al perder foco
+    reflectionInput.addEventListener("blur", () => {
+        saveReflection(user.id, courseId, lesson);
+    });
+    }
+
 
     renderLessonHeader(course, lesson, dayNum);
     renderLessonContent(lesson);
     setupFeedbackStars();
-    initMindsetUI();
+
+    if (reflectionInput) {
+      reflectionInput.addEventListener("blur", () => {
+        saveReflection(user.id, courseId, lesson);
+      });
+    }
+
+    // Auto-save cada 5 segundos si hay cambios
+    setInterval(() => {
+    saveReflection(user.id, courseId, lesson);
+    }, 5000);
 
     /* ============================
-       Botón completar lección
+       2. Botón completar lección
     ============================ */
     const completeBtn = qs("#completeLessonBtn");
+
     const isCompleted = progress?.completed === true;
 
     if (isCompleted) {
+      // Reemplaza el botón por uno verde de "Lección completada"
       if (completeBtn) {
         completeBtn.outerHTML = `
           <button class="btn completed-badge" disabled>
@@ -617,10 +467,12 @@ async function init() {
         `;
       }
     } else {
+      // Botón funcional normal
       if (completeBtn) {
         completeBtn.onclick = async () => {
           await saveReflection(user.id, courseId, lesson);
           await completeLesson(user.id, course, lesson);
+          // 🎉 ANIMACIÓN PREMIUM
           launchConfetti();
           highlightLesson();
           openFeedbackModal();
@@ -629,45 +481,45 @@ async function init() {
     }
 
     /* ============================
-       Botones feedback
+       3. Botones feedback
     ============================ */
     const skipBtn = qs("#feedbackSkipBtn");
     const sendBtn = qs("#feedbackSendBtn");
 
-    async function handleAfterFeedback() {
-      const redirectInfo = await computeNextDayForRedirect(
-        user.id,
-        course,
-        lesson.day
-      );
-
-      const alreadyLogged = await hasMindsetLogForToday(user.id);
-
-      if (alreadyLogged) {
-        redirectAfterLesson(course, lesson, redirectInfo);
-      } else {
-        pendingRedirect = { course, lesson, redirectInfo };
-        openMindsetModal();
-      }
-    }
-
     if (skipBtn) {
       skipBtn.onclick = async () => {
+        const { nextDay, totalDays, finished } =
+          await computeNextDayForRedirect(user.id, course, lesson.day);
+
         closeFeedbackModal();
-        await handleAfterFeedback();
+
+        if (finished && lesson.day >= totalDays) {
+          window.location.href = `/curso/index.html?c=${course.id}`;
+        } else {
+          window.location.href = `/curso/lesson.html?c=${course.id}&day=${nextDay}`;
+        }
       };
     }
 
     if (sendBtn) {
       sendBtn.onclick = async () => {
         await saveFeedback(user.id, courseId, lesson);
+
+        const { nextDay, totalDays, finished } =
+          await computeNextDayForRedirect(user.id, course, lesson.day);
+
         closeFeedbackModal();
-        await handleAfterFeedback();
+
+        if (finished && lesson.day >= totalDays) {
+          window.location.href = `/curso/index.html?c=${course.id}`;
+        } else {
+          window.location.href = `/curso/lesson.html?c=${course.id}&day=${nextDay}`;
+        }
       };
     }
 
     /* ============================================
-       Navegación: Siguiente / Anterior lección
+       4. Navegación: Siguiente / Anterior lección
     ============================================ */
     const prevBtn = qs("#prevLessonBtn");
     const nextBtn = qs("#nextLessonBtn");
@@ -693,6 +545,7 @@ async function init() {
             window.location.href = `/curso/lesson.html?c=${courseId}&day=${dayNum + 1}`;
           };
         } else {
+          // bloquear si la lección no está completada
           nextBtn.disabled = true;
           nextBtn.style.opacity = "0.4";
           nextBtn.textContent = "Completa esta lección para continuar →";
@@ -704,47 +557,6 @@ async function init() {
       }
     }
 
-    /* ============================================
-       Eventos del modal de mindset
-    ============================================ */
-    const btnMindsetNext = qs("#mindsetNextStep");
-    const btnMindsetBack = qs("#mindsetBackStep");
-    const btnMindsetSkip1 = qs("#mindsetSkipStep1");
-    const btnMindsetSave = qs("#mindsetSaveBtn");
-    const btnMindsetCloseX = qs("#mindsetCloseX");
-
-    if (btnMindsetNext) {
-      btnMindsetNext.onclick = () => {
-        goToMindsetStep(2);
-      };
-    }
-
-    if (btnMindsetBack) {
-      btnMindsetBack.onclick = () => {
-        goToMindsetStep(1);
-      };
-    }
-
-    async function skipMindsetAndGo() {
-      closeMindsetModal();
-      redirectFromMindset();
-    }
-
-    if (btnMindsetSkip1) {
-      btnMindsetSkip1.onclick = skipMindsetAndGo;
-    }
-
-    if (btnMindsetCloseX) {
-      btnMindsetCloseX.onclick = skipMindsetAndGo;
-    }
-
-    if (btnMindsetSave) {
-      btnMindsetSave.onclick = async () => {
-        await saveMindsetLog(user.id);
-        closeMindsetModal();
-        redirectFromMindset();
-      };
-    }
   } catch (e) {
     console.error("[lesson] ERROR en init:", e);
     alert(e.message || "No se pudo cargar la lección (error desconocido).");
@@ -753,3 +565,4 @@ async function init() {
 }
 
 init();
+
