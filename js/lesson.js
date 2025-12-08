@@ -363,6 +363,15 @@ async function init() {
     return;
   }
 
+  if (progress?.completed) {
+  const completeBtn = qs("#completeLessonBtn");
+    if (completeBtn) {
+        completeBtn.disabled = true;
+        completeBtn.textContent = "Lección ya completada";
+        completeBtn.classList.add("btn-disabled");
+    }
+  }
+
   const courseId = getQueryParam("c");
   const dayParam = getQueryParam("day") || "1";
   const dayNum = Number(dayParam) || 1;
