@@ -1,167 +1,139 @@
 // /perfil/perfil.js
 import { supabase } from "/js/supabase.js";
-import { protectUserView } from "/js/router.js";
+import { protectPage } from "/js/router.js";
+import { getCurrentUserWithProfile, logout } from "/js/auth.js";
 import { loadHeader } from "/components/header.js";
 
+/* ============================================================
+   INIT — Protege la página y carga datos del usuario
+============================================================ */
 document.addEventListener("DOMContentLoaded", async () => {
-  await protectUserView();
-  loadHeader();
+  await protectPage({ allowedRoles: ["user", "coach", "admin"] });
 
-  /* ----------------------------------------------------
-     1) Obtener usuario autenticado
-  ---------------------------------------------------- */
-  const { data: session } = await supabase.auth.getUser();
-  if (!session?.user) {
-    alert("Tu sesión expiró. Inicia sesión nuevamente.");
+  const data = await getCurrentUserWithProfile();
+  if (!data || !data.profile) {
     window.location.href = "/auth/login.html";
     return;
   }
 
-  const user = session.user;
-  const userId = user.id;
+  const { user, profile } = data;
 
-  /* ----------------------------------------------------
-     2) Obtener perfil desde Supabase
-  ---------------------------------------------------- */
-  const { data: profile, error: profileErr } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .maybeSingle();
+  console.log("[perfil] Loaded profile:", profile);
 
-  if (profileErr || !profile) {
-    console.error("Error cargando perfil:", profileErr);
-    alert("No se pudo cargar tu perfil.");
-    return;
-  }
+  await loadHeader();
+  loadProfile(profile);
+  setupAvatarUploader(user, profile);
+  setupSaveButton(user);
+});
 
-  /* ----------------------------------------------------
-     Helpers para asignar valores
-  ---------------------------------------------------- */
-  const set = (id, v) => {
+/* ============================================================
+   CARGAR DATOS DEL PERFIL
+============================================================ */
+function loadProfile(profile) {
+  const set = (id, val) => {
     const el = document.getElementById(id);
-    if (el) el.value = v ?? "";
+    if (el) el.value = val ?? "";
   };
 
-  const setSwitch = (id, v) => {
+  const setSwitch = (id, val) => {
     const el = document.getElementById(id);
-    if (el) el.checked = !!v;
+    if (el) el.checked = !!val;
   };
 
-  /* ----------------------------------------------------
-     3) Rellenar campos del formulario
-  ---------------------------------------------------- */
-
-  // Datos principales
+  // ---- Datos personales ----
   set("input_fullname", profile.full_name);
   set("input_birthdate", profile.birthdate);
   set("input_gender", profile.gender);
   set("input_phone", profile.phone);
   set("input_country", profile.country);
-
-  // Preferencias
   set("input_language", profile.language);
   set("input_timezone", profile.timezone);
   set("input_focus", profile.preferred_focus_time);
 
-  // Notificaciones JSON
+  // ---- Notificaciones ----
   const notif = profile.notifications || {};
   setSwitch("notif_racha", notif.notifRacha);
   setSwitch("notif_privNombre", notif.privNombre);
   setSwitch("notif_tema", notif.temaVisual === "auto");
 
-  // Objetivos JSON
+  // ---- Objetivos ----
   const goals = profile.goals_json || {};
   setSwitch("goal_disciplina", goals.disciplina);
   setSwitch("goal_foco", goals.foco);
   setSwitch("goal_energia", goals.energia);
 
-  // Info fija
-  document.getElementById("p_email").textContent = profile.email || user.email;
+  // ---- Email + fecha creación ----
+  document.getElementById("p_email").textContent = profile.email || "";
   document.getElementById("p_created").textContent =
     new Date(profile.created_at).toLocaleDateString();
 
-  /* ----------------------------------------------------
-     4) Avatar — mostrar imagen actual
-  ---------------------------------------------------- */
+  // ---- Avatar ----
   const avatarPreview = document.getElementById("avatarPreview");
-  avatarPreview.src =
-    profile.avatar_url ||
-    "/assets/default-avatar.png";
 
-  /* ----------------------------------------------------
-     5) Avatar — lógica de Cropper
-  ---------------------------------------------------- */
+  if (profile.avatar_url) {
+    avatarPreview.src = profile.avatar_url;
+  } else {
+    avatarPreview.src = "/img/default-avatar.png";
+  }
+}
+
+/* ============================================================
+   AVATAR — Subir, recortar, guardar
+============================================================ */
+function setupAvatarUploader(user, profile) {
   let cropper = null;
+
   const avatarInput = document.getElementById("avatarInput");
+  const avatarPreview = document.getElementById("avatarPreview");
   const avatarModal = document.getElementById("avatarModal");
   const avatarCropImage = document.getElementById("avatarCropImage");
 
-  avatarInput.addEventListener("change", (event) => {
-    const file = event.target.files[0];
+  avatarInput.addEventListener("change", () => {
+    const file = avatarInput.files[0];
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
-      alert("La imagen no puede superar los 2 MB.");
-      avatarInput.value = "";
+      alert("La imagen no puede superar 2 MB.");
       return;
     }
 
     const url = URL.createObjectURL(file);
     avatarCropImage.src = url;
 
-    avatarCropImage.onload = () => {
-      avatarModal.classList.remove("hidden");
+    avatarModal.classList.remove("hidden");
 
-      if (cropper) cropper.destroy();
+    if (cropper) cropper.destroy();
 
-      cropper = new Cropper(avatarCropImage, {
-        aspectRatio: 1,
-        viewMode: 1,
-        dragMode: "move",
-        autoCropArea: 1,
-        background: false
-      });
-    };
+    cropper = new Cropper(avatarCropImage, {
+      aspectRatio: 1,
+      viewMode: 1,
+      autoCropArea: 1,
+      background: false,
+    });
   });
 
-  /* Cancelar recorte */
   document.getElementById("avatarCropCancel").onclick = () => {
-    if (cropper) cropper.destroy();
+    cropper?.destroy();
     cropper = null;
-    avatarModal.classList.add("hidden");
     avatarInput.value = "";
+    avatarModal.classList.add("hidden");
   };
 
-  /* Aplicar recorte + filtros A+ */
   document.getElementById("avatarCropApply").onclick = async () => {
     if (!cropper) return;
 
-    const croppedCanvas = cropper.getCroppedCanvas({
-      width: 450,
-      height: 450
-    });
+    const canvas = cropper.getCroppedCanvas({ width: 400, height: 400 });
 
-    // Canvas con filtro Advance+
-    const filtered = document.createElement("canvas");
-    filtered.width = 450;
-    filtered.height = 450;
-    const ctx = filtered.getContext("2d");
+    canvas.toBlob(async (blob) => {
+      const fileName = `${user.id}_${Date.now()}.jpg`;
 
-    ctx.filter =
-      "brightness(1.04) contrast(1.06) saturate(1.07) blur(0.3px)";
-    ctx.drawImage(croppedCanvas, 0, 0, 450, 450);
-
-    filtered.toBlob(async (blob) => {
-      const fileName = `${userId}_${Date.now()}.jpg`;
-
-      const { error: upErr } = await supabase.storage
+      const { error: uploadErr } = await supabase.storage
         .from("avatars")
         .upload(fileName, blob, { upsert: true });
 
-      if (upErr) {
+      if (uploadErr) {
+        console.error(uploadErr);
         alert("Error subiendo avatar.");
-        console.error(upErr);
         return;
       }
 
@@ -169,46 +141,43 @@ document.addEventListener("DOMContentLoaded", async () => {
         .from("avatars")
         .getPublicUrl(fileName);
 
-      // Guardar en profiles
+      // Guardar en BD
       await supabase
         .from("profiles")
         .update({ avatar_url: publicUrl.publicUrl })
-        .eq("id", userId);
+        .eq("id", user.id);
 
       avatarPreview.src = publicUrl.publicUrl;
-      avatarModal.classList.add("hidden");
+
+      await loadHeader();
 
       cropper.destroy();
-      cropper = null;
+      avatarModal.classList.add("hidden");
       avatarInput.value = "";
-      loadHeader();
     }, "image/jpeg", 0.9);
   };
 
-  /* Eliminar avatar */
   document.getElementById("avatarDelete").onclick = async () => {
-    await supabase
-      .from("profiles")
-      .update({ avatar_url: null })
-      .eq("id", userId);
-
-    avatarPreview.src = "/assets/default-avatar.png";
-    loadHeader();
+    await supabase.from("profiles").update({ avatar_url: null }).eq("id", user.id);
+    avatarPreview.src = "/img/default-avatar.png";
+    await loadHeader();
   };
+}
 
-  /* ----------------------------------------------------
-     6) Guardar cambios del perfil
-  ---------------------------------------------------- */
-  document.getElementById("saveProfileBtn").onclick = async () => {
+/* ============================================================
+   GUARDAR PERFIL
+============================================================ */
+function setupSaveButton(user) {
+  document.getElementById("saveProfileBtn").addEventListener("click", async () => {
     const updates = {
       full_name: document.getElementById("input_fullname").value.trim(),
       birthdate: document.getElementById("input_birthdate").value || null,
-      gender: document.getElementById("input_gender").value,
+      gender: document.getElementById("input_gender").value || null,
       phone: document.getElementById("input_phone").value.trim(),
       country: document.getElementById("input_country").value.trim(),
       language: document.getElementById("input_language").value,
       timezone: document.getElementById("input_timezone").value.trim(),
-      preferred_focus_time: document.getElementById("input_focus").value,
+      preferred_focus_time: document.getElementById("input_focus").value.trim(),
 
       notifications: {
         notifRacha: document.getElementById("notif_racha").checked,
@@ -222,25 +191,24 @@ document.addEventListener("DOMContentLoaded", async () => {
         energia: document.getElementById("goal_energia").checked
       },
 
-      updated_at: new Date()
+      updated_at: new Date().toISOString(),
     };
-
-    const { error: saveErr } = await supabase
-      .from("profiles")
-      .update(updates)
-      .eq("id", userId);
 
     const msg = document.getElementById("saveMessage");
 
-    if (saveErr) {
+    const { error } = await supabase
+      .from("profiles")
+      .update(updates)
+      .eq("id", user.id);
+
+    if (error) {
       msg.textContent = "❌ Error al guardar";
       msg.style.color = "#ff6b6b";
-      console.error(saveErr);
+      console.error(error);
       return;
     }
 
     msg.textContent = "✔ Cambios guardados";
     msg.style.color = "#3ee98a";
-    loadHeader();
-  };
-});
+  });
+}
