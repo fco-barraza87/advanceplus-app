@@ -22,28 +22,53 @@ async function getCurrentUser() {
 ========================================== */
 async function loadLessonData(userId, courseId, day) {
   const dayNum = Number(day) || 1;
+  console.log("[lesson] loadLessonData →", { userId, courseId, dayNum });
 
-  // Curso
-  const { data: course, error: cErr } = await supabase
+  // ---------- CURSO ----------
+  const {
+    data: course,
+    error: cErr
+  } = await supabase
     .from("courses")
     .select("*")
     .eq("id", courseId)
-    .single();
+    .maybeSingle();
 
-  if (cErr || !course) throw new Error("Curso no encontrado");
+  console.log("[lesson] course result:", { course, cErr });
 
-  // Lección
-  const { data: lesson, error: lErr } = await supabase
+  if (cErr) {
+    throw new Error("Error cargando curso: " + cErr.message);
+  }
+  if (!course) {
+    throw new Error("Curso no encontrado para ese id.");
+  }
+
+  // ---------- LECCIÓN ----------
+  const {
+    data: lesson,
+    error: lErr
+  } = await supabase
     .from("lessons")
     .select("*")
     .eq("course_id", courseId)
     .eq("day", dayNum)
-    .single();
+    .maybeSingle();
 
-  if (lErr || !lesson) throw new Error("Lección no encontrada");
+  console.log("[lesson] lesson result:", { lesson, lErr });
 
-  // Progreso de este día
-  const { data: progress, error: pErr } = await supabase
+  if (lErr) {
+    // aquí veremos si es RLS, 406, etc.
+    throw new Error("Error cargando lección: " + lErr.message);
+  }
+  if (!lesson) {
+    throw new Error(`No existe lección para el día ${dayNum} en este curso.`);
+  }
+
+  // ---------- PROGRESO ----------
+  const {
+    data: progress,
+    error: pErr
+  } = await supabase
     .from("progress")
     .select("*")
     .eq("user_id", userId)
@@ -51,17 +76,29 @@ async function loadLessonData(userId, courseId, day) {
     .eq("day", dayNum)
     .maybeSingle();
 
-  if (pErr) console.warn("Error cargando progreso", pErr);
+  console.log("[lesson] progress result:", { progress, pErr });
+  if (pErr) {
+    console.warn("[lesson] Error cargando progreso (no crítico):", pErr);
+  }
 
-  // Reflexión previa (si existe)
-  const { data: reflection } = await supabase
-    .from("lesson_reflections")
-    .select("id, content")
-    .eq("user_id", userId)
-    .eq("course_id", courseId)
-    .eq("lesson_id", lesson.id)
-    .maybeSingle()
-    .catch(() => ({ data: null }));
+  // ---------- REFLEXIÓN (opcional) ----------
+  let reflection = null;
+  try {
+    const { data } = await supabase
+      .from("lesson_reflections")
+      .select("id, content")
+      .eq("user_id", userId)
+      .eq("course_id", courseId)
+      .eq("lesson_id", lesson.id)
+      .maybeSingle();
+
+    reflection = data || null;
+  } catch (e) {
+    console.warn(
+      "[lesson] No se pudo cargar reflexión (tabla opcional):",
+      e
+    );
+  }
 
   return { course, lesson, progress, reflection };
 }
@@ -75,7 +112,6 @@ async function saveReflection(userId, courseId, lesson) {
 
   const content = textarea.value.trim();
 
-  // Si no hay tabla, evitamos crash silenciosamente
   try {
     const { data: existing } = await supabase
       .from("lesson_reflections")
@@ -100,7 +136,7 @@ async function saveReflection(userId, courseId, lesson) {
       });
     }
   } catch (e) {
-    console.warn("No se pudo guardar reflexión (tabla opcional)", e);
+    console.warn("[lesson] No se pudo guardar reflexión:", e);
   }
 }
 
@@ -127,7 +163,9 @@ function renderLessonHeader(course, lesson, day) {
   if (subtitleEl) subtitleEl.textContent = lesson.subtitle || "";
 
   if (metaEl) {
-    metaEl.textContent = `Día ${day} · ${lesson.duration || 10} min · XP ${lesson.xp_reward || 25}`;
+    metaEl.textContent = `Día ${day} · ${lesson.duration || 10} min · XP ${
+      lesson.xp_reward || 25
+    }`;
   }
 }
 
@@ -135,13 +173,12 @@ function renderLessonContent(lesson) {
   const contentEl = qs("#lessonContent");
   const mediaEl = qs("#lessonMedia");
   const exerciseTextEl = qs("#lessonExerciseText");
-  const reflectionInput = qs("#lessonReflectionInput");
 
   if (contentEl) {
     if (lesson.content_html) {
       contentEl.innerHTML = lesson.content_html;
     } else if (lesson.text_content) {
-      contentEl.textContent = lesson.text_content;
+      contentEl.innerHTML = lesson.text_content; // puede traer HTML
     } else {
       contentEl.textContent =
         "Muy pronto verás aquí el contenido completo de esta lección.";
@@ -185,20 +222,19 @@ function renderLessonContent(lesson) {
   }
 
   if (exerciseTextEl && lesson.exercise_content) {
-    exerciseTextEl.textContent = lesson.exercise_content;
+    exerciseTextEl.innerHTML = lesson.exercise_content;
   }
-
-  // reflectionInput se rellenará desde DB en init
 }
 
 /* ==========================================
-   5. Feedback (modal)
+   5. Feedback (estrellas + modal)
 ========================================== */
 function setupFeedbackStars() {
   const container = qs("#feedbackStars");
   if (!container) return;
 
   container.innerHTML = "";
+  container.dataset.selected = "0";
 
   for (let i = 1; i <= 5; i++) {
     const star = document.createElement("button");
@@ -248,48 +284,58 @@ async function saveFeedback(userId, courseId, lesson) {
   const comment = commentEl ? commentEl.value.trim() : "";
 
   if (!rating && !comment) {
-    // Nada que guardar
     return;
   }
 
-  await supabase.from("lesson_feedback").insert({
-    user_id: userId,
-    course_id: courseId,
-    lesson_id: lesson.id,
-    day: lesson.day,
-    rating: rating || null,
-    comment: comment || null
-  });
+  try {
+    await supabase.from("lesson_feedback").insert({
+      user_id: userId,
+      course_id: courseId,
+      lesson_id: lesson.id,
+      day: lesson.day,
+      rating: rating || null,
+      comment: comment || null
+    });
+  } catch (e) {
+    console.warn("[lesson] No se pudo guardar feedback:", e);
+  }
 }
 
 /* ==========================================
-   7. Completar lección (progress + XP)
+   7. Completar lección
 ========================================== */
 async function completeLesson(userId, course, lesson) {
-  // Marcar progress.completed = true y setear XP de la lección
-  await supabase
-    .from("progress")
-    .update({
-      completed: true,
-      xp: lesson.xp_reward || 0
-    })
-    .eq("user_id", userId)
-    .eq("course_id", course.id)
-    .eq("day", lesson.day);
+  try {
+    await supabase
+      .from("progress")
+      .update({
+        completed: true,
+        xp: lesson.xp_reward || 0
+      })
+      .eq("user_id", userId)
+      .eq("course_id", course.id)
+      .eq("day", lesson.day);
 
-  // Aquí asumimos que tus triggers en DB se encargan del XP total, streak, etc.
+    console.log("[lesson] progress actualizado");
+  } catch (e) {
+    console.error("[lesson] Error al actualizar progress:", e);
+  }
 }
 
 /* ==========================================
-   8. Cálculo de nextDay para la redirección
+   8. Calcular nextDay para redirección
 ========================================== */
 async function computeNextDayForRedirect(userId, course, currentDay) {
-  const { data: allProgress } = await supabase
+  const { data: allProgress, error } = await supabase
     .from("progress")
     .select("day, completed")
     .eq("user_id", userId)
     .eq("course_id", course.id)
     .order("day", { ascending: true });
+
+  if (error) {
+    console.warn("[lesson] Error leyendo progress para nextDay:", error);
+  }
 
   const totalDays = course.duration_days || 1;
 
@@ -301,7 +347,6 @@ async function computeNextDayForRedirect(userId, course, currentDay) {
   let nextDay = lastCompleted + 1;
   if (nextDay > totalDays) nextDay = totalDays;
 
-  // Si ya terminó todas
   const finished = completedDays.length >= totalDays;
 
   return { nextDay, totalDays, finished };
@@ -312,11 +357,17 @@ async function computeNextDayForRedirect(userId, course, currentDay) {
 ========================================== */
 async function init() {
   const user = await getCurrentUser();
-  if (!user) return;
+  if (!user) {
+    alert("Tu sesión ha expirado. Vuelve a iniciar sesión.");
+    window.location.href = "/auth/login.html";
+    return;
+  }
 
   const courseId = getQueryParam("c");
   const dayParam = getQueryParam("day") || "1";
   const dayNum = Number(dayParam) || 1;
+
+  console.log("[lesson] init →", { courseId, dayParam, dayNum });
 
   if (!courseId) {
     alert("No se ha especificado el curso.");
@@ -331,7 +382,7 @@ async function init() {
       dayNum
     );
 
-    // Rellenar reflexión previa
+    // Reflexión previa
     const reflectionInput = qs("#lessonReflectionInput");
     if (reflectionInput && reflection?.content) {
       reflectionInput.value = reflection.content;
@@ -341,18 +392,17 @@ async function init() {
     renderLessonContent(lesson);
     setupFeedbackStars();
 
-    // auto-guardado de reflexión (on blur)
+    // Auto-guardado reflexión
     if (reflectionInput) {
       reflectionInput.addEventListener("blur", () => {
         saveReflection(user.id, courseId, lesson);
       });
     }
 
-    // Completar lección
+    // Botón completar lección
     const completeBtn = qs("#completeLessonBtn");
     if (completeBtn) {
       completeBtn.onclick = async () => {
-        // Guardar reflexión antes
         await saveReflection(user.id, courseId, lesson);
         await completeLesson(user.id, course, lesson);
         openFeedbackModal();
@@ -365,11 +415,8 @@ async function init() {
 
     if (skipBtn) {
       skipBtn.onclick = async () => {
-        const { nextDay, totalDays, finished } = await computeNextDayForRedirect(
-          user.id,
-          course,
-          lesson.day
-        );
+        const { nextDay, totalDays, finished } =
+          await computeNextDayForRedirect(user.id, course, lesson.day);
 
         closeFeedbackModal();
 
@@ -385,11 +432,8 @@ async function init() {
       sendBtn.onclick = async () => {
         await saveFeedback(user.id, courseId, lesson);
 
-        const { nextDay, totalDays, finished } = await computeNextDayForRedirect(
-          user.id,
-          course,
-          lesson.day
-        );
+        const { nextDay, totalDays, finished } =
+          await computeNextDayForRedirect(user.id, course, lesson.day);
 
         closeFeedbackModal();
 
@@ -401,8 +445,8 @@ async function init() {
       };
     }
   } catch (e) {
-    console.error(e);
-    alert("No se pudo cargar la lección.");
+    console.error("[lesson] ERROR en init:", e);
+    alert(e.message || "No se pudo cargar la lección (error desconocido).");
     window.location.href = "/dashboard/index.html";
   }
 }
