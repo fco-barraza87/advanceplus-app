@@ -264,18 +264,6 @@ function setupFeedbackStars() {
   }
 }
 
-function openFeedbackModal() {
-  const modal = qs("#feedbackModal");
-  if (!modal) return;
-  modal.classList.remove("hidden");
-}
-
-function closeFeedbackModal() {
-  const modal = qs("#feedbackModal");
-  if (!modal) return;
-  modal.classList.add("hidden");
-}
-
 /* ==========================================
    6. Guardar feedback
 ========================================== */
@@ -629,42 +617,37 @@ async function init() {
     }
 
     /* ============================
-       Botones feedback
+   Feedback en página
     ============================ */
-    const skipBtn = qs("#feedbackSkipBtn");
     const sendBtn = qs("#feedbackSendBtn");
-
-    async function handleAfterFeedback() {
-      const redirectInfo = await computeNextDayForRedirect(
-        user.id,
-        course,
-        lesson.day
-      );
-
-      const alreadyLogged = await hasMindsetLogForToday(user.id);
-
-      if (alreadyLogged) {
-        redirectAfterLesson(course, lesson, redirectInfo);
-      } else {
-        pendingRedirect = { course, lesson, redirectInfo };
-        openMindsetModal();
-      }
-    }
-
-    if (skipBtn) {
-      skipBtn.onclick = async () => {
-        closeFeedbackModal();
-        await handleAfterFeedback();
-      };
-    }
 
     if (sendBtn) {
       sendBtn.onclick = async () => {
         await saveFeedback(user.id, courseId, lesson);
-        closeFeedbackModal();
-        await handleAfterFeedback();
+
+        const msg = qs("#feedbackSavedMsg");
+        if (msg) {
+          msg.style.display = "block";
+          setTimeout(() => (msg.style.display = "none"), 2000);
+        }
+
+        // Ahora seguimos al mindset
+        const redirectInfo = await computeNextDayForRedirect(
+          user.id,
+          course,
+          lesson.day
+        );
+        const alreadyLogged = await hasMindsetLogForToday(user.id);
+
+        if (alreadyLogged) {
+          redirectAfterLesson(course, lesson, redirectInfo);
+        } else {
+          pendingRedirect = { course, lesson, redirectInfo };
+          openMindsetModal();
+        }
       };
     }
+
 
     /* ============================================
        Navegación: Siguiente / Anterior lección

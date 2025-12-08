@@ -53,6 +53,31 @@
       <p class="lesson-save-note" id="lessonSaveNote">Se guarda automáticamente.</p>
     </section>
 
+    <!-- FEEDBACK EN LA PÁGINA -->
+    <section class="dash-section lesson-feedback-section" id="feedbackSection">
+      <h2 class="section-title">Tu feedback</h2>
+      <p class="lesson-feedback-sub">
+        ¿Cómo te sentiste con esta lección? Nos ayuda a mejorar tu experiencia.
+      </p>
+
+      <div class="feedback-stars" id="feedbackStars">
+        <!-- estrellas por JS -->
+      </div>
+
+      <textarea id="feedbackComment" class="lesson-reflection-input" rows="4"
+        placeholder="Escribe aquí lo que más te ayudó o qué mejorarías... (opcional)">
+      </textarea>
+
+      <button class="btn btn-primary feedback-send-btn" id="feedbackSendBtn">
+        Guardar feedback y continuar →
+      </button>
+
+      <p id="feedbackSavedMsg" class="feedback-saved-msg" style="display:none;">
+        ✔ Feedback guardado
+      </p>
+    </section>
+
+
     <!-- NAVEGACIÓN ENTRE LECCIONES (NUEVO) -->
     <section class="dash-section lesson-navigation-section">
     <div class="lesson-nav-grid">
@@ -78,26 +103,6 @@
   </div>
 </main>
 
-
-  <!-- MODAL FEEDBACK -->
-  <div class="lesson-feedback-modal hidden" id="feedbackModal">
-    <div class="lesson-feedback-card">
-      <h2>¿Cómo te sentiste con esta lección?</h2>
-      <p>Tu feedback nos ayuda a mejorar y personalizar tu experiencia.</p>
-
-      <div class="feedback-stars" id="feedbackStars">
-        <!-- estrellas por JS -->
-      </div>
-
-      <textarea id="feedbackComment" class="lesson-reflection-input" rows="4"
-        placeholder="Escribe aquí lo que más te ayudó o qué mejorarías (opcional)"></textarea>
-
-      <div class="feedback-actions">
-        <button class="btn-outline" id="feedbackSkipBtn">Saltar</button>
-        <button class="btn btn-primary" id="feedbackSendBtn">Enviar y continuar</button>
-      </div>
-    </div>
-  </div>
 
     <!-- MODAL MINDSET (2 PASOS) -->
   <div class="mindset-modal hidden" id="mindsetModal">
