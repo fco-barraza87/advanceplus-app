@@ -3,65 +3,206 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Curso · Advance+</title>
+  <title>Mi perfil · Advance+</title>
 
+  <!-- CSS global A+ -->
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/tokens.css">
   <link rel="stylesheet" href="/css/components.css">
   <link rel="stylesheet" href="/css/dashboard.css">
-  <link rel="stylesheet" href="/css/courses.css">
+
+  <!-- CropperJS para avatar (lo usa perfil.js) -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/cropperjs@1.6.1/dist/cropper.min.css"
+  >
+  <script src="https://unpkg.com/cropperjs@1.6.1/dist/cropper.min.js"></script>
 </head>
 
 <body class="app-bg dashboard-page">
 
-  <!-- HEADER GLOBAL -->
+  <!-- HEADER GLOBAL (igual que en curso/lesson/dashboard) -->
   <div id="appHeader"></div>
 
   <main class="dashboard-main">
     <div class="dashboard-wrapper">
 
-      <!-- HERO DEL CURSO -->
-      <section class="dash-section" id="courseHero">
-        <p class="course-category-label" id="courseCategoryLabel"></p>
-        <h1 class="course-main-title" id="courseTitleHero">Cargando curso...</h1>
-        <p class="course-subtitle-hero" id="courseSubtitleHero"></p>
-
-        <div class="course-hero-grid">
-          <div class="course-hero-left">
-            <p class="course-short-promise" id="courseShortPromise"></p>
-
-            <div class="course-meta-hero" id="courseMetaHero">
-              <!-- nivel, duración, reviews -->
-            </div>
-
-            <div class="course-progress-wrapper">
-              <div class="course-progress-top">
-                <span id="courseProgressLabel">Progreso: 0%</span>
-                <span id="courseProgressDays">0 / 0 días</span>
-              </div>
-              <div class="course-progress-bar">
-                <div class="course-progress-fill" id="courseProgressFill"></div>
-              </div>
-            </div>
-
-            <button class="btn btn-primary course-cta-btn" id="courseCtaBtn">
-              Continuar reto
-            </button>
-
-            <p class="course-cta-note" id="courseCtaNote"></p>
-          </div>
-
-          <div class="course-hero-right">
-            <div class="course-hero-image" id="courseHeroImage"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- LISTA DE LECCIONES -->
+      <!-- BLOQUE PERFIL PRINCIPAL -->
       <section class="dash-section">
-        <h2 class="section-title">Lecciones del reto</h2>
-        <div id="lessonsList" class="lessons-list">
-          <!-- items por JS -->
+        <h1 class="section-title">Mi perfil</h1>
+
+        <div class="profile-card">
+
+          <!-- 🖼 AVATAR -->
+          <h3 class="section-sub">Foto de perfil</h3>
+
+          <div class="avatar-box">
+            <img id="avatarPreview" class="avatar-preview" alt="Avatar">
+
+            <div class="avatar-actions">
+              <label class="btn-avatar">
+                Subir imagen
+                <input type="file" id="avatarInput" accept="image/*" hidden>
+              </label>
+
+              <button id="avatarDelete" class="btn-avatar-delete">
+                Eliminar
+              </button>
+            </div>
+          </div>
+
+          <!-- Modal recorte avatar -->
+          <div id="avatarModal" class="avatar-modal hidden">
+            <div class="avatar-modal-content">
+              <h4>Recorta tu foto</h4>
+
+              <div class="avatar-crop-container">
+                <img id="avatarCropImage" src="" alt="Recorte avatar">
+              </div>
+
+              <div class="avatar-modal-actions">
+                <button
+                  id="avatarCropCancel"
+                  type="button"
+                  class="btn-avatar-delete"
+                >
+                  Cancelar
+                </button>
+                <button
+                  id="avatarCropApply"
+                  type="button"
+                  class="btn-avatar"
+                >
+                  Aplicar recorte
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 🧍 DATOS PERSONALES -->
+          <h3 class="section-sub">Datos personales</h3>
+
+          <label>Nombre completo</label>
+          <input
+            id="input_fullname"
+            class="profile-input"
+            placeholder="Tu nombre..."
+          />
+
+          <label>Fecha de nacimiento</label>
+          <input
+            id="input_birthdate"
+            type="date"
+            class="profile-input"
+          />
+
+          <label>Género</label>
+          <select id="input_gender" class="profile-input">
+            <option value="">Prefiero no decir</option>
+            <option value="male">Hombre</option>
+            <option value="female">Mujer</option>
+            <option value="other">Otro</option>
+          </select>
+
+          <label>Teléfono</label>
+          <input
+            id="input_phone"
+            class="profile-input"
+            placeholder="+41..."
+          />
+
+          <!-- País -->
+          <label>País</label>
+          <select id="input_country" class="profile-input">
+            <option value="">Selecciona tu país</option>
+            <option value="Chile">Chile</option>
+            <option value="Suiza">Suiza</option>
+            <option value="España">España</option>
+            <option value="México">México</option>
+            <option value="Argentina">Argentina</option>
+            <option value="Colombia">Colombia</option>
+            <option value="Perú">Perú</option>
+            <option value="USA">USA</option>
+            <option value="otro">Otro</option>
+          </select>
+
+          <!-- 🧠 PREFERENCIAS -->
+          <h3 class="section-sub">Preferencias de la app</h3>
+
+          <label>Idioma</label>
+          <select id="input_language" class="profile-input">
+            <option value="es">Español</option>
+            <option value="en">Inglés</option>
+          </select>
+
+          <label>Zona horaria</label>
+          <input
+            id="input_timezone"
+            class="profile-input"
+            placeholder="Europe/Zurich"
+          />
+
+          <label>Focus Time preferido</label>
+          <select id="input_focus" class="profile-input">
+            <option value="">Selecciona</option>
+            <option value="mañana">Mañana</option>
+            <option value="tarde">Tarde</option>
+            <option value="noche">Noche</option>
+          </select>
+
+          <!-- 🔔 NOTIFICACIONES -->
+          <h3 class="section-sub">Notificaciones</h3>
+
+          <div class="switch-row">
+            <label>Notificar racha</label>
+            <input type="checkbox" id="notif_racha" class="switch">
+          </div>
+
+          <div class="switch-row">
+            <label>Privacidad de nombre</label>
+            <input type="checkbox" id="notif_privNombre" class="switch">
+          </div>
+
+          <div class="switch-row">
+            <label>Tema visual automático</label>
+            <input type="checkbox" id="notif_tema" class="switch">
+          </div>
+
+          <!-- 🎯 OBJETIVOS -->
+          <h3 class="section-sub">Objetivos</h3>
+
+          <div class="switch-row">
+            <label>Mejorar disciplina</label>
+            <input type="checkbox" id="goal_disciplina" class="switch">
+          </div>
+
+          <div class="switch-row">
+            <label>Mejorar foco</label>
+            <input type="checkbox" id="goal_foco" class="switch">
+          </div>
+
+          <div class="switch-row">
+            <label>Mejorar energía</label>
+            <input type="checkbox" id="goal_energia" class="switch">
+          </div>
+
+          <!-- 📨 INFO CUENTA -->
+          <h3 class="section-sub">Información de tu cuenta</h3>
+
+          <div class="account-info-box">
+            <p class="label-small">Email</p>
+            <p id="p_email" class="profile-static"></p>
+
+            <p class="label-small" style="margin-top:10px;">Miembro desde</p>
+            <p id="p_created" class="profile-static"></p>
+          </div>
+
+          <!-- 💾 BOTÓN GUARDAR -->
+          <button id="saveProfileBtn" class="btn-save-profile">
+            Guardar cambios
+          </button>
+          <p id="saveMessage" class="save-message"></p>
+
         </div>
       </section>
 
@@ -75,12 +216,12 @@
       <small>Inicio</small>
     </button>
 
-    <button class="tab-btn active" onclick="location.href='/curso/index.html'">
+    <button class="tab-btn" onclick="location.href='/curso/index.html'">
       <span>📘</span>
       <small>Retos</small>
     </button>
 
-    <button class="tab-btn" onclick="location.href='/perfil/index.html'">
+    <button class="tab-btn active" onclick="location.href='/perfil/index.html'">
       <span>👤</span>
       <small>Perfil</small>
     </button>
@@ -91,20 +232,13 @@
     </button>
   </nav>
 
-  <!-- PROTECCIÓN POR ROL -->
-  <script type="module">
-    import { protectPage } from "/js/router.js";
-    protectPage({ allowedRoles: ["user"] });
-  </script>
-
-  <!-- HEADER -->
+  <!-- PROTECCIÓN / HEADER / LÓGICA PERFIL -->
   <script type="module">
     import { loadHeader } from "/components/header.js";
     loadHeader();
   </script>
 
-  <!-- LÓGICA DEL CURSO -->
-  <script type="module" src="/js/course-index.js"></script>
+  <script type="module" src="/perfil/perfil.js"></script>
 
 </body>
 </html>
