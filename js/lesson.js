@@ -24,11 +24,8 @@ async function loadLessonData(userId, courseId, day) {
   const dayNum = Number(day) || 1;
   console.log("[lesson] loadLessonData →", { userId, courseId, dayNum });
 
-  // ---------- CURSO ----------
-  const {
-    data: course,
-    error: cErr
-  } = await supabase
+  /* ---------- CURSO ---------- */
+  const { data: course, error: cErr } = await supabase
     .from("courses")
     .select("*")
     .eq("id", courseId)
@@ -43,11 +40,8 @@ async function loadLessonData(userId, courseId, day) {
     throw new Error("Curso no encontrado para ese id.");
   }
 
-  // ---------- LECCIÓN ----------
-  const {
-    data: lesson,
-    error: lErr
-  } = await supabase
+  /* ---------- LECCIÓN ---------- */
+  const { data: lesson, error: lErr } = await supabase
     .from("lessons")
     .select("*")
     .eq("course_id", courseId)
@@ -64,11 +58,8 @@ async function loadLessonData(userId, courseId, day) {
     throw new Error(`No existe lección para el día ${dayNum} en este curso.`);
   }
 
-  // ---------- PROGRESO ----------
-  const {
-    data: progress,
-    error: pErr
-  } = await supabase
+  /* ---------- PROGRESO ---------- */
+  const { data: progress, error: pErr } = await supabase
     .from("progress")
     .select("*")
     .eq("user_id", userId)
@@ -77,14 +68,15 @@ async function loadLessonData(userId, courseId, day) {
     .maybeSingle();
 
   console.log("[lesson] progress result:", { progress, pErr });
+
   if (pErr) {
     console.warn("[lesson] Error cargando progreso (no crítico):", pErr);
   }
 
-  // ---------- REFLEXIÓN (opcional) ----------
+  /* ---------- REFLEXIÓN (opcional, robusto) ---------- */
   let reflection = null;
   try {
-    const { data } = await supabase
+    const { data: refData, error: rErr } = await supabase
       .from("lesson_reflections")
       .select("id, content")
       .eq("user_id", userId)
@@ -92,19 +84,22 @@ async function loadLessonData(userId, courseId, day) {
       .eq("lesson_id", lesson.id)
       .maybeSingle();
 
-    reflection = data || null;
+    if (rErr) {
+      console.warn("[lesson] Error cargando reflexión (no crítico):", rErr);
+    }
+
+    reflection = refData || null;
+    console.log("[lesson] reflection result:", { reflection });
   } catch (e) {
-    console.warn(
-      "[lesson] No se pudo cargar reflexión (tabla opcional):",
-      e
-    );
+    console.warn("[lesson] No se pudo cargar reflexión (tabla opcional):", e);
   }
 
   return { course, lesson, progress, reflection };
 }
 
+
 /* ==========================================
-   3. Guardar reflexión (upsert)
+   Guardar reflexión (upsert real y seguro)
 ========================================== */
 async function saveReflection(userId, courseId, lesson) {
   const textarea = qs("#lessonReflectionInput");
@@ -113,6 +108,7 @@ async function saveReflection(userId, courseId, lesson) {
   const content = textarea.value.trim();
 
   try {
+    // Buscar si ya existe reflexión del usuario para esta lección
     const { data: existing } = await supabase
       .from("lesson_reflections")
       .select("id")
@@ -121,12 +117,15 @@ async function saveReflection(userId, courseId, lesson) {
       .eq("lesson_id", lesson.id)
       .maybeSingle();
 
-    if (existing) {
+    if (existing?.id) {
+      // UPDATE
       await supabase
         .from("lesson_reflections")
         .update({ content })
         .eq("id", existing.id);
+
     } else {
+      // INSERT
       await supabase.from("lesson_reflections").insert({
         user_id: userId,
         course_id: courseId,
@@ -135,10 +134,12 @@ async function saveReflection(userId, courseId, lesson) {
         content
       });
     }
+
   } catch (e) {
-    console.warn("[lesson] No se pudo guardar reflexión:", e);
+    console.error("❌ Error guardando reflexión:", e);
   }
 }
+
 
 /* ==========================================
    4. Render lección
@@ -418,12 +419,21 @@ async function init() {
     );
 
     /* ============================
-       1. Reflexión previa
+    Cargar reflexión previa
     ============================ */
     const reflectionInput = qs("#lessonReflectionInput");
-    if (reflectionInput && reflection?.content) {
-      reflectionInput.value = reflection.content;
+
+    if (reflectionInput) {
+    if (reflection?.content) {
+        reflectionInput.value = reflection.content;
     }
+
+    // Autoguardado al perder foco
+    reflectionInput.addEventListener("blur", () => {
+        saveReflection(user.id, courseId, lesson);
+    });
+    }
+
 
     renderLessonHeader(course, lesson, dayNum);
     renderLessonContent(lesson);
@@ -434,6 +444,11 @@ async function init() {
         saveReflection(user.id, courseId, lesson);
       });
     }
+
+    // Auto-save cada 5 segundos si hay cambios
+    setInterval(() => {
+    saveReflection(user.id, courseId, lesson);
+    }, 5000);
 
     /* ============================
        2. Botón completar lección
