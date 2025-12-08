@@ -1,0 +1,196 @@
+/* ====== GRID DE STATS ====== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.stat-card {
+  background: rgba(8, 17, 43, 0.92);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.stat-caption {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ====== HEADERS ====== */
+.section-subtitle {
+  margin-top: 0.25rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.section-chip {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* ====== MINDSET CHART ====== */
+.mindset-chart-card {
+  background: rgba(8, 17, 43, 0.92);
+  border-radius: 16px;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mindset-chart-wrapper {
+  position: relative;
+  width: 100%;
+  height: 260px;
+}
+
+.mindset-empty {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ====== MINDSET FORM ====== */
+.mindset-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.mindset-slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.mindset-slider-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.mindset-value {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.mindset-form input[type="range"] {
+  width: 100%;
+}
+
+.mindset-save-btn {
+  margin-top: 0.75rem;
+  width: 100%;
+}
+
+.save-message {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+}
+
+/* ====== CURSOS PROGRESO ====== */
+.courses-progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.course-progress-item {
+  background: rgba(8, 17, 43, 0.9);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.course-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.course-progress-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.course-progress-meta {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.course-progress-bar {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  margin-top: 0.3rem;
+}
+
+.course-progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #c0a450, #f5d98b);
+  transition: width 0.4s ease-out;
+}
+
+.course-progress-footer {
+  margin-top: 0.2rem;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.empty-text {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 0.5rem;
+}
+
+/* Mobile tweaks */
+@media (max-width: 600px) {
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .mindset-chart-wrapper {
+    height: 220px;
+  }
+
+  .dashboard-wrapper {
+    padding-bottom: 5rem; /* espacio tabbar */
+  }
+}

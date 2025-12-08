@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Progreso · Advance+</title>
+
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/tokens.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/perfil-datos.css" />
+</head>
+
+<body class="app-bg dashboard-page">
+
+  <!-- HEADER GLOBAL -->
+  <div id="appHeader"></div>
+
+  <main class="dashboard-main">
+    <div class="dashboard-wrapper">
+
+      <!-- SECCIÓN 1 · RESUMEN -->
+      <section class="dash-section">
+        <h1 class="section-title">Tu progreso interno</h1>
+        <p class="section-subtitle">
+          Una vista clara de tu disciplina, racha y mindset.
+        </p>
+
+        <div class="stats-grid">
+          <article class="stat-card">
+            <span class="stat-label">Racha actual</span>
+            <span id="statStreakCurrent" class="stat-value">—</span>
+            <span class="stat-caption">días seguidos</span>
+          </article>
+
+          <article class="stat-card">
+            <span class="stat-label">Mejor racha</span>
+            <span id="statStreakBest" class="stat-value">—</span>
+            <span class="stat-caption">máximo histórico</span>
+          </article>
+
+          <article class="stat-card">
+            <span class="stat-label">Disciplina</span>
+            <span id="statDiscipline" class="stat-value">—%</span>
+            <span class="stat-caption">lecciones completadas</span>
+          </article>
+
+          <article class="stat-card">
+            <span class="stat-label">Tiempo de enfoque</span>
+            <span id="statFocusTime" class="stat-value">—</span>
+            <span class="stat-caption">estimado acumulado</span>
+          </article>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 2 · GRÁFICO MINDSET -->
+      <section class="dash-section">
+        <div class="section-header-row">
+          <h2 class="section-title">Mindset & energía</h2>
+          <span class="section-chip" id="mindsetRangeLabel">Últimos 30 días</span>
+        </div>
+
+        <div class="mindset-chart-card">
+          <div class="mindset-chart-wrapper">
+            <canvas id="mindsetChart"></canvas>
+          </div>
+          <p class="mindset-empty" id="mindsetEmptyMessage" style="display:none;">
+            Aún no has registrado tu estado. Empieza con el formulario de abajo.
+          </p>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 3 · REGISTRO DIARIO -->
+      <section class="dash-section">
+        <h2 class="section-title">Registro diario de mindset</h2>
+        <p class="section-subtitle">
+          Toma 30 segundos al día para medir cómo estás. Esto alimenta al Coach IA
+          y tus futuras decisiones.
+        </p>
+
+        <form class="mindset-form" id="mindsetForm" onsubmit="return false;">
+          <div class="mindset-slider-row">
+            <div class="mindset-slider-label">
+              <span>Enfoque</span>
+              <span id="valEnfoque" class="mindset-value">5</span>
+            </div>
+            <input type="range" id="sliderEnfoque" min="0" max="10" step="1" value="5" />
+          </div>
+
+          <div class="mindset-slider-row">
+            <div class="mindset-slider-label">
+              <span>Energía</span>
+              <span id="valEnergia" class="mindset-value">5</span>
+            </div>
+            <input type="range" id="sliderEnergia" min="0" max="10" step="1" value="5" />
+          </div>
+
+          <div class="mindset-slider-row">
+            <div class="mindset-slider-label">
+              <span>Motivación</span>
+              <span id="valMotivacion" class="mindset-value">5</span>
+            </div>
+            <input type="range" id="sliderMotivacion" min="0" max="10" step="1" value="5" />
+          </div>
+
+          <div class="mindset-slider-row">
+            <div class="mindset-slider-label">
+              <span>Claridad</span>
+              <span id="valClaridad" class="mindset-value">5</span>
+            </div>
+            <input type="range" id="sliderClaridad" min="0" max="10" step="1" value="5" />
+          </div>
+
+          <div class="mindset-slider-row">
+            <div class="mindset-slider-label">
+              <span>Confianza</span>
+              <span id="valConfianza" class="mindset-value">5</span>
+            </div>
+            <input type="range" id="sliderConfianza" min="0" max="10" step="1" value="5" />
+          </div>
+
+          <button id="mindsetSaveBtn" class="btn btn-primary mindset-save-btn">
+            Guardar registro de hoy
+          </button>
+          <p id="mindsetSaveMessage" class="save-message"></p>
+        </form>
+      </section>
+
+      <!-- SECCIÓN 4 · PROGRESO EN RETOS -->
+      <section class="dash-section">
+        <h2 class="section-title">Progreso en tus retos</h2>
+        <p class="section-subtitle">
+          Visualiza qué programas tienes más avanzados.
+        </p>
+
+        <div id="coursesProgressList" class="courses-progress-list">
+          <!-- items via JS -->
+        </div>
+
+        <p id="coursesProgressEmpty" class="empty-text" style="display:none;">
+          Aún no tienes progreso registrado en ningún reto.
+        </p>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- TABBAR GLOBAL -->
+  <nav class="tabbar">
+    <button class="tab-btn" onclick="location.href='/dashboard/index.html'">
+      <span>🏠</span>
+      <small>Inicio</small>
+    </button>
+
+    <button class="tab-btn" onclick="location.href='/curso/index.html'">
+      <span>📘</span>
+      <small>Retos</small>
+    </button>
+
+    <button class="tab-btn" onclick="location.href='/perfil/index.html'">
+      <span>👤</span>
+      <small>Perfil</small>
+    </button>
+
+    <button class="tab-btn active" onclick="location.href='/perfil/datos.html'">
+      <span>📊</span>
+      <small>Progreso</small>
+    </button>
+  </nav>
+
+  <!-- PROTECCIÓN POR ROL -->
+  <script type="module">
+    import { protectPage } from "/js/router.js";
+    protectPage({ allowedRoles: ["user"] });
+  </script>
+
+  <!-- HEADER -->
+  <script type="module">
+    import { loadHeader } from "/components/header.js";
+    loadHeader();
+  </script>
+
+  <!-- CHART.JS -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- LÓGICA PERFIL/DATOS -->
+  <script type="module" src="/js/perfil-datos.js"></script>
+
+</body>
+</html>
