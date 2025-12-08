@@ -17,51 +17,65 @@
   <!-- HEADER GLOBAL -->
   <div id="appHeader"></div>
 
-  <main class="dashboard-main">
-    <div class="dashboard-wrapper">
+<main class="dashboard-main">
+  <div class="dashboard-wrapper">
 
-      <!-- ENCABEZADO LECCIÓN -->
-      <section class="dash-section lesson-header-section">
-        <button class="btn-outline lesson-back-btn" id="lessonBackBtn">
-          ← Volver al curso
+    <!-- ENCABEZADO LECCIÓN -->
+    <section class="dash-section lesson-header-section">
+      <button class="btn-outline lesson-back-btn" id="lessonBackBtn">
+        ← Volver al curso
+      </button>
+
+      <p class="lesson-course-label" id="lessonCourseLabel"></p>
+      <h1 class="lesson-title" id="lessonTitle">Cargando lección...</h1>
+      <p class="lesson-subtitle" id="lessonSubtitle"></p>
+
+      <p class="lesson-meta" id="lessonMeta"></p>
+    </section>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <section class="dash-section lesson-content-section">
+      <div id="lessonContent" class="lesson-content"></div>
+
+      <div id="lessonMedia" class="lesson-media"></div>
+    </section>
+
+    <!-- EJERCICIO / REFLEXIÓN -->
+    <section class="dash-section lesson-exercise-section">
+      <h2 class="section-title">Ejercicio del día</h2>
+      <p id="lessonExerciseText" class="lesson-exercise-text">
+        Escribe aquí tu reflexión o lo que vas a aplicar hoy.
+      </p>
+
+      <textarea id="lessonReflectionInput" class="lesson-reflection-input" rows="6"
+        placeholder="Escribe tus ideas, compromisos o aprendizajes clave..."></textarea>
+
+      <p class="lesson-save-note" id="lessonSaveNote">Se guarda automáticamente.</p>
+    </section>
+
+    <!-- NAVEGACIÓN ENTRE LECCIONES (NUEVO) -->
+    <section class="dash-section lesson-navigation-section">
+      <div class="lesson-nav-grid">
+        <button class="btn-outline lesson-nav-btn" id="prevLessonBtn">
+          ← Lección anterior
         </button>
 
-        <p class="lesson-course-label" id="lessonCourseLabel"></p>
-        <h1 class="lesson-title" id="lessonTitle">Cargando lección...</h1>
-        <p class="lesson-subtitle" id="lessonSubtitle"></p>
-
-        <p class="lesson-meta" id="lessonMeta"></p>
-      </section>
-
-      <!-- CONTENIDO PRINCIPAL -->
-      <section class="dash-section lesson-content-section">
-        <div id="lessonContent" class="lesson-content"></div>
-
-        <div id="lessonMedia" class="lesson-media"></div>
-      </section>
-
-      <!-- EJERCICIO / REFLEXIÓN -->
-      <section class="dash-section lesson-exercise-section">
-        <h2 class="section-title">Ejercicio del día</h2>
-        <p id="lessonExerciseText" class="lesson-exercise-text">
-          Escribe aquí tu reflexión o lo que vas a aplicar hoy.
-        </p>
-
-        <textarea id="lessonReflectionInput" class="lesson-reflection-input" rows="6"
-          placeholder="Escribe tus ideas, compromisos o aprendizajes clave..."></textarea>
-
-        <p class="lesson-save-note" id="lessonSaveNote">Se guarda automáticamente.</p>
-      </section>
-
-      <!-- CTA COMPLETAR -->
-      <section class="dash-section lesson-complete-section">
-        <button class="btn btn-primary" id="completeLessonBtn">
-          Marcar lección como completada
+        <button class="btn-outline lesson-nav-btn" id="nextLessonBtn">
+          Siguiente lección →
         </button>
-      </section>
+      </div>
+    </section>
 
-    </div>
-  </main>
+    <!-- CTA COMPLETAR -->
+    <section class="dash-section lesson-complete-section">
+      <button class="btn btn-primary" id="completeLessonBtn">
+        Marcar lección como completada
+      </button>
+    </section>
+
+  </div>
+</main>
+
 
   <!-- MODAL FEEDBACK -->
   <div class="lesson-feedback-modal hidden" id="feedbackModal">
