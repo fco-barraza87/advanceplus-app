@@ -405,15 +405,19 @@ async function init() {
     ============================ */
     const completeBtn = qs("#completeLessonBtn");
 
-    if (progress?.completed) {
-      // ya completada → deshabilitar botón
+    const isCompleted = progress?.completed === true;
+
+    if (isCompleted) {
+      // Reemplaza el botón por uno verde de "Lección completada"
       if (completeBtn) {
-        completeBtn.disabled = true;
-        completeBtn.textContent = "Lección ya completada";
-        completeBtn.classList.add("btn-disabled");
+        completeBtn.outerHTML = `
+          <button class="btn completed-badge" disabled>
+            ✓ Lección ya completada
+          </button>
+        `;
       }
     } else {
-      // si no está completada → funcionalidad normal
+      // Botón funcional normal
       if (completeBtn) {
         completeBtn.onclick = async () => {
           await saveReflection(user.id, courseId, lesson);
@@ -421,48 +425,6 @@ async function init() {
           openFeedbackModal();
         };
       }
-    }
-
-    // ESTADO ACTUAL DE LA LECCIÓN
-    const isCompleted = progress?.completed === true;
-    const totalDays = course.duration_days;
-
-    // --- Completar lección (UI) ---
-    const completeBtn = qs("#completeLessonBtn");
-
-    if (isCompleted) {
-    // Cambiar botón por badge verde
-    completeBtn.outerHTML = `
-        <button class="btn completed-badge" disabled>
-        ✓ Lección ya completada
-        </button>
-    `;
-    }
-
-    // --- Navegación Anterior / Siguiente ---
-    const prevBtn = qs("#prevLessonBtn");
-    const nextBtn = qs("#nextLessonBtn");
-
-    // Botón anterior
-    if (dayNum <= 1) {
-    prevBtn.disabled = true;
-    } else {
-    prevBtn.onclick = () => {
-        window.location.href = `/curso/lesson.html?c=${course.id}&day=${dayNum - 1}`;
-    };
-    }
-
-    // Botón siguiente
-    if (!isCompleted) {
-    // Bloqueado hasta completar esta lección
-    nextBtn.disabled = true;
-    } else if (dayNum >= totalDays) {
-    // Última lección → bloquear botón siguiente
-    nextBtn.disabled = true;
-    } else {
-    nextBtn.onclick = () => {
-        window.location.href = `/curso/lesson.html?c=${course.id}&day=${dayNum + 1}`;
-    };
     }
 
     /* ============================
@@ -525,9 +487,16 @@ async function init() {
     // Siguiente
     if (nextBtn) {
       if (dayNum < totalDays) {
-        nextBtn.onclick = () => {
-          window.location.href = `/curso/lesson.html?c=${courseId}&day=${dayNum + 1}`;
-        };
+        if (isCompleted) {
+          nextBtn.onclick = () => {
+            window.location.href = `/curso/lesson.html?c=${courseId}&day=${dayNum + 1}`;
+          };
+        } else {
+          // bloquear si la lección no está completada
+          nextBtn.disabled = true;
+          nextBtn.style.opacity = "0.4";
+          nextBtn.textContent = "Completa esta lección para continuar →";
+        }
       } else {
         nextBtn.disabled = true;
         nextBtn.textContent = "Fin del curso 🎉";
