@@ -95,17 +95,3 @@ input::placeholder {
 }
 
 
-.lesson-navigation-section {
-  margin-top: 20px;
-}
-
-.lesson-nav-grid {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.lesson-nav-btn {
-  width: 48%;
-  text-align: center;
-}

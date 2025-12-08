@@ -423,6 +423,48 @@ async function init() {
       }
     }
 
+    // ESTADO ACTUAL DE LA LECCIÓN
+    const isCompleted = progress?.completed === true;
+    const totalDays = course.duration_days;
+
+    // --- Completar lección (UI) ---
+    const completeBtn = qs("#completeLessonBtn");
+
+    if (isCompleted) {
+    // Cambiar botón por badge verde
+    completeBtn.outerHTML = `
+        <button class="btn completed-badge" disabled>
+        ✓ Lección ya completada
+        </button>
+    `;
+    }
+
+    // --- Navegación Anterior / Siguiente ---
+    const prevBtn = qs("#prevLessonBtn");
+    const nextBtn = qs("#nextLessonBtn");
+
+    // Botón anterior
+    if (dayNum <= 1) {
+    prevBtn.disabled = true;
+    } else {
+    prevBtn.onclick = () => {
+        window.location.href = `/curso/lesson.html?c=${course.id}&day=${dayNum - 1}`;
+    };
+    }
+
+    // Botón siguiente
+    if (!isCompleted) {
+    // Bloqueado hasta completar esta lección
+    nextBtn.disabled = true;
+    } else if (dayNum >= totalDays) {
+    // Última lección → bloquear botón siguiente
+    nextBtn.disabled = true;
+    } else {
+    nextBtn.onclick = () => {
+        window.location.href = `/curso/lesson.html?c=${course.id}&day=${dayNum + 1}`;
+    };
+    }
+
     /* ============================
        3. Botones feedback
     ============================ */
