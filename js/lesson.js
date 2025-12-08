@@ -363,7 +363,6 @@ async function init() {
     return;
   }
 
-  
   const courseId = getQueryParam("c");
   const dayParam = getQueryParam("day") || "1";
   const dayNum = Number(dayParam) || 1;
@@ -383,7 +382,9 @@ async function init() {
       dayNum
     );
 
-    // Reflexión previa
+    /* ============================
+       1. Reflexión previa
+    ============================ */
     const reflectionInput = qs("#lessonReflectionInput");
     if (reflectionInput && reflection?.content) {
       reflectionInput.value = reflection.content;
@@ -393,24 +394,38 @@ async function init() {
     renderLessonContent(lesson);
     setupFeedbackStars();
 
-    // Auto-guardado reflexión
     if (reflectionInput) {
       reflectionInput.addEventListener("blur", () => {
         saveReflection(user.id, courseId, lesson);
       });
     }
 
-    // Botón completar lección
+    /* ============================
+       2. Botón completar lección
+    ============================ */
     const completeBtn = qs("#completeLessonBtn");
-    if (completeBtn) {
-      completeBtn.onclick = async () => {
-        await saveReflection(user.id, courseId, lesson);
-        await completeLesson(user.id, course, lesson);
-        openFeedbackModal();
-      };
+
+    if (progress?.completed) {
+      // ya completada → deshabilitar botón
+      if (completeBtn) {
+        completeBtn.disabled = true;
+        completeBtn.textContent = "Lección ya completada";
+        completeBtn.classList.add("btn-disabled");
+      }
+    } else {
+      // si no está completada → funcionalidad normal
+      if (completeBtn) {
+        completeBtn.onclick = async () => {
+          await saveReflection(user.id, courseId, lesson);
+          await completeLesson(user.id, course, lesson);
+          openFeedbackModal();
+        };
+      }
     }
 
-    // Botones feedback
+    /* ============================
+       3. Botones feedback
+    ============================ */
     const skipBtn = qs("#feedbackSkipBtn");
     const sendBtn = qs("#feedbackSendBtn");
 
@@ -445,6 +460,39 @@ async function init() {
         }
       };
     }
+
+    /* ============================================
+       4. Navegación: Siguiente / Anterior lección
+    ============================================ */
+    const prevBtn = qs("#prevLessonBtn");
+    const nextBtn = qs("#nextLessonBtn");
+    const totalDays = course.duration_days || 1;
+
+    // Anterior
+    if (prevBtn) {
+      if (dayNum > 1) {
+        prevBtn.onclick = () => {
+          window.location.href = `/curso/lesson.html?c=${courseId}&day=${dayNum - 1}`;
+        };
+      } else {
+        prevBtn.disabled = true;
+        prevBtn.style.opacity = "0.4";
+      }
+    }
+
+    // Siguiente
+    if (nextBtn) {
+      if (dayNum < totalDays) {
+        nextBtn.onclick = () => {
+          window.location.href = `/curso/lesson.html?c=${courseId}&day=${dayNum + 1}`;
+        };
+      } else {
+        nextBtn.disabled = true;
+        nextBtn.textContent = "Fin del curso 🎉";
+        nextBtn.style.opacity = "0.4";
+      }
+    }
+
   } catch (e) {
     console.error("[lesson] ERROR en init:", e);
     alert(e.message || "No se pudo cargar la lección (error desconocido).");
@@ -453,3 +501,4 @@ async function init() {
 }
 
 init();
+
