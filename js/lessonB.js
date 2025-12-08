@@ -12,6 +12,7 @@ function getQueryParam(key) {
    Helpers de fecha
 ========================================== */
 function todayISO() {
+  // Usamos la fecha local del navegador (suficiente para MVP)
   const d = new Date();
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -231,7 +232,7 @@ function renderLessonContent(lesson) {
 }
 
 /* ==========================================
-   5. Feedback (estrellas inline)
+   5. Feedback (estrellas + modal)
 ========================================== */
 function setupFeedbackStars() {
   const container = qs("#feedbackStars");
@@ -275,7 +276,6 @@ async function saveFeedback(userId, courseId, lesson) {
   const rating = Number(starsContainer.dataset.selected || 0);
   const comment = commentEl ? commentEl.value.trim() : "";
 
-  // Si el usuario no puso nada, no guardamos nada
   if (!rating && !comment) {
     return;
   }
@@ -289,7 +289,6 @@ async function saveFeedback(userId, courseId, lesson) {
       rating: rating || null,
       comment: comment || null
     });
-    console.log("[lesson] feedback guardado");
   } catch (e) {
     console.warn("[lesson] No se pudo guardar feedback:", e);
   }
@@ -386,6 +385,8 @@ function openMindsetModal() {
   const modal = qs("#mindsetModal");
   if (!modal) return;
   modal.classList.remove("hidden");
+
+  // Siempre empezamos en paso 1
   goToMindsetStep(1);
 }
 
@@ -456,6 +457,7 @@ async function saveMindsetLog(userId) {
       : null;
 
   try {
+    // upsert por (user_id, log_date) → asumiendo unique constraint
     await supabase.from("mindset_logs").upsert(
       {
         user_id: userId,
@@ -478,9 +480,10 @@ async function saveMindsetLog(userId) {
 }
 
 function initMindsetUI() {
+  // mood buttons
   const moodRow = qs("#mindsetMoodRow");
   if (moodRow) {
-    moodRow.dataset.selected = "3";
+    moodRow.dataset.selected = "3"; // neutro por defecto
     Array.from(moodRow.children).forEach((btn) => {
       btn.addEventListener("click", () => {
         const val = btn.dataset.value;
@@ -492,6 +495,7 @@ function initMindsetUI() {
     });
   }
 
+  // sliders
   const sliders = [
     { id: "mindsetFocus", labelId: "mindsetFocusValue" },
     { id: "mindsetEnergy", labelId: "mindsetEnergyValue" },
@@ -575,6 +579,7 @@ async function init() {
         saveReflection(user.id, courseId, lesson);
       });
 
+      // Auto-save cada 5 segundos
       setInterval(() => {
         saveReflection(user.id, courseId, lesson);
       }, 5000);
@@ -605,17 +610,17 @@ async function init() {
           // 1. Guardar reflexión
           await saveReflection(user.id, courseId, lesson);
 
-          // 2. Marcar progreso
+          // 2. Guardar progreso
           await completeLesson(user.id, course, lesson);
 
-          // 3. Guardar feedback si existe
+          // 3. Guardar feedback automáticamente si existe algo
           await saveFeedback(user.id, courseId, lesson);
 
           // 4. Animación A+
           launchConfetti();
           highlightLesson();
 
-          // 5. Lógica de redirección + mindset
+          // 5. Ver si procede mindset
           const redirectInfo = await computeNextDayForRedirect(
             user.id,
             course,
@@ -631,8 +636,42 @@ async function init() {
             openMindsetModal();
           }
         };
+
       }
     }
+
+    /* ============================
+   Feedback en página
+    ============================ */
+    const sendBtn = qs("#feedbackSendBtn");
+
+    if (sendBtn) {
+      sendBtn.onclick = async () => {
+        await saveFeedback(user.id, courseId, lesson);
+
+        const msg = qs("#feedbackSavedMsg");
+        if (msg) {
+          msg.style.display = "block";
+          setTimeout(() => (msg.style.display = "none"), 2000);
+        }
+
+        // Ahora seguimos al mindset
+        const redirectInfo = await computeNextDayForRedirect(
+          user.id,
+          course,
+          lesson.day
+        );
+        const alreadyLogged = await hasMindsetLogForToday(user.id);
+
+        if (alreadyLogged) {
+          redirectAfterLesson(course, lesson, redirectInfo);
+        } else {
+          pendingRedirect = { course, lesson, redirectInfo };
+          openMindsetModal();
+        }
+      };
+    }
+
 
     /* ============================================
        Navegación: Siguiente / Anterior lección
