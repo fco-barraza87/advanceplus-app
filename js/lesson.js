@@ -353,6 +353,41 @@ async function computeNextDayForRedirect(userId, course, currentDay) {
 }
 
 /* ==========================================
+   CONFETTI PREMIUM A+
+========================================== */
+function launchConfetti() {
+  const num = 22; // ligero, mobile-friendly
+
+  for (let i = 0; i < num; i++) {
+    const piece = document.createElement("div");
+    piece.className = "confetti-piece";
+
+    // Movimiento aleatorio
+    piece.style.left = `${50 + (Math.random() * 40 - 20)}%`;
+    piece.style.setProperty("--x-move", `${Math.random() * 120 - 60}px`);
+
+    // Colores premium A+
+    const colors = ["#C9A86A", "#E9D2A6", "#F1E5C9", "#fff"];
+    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+    document.body.appendChild(piece);
+
+    // Eliminar después de la animación
+    setTimeout(() => piece.remove(), 2600);
+  }
+}
+
+/* Glow al completar */
+function highlightLesson() {
+  const section = document.querySelector(".lesson-content-section");
+  if (!section) return;
+
+  section.classList.add("lesson-glow");
+  setTimeout(() => section.classList.remove("lesson-glow"), 1600);
+}
+
+
+/* ==========================================
    9. INIT
 ========================================== */
 async function init() {
@@ -422,6 +457,9 @@ async function init() {
         completeBtn.onclick = async () => {
           await saveReflection(user.id, courseId, lesson);
           await completeLesson(user.id, course, lesson);
+          // 🎉 ANIMACIÓN PREMIUM
+          launchConfetti();
+          highlightLesson();
           openFeedbackModal();
         };
       }
