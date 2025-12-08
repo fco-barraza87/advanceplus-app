@@ -1,242 +1,300 @@
 // /js/course-index.js
 import { supabase } from "/js/supabase.js";
 
-const qs = (sel) => document.querySelector(sel);
+const qs = (s) => document.querySelector(s);
 
-/* ==================================================
-   1. OBTENER USUARIO ACTUAL
-================================================== */
+function getQueryParam(key) {
+  const url = new URL(window.location.href);
+  return url.searchParams.get(key);
+}
+
+/* ===============================================
+   1. Cargar usuario
+=============================================== */
 async function getCurrentUser() {
   const { data, error } = await supabase.auth.getUser();
   if (error || !data?.user) return null;
   return data.user;
 }
 
-/* ==================================================
-   2. CARGAR RETOS ACTIVOS DEL USUARIO
-================================================== */
-async function loadActiveCourses(userId) {
-  const { data: userCourses, error } = await supabase
-    .from("user_courses")
-    .select("course_id, status, started_at, progress_pct")
-    .eq("user_id", userId)
-    .eq("status", "active")
-    .order("started_at", { ascending: false });
-
-  if (error) {
-    console.error("Error cargando user_courses", error);
-    return [];
-  }
-
-  const list = [];
-
-  for (const uc of userCourses || []) {
-    const { data: course, error: courseError } = await supabase
-      .from("courses")
-      .select("id, title, short_promise, category, level, duration_days, cover_url, active")
-      .eq("id", uc.course_id)
-      .single();
-
-    if (courseError) {
-      console.warn("Error cargando course", courseError);
-      continue;
-    }
-
-    if (course?.active !== false) {
-      list.push({
-        ...course,
-        progress_pct: uc.progress_pct ?? 0,
-      });
-    }
-  }
-
-  return list;
-}
-
-/* ==================================================
-   3. CARGAR TODOS LOS RETOS DISPONIBLES
-================================================== */
-async function loadAllCourses() {
-  const { data, error } = await supabase
+/* ===============================================
+   2. Cargar curso + estado de usuario
+=============================================== */
+async function loadCourseAndState(userId, courseId) {
+  // Curso
+  const { data: course, error: courseErr } = await supabase
     .from("courses")
-    .select(`
-      id,
-      title,
-      short_promise,
-      category,
-      level,
-      duration_days,
-      hero_image_url,
-      thumbnail_url,
-      cover_url,
-      badge_text,
-      price_chf,
-      sale_price_chf,
-      reviews_average,
-      reviews_count,
-      active
-    `)
-    .eq("active", true);
+    .select("*")
+    .eq("id", courseId)
+    .single();
 
-  if (error) {
-    console.error("Error cargando courses", error);
-    return [];
-  }
+  if (courseErr || !course) throw new Error("Curso no encontrado");
 
-  return data || [];
+  // user_courses (inscripción)
+  const { data: userCourse } = await supabase
+    .from("user_courses")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("course_id", courseId)
+    .maybeSingle();
+
+  // progreso
+  const { data: progress } = await supabase
+    .from("progress")
+    .select("day, completed")
+    .eq("user_id", userId)
+    .eq("course_id", courseId)
+    .order("day", { ascending: true });
+
+  return { course, userCourse, progress: progress || [] };
 }
 
-/* ==================================================
-   4. RENDER — TARJETA DE CURSO (REUTILIZABLE)
-================================================== */
-function createCourseCard(course, { showProgress = false } = {}) {
-  const card = document.createElement("article");
-  card.className = "course-card";
+/* ===============================================
+   3. Calcular nextDay y % de avance
+=============================================== */
+function computeProgress(course, progressRows) {
+  const totalDays = course.duration_days || 1;
 
-  const cover =
+  const completedDays = progressRows.filter((p) => p.completed);
+  const completedCount = completedDays.length;
+
+  const lastCompletedDay = completedDays.length
+    ? completedDays[completedDays.length - 1].day
+    : 0;
+
+  let nextDay = lastCompletedDay + 1;
+  if (nextDay > totalDays) nextDay = totalDays;
+
+  const pct = Math.min(100, (completedCount / totalDays) * 100);
+
+  return { totalDays, completedCount, nextDay, pct };
+}
+
+/* ===============================================
+   4. Render HERO
+=============================================== */
+function renderHero(course, progressInfo, isEnrolled) {
+  const {
+    totalDays,
+    completedCount,
+    nextDay,
+    pct
+  } = progressInfo;
+
+  const titleHero = qs("#courseTitleHero");
+  const subtitleHero = qs("#courseSubtitleHero");
+  const catLabel = qs("#courseCategoryLabel");
+  const shortPromise = qs("#courseShortPromise");
+  const metaHero = qs("#courseMetaHero");
+  const imgHero = qs("#courseHeroImage");
+  const progressLabel = qs("#courseProgressLabel");
+  const progressDays = qs("#courseProgressDays");
+  const progressFill = qs("#courseProgressFill");
+  const ctaBtn = qs("#courseCtaBtn");
+  const ctaNote = qs("#courseCtaNote");
+
+  if (titleHero) titleHero.textContent = course.title || "Reto Advance+";
+  if (subtitleHero) subtitleHero.textContent = course.subtitle || "";
+  if (catLabel) catLabel.textContent = course.category || "Reto";
+
+  if (shortPromise)
+    shortPromise.textContent =
+      course.short_promise ||
+      "Sigue este reto día a día para transformar tu enfoque, disciplina y energía.";
+
+  if (metaHero) {
+    const nivel = course.level || "Todos los niveles";
+    const reviewsAvg = course.reviews_average || "5.0";
+    const reviewsCount = course.reviews_count || 0;
+
+    metaHero.innerHTML = `
+      <span class="course-pill">${nivel}</span>
+      <span class="course-pill">${totalDays} días</span>
+      <span class="course-pill">⭐ ${reviewsAvg} · ${reviewsCount} reseñas</span>
+    `;
+  }
+
+  const heroImg =
     course.hero_image_url ||
     course.thumbnail_url ||
     course.cover_url ||
-    "https://via.placeholder.com/600x300?text=A+";
+    "https://via.placeholder.com/800x400?text=Advance+";
 
-  const priceBlock =
-    course.sale_price_chf || course.price_chf
-      ? `
-    <div class="course-price">
-      ${
-        course.sale_price_chf
-          ? `<del>${course.price_chf} CHF</del> ${course.sale_price_chf} CHF`
-          : `${course.price_chf || 0} CHF`
-      }
-    </div>`
-      : "";
+  if (imgHero) {
+    imgHero.style.backgroundImage = `url('${heroImg}')`;
+  }
 
-  const progressBlock =
-    showProgress && typeof course.progress_pct === "number"
-      ? `
-    <div class="course-progress-row">
-      <div class="course-progress-label">
-        Progreso: ${Math.round(course.progress_pct)}%
-      </div>
-      <div class="course-progress-bar">
-        <div class="course-progress-fill" style="width:${Math.min(
-          100,
-          course.progress_pct
-        )}%;"></div>
-      </div>
-    </div>`
-      : "";
+  if (progressLabel) progressLabel.textContent = `Progreso: ${pct.toFixed(0)}%`;
+  if (progressDays)
+    progressDays.textContent = `${completedCount} / ${totalDays} días`;
 
-  card.innerHTML = `
-    <div class="course-cover" style="
-      background-image:url('${cover}');
-      background-size:cover;
-      background-position:center;
-    "></div>
+  if (progressFill) {
+    setTimeout(() => {
+      progressFill.style.width = `${pct}%`;
+    }, 150);
+  }
 
-    <h3 class="course-title">${course.title}</h3>
-
-    ${
-      course.short_promise
-        ? `<p class="course-desc">${course.short_promise}</p>`
-        : ""
+  if (ctaBtn) {
+    if (!isEnrolled) {
+      ctaBtn.textContent = "Empezar este reto";
+    } else if (completedCount >= totalDays) {
+      ctaBtn.textContent = "Ver lecciones";
+    } else {
+      ctaBtn.textContent = `Continuar en el Día ${nextDay}`;
     }
 
-    <div class="course-meta-row">
-      ${
-        course.category
-          ? `<span class="course-pill">${course.category}</span>`
-          : ""
+    ctaBtn.onclick = async () => {
+      if (!isEnrolled) {
+        // Auto-inscribir
+        const { error } = await supabase.from("user_courses").insert({
+          user_id: window.__A_USER_ID,
+          course_id: course.id,
+          status: "active"
+        });
+        if (error) {
+          alert("No se pudo inscribir en el curso.");
+          return;
+        }
+        // Recargar página para que se creen filas de progress (trigger)
+        window.location.reload();
+        return;
       }
-      ${
-        course.level
-          ? `<span class="course-pill">${course.level}</span>`
-          : ""
+
+      // Si ya terminó, ir a la lista
+      if (completedCount >= totalDays) {
+        window.location.href = `/curso/lesson.html?c=${course.id}&day=${totalDays}`;
+        return;
       }
-      ${
-        course.duration_days
-          ? `<span class="course-pill">${course.duration_days} días</span>`
-          : ""
-      }
-    </div>
 
-    ${priceBlock}
-    ${progressBlock}
-  `;
-
-  // TODO: luego conectamos con lesson.html o página de detalle
-  card.onclick = () => {
-    // Por ahora, enviamos al curso en modo simple
-    window.location.href = `/curso/index.html?c=${course.id}`;
-  };
-
-  return card;
-}
-
-/* ==================================================
-   5. RENDER — LISTAS
-================================================== */
-function renderActiveCourses(courses) {
-  const grid = qs("#activeCoursesGrid");
-  const empty = qs("#noActiveCoursesMessage");
-  const count = qs("#activeCoursesCount");
-
-  if (!grid || !empty || !count) return;
-
-  grid.innerHTML = "";
-
-  if (!courses.length) {
-    empty.style.display = "block";
-    count.textContent = "0 activos";
-    return;
+      // Ir a la próxima lección pendiente
+      window.location.href = `/curso/lesson.html?c=${course.id}&day=${nextDay}`;
+    };
   }
 
-  empty.style.display = "none";
-  count.textContent = `${courses.length} activo${
-    courses.length > 1 ? "s" : ""
-  }`;
-
-  courses.forEach((course) => {
-    const card = createCourseCard(course, { showProgress: true });
-    grid.appendChild(card);
-  });
-}
-
-function renderAllCourses(courses) {
-  const grid = qs("#allCoursesGrid");
-  const empty = qs("#noCoursesMessage");
-
-  if (!grid || !empty) return;
-
-  grid.innerHTML = "";
-
-  if (!courses.length) {
-    empty.style.display = "block";
-    return;
+  if (ctaNote) {
+    if (!isEnrolled) {
+      ctaNote.textContent = "Al empezar, se activará este reto en tu dashboard.";
+    } else {
+      ctaNote.textContent = "Puedes volver a cualquier día desde la lista de lecciones.";
+    }
   }
-
-  empty.style.display = "none";
-
-  courses.forEach((course) => {
-    const card = createCourseCard(course, { showProgress: false });
-    grid.appendChild(card);
-  });
 }
 
-/* ==================================================
+/* ===============================================
+   5. Render lista de lecciones
+=============================================== */
+function renderLessonsList(course, progressRows, progressInfo) {
+  const list = qs("#lessonsList");
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  const byDay = new Map();
+  progressRows.forEach((p) => {
+    byDay.set(p.day, p);
+  });
+
+  const totalDays = progressInfo.totalDays;
+  const nextDay = progressInfo.nextDay;
+
+  // Opcional: si quieres datos de lessons: ya los cargamos en backend,
+  // pero para simplificar, vamos a tirar solo "Día X".
+  // Si quieres títulos desde lessons.title, se puede ampliar a:
+  //   select day, title from lessons where course_id = ...
+  // (lo dejo así para no explotar la respuesta).
+  for (let day = 1; day <= totalDays; day++) {
+    const prog = byDay.get(day);
+    const completed = prog?.completed === true;
+
+    const item = document.createElement("article");
+    item.className = "lesson-item-card";
+
+    const stateLabel = completed
+      ? "Completado"
+      : day === nextDay
+      ? "Continuar"
+      : day < nextDay
+      ? "Disponible"
+      : course.progression_type === "linear"
+      ? "Bloqueado"
+      : "Disponible";
+
+    const locked =
+      course.progression_type === "linear" && day > nextDay && !completed;
+
+    item.innerHTML = `
+      <div class="lesson-item-left">
+        <div class="lesson-day-pill">Día ${day}</div>
+        <div class="lesson-title-main">Lección ${day}</div>
+        <div class="lesson-sub-meta">${stateLabel}</div>
+      </div>
+      <div class="lesson-item-right">
+        ${
+          completed
+            ? '<span class="lesson-status done">✓</span>'
+            : locked
+            ? '<span class="lesson-status locked">🔒</span>'
+            : '<span class="lesson-status go">→</span>'
+        }
+      </div>
+    `;
+
+    if (!locked) {
+      item.classList.add("clickable");
+      item.onclick = () => {
+        window.location.href = `/curso/lesson.html?c=${course.id}&day=${day}`;
+      };
+    } else {
+      item.classList.add("lesson-locked");
+    }
+
+    list.appendChild(item);
+  }
+}
+
+/* ===============================================
    6. INIT
-================================================== */
-async function initCoursesPage() {
+=============================================== */
+async function init() {
   const user = await getCurrentUser();
   if (!user) return;
 
-  // 1. Retos activos
-  const activeCourses = await loadActiveCourses(user.id);
-  renderActiveCourses(activeCourses);
+  window.__A_USER_ID = user.id;
 
-  // 2. Todos los retos (catálogo)
-  const allCourses = await loadAllCourses();
-  renderAllCourses(allCourses);
+  const courseId = getQueryParam("c");
+  if (!courseId) {
+    alert("No se ha especificado el curso.");
+    window.location.href = "/dashboard/index.html";
+    return;
+  }
+
+  try {
+    const { course, userCourse, progress } = await loadCourseAndState(
+      user.id,
+      courseId
+    );
+
+    const progressInfo = computeProgress(course, progress);
+    const isEnrolled = !!userCourse;
+
+    renderHero(course, progressInfo, isEnrolled);
+
+    if (isEnrolled) {
+      renderLessonsList(course, progress, progressInfo);
+    } else {
+      // Si no está inscrito todavía, mostramos la lista pero toda bloqueada
+      const fakeProgress = [];
+      const fakeInfo = {
+        ...progressInfo,
+        nextDay: 1
+      };
+      renderLessonsList(course, fakeProgress, fakeInfo);
+    }
+  } catch (e) {
+    console.error(e);
+    alert("No se pudo cargar el curso.");
+    window.location.href = "/dashboard/index.html";
+  }
 }
 
-initCoursesPage();
+init();

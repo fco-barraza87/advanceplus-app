@@ -3,10 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Curso · Advance+</title>
 
-  <title>Advance+ · Tus retos</title>
-
-  <!-- ESTILOS GLOBALES -->
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/tokens.css">
   <link rel="stylesheet" href="/css/components.css">
@@ -20,46 +18,51 @@
   <div id="appHeader"></div>
 
   <main class="dashboard-main">
-    <div class="dashboard-wrapper courses-page">
+    <div class="dashboard-wrapper">
 
-      <!-- TÍTULO PRINCIPAL -->
-      <section class="dash-section">
-        <h1 class="section-title">Tus retos Advance+</h1>
-        <p class="section-subtitle">
-          Gestiona tus retos activos y descubre nuevos programas para seguir avanzando.
-        </p>
+      <!-- HERO DEL CURSO -->
+      <section class="dash-section" id="courseHero">
+        <p class="course-category-label" id="courseCategoryLabel"></p>
+        <h1 class="course-main-title" id="courseTitleHero">Cargando curso...</h1>
+        <p class="course-subtitle-hero" id="courseSubtitleHero"></p>
+
+        <div class="course-hero-grid">
+          <div class="course-hero-left">
+            <p class="course-short-promise" id="courseShortPromise"></p>
+
+            <div class="course-meta-hero" id="courseMetaHero">
+              <!-- nivel, duración, reviews -->
+            </div>
+
+            <div class="course-progress-wrapper">
+              <div class="course-progress-top">
+                <span id="courseProgressLabel">Progreso: 0%</span>
+                <span id="courseProgressDays">0 / 0 días</span>
+              </div>
+              <div class="course-progress-bar">
+                <div class="course-progress-fill" id="courseProgressFill"></div>
+              </div>
+            </div>
+
+            <button class="btn btn-primary course-cta-btn" id="courseCtaBtn">
+              Continuar reto
+            </button>
+
+            <p class="course-cta-note" id="courseCtaNote"></p>
+          </div>
+
+          <div class="course-hero-right">
+            <div class="course-hero-image" id="courseHeroImage"></div>
+          </div>
+        </div>
       </section>
 
-      <!-- RETOS ACTIVOS -->
+      <!-- LISTA DE LECCIONES -->
       <section class="dash-section">
-        <div class="section-header-row">
-          <h2 class="section-title">Retos activos</h2>
-          <span id="activeCoursesCount" class="section-subtitle">0 activos</span>
+        <h2 class="section-title">Lecciones del reto</h2>
+        <div id="lessonsList" class="lessons-list">
+          <!-- items por JS -->
         </div>
-
-        <div id="activeCoursesGrid" class="courses-grid">
-          <!-- tarjetas de retos activos por JS -->
-        </div>
-
-        <p id="noActiveCoursesMessage" class="empty-message">
-          Aún no tienes retos activos. Activa tu primer programa para empezar a sumar XP.
-        </p>
-      </section>
-
-      <!-- EXPLORAR TODOS LOS RETOS -->
-      <section class="dash-section">
-        <h2 class="section-title">Explorar todos los retos</h2>
-        <p class="section-subtitle">
-          Elige el siguiente paso en tu entrenamiento: disciplina, enfoque, energía, alimentación y más.
-        </p>
-
-        <div id="allCoursesGrid" class="courses-grid">
-          <!-- tarjetas de todos los cursos por JS -->
-        </div>
-
-        <p id="noCoursesMessage" class="empty-message">
-          Muy pronto llegarán más retos Advance+ a tu biblioteca.
-        </p>
       </section>
 
     </div>
@@ -100,7 +103,7 @@
     loadHeader();
   </script>
 
-  <!-- LÓGICA DE CURSOS -->
+  <!-- LÓGICA DEL CURSO -->
   <script type="module" src="/js/course-index.js"></script>
 
 </body>
