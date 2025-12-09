@@ -713,11 +713,12 @@ async function init() {
 
     if (btnMindsetSave) {
       btnMindsetSave.onclick = async () => {
-        await saveMindsetLog(user.id);
+        await saveMindsetLog(user.id, courseId, lesson);
         closeMindsetModal();
         redirectFromMindset();
       };
     }
+
   } catch (e) {
     console.error("[lesson] ERROR en init:", e);
     alert(e.message || "No se pudo cargar la lección (error desconocido).");
