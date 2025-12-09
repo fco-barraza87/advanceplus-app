@@ -269,11 +269,11 @@ async function setupMindsetForm(userId) {
   if (!saveBtn) return;
 
   saveBtn.onclick = async () => {
-    const enfoque = Number(qs("#sliderEnfoque")?.value ?? 5);
-    const energia = Number(qs("#sliderEnergia")?.value ?? 5);
-    const motivacion = Number(qs("#sliderMotivacion")?.value ?? 5);
-    const claridad = Number(qs("#sliderClaridad")?.value ?? 5);
-    const confianza = Number(qs("#sliderConfianza")?.value ?? 5);
+    const enfoque = Number(qs("#sliderEnfoque")?.value ?? 3);
+    const energia = Number(qs("#sliderEnergia")?.value ?? 3);
+    const motivacion = Number(qs("#sliderMotivacion")?.value ?? 3);
+    const claridad = Number(qs("#sliderClaridad")?.value ?? 3);
+    const confianza = Number(qs("#sliderConfianza")?.value ?? 3);
 
     const payload = {
       user_id: userId,
