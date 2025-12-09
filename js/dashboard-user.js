@@ -283,8 +283,15 @@ function getCourseExploreState(course, userCourse) {
 
 // 5.2 — Carga avanzada de cursos disponibles
 async function loadExploreCourses(user) {
+  console.log("Explore – user:", user);
+console.log("Explore – courses RAW:", courses);
+console.log("Explore – userCourses:", userCourses);
+console.log("Explore – owned:", owned);
+
+  
   const grid = qs("#coursesGrid"); // usa tu ID actual
   const empty = qs("#noAvailableMessage");
+
   if (!grid || !empty) return;
 
   grid.innerHTML = "";
