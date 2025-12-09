@@ -439,7 +439,7 @@ async function saveMindsetLog(userId, courseId, lesson) {
     ? Number(moodRow.dataset.selected)
     : null;
 
-  const focus = Number(qs("#mindsetFocus")?.value || 0);
+  const enfoque = Number(qs("#mindsetEnfoque")?.value || 0);
   const energia = Number(qs("#mindsetEnergy")?.value || 0);
   const motivacion = Number(qs("#mindsetMotivation")?.value || 0);
   const claridad = Number(qs("#mindsetClarity")?.value || 0);
@@ -462,7 +462,7 @@ async function saveMindsetLog(userId, courseId, lesson) {
       day: lesson.day,
 
       mood: moodValue,
-      focus,
+      enfoque,
       energia,
       motivacion,
       claridad,
@@ -493,7 +493,7 @@ function initMindsetUI() {
   }
 
   const sliders = [
-    { id: "mindsetFocus", labelId: "mindsetFocusValue" },
+    { id: "mindsetEnfoque", labelId: "mindsetEnfoqueValue" },
     { id: "mindsetEnergy", labelId: "mindsetEnergyValue" },
     { id: "mindsetMotivation", labelId: "mindsetMotivationValue" },
     { id: "mindsetClarity", labelId: "mindsetClarityValue" },
