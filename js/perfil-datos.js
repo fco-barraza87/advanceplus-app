@@ -277,7 +277,7 @@ async function setupMindsetForm(userId) {
 
     const payload = {
       user_id: userId,
-      enfoque,
+      focus: enfoque,
       energia,
       motivacion,
       claridad,
