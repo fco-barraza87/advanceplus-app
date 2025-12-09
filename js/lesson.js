@@ -439,11 +439,12 @@ async function saveMindsetLog(userId, courseId, lesson) {
     ? Number(moodRow.dataset.selected)
     : null;
 
-  const enfoque = Number(qs("#mindsetEnfoque")?.value || 0);
-  const energia = Number(qs("#mindsetEnergy")?.value || 0);
-  const motivacion = Number(qs("#mindsetMotivation")?.value || 0);
-  const claridad = Number(qs("#mindsetClarity")?.value || 0);
-  const confianza = Number(qs("#mindsetConfidence")?.value || 0);
+  const enfoque = Number(qs("#mindsetFocus")?.value || null);
+  const energia = Number(qs("#mindsetEnergy")?.value || null);
+  const motivacion = Number(qs("#mindsetMotivation")?.value || null);
+  const claridad = Number(qs("#mindsetClarity")?.value || null);
+  const confianza = Number(qs("#mindsetConfidence")?.value || null);
+
 
   const best = qs("#mindsetNoteBest")?.value.trim() || "";
   const challenge = qs("#mindsetNoteChallenge")?.value.trim() || "";
@@ -493,7 +494,7 @@ function initMindsetUI() {
   }
 
   const sliders = [
-    { id: "mindsetEnfoque", labelId: "mindsetEnfoqueValue" },
+    { id: "mindsetFocus", labelId: "mindsetFocusValue" },
     { id: "mindsetEnergy", labelId: "mindsetEnergyValue" },
     { id: "mindsetMotivation", labelId: "mindsetMotivationValue" },
     { id: "mindsetClarity", labelId: "mindsetClarityValue" },
