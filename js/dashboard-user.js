@@ -283,15 +283,8 @@ function getCourseExploreState(course, userCourse) {
 
 // 5.2 — Carga avanzada de cursos disponibles
 async function loadExploreCourses(user) {
-  console.log("Explore – user:", user);
-console.log("Explore – courses RAW:", courses);
-console.log("Explore – userCourses:", userCourses);
-console.log("Explore – owned:", owned);
-
-  
-  const grid = qs("#coursesGrid"); // usa tu ID actual
-  const empty = qs("#noAvailableMessage");
-
+  const grid = qs("#exploreCoursesGrid"); 
+  const empty = qs("#exploreCoursesEmpty");
   if (!grid || !empty) return;
 
   grid.innerHTML = "";
@@ -299,25 +292,32 @@ console.log("Explore – owned:", owned);
 
   const userId = user.id;
 
-  // Cursos del usuario
+  // 1) Cursos del usuario
   const { data: userCourses } = await supabase
     .from("user_courses")
-    .select("course_id, status, payment_status");
+    .select("course_id, status, payment_status")
+    .eq("user_id", userId);
 
   const owned = new Map();
   (userCourses || []).forEach((uc) => owned.set(uc.course_id, uc));
 
-  // Cursos disponibles
+  // 2) Cursos disponibles
   const { data: courses, error } = await supabase
     .from("courses")
     .select("*")
     .order("created_at", { ascending: false });
 
   if (error || !courses) {
+    console.error("Explore – error loading courses:", error);
     empty.style.display = "block";
     empty.textContent = "No se pudieron cargar los retos.";
     return;
   }
+
+  // LOGS SEGUROS
+  console.log("Explore – RAW courses:", courses);
+  console.log("Explore – userCourses:", userCourses);
+  console.log("Explore – owned:", owned);
 
   const cards = [];
 
@@ -336,36 +336,36 @@ console.log("Explore – owned:", owned);
       "https://via.placeholder.com/600x300?text=A+";
 
     const card = document.createElement("article");
-    card.className = "course-card premium-course-card";
+    card.className = "explore-card";
 
     card.innerHTML = `
-      <div class="course-cover" style="background-image:url('${hero}')"></div>
-      <div class="course-title">${course.title}</div>
-      <p class="course-desc">${course.short_promise || course.subtitle || ""}</p>
+      <div class="explore-card-top">
+        <div class="explore-tag-row">
+          <span class="explore-badge ${state.badgeClass}">${state.badge}</span>
+          <span class="explore-meta">${course.category}</span>
+        </div>
 
-      <div class="course-meta-row">
-        <span class="course-pill">${course.category}</span>
-        ${
-          state.badge
-            ? `<span class="course-pill ${state.badgeClass}">${state.badge}</span>`
-            : ""
-        }
+        <div class="explore-title">${course.title}</div>
+        <div class="explore-sub">${course.short_promise || course.subtitle || ""}</div>
       </div>
 
-      <div class="course-price">
-        ${
-          !course.is_paid
-            ? `<span class="explore-price-free">Gratis</span>`
-            : priceOld
-            ? `<del>${priceOld} CHF</del> <strong>${priceMain} CHF</strong>`
-            : `<strong>${priceMain} CHF</strong>`
-        }
-      </div>
+      <div class="explore-card-bottom">
+        <div class="explore-price-block">
+          ${
+            !course.is_paid
+              ? `<span class="explore-price-free">Gratis</span>`
+              : priceOld
+              ? `<span class="explore-price-old">${priceOld} CHF</span>
+                 <span class="explore-price-main">${priceMain} CHF</span>`
+              : `<span class="explore-price-main">${priceMain} CHF</span>`
+          }
+        </div>
 
-      <button class="course-btn">${state.btnText}</button>
+        <button class="explore-btn explore-btn-primary">${state.btnText}</button>
+      </div>
     `;
 
-    const btn = card.querySelector(".course-btn");
+    const btn = card.querySelector(".explore-btn");
 
     btn.onclick = async () => {
       try {
@@ -384,7 +384,7 @@ console.log("Explore – owned:", owned);
             break;
         }
       } catch (err) {
-        console.error("Error ejecutando acción Explore:", err);
+        console.error("Explore – action error:", err);
       }
     };
 
