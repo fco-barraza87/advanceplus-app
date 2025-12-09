@@ -183,9 +183,12 @@ function renderHero(course, progressInfo, isEnrolled) {
 /* ===============================================
    5. Render lista de lecciones
 =============================================== */
-function renderLessonsList(course, progressRows, progressInfo) {
+async function renderLessonsList(course, progressRows, progressInfo) {
   const list = qs("#lessonsList");
   if (!list) return;
+
+  // 1. Obtener títulos reales
+  const lessonTitles = await loadLessonsTitles(course.id);
 
   list.innerHTML = "";
 
@@ -197,11 +200,6 @@ function renderLessonsList(course, progressRows, progressInfo) {
   const totalDays = progressInfo.totalDays;
   const nextDay = progressInfo.nextDay;
 
-  // Opcional: si quieres datos de lessons: ya los cargamos en backend,
-  // pero para simplificar, vamos a tirar solo "Día X".
-  // Si quieres títulos desde lessons.title, se puede ampliar a:
-  //   select day, title from lessons where course_id = ...
-  // (lo dejo así para no explotar la respuesta).
   for (let day = 1; day <= totalDays; day++) {
     const prog = byDay.get(day);
     const completed = prog?.completed === true;
@@ -222,10 +220,12 @@ function renderLessonsList(course, progressRows, progressInfo) {
     const locked =
       course.progression_type === "linear" && day > nextDay && !completed;
 
+    const title = lessonTitles[day] || `Lección ${day}`;
+
     item.innerHTML = `
       <div class="lesson-item-left">
         <div class="lesson-day-pill">Día ${day}</div>
-        <div class="lesson-title-main">Lección ${day}</div>
+        <div class="lesson-title-main">${title}</div>
         <div class="lesson-sub-meta">${stateLabel}</div>
       </div>
       <div class="lesson-item-right">
@@ -251,6 +251,30 @@ function renderLessonsList(course, progressRows, progressInfo) {
     list.appendChild(item);
   }
 }
+
+
+/* ===============================================
+   Obtener títulos reales desde lessons
+=============================================== */
+async function loadLessonsTitles(courseId) {
+  const { data, error } = await supabase
+    .from("lessons")
+    .select("day, title")
+    .eq("course_id", courseId)
+    .order("day");
+
+  if (error) {
+    console.warn("Error cargando títulos de lecciones:", error);
+    return {};
+  }
+
+  const map = {};
+  data.forEach((l) => {
+    map[l.day] = l.title?.trim() || null;
+  });
+  return map;
+}
+
 
 /* ===============================================
    6. INIT
@@ -280,7 +304,7 @@ async function init() {
     renderHero(course, progressInfo, isEnrolled);
 
     if (isEnrolled) {
-      renderLessonsList(course, progress, progressInfo);
+      await renderLessonsList(course, progress, progressInfo);
     } else {
       // Si no está inscrito todavía, mostramos la lista pero toda bloqueada
       const fakeProgress = [];
@@ -288,7 +312,7 @@ async function init() {
         ...progressInfo,
         nextDay: 1
       };
-      renderLessonsList(course, fakeProgress, fakeInfo);
+      await renderLessonsList(course, fakeProgress, fakeInfo);
     }
   } catch (e) {
     console.error(e);
