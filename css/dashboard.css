@@ -387,3 +387,144 @@
   margin-top: var(--space-xs);
   color: var(--color-gray-2);
 }
+
+/* ============================================================
+   EXPLORAR RETOS
+============================================================ */
+
+.explore-grid {
+  display: grid;
+  gap: var(--space-md);
+}
+
+@media (min-width: 768px) {
+  .explore-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.explore-card {
+  background: var(--color-primary-dark);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-md);
+  box-shadow: var(--shadow-soft);
+}
+
+.explore-card-top {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.explore-tag-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.explore-badge {
+  padding: var(--space-2xs) var(--space-xs);
+  border-radius: var(--radius-round);
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+
+.explore-badge-paid {
+  background: rgba(201, 168, 106, 0.18);
+  color: #f5d9a1;
+}
+
+.explore-badge-free {
+  background: rgba(62, 233, 138, 0.1);
+  color: #3ee98a;
+}
+
+.explore-badge-soon {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-white-muted);
+}
+
+.explore-title {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.explore-sub {
+  font-size: var(--text-sm);
+  color: var(--color-gray-1);
+}
+
+.explore-meta {
+  font-size: var(--text-xs);
+  color: var(--color-gray-2);
+}
+
+.explore-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.explore-price-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.explore-price-main {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: #3ee98a;
+}
+
+.explore-price-old {
+  font-size: var(--text-xs);
+  color: var(--color-gray-2);
+  text-decoration: line-through;
+}
+
+.explore-price-free {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: #3ee98a;
+}
+
+.explore-btn {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  border: none;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition-normal);
+}
+
+.explore-btn-primary {
+  background: var(--gradient-blue);
+  color: var(--color-white);
+  box-shadow: var(--shadow-soft);
+}
+
+.explore-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hover);
+}
+
+.explore-btn-ghost {
+  background: transparent;
+  color: var(--color-white-muted);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.explore-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.04);
+}

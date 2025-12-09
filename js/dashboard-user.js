@@ -49,6 +49,285 @@ async function getStreakGoal(userId) {
   return course?.duration_days ?? 21;
 }
 
+
+/* solo cursos gratis) */
+
+async function enrollFreeCourse(userId, courseId) {
+  const { error } = await supabase.from("user_courses").insert({
+    user_id: userId,
+    course_id: courseId,
+    status: "active",
+    payment_status: "free",
+    source: "app"
+  });
+
+  if (error) {
+    console.error("[dashboard] Error inscribiendo curso gratis:", error);
+    throw error;
+  }
+}
+
+
+/* funcion pintar*/
+
+function getCourseExploreState(course, userCourse) {
+  const isPaid = !!course.is_paid;
+  const isComingSoon = course.active === false || course.is_active === false;
+  const hasCheckout = !!course.systeme_checkout_url;
+  const isEnrolledActive = !!userCourse && userCourse.status === "active";
+
+  // Si ya está activo, no debería estar en Explorar (normalmente lo filtramos antes)
+  if (isEnrolledActive) {
+    return { show: false };
+  }
+
+  // 1) Próximamente (no lanzado)
+  if (isComingSoon) {
+    return {
+      show: true,
+      type: "coming_soon",
+      badge: "Próximamente",
+      badgeClass: "explore-badge-soon",
+      btnText: "Ver más",
+      action: "prelaunch"
+    };
+  }
+
+  // 2) Pagado
+  if (isPaid) {
+    // Sin URL de checkout aún → lo tratamos como pre-lanzamiento pagado
+    if (!hasCheckout) {
+      return {
+        show: true,
+        type: "coming_soon_paid",
+        badge: "Premium",
+        badgeClass: "explore-badge-paid",
+        btnText: "Próximamente",
+        action: "prelaunch"
+      };
+    }
+
+    // Pagado disponible, pero usuario no lo tiene
+    if (!userCourse) {
+      return {
+        show: true,
+        type: "paid_locked",
+        badge: "Premium",
+        badgeClass: "explore-badge-paid",
+        btnText: `Comprar`,
+        action: "checkout"
+      };
+    }
+
+    // Si llega aquí y tiene userCourse pero no activo, lo puedes tratar como acceso
+    return {
+      show: true,
+      type: "paid_enrolled",
+      badge: "Premium",
+      badgeClass: "explore-badge-paid",
+      btnText: "Ir al curso",
+      action: "go_course"
+    };
+  }
+
+  // 3) Gratis
+  if (!userCourse) {
+    return {
+      show: true,
+      type: "free_available",
+      badge: "Gratis",
+      badgeClass: "explore-badge-free",
+      btnText: "Empezar gratis",
+      action: "start_free"
+    };
+  }
+
+  // Gratis pero ya inscrito → normalmente no se muestra
+  return { show: false };
+}
+
+
+/* renderizar las cards de explorer*/
+async function loadExploreCourses(user) {
+  const grid = document.querySelector("#exploreCoursesGrid");
+  const empty = document.querySelector("#exploreCoursesEmpty");
+  if (!grid || !empty) return;
+
+  grid.innerHTML = "";
+  empty.style.display = "none";
+
+  // 1) Cursos del usuario
+  const userId = user?.id;
+  let userCoursesMap = new Map();
+
+  if (userId) {
+    const { data: userCourses, error: ucErr } = await supabase
+      .from("user_courses")
+      .select("course_id, status, payment_status");
+
+    if (ucErr) {
+      console.warn("[dashboard] Error cargando user_courses:", ucErr);
+    } else if (userCourses) {
+      userCourses.forEach((uc) => {
+        userCoursesMap.set(uc.course_id, uc);
+      });
+    }
+  }
+
+  // 2) Todos los cursos visibles para explorar
+  const { data: courses, error: cErr } = await supabase
+    .from("courses")
+    .select("*")
+    .order("created_at", { ascending: true });
+
+  if (cErr) {
+    console.error("[dashboard] Error cargando courses:", cErr);
+    empty.style.display = "block";
+    empty.textContent = "No se pudieron cargar los retos. Inténtalo más tarde.";
+    return;
+  }
+
+  if (!courses || !courses.length) {
+    empty.style.display = "block";
+    return;
+  }
+
+  // 3) Filtrado y render
+  const cards = [];
+
+  courses.forEach((course) => {
+    const userCourse = userCoursesMap.get(course.id);
+    const state = getCourseExploreState(course, userCourse);
+
+    if (!state.show) return;
+
+    // Precio
+    const isPaid = !!course.is_paid;
+    const price = course.sale_price_chf ?? course.price_chf;
+    const priceNum = price != null ? Number(price) : null;
+    const oldPriceNum =
+      course.sale_price_chf != null ? Number(course.price_chf) : null;
+
+    let priceHTML = `<span class="explore-price-free">Gratis</span>`;
+    if (isPaid && priceNum != null) {
+      const fmt = priceNum.toLocaleString("de-CH", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+
+      if (oldPriceNum != null && oldPriceNum > priceNum) {
+        const oldFmt = oldPriceNum.toLocaleString("de-CH", {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
+        });
+        priceHTML = `
+          <span class="explore-price-main">CHF ${fmt}</span>
+          <span class="explore-price-old">CHF ${oldFmt}</span>
+        `;
+      } else {
+        priceHTML = `<span class="explore-price-main">CHF ${fmt}</span>`;
+      }
+    }
+
+    // Título corto / promesa
+    const subtitle =
+      course.short_promise ||
+      course.subtitle ||
+      "Entrena tu enfoque, energía y disciplina con este reto.";
+
+    const levelLabel = course.level || "Todos los niveles";
+    const daysLabel = `${course.duration_days || 1} días`;
+
+    const card = document.createElement("article");
+    card.className = "explore-card";
+
+    card.innerHTML = `
+      <div class="explore-card-top">
+        <div class="explore-tag-row">
+          <span class="dash-pill">${course.category || "Reto"}</span>
+          ${
+            state.badge
+              ? `<span class="explore-badge ${state.badgeClass}">${state.badge}</span>`
+              : ""
+          }
+        </div>
+        <h3 class="explore-title">${course.title}</h3>
+        <p class="explore-sub">${subtitle}</p>
+        <p class="explore-meta">
+          ${levelLabel} · ${daysLabel}
+        </p>
+      </div>
+
+      <div class="explore-card-bottom">
+        <div class="explore-price-block">
+          ${priceHTML}
+        </div>
+        <button class="explore-btn ${
+          state.action === "prelaunch" ? "explore-btn-ghost" : "explore-btn-primary"
+        }">
+          ${state.btnText}
+        </button>
+      </div>
+    `;
+
+    const btn = card.querySelector("button");
+
+    if (btn) {
+      btn.onclick = async () => {
+        try {
+          const slug = course.slug;
+          switch (state.action) {
+            case "start_free":
+              if (!userId) {
+                window.location.href = "/auth/login.html";
+                return;
+              }
+              await enrollFreeCourse(userId, course.id);
+              window.location.href = `/curso/index.html?c=${course.id}`;
+              break;
+
+            case "go_course":
+              window.location.href = `/curso/index.html?c=${course.id}`;
+              break;
+
+            case "checkout":
+              if (course.systeme_checkout_url) {
+                window.location.href = course.systeme_checkout_url;
+              }
+              break;
+
+            case "prelaunch":
+              if (slug) {
+                window.location.href = `/retos/${slug}.html`;
+              } else {
+                // Si no hay landing específica, que no haga nada crítico
+                console.log("[dashboard] Curso en prelaunch sin slug definido");
+              }
+              break;
+
+            default:
+              break;
+          }
+        } catch (e) {
+          console.error("[dashboard] Error en acción de Explore:", e);
+        }
+      };
+    }
+
+    cards.push(card);
+  });
+
+  if (!cards.length) {
+    empty.style.display = "block";
+    empty.textContent =
+      "Ya tienes todos los retos actuales activos. Muy pronto agregaremos nuevos.";
+    return;
+  }
+
+  cards.forEach((c) => grid.appendChild(c));
+}
+
+
 /* ==================================================
    3. GAMIFICACIÓN — NIVELES + XP + RACHA
 ================================================== */
@@ -473,6 +752,8 @@ async function initDashboard() {
 
   await loadMission(user);
   await loadRandomCoachMessage();
+
+
 }
 
 initDashboard();
