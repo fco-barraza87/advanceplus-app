@@ -625,8 +625,6 @@ async function initDashboard() {
   const active = await loadActiveCourses(user.id);
   renderActiveCourses(active, user);
 
-  const available = await loadAvailableCourses(user.id);
-  renderAvailableCourses(available);
   
   await loadExploreCourses(user);
 
