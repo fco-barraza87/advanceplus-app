@@ -211,190 +211,35 @@ function renderActiveCourses(courses, user) {
 }
 
 /* ==================================================
-   5. EXPLORAR RETOS — VERSIÓN AVANZADA INTEGRADA
+   5. EXPLORAR RETOS
 ================================================== */
-
-// 5.0 — Helper para inscribir cursos gratis
-async function enrollFreeCourse(userId, courseId) {
-  const { error } = await supabase.from("user_courses").insert({
-    user_id: userId,
-    course_id: courseId,
-    status: "active",
-    payment_status: "free",
-    source: "dashboard_explore"
-  });
-
-  if (error) {
-    console.error("[dashboard] Error inscribiendo curso gratis:", error);
-    throw error;
-  }
-}
-
-// 5.1 — Calcula el estado correcto del curso para pintar la card
-function getCourseExploreState(course, userCourse) {
-  const isPaid = !!course.is_paid;
-  const isComingSoon = !course.active || !course.is_active;
-  const hasCheckout = !!course.systeme_checkout_url;
-  const activeUser = userCourse?.status === "active";
-
-  // Ya inscrito → no mostrar en explorar
-  if (activeUser) return { show: false };
-
-  // Próximamente
-  if (isComingSoon) {
-    return {
-      show: true,
-      type: "coming_soon",
-      badge: "Próximamente",
-      badgeClass: "explore-badge-soon",
-      btnText: "Más información",
-      action: "prelaunch"
-    };
-  }
-
-  // Pagado
-  if (isPaid) {
-    if (!userCourse) {
-      return {
-        show: true,
-        type: "paid_locked",
-        badge: "Premium",
-        badgeClass: "explore-badge-paid",
-        btnText: "Comprar",
-        action: "checkout"
-      };
-    }
-  }
-
-  // Gratis no inscrito
-  if (!isPaid && !userCourse) {
-    return {
-      show: true,
-      type: "free_available",
-      badge: "Gratis",
-      badgeClass: "explore-badge-free",
-      btnText: "Empezar gratis",
-      action: "start_free"
-    };
-  }
-
-  return { show: false };
-}
-
-// 5.2 — Carga avanzada de cursos disponibles
-async function loadExploreCourses(user) {
-  const grid = qs("#coursesGrid"); // usa tu ID actual
-  const empty = qs("#noAvailableMessage");
-  if (!grid || !empty) return;
-
-  grid.innerHTML = "";
-  empty.style.display = "none";
-
-  const userId = user.id;
-
-  // Cursos del usuario
-  const { data: userCourses } = await supabase
-    .from("user_courses")
-    .select("course_id, status, payment_status");
-
-  const owned = new Map();
-  (userCourses || []).forEach((uc) => owned.set(uc.course_id, uc));
-
-  // Cursos disponibles
-  const { data: courses, error } = await supabase
+async function loadAvailableCourses(userId) {
+  const { data: all } = await supabase
     .from("courses")
-    .select("*")
-    .order("created_at", { ascending: false });
+    .select(`
+      id,
+      title,
+      short_promise,
+      hero_image_url,
+      thumbnail_url,
+      badge_text,
+      price_chf,
+      sale_price_chf,
+      reviews_average,
+      reviews_count,
+      active
+    `)
+    .eq("active", true);
 
-  if (error || !courses) {
-    empty.style.display = "block";
-    empty.textContent = "No se pudieron cargar los retos.";
-    return;
-  }
+  const { data: mine } = await supabase
+    .from("user_courses")
+    .select("course_id")
+    .eq("user_id", userId);
 
-  const cards = [];
+  const owned = new Set((mine || []).map((c) => c.course_id));
 
-  courses.forEach((course) => {
-    const userCourse = owned.get(course.id);
-    const state = getCourseExploreState(course, userCourse);
-
-    if (!state.show) return;
-
-    const priceMain = course.sale_price_chf ?? course.price_chf;
-    const priceOld = course.sale_price_chf ? course.price_chf : null;
-
-    const hero =
-      course.hero_image_url ||
-      course.thumbnail_url ||
-      "https://via.placeholder.com/600x300?text=A+";
-
-    const card = document.createElement("article");
-    card.className = "course-card premium-course-card";
-
-    card.innerHTML = `
-      <div class="course-cover" style="background-image:url('${hero}')"></div>
-      <div class="course-title">${course.title}</div>
-      <p class="course-desc">${course.short_promise || course.subtitle || ""}</p>
-
-      <div class="course-meta-row">
-        <span class="course-pill">${course.category}</span>
-        ${
-          state.badge
-            ? `<span class="course-pill ${state.badgeClass}">${state.badge}</span>`
-            : ""
-        }
-      </div>
-
-      <div class="course-price">
-        ${
-          !course.is_paid
-            ? `<span class="explore-price-free">Gratis</span>`
-            : priceOld
-            ? `<del>${priceOld} CHF</del> <strong>${priceMain} CHF</strong>`
-            : `<strong>${priceMain} CHF</strong>`
-        }
-      </div>
-
-      <button class="course-btn">${state.btnText}</button>
-    `;
-
-    const btn = card.querySelector(".course-btn");
-
-    btn.onclick = async () => {
-      try {
-        switch (state.action) {
-          case "start_free":
-            await enrollFreeCourse(userId, course.id);
-            window.location.href = `/curso/index.html?c=${course.id}`;
-            break;
-
-          case "checkout":
-            window.location.href = course.systeme_checkout_url;
-            break;
-
-          case "prelaunch":
-            window.location.href = `/retos/${course.slug}.html`;
-            break;
-        }
-      } catch (err) {
-        console.error("Error ejecutando acción Explore:", err);
-      }
-    };
-
-    cards.push(card);
-  });
-
-  if (!cards.length) {
-    empty.style.display = "block";
-    empty.textContent = "Pronto añadiremos nuevos retos.";
-    return;
-  }
-
-  cards.forEach((c) => grid.appendChild(c));
+  return (all || []).filter((c) => !owned.has(c.id));
 }
-
-
-/* funcion 6?? */
 
 function renderPremiumCourseCard(course) {
   const card = document.createElement("article");
@@ -627,8 +472,6 @@ async function initDashboard() {
 
   const available = await loadAvailableCourses(user.id);
   renderAvailableCourses(available);
-  
-  await loadExploreCourses(user);
 
   await loadMission(user);
   await loadRandomCoachMessage();
