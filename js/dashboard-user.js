@@ -296,10 +296,16 @@ async function loadExploreCourses(user) {
   const { data: userCourses } = await supabase
     .from("user_courses")
     .select("course_id, status, payment_status")
-    .eq("user_id", userId);
+    .eq("user_id", user.id);
 
   const owned = new Map();
-  (userCourses || []).forEach((uc) => owned.set(uc.course_id, uc));
+  (userCourses || []).forEach((uc) => {
+    // Excluir todo curso que esté activo o ya comprado/registrado
+    if (uc.status === "active" || uc.payment_status === "free" || uc.payment_status === "paid") {
+      owned.set(uc.course_id, uc);
+    }
+  });
+
 
   // 2) Cursos disponibles
   const { data: courses, error } = await supabase
@@ -323,6 +329,11 @@ async function loadExploreCourses(user) {
 
   courses.forEach((course) => {
     const userCourse = owned.get(course.id);
+
+    if (userCourse?.status === "active") {
+      // NO mostrar el curso en Explorar retos
+      return;
+    }    
     const state = getCourseExploreState(course, userCourse);
 
     if (!state.show) return;
