@@ -4,18 +4,23 @@ import { getCurrentUserWithProfile } from "/js/auth.js";
 
 const qs = (s) => document.querySelector(s);
 
+let mindsetRawData = [];
 let mindsetChart = null;
 
-/* ================ UTIL ================= */
+/* ============================================
+   UTILIDADES
+============================================ */
 function formatDateShort(isoString) {
   const d = new Date(isoString);
   if (Number.isNaN(d.getTime())) return "";
   return d.toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit" });
 }
 
-/* ================ 1. STATS GENERALES ================= */
+/* ============================================
+   1. STATS GENERALES
+============================================ */
 async function loadStats(userId) {
-  // 1) Intentar desde user_stats
+  // Intentar leer user_stats
   const { data: stats } = await supabase
     .from("user_stats")
     .select("xp_total, streak_current, streak_best")
@@ -25,7 +30,7 @@ async function loadStats(userId) {
   let streakCurrent = stats?.streak_current ?? 0;
   let streakBest = stats?.streak_best ?? 0;
 
-  // Si no hay user_stats, intentar desde profiles
+  // Si no existe user_stats, usar profiles
   if (!stats) {
     const { data: profile } = await supabase
       .from("profiles")
@@ -37,21 +42,21 @@ async function loadStats(userId) {
     streakBest = profile?.streak_best ?? 0;
   }
 
-  // 2) Disciplina y FocusTime desde progress
+  // Disciplina
   const { data: progress } = await supabase
     .from("progress")
     .select("completed")
     .eq("user_id", userId);
 
-  const totalEntries = progress?.length ?? 0;
-  const completedEntries = (progress || []).filter((p) => p.completed).length;
-  const disciplinePct =
-    totalEntries > 0 ? Math.round((completedEntries / totalEntries) * 100) : 0;
+  const total = progress?.length ?? 0;
+  const done = (progress || []).filter((p) => p.completed).length;
+  const disciplinePct = total > 0 ? Math.round((done / total) * 100) : 0;
 
-  // FocusTime estimado: cada lección completada ~10 min
-  const focusMinutes = completedEntries * 10;
+  // FocusTime estimado
+  const focusMinutes = done * 10;
   const hours = Math.floor(focusMinutes / 60);
   const minutes = focusMinutes % 60;
+
   const focusLabel =
     focusMinutes === 0
       ? "0 min"
@@ -59,24 +64,19 @@ async function loadStats(userId) {
       ? `${hours}h ${minutes}m`
       : `${minutes} min`;
 
-  // Pintar en DOM
-  const streakCurrentEl = qs("#statStreakCurrent");
-  const streakBestEl = qs("#statStreakBest");
-  const disciplineEl = qs("#statDiscipline");
-  const focusEl = qs("#statFocusTime");
-
-  if (streakCurrentEl) streakCurrentEl.textContent = streakCurrent;
-  if (streakBestEl) streakBestEl.textContent = streakBest;
-  if (disciplineEl) disciplineEl.textContent = `${disciplinePct}%`;
-  if (focusEl) focusEl.textContent = focusLabel;
+  // Pintar
+  qs("#statStreakCurrent").textContent = streakCurrent;
+  qs("#statStreakBest").textContent = streakBest;
+  qs("#statDiscipline").textContent = `${disciplinePct}%`;
+  qs("#statFocusTime").textContent = focusLabel;
 }
 
-/* ================ 2. GRÁFICO MINDSET ================= */
-async function loadMindsetChart(userId) {
-  const canvas = qs("#mindsetChart");
-  const emptyMsg = qs("#mindsetEmptyMessage");
-  if (!canvas) return;
+/* ============================================
+   2. MINDSET & ENERGÍA
+============================================ */
 
+/* ---- Obtener datos crudos ---- */
+async function fetchMindsetLogs(userId) {
   const { data, error } = await supabase
     .from("mindset_logs")
     .select("*")
@@ -85,278 +85,143 @@ async function loadMindsetChart(userId) {
 
   if (error) {
     console.warn("[perfil/datos] Error cargando mindset_logs:", error);
+    return [];
   }
 
-  if (!data || !data.length) {
-    if (emptyMsg) emptyMsg.style.display = "block";
-    if (canvas) canvas.style.display = "none";
-    if (mindsetChart) {
-      mindsetChart.destroy();
-      mindsetChart = null;
-    }
+  return data || [];
+}
+
+/* ---- Lógica de filtrado ---- */
+function filterMindsetData(range) {
+  if (range === "all") return mindsetRawData;
+
+  const days = Number(range);
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+
+  return mindsetRawData.filter(
+    (row) => new Date(row.created_at) >= cutoff
+  );
+}
+
+/* ---- Render del gráfico ---- */
+function renderMindsetChart(rows) {
+  const canvas = qs("#mindsetChart");
+  const emptyMsg = qs("#mindsetEmptyMessage");
+
+  if (!rows.length) {
+    canvas.style.display = "none";
+    emptyMsg.style.display = "block";
     return;
   }
 
-  if (emptyMsg) emptyMsg.style.display = "none";
   canvas.style.display = "block";
+  emptyMsg.style.display = "none";
 
-  const labels = data.map((row) => formatDateShort(row.created_at));
+  const labels = rows.map((r) => formatDateShort(r.created_at));
 
-  const enfoque = data.map((row) => row.enfoque ?? null);
-  const energia = data.map((row) => row.energia ?? null);
-  const motivacion = data.map((row) => row.motivacion ?? null);
-  const claridad = data.map((row) => row.claridad ?? null);
-  const confianza = data.map((row) => row.confianza ?? null);
+  const enfoque = rows.map((r) => r.enfoque);
+  const energia = rows.map((r) => r.energia);
+  const motivacion = rows.map((r) => r.motivacion);
+  const claridad = rows.map((r) => r.claridad);
+  const confianza = rows.map((r) => r.confianza);
+
+  if (mindsetChart) mindsetChart.destroy();
 
   const ctx = canvas.getContext("2d");
-
-  if (mindsetChart) {
-    mindsetChart.destroy();
-  }
 
   mindsetChart = new Chart(ctx, {
     type: "line",
     data: {
       labels,
       datasets: [
-        {
-          label: "Enfoque",
-          data: enfoque,
-          tension: 0.35,
-          borderWidth: 2,
-          pointRadius: 2,
-        },
-        {
-          label: "Energía",
-          data: energia,
-          tension: 0.35,
-          borderWidth: 2,
-          pointRadius: 2,
-        },
-        {
-          label: "Motivación",
-          data: motivacion,
-          tension: 0.35,
-          borderWidth: 2,
-          pointRadius: 2,
-        },
-        {
-          label: "Claridad",
-          data: claridad,
-          tension: 0.35,
-          borderWidth: 2,
-          pointRadius: 2,
-        },
-        {
-          label: "Confianza",
-          data: confianza,
-          tension: 0.35,
-          borderWidth: 2,
-          pointRadius: 2,
-        },
+        { label: "Enfoque", data: enfoque, borderWidth: 2, tension: 0.3 },
+        { label: "Energía", data: energia, borderWidth: 2, tension: 0.3 },
+        { label: "Motivación", data: motivacion, borderWidth: 2, tension: 0.3 },
+        { label: "Claridad", data: claridad, borderWidth: 2, tension: 0.3 },
+        { label: "Confianza", data: confianza, borderWidth: 2, tension: 0.3 },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: "bottom",
-          labels: {
-            color: "#ffffff",
-            usePointStyle: true,
-          },
-        },
-      },
+      animation: { duration: 650 },
       scales: {
+        y: {
+          min: 1,
+          max: 5,
+          ticks: { stepSize: 1, color: "rgba(255,255,255,0.75)" },
+          grid: { color: "rgba(255,255,255,0.08)" },
+        },
         x: {
           ticks: { color: "rgba(255,255,255,0.75)" },
           grid: { color: "rgba(255,255,255,0.08)" },
         },
-        y: {
-          suggestedMin: 0,
-          suggestedMax: 10,
-          ticks: { color: "rgba(255,255,255,0.75)", stepSize: 2 },
-          grid: { color: "rgba(255,255,255,0.08)" },
+      },
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: { color: "white", usePointStyle: true },
         },
       },
     },
   });
 }
 
-/* ================ 3. FORM · REGISTRO DIARIO ================= */
-async function loadTodayMindset(userId) {
-  const today = new Date();
-  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const end = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate() + 1
-  );
+/* ---- Inicializar botones de filtro ---- */
+function initMindsetFilters() {
+  const buttons = document.querySelectorAll(".mindset-filter-btn");
 
-  const { data, error } = await supabase
-    .from("mindset_logs")
-    .select("*")
-    .eq("user_id", userId)
-    .gte("created_at", start.toISOString())
-    .lt("created_at", end.toISOString())
-    .order("created_at", { ascending: false })
-    .maybeSingle();
+  buttons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      buttons.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
 
-  if (error && error.code !== "PGRST116") {
-    // PGRST116 = no rows
-    console.warn("[perfil/datos] Error cargando registro de hoy:", error);
-  }
-
-  return data || null;
-}
-
-function setupSlider(idSlider, idValue) {
-  const slider = qs(idSlider);
-  const value = qs(idValue);
-
-  if (!slider || !value) return;
-
-  value.textContent = slider.value;
-
-  slider.addEventListener("input", () => {
-    value.textContent = slider.value;
+      const range = btn.dataset.range;
+      const filtered = filterMindsetData(range);
+      renderMindsetChart(filtered);
+    });
   });
 }
 
-async function setupMindsetForm(userId) {
-  setupSlider("#sliderEnfoque", "#valEnfoque");
-  setupSlider("#sliderEnergia", "#valEnergia");
-  setupSlider("#sliderMotivacion", "#valMotivacion");
-  setupSlider("#sliderClaridad", "#valClaridad");
-  setupSlider("#sliderConfianza", "#valConfianza");
+/* ---- Cargar gráfico completo ---- */
+async function loadMindsetChart(userId) {
+  mindsetRawData = await fetchMindsetLogs(userId);
 
-  const saveBtn = qs("#mindsetSaveBtn");
-  const msgEl = qs("#mindsetSaveMessage");
+  initMindsetFilters();
 
-  let existingId = null;
-
-  // Prefill si ya hay registro hoy
-  const todayLog = await loadTodayMindset(userId);
-  if (todayLog) {
-    existingId = todayLog.id;
-
-    const sEnfoque = qs("#sliderEnfoque");
-    const sEnergia = qs("#sliderEnergia");
-    const sMotivacion = qs("#sliderMotivacion");
-    const sClaridad = qs("#sliderClaridad");
-    const sConfianza = qs("#sliderConfianza");
-
-    if (sEnfoque && todayLog.enfoque != null) sEnfoque.value = todayLog.enfoque;
-    if (sEnergia && todayLog.energia != null) sEnergia.value = todayLog.energia;
-    if (sMotivacion && todayLog.motivacion != null)
-      sMotivacion.value = todayLog.motivacion;
-    if (sClaridad && todayLog.claridad != null)
-      sClaridad.value = todayLog.claridad;
-    if (sConfianza && todayLog.confianza != null)
-      sConfianza.value = todayLog.confianza;
-
-    // Forzar actualizar labels
-    setupSlider("#sliderEnfoque", "#valEnfoque");
-    setupSlider("#sliderEnergia", "#valEnergia");
-    setupSlider("#sliderMotivacion", "#valMotivacion");
-    setupSlider("#sliderClaridad", "#valClaridad");
-    setupSlider("#sliderConfianza", "#valConfianza");
-
-    if (saveBtn) saveBtn.textContent = "Actualizar registro de hoy";
-  }
-
-  if (!saveBtn) return;
-
-  saveBtn.onclick = async () => {
-    const enfoque = Number(qs("#sliderEnfoque")?.value ?? 3);
-    const energia = Number(qs("#sliderEnergia")?.value ?? 3);
-    const motivacion = Number(qs("#sliderMotivacion")?.value ?? 3);
-    const claridad = Number(qs("#sliderClaridad")?.value ?? 3);
-    const confianza = Number(qs("#sliderConfianza")?.value ?? 3);
-
-    const payload = {
-      user_id: userId,
-      enfoque,
-      energia,
-      motivacion,
-      claridad,
-      confianza,
-    };
-
-    let error = null;
-
-    if (existingId) {
-      const { error: updErr } = await supabase
-        .from("mindset_logs")
-        .update(payload)
-        .eq("id", existingId);
-      error = updErr;
-    } else {
-      const { data, error: insErr } = await supabase
-        .from("mindset_logs")
-        .insert(payload)
-        .select()
-        .maybeSingle();
-      error = insErr;
-      if (!insErr && data?.id) {
-        existingId = data.id;
-      }
-    }
-
-    if (error) {
-      console.error("[perfil/datos] Error guardando mindset:", error);
-      if (msgEl) {
-        msgEl.textContent = "❌ Error al guardar tu registro.";
-        msgEl.style.color = "#ff6b6b";
-      }
-      return;
-    }
-
-    if (msgEl) {
-      msgEl.textContent = "✔ Registro guardado correctamente.";
-      msgEl.style.color = "#3ee98a";
-    }
-
-    if (saveBtn) {
-      saveBtn.textContent = "Actualizar registro de hoy";
-    }
-
-    await loadMindsetChart(userId);
-  };
+  // Filtro por defecto → últimos 30 días
+  const defaultRows = filterMindsetData("30");
+  renderMindsetChart(defaultRows);
 }
 
-/* ================ 4. PROGRESO EN RETOS ================= */
+/* ============================================
+   3. PROGRESO DE RETOS
+============================================ */
 async function loadCoursesProgress(userId) {
   const listEl = qs("#coursesProgressList");
   const emptyEl = qs("#coursesProgressEmpty");
-  if (!listEl || !emptyEl) return;
 
-  listEl.innerHTML = "";
-
-  // 1) Cursos del usuario (activos o en cualquier estado)
   const { data: userCourses } = await supabase
     .from("user_courses")
-    .select("course_id, status")
+    .select("course_id")
     .eq("user_id", userId);
 
-  if (!userCourses || !userCourses.length) {
+  if (!userCourses?.length) {
     emptyEl.style.display = "block";
     return;
   }
 
-  const courseIds = [...new Set(userCourses.map((c) => c.course_id))];
+  const courseIds = userCourses.map((c) => c.course_id);
 
-  // 2) Info de cursos
   const { data: courses } = await supabase
     .from("courses")
     .select("id, title, duration_days")
     .in("id", courseIds);
 
   const courseMap = new Map();
-  (courses || []).forEach((c) => courseMap.set(c.id, c));
+  courses.forEach((c) => courseMap.set(c.id, c));
 
-  // 3) Progreso
   const { data: progress } = await supabase
     .from("progress")
     .select("course_id, completed")
@@ -364,33 +229,22 @@ async function loadCoursesProgress(userId) {
     .in("course_id", courseIds);
 
   const agg = new Map();
-  (progress || []).forEach((row) => {
+  progress.forEach((row) => {
     const entry = agg.get(row.course_id) || { total: 0, done: 0 };
-    entry.total += 1;
-    if (row.completed) entry.done += 1;
+    entry.total++;
+    if (row.completed) entry.done++;
     agg.set(row.course_id, entry);
   });
 
-  if (!agg.size) {
-    emptyEl.style.display = "block";
-    return;
-  }
-
+  listEl.innerHTML = "";
   emptyEl.style.display = "none";
 
-  // 4) Render tarjetas
   agg.forEach((value, courseId) => {
     const course = courseMap.get(courseId);
     if (!course) return;
 
-    const totalDays =
-      course.duration_days && course.duration_days > 0
-        ? course.duration_days
-        : value.total || 1;
-
-    const done = value.done;
-    const pct =
-      totalDays > 0 ? Math.round((done / totalDays) * 100) : 0;
+    const totalDays = course.duration_days || value.total;
+    const pct = Math.round((value.done / totalDays) * 100);
 
     const item = document.createElement("article");
     item.className = "course-progress-item";
@@ -406,7 +260,7 @@ async function loadCoursesProgress(userId) {
       </div>
 
       <div class="course-progress-footer">
-        <span>${done} / ${totalDays} días completados</span>
+        <span>${value.done} / ${totalDays} días completados</span>
         <span>${pct >= 100 ? "Completado 🎯" : "En progreso"}</span>
       </div>
     `;
@@ -415,10 +269,12 @@ async function loadCoursesProgress(userId) {
   });
 }
 
-/* ================ 5. INIT ================= */
+/* ============================================
+   INIT
+============================================ */
 async function initPerfilDatos() {
   const data = await getCurrentUserWithProfile();
-  if (!data || !data.user) {
+  if (!data?.user) {
     window.location.href = "/auth/login.html";
     return;
   }
@@ -427,7 +283,6 @@ async function initPerfilDatos() {
 
   await loadStats(user.id);
   await loadMindsetChart(user.id);
-  await setupMindsetForm(user.id);
   await loadCoursesProgress(user.id);
 }
 

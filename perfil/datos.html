@@ -69,62 +69,12 @@
             Aún no has registrado tu estado. Empieza con el formulario de abajo.
           </p>
         </div>
-      </section>
-
-      <!-- SECCIÓN 3 · REGISTRO DIARIO -->
-      <section class="dash-section">
-        <h2 class="section-title">Registro diario de mindset</h2>
-        <p class="section-subtitle">
-          Toma 30 segundos al día para medir cómo estás. Esto alimenta al Coach IA
-          y tus futuras decisiones.
-        </p>
-
-        <form class="mindset-form" id="mindsetForm" onsubmit="return false;">
-          <div class="mindset-slider-row">
-            <div class="mindset-slider-label">
-              <span>Enfoque</span>
-              <span id="valEnfoque" class="mindset-value">5</span>
-            </div>
-            <input type="range" id="sliderEnfoque" min="1" max="5" step="1" value="5" />
-          </div>
-
-          <div class="mindset-slider-row">
-            <div class="mindset-slider-label">
-              <span>Energía</span>
-              <span id="valEnergia" class="mindset-value">5</span>
-            </div>
-            <input type="range" id="sliderEnergia" min="1" max="5" step="1" value="5" />
-          </div>
-
-          <div class="mindset-slider-row">
-            <div class="mindset-slider-label">
-              <span>Motivación</span>
-              <span id="valMotivacion" class="mindset-value">5</span>
-            </div>
-            <input type="range" id="sliderMotivacion" min="1" max="5" step="1" value="5" />
-          </div>
-
-          <div class="mindset-slider-row">
-            <div class="mindset-slider-label">
-              <span>Claridad</span>
-              <span id="valClaridad" class="mindset-value">5</span>
-            </div>
-            <input type="range" id="sliderClaridad" min="1" max="5" step="1" value="5" />
-          </div>
-
-          <div class="mindset-slider-row">
-            <div class="mindset-slider-label">
-              <span>Confianza</span>
-              <span id="valConfianza" class="mindset-value">5</span>
-            </div>
-            <input type="range" id="sliderConfianza" min="1" max="5" step="1" value="5" />
-          </div>
-
-          <button id="mindsetSaveBtn" class="btn btn-primary mindset-save-btn">
-            Guardar registro de hoy
-          </button>
-          <p id="mindsetSaveMessage" class="save-message"></p>
-        </form>
+        <div class="mindset-filter-row">
+            <button class="mindset-filter-btn active" data-range="7">7 días</button>
+            <button class="mindset-filter-btn" data-range="30">30 días</button>
+            <button class="mindset-filter-btn" data-range="90">90 días</button>
+            <button class="mindset-filter-btn" data-range="all">Todo</button>
+        </div>
       </section>
 
       <!-- SECCIÓN 4 · PROGRESO EN RETOS -->

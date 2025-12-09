@@ -194,3 +194,32 @@
     padding-bottom: 5rem; /* espacio tabbar */
   }
 }
+
+
+.mindset-filter-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.mindset-filter-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all .25s ease;
+}
+
+.mindset-filter-btn:hover {
+  background: rgba(255,255,255,0.22);
+}
+
+.mindset-filter-btn.active {
+  background: var(--color-primary, #24dfc6);
+  color: #0e1e44;
+  font-weight: bold;
+  border-color: transparent;
+}
