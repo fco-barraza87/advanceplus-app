@@ -616,6 +616,10 @@ async function init() {
       progress.completed = progress.completed === "t" || progress.completed === "true";
     }
 
+    if (progress && typeof progress.completed === "number") {
+      progress.completed = progress.completed === 1;
+    }
+
 
     /* ============================
        Cargar reflexión previa
