@@ -104,8 +104,30 @@ async function loadLessonData(userId, courseId, day) {
     console.warn("[lesson] No se pudo cargar reflexión (tabla opcional):", e);
   }
 
-  return { course, lesson, progress, reflection };
+  /* ---------- FEEDBACK (rating + comment) ---------- */
+  let feedback = null;
+  try {
+    const { data: fbData, error: fbErr } = await supabase
+      .from("lesson_feedback")
+      .select("id, rating, comment")
+      .eq("user_id", userId)
+      .eq("course_id", courseId)
+      .eq("lesson_id", lesson.id)
+      .maybeSingle();
+
+    if (fbErr) {
+      console.warn("[lesson] Error cargando feedback (no crítico):", fbErr);
+    }
+
+    feedback = fbData || null;
+    console.log("[lesson] feedback result:", { feedback });
+  } catch (e) {
+    console.warn("[lesson] No se pudo cargar feedback (tabla opcional):", e);
+  }
+
+  return { course, lesson, progress, reflection, feedback };
 }
+
 
 /* ==========================================
    Guardar reflexión (upsert real y seguro)
@@ -275,25 +297,53 @@ async function saveFeedback(userId, courseId, lesson) {
   const rating = Number(starsContainer.dataset.selected || 0);
   const comment = commentEl ? commentEl.value.trim() : "";
 
-  // Si el usuario no puso nada, no guardamos nada
+  // Si el usuario no puso nada, no guardamos nada nuevo
+  // (OJO: esto no borra el feedback anterior, solo evita sobreescribir con vacío)
   if (!rating && !comment) {
     return;
   }
 
   try {
-    await supabase.from("lesson_feedback").insert({
-      user_id: userId,
-      course_id: courseId,
-      lesson_id: lesson.id,
-      day: lesson.day,
-      rating: rating || null,
-      comment: comment || null
-    });
-    console.log("[lesson] feedback guardado");
+    // ¿Ya existe feedback para este user/curso/lección?
+    const { data: existing, error: selErr } = await supabase
+      .from("lesson_feedback")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("course_id", courseId)
+      .eq("lesson_id", lesson.id)
+      .maybeSingle();
+
+    if (selErr) {
+      console.warn("[lesson] Error comprobando feedback existente:", selErr);
+    }
+
+    if (existing?.id) {
+      // UPDATE si ya existe fila
+      await supabase
+        .from("lesson_feedback")
+        .update({
+          rating: rating || null,
+          comment: comment || null
+        })
+        .eq("id", existing.id);
+    } else {
+      // INSERT si no existe
+      await supabase.from("lesson_feedback").insert({
+        user_id: userId,
+        course_id: courseId,
+        lesson_id: lesson.id,
+        day: lesson.day,
+        rating: rating || null,
+        comment: comment || null
+      });
+    }
+
+    console.log("[lesson] feedback guardado / actualizado");
   } catch (e) {
     console.warn("[lesson] No se pudo guardar feedback:", e);
   }
 }
+
 
 /* ==========================================
    7. Completar lección
@@ -556,7 +606,7 @@ async function init() {
   }
 
   try {
-    const { course, lesson, progress, reflection } = await loadLessonData(
+    const { course, lesson, progress, reflection, feedback } = await loadLessonData(
       user.id,
       courseId,
       dayNum
@@ -585,6 +635,34 @@ async function init() {
     renderLessonContent(lesson);
     setupFeedbackStars();
     initMindsetUI();
+
+    /* ============================
+    Cargar feedback previo
+    ============================ */
+    if (feedback) {
+      const starsContainer = qs("#feedbackStars");
+      const commentEl = qs("#feedbackComment");
+
+      // Restaurar rating
+      if (starsContainer && typeof feedback.rating === "number" && feedback.rating > 0) {
+        starsContainer.dataset.selected = String(feedback.rating);
+
+        Array.from(starsContainer.children).forEach((child) => {
+          const val = Number(child.dataset.value);
+          if (val <= feedback.rating) {
+            child.classList.add("selected");
+          } else {
+            child.classList.remove("selected");
+          }
+        });
+      }
+
+      // Restaurar comentario
+      if (commentEl && feedback.comment) {
+        commentEl.value = feedback.comment;
+      }
+    }
+
 
     /* ============================
        Botón completar lección
