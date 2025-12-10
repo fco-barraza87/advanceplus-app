@@ -299,34 +299,20 @@ async function saveFeedback(userId, courseId, lesson) {
    7. Completar lección
 ========================================== */
 async function completeLesson(userId, course, lesson) {
-  const xp = lesson.xp_reward || 25;
-
   try {
-    // 1) Marcar progreso del día
     await supabase
       .from("progress")
       .update({
         completed: true,
-        xp_gained: xp
+        xp: lesson.xp_reward || 0
       })
       .eq("user_id", userId)
       .eq("course_id", course.id)
       .eq("day", lesson.day);
 
-    // 2) Sumar XP total del usuario
-    await supabase.rpc("add_xp", {
-      uid: userId,
-      amount: xp
-    });
-
-    // 3) Actualizar racha del usuario (streak)
-    await supabase.rpc("update_streak", { uid: userId });
-
-
-    console.log("[lesson] XP + racha actualizados correctamente");
-
+    console.log("[lesson] progress actualizado");
   } catch (e) {
-    console.error("[lesson] Error al completar lección:", e);
+    console.error("[lesson] Error al actualizar progress:", e);
   }
 }
 
