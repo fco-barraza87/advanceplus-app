@@ -29,7 +29,7 @@ export async function protectPage({ allowedRoles = [] } = {}) {
 ============================================================ */
 export function redirectByRole(role = "user") {
   const routes = {
-    admin: "/dashboard/admin.html",
+    admin: "/admin/index.html",
     coach: "/dashboard/coach.html",
     user: "/dashboard/index.html",
   };
