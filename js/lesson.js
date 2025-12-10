@@ -349,22 +349,31 @@ async function saveFeedback(userId, courseId, lesson) {
    7. Completar lección
 ========================================== */
 async function completeLesson(userId, course, lesson) {
-  try {
-    await supabase
-      .from("progress")
-      .update({
-        completed: true,
-        xp: lesson.xp_reward || 0
-      })
-      .eq("user_id", userId)
-      .eq("course_id", course.id)
-      .eq("day", lesson.day);
+  const xp = lesson.xp_reward || 0;
 
-    console.log("[lesson] progress actualizado");
-  } catch (e) {
-    console.error("[lesson] Error al actualizar progress:", e);
+  console.log("[lesson] Ejecutando RPC finish_lesson →", {
+    userId,
+    courseId: course.id,
+    day: lesson.day,
+    xp
+  });
+
+  const { data, error } = await supabase.rpc("finish_lesson", {
+    p_user_id: userId,
+    p_course_id: course.id,
+    p_day: lesson.day,
+    p_xp: xp
+  });
+
+  if (error) {
+    console.error("❌ Error en finish_lesson:", error);
+    alert("No se pudo completar la lección (error RPC).");
+    return;
   }
+
+  console.log("✅ finish_lesson ejecutado con éxito:", data);
 }
+
 
 /* ==========================================
    8. Calcular nextDay para redirección
