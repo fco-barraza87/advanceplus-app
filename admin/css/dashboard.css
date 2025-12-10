@@ -1,120 +1,110 @@
-/* Dashboard hero */
+/* ========================================================
+   DASHBOARD METRICS — ADVANCE+
+   Estilos de tarjetas, grids, hero y métricas generales.
+   ======================================================== */
+
+/* --------------------------
+   HERO
+--------------------------- */
+
 .admin-hero {
   display: flex;
-  align-items: flex-end;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
+  align-items: flex-start;
+  margin-bottom: 2.5rem;
 }
 
 .admin-hero-title {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
   color: var(--ap-blue);
-  margin: 0 0 4px;
 }
 
 .admin-hero-subtitle {
-  margin: 0;
-  color: #555;
-  font-size: 14px;
-}
-
-.admin-hero-meta {
-  font-size: 12px;
-  color: #666;
+  font-size: 15px;
+  opacity: 0.8;
+  margin-top: 6px;
 }
 
 .admin-hero-updated {
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: #eef1f8;
+  background: white;
+  border: 1px solid var(--ap-border);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  opacity: 0.8;
 }
 
-/* Access warning */
-.access-warning {
-  border-radius: 12px;
-  padding: 16px 18px;
-  background: #fff0f0;
-  border: 1px solid #f5c2c2;
-  color: #7a1b1b;
-  margin-bottom: 24px;
-}
+/* --------------------------
+   MÉTRICAS
+--------------------------- */
 
-.access-warning.hidden {
-  display: none;
-}
-
-/* Metrics */
 .metrics-section {
-  margin-bottom: 28px;
+  margin-bottom: 3rem;
 }
 
 .metrics-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 1rem;
 }
 
 .metrics-title {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--ap-blue);
-  margin: 0;
 }
 
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.2rem;
 }
 
 .metrics-grid--wide {
-  grid-template-columns: 2fr 3fr;
+  grid-template-columns: repeat(2, 1fr);
 }
 
+/* --------------------------
+   TARJETAS
+--------------------------- */
+
 .metric-card {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 14px 16px;
-  box-shadow: 0 4px 12px rgba(15, 30, 68, 0.06);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  background: white;
+  border: 1px solid var(--ap-border);
+  border-radius: var(--ap-radius);
+  padding: 1.5rem;
+  box-shadow: var(--ap-shadow);
+  transition: var(--ap-transition);
+}
+
+.metric-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.06);
 }
 
 .metric-card--soft {
-  background: #f7f8fc;
-  box-shadow: none;
+  background: #f8f9fb;
 }
 
 .metric-label {
-  font-size: 12px;
-  color: #777;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.6;
+  margin-bottom: 0.4rem;
 }
 
 .metric-value {
-  font-size: 24px;
-  font-weight: 600;
-  color: #111827;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ap-blue);
 }
 
 .metric-caption {
-  font-size: 11px;
-  color: #777;
+  font-size: 12px;
+  opacity: 0.7;
 }
 
 .metric-caption--body {
-  font-size: 13px;
-}
-
-/* Responsive tweaks */
-@media (max-width: 768px) {
-  .admin-hero {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  margin-top: 10px;
+  line-height: 1.45;
 }
