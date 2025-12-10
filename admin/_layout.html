@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Advance+ Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS Global Admin -->
+  <link rel="stylesheet" href="/admin/css/admin-base.css" />
+</head>
+
+<body class="admin-body">
+
+  <!-- SIDEBAR -->
+  <div id="adminSidebar"></div>
+
+  <!-- MAIN SHELL -->
+  <div class="admin-main">
+    
+    <!-- HEADER -->
+    <div id="adminHeader"></div>
+
+    <!-- CONTENT -->
+    <main id="adminContent" class="admin-content">
+      <!-- Cada página carga aquí su contenido -->
+    </main>
+  </div>
+
+  <!-- Supabase -->
+  <script type="module" src="/js/supabase.js"></script>
+
+  <!-- Admin Auth / Shell Loader -->
+  <script type="module" src="/admin/js/admin-auth.js"></script>
+  <script type="module" src="/admin/js/admin-shell.js"></script>
+
+</body>
+</html>

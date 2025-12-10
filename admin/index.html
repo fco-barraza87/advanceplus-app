@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Advance+ Admin — Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tipografías -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS base admin + dashboard -->
+  <link rel="stylesheet" href="/admin/css/admin-base.css" />
+  <link rel="stylesheet" href="/admin/css/dashboard.css" />
+</head>
+
+<body class="admin-body">
+
+  <!-- SIDEBAR DINÁMICO -->
+  <div id="adminSidebar"></div>
+
+  <!-- ÁREA PRINCIPAL -->
+  <div class="admin-main">
+    <!-- HEADER DINÁMICO -->
+    <div id="adminHeader"></div>
+
+    <!-- CONTENIDO DEL DASHBOARD -->
+    <main id="adminContent" class="admin-content">
+
+      <!-- Hero / bienvenida -->
+      <section class="admin-hero">
+        <div>
+          <h1 class="admin-hero-title">Dashboard administrador</h1>
+          <p class="admin-hero-subtitle">
+            Visión general de usuarios, cursos y actividad dentro de Advance+.
+          </p>
+        </div>
+        <div class="admin-hero-meta">
+          <span id="dashboard-last-updated" class="admin-hero-updated">Actualizado: —</span>
+        </div>
+      </section>
+
+      <!-- Aviso de acceso restringido (se muestra solo si NO es admin, por seguridad extra) -->
+      <section id="access-warning" class="access-warning hidden">
+        <h2>Acceso restringido</h2>
+        <p>
+          Este panel está disponible solo para usuarios con rol
+          <strong>admin</strong>. Si ves este mensaje y crees que es un error,
+          revisa tu rol en la tabla <code>profiles</code>.
+        </p>
+      </section>
+
+      <!-- Bloque: Usuarios -->
+      <section class="metrics-section">
+        <div class="metrics-header">
+          <h2 class="metrics-title">Usuarios</h2>
+        </div>
+
+        <div class="metrics-grid">
+          <article class="metric-card">
+            <div class="metric-label">Usuarios totales</div>
+            <div id="metric-total-users" class="metric-value">–</div>
+            <div class="metric-caption">Perfiles en <code>profiles</code></div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-label">Usuarios activos</div>
+            <div id="metric-active-users" class="metric-value">–</div>
+            <div class="metric-caption">
+              Basado en <code>profiles.onboarding_completed = true</code> (si existe)
+            </div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-label">Admins</div>
+            <div id="metric-admins" class="metric-value">–</div>
+            <div class="metric-caption">role = "admin"</div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-label">Coaches</div>
+            <div id="metric-coaches" class="metric-value">–</div>
+            <div class="metric-caption">role = "coach"</div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Bloque: Cursos -->
+      <section class="metrics-section">
+        <div class="metrics-header">
+          <h2 class="metrics-title">Cursos</h2>
+        </div>
+
+        <div class="metrics-grid">
+          <article class="metric-card">
+            <div class="metric-label">Cursos totales</div>
+            <div id="metric-total-courses" class="metric-value">–</div>
+            <div class="metric-caption">Registros en <code>courses</code></div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-label">Cursos activos</div>
+            <div id="metric-active-courses" class="metric-value">–</div>
+            <div class="metric-caption">active = true</div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-label">En preparación</div>
+            <div id="metric-prep-courses" class="metric-value">–</div>
+            <div class="metric-caption">visibility = "in prep"</div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-label">Cursos públicos</div>
+            <div id="metric-public-courses" class="metric-value">–</div>
+            <div class="metric-caption">visibility = "public"</div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Bloque: Actividad -->
+      <section class="metrics-section">
+        <div class="metrics-header">
+          <h2 class="metrics-title">Actividad</h2>
+        </div>
+
+        <div class="metrics-grid metrics-grid--wide">
+          <article class="metric-card">
+            <div class="metric-label">Lecciones completadas</div>
+            <div id="metric-completed-lessons" class="metric-value">–</div>
+            <div class="metric-caption">
+              Registros en <code>progress</code> con <code>completed = true</code> (si existe)
+            </div>
+          </article>
+
+          <article class="metric-card metric-card--soft">
+            <div class="metric-label">Notas</div>
+            <div class="metric-caption metric-caption--body">
+              Métricas avanzadas por usuario/curso se gestionan en los módulos
+              <strong>Usuarios</strong>, <strong>Cursos</strong> y
+              <strong>Progreso</strong>.
+            </div>
+          </article>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- JS Supabase y Admin -->
+  <script type="module" src="/js/supabase.js"></script>
+  <script type="module" src="/admin/js/admin-shell.js"></script>
+  <script type="module" src="/admin/js/admin-index.js"></script>
+  <script type="module" src="/admin/js/admin-auth.js"></script>
+  <script type="module" src="/admin/js/admin-shell.js"></script>
+
+</body>
+</html>
