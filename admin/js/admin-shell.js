@@ -7,6 +7,19 @@ async function loadComponent(id, url) {
   container.innerHTML = html;
 }
 
+function setActiveSidebarLink() {
+  const links = document.querySelectorAll(".sidebar-link");
+  const current = window.location.pathname;
+
+  links.forEach(link => {
+    if (link.getAttribute("href") === current) {
+      link.classList.add("active");
+    }
+  });
+}
+
+setActiveSidebarLink();
+
 async function initAdminShell() {
   await requireAdmin();
 

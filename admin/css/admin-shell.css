@@ -1,0 +1,101 @@
+/* ======== LAYOUT GENERAL DEL ADMIN ======== */
+
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  background: #f7f8fa;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ================== SIDEBAR ================== */
+
+.admin-sidebar {
+  width: 250px;
+  background: #0F1E44; /* Azul profundo A+ */
+  color: white;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sidebar-link {
+  color: white;
+  text-decoration: none;
+  font-size: 15px;
+  padding: 0.55rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+  opacity: 0.9;
+}
+
+.sidebar-link:hover {
+  background: rgba(255,255,255,0.12);
+  opacity: 1;
+}
+
+.sidebar-link.active {
+  background: #C0A450; /* Gold */
+  color: #0F1E44;
+  font-weight: 600;
+}
+
+/* ================== HEADER SUPERIOR ================== */
+
+.admin-header-bar {
+  position: fixed;
+  top: 0;
+  left: 250px; /* espacio del sidebar */
+  right: 0;
+  height: 60px;
+  background: white;
+  border-bottom: 1px solid #e5e8ef;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  z-index: 100;
+}
+
+.admin-logo {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0F1E44;
+}
+
+.admin-user-label {
+  color: #0F1E44;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.admin-logout-btn {
+  background: #C0A450;
+  color: #0F1E44;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.admin-logout-btn:hover {
+  background: #d3b267;
+}
+
+/* ================== CONTENIDO ================== */
+
+.admin-content {
+  margin-left: 250px;
+  padding: 90px 40px 40px 40px; /* espacio por header */
+}
