@@ -30,3 +30,15 @@ async function initAdminShell() {
 }
 
 initAdminShell();
+
+// Toggle del sidebar (mobile + desktop)
+document.addEventListener("click", (e) => {
+  const btn = document.getElementById("sidebarToggle");
+  const sidebar = document.querySelector(".admin-sidebar");
+  const header = document.querySelector(".admin-header-bar");
+
+  if (e.target === btn) {
+    sidebar.classList.toggle("sidebar-closed");
+    header.classList.toggle("header-shifted");
+  }
+});
