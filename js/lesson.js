@@ -320,9 +320,8 @@ async function completeLesson(userId, course, lesson) {
     });
 
     // 3) Actualizar racha del usuario (streak)
-    await supabase.rpc("update_streak", {
-      uid: userId
-    });
+    await supabase.rpc("update_streak", { uid: userId });
+
 
     console.log("[lesson] XP + racha actualizados correctamente");
 
