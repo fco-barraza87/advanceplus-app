@@ -612,6 +612,11 @@ async function init() {
       dayNum
     );
 
+    if (progress && typeof progress.completed === "string") {
+      progress.completed = progress.completed === "t" || progress.completed === "true";
+    }
+
+
     /* ============================
        Cargar reflexión previa
     ============================ */
@@ -668,7 +673,7 @@ async function init() {
        Botón completar lección
     ============================ */
     const completeBtn = qs("#completeLessonBtn");
-    const isCompleted = progress?.completed === true;
+    const isCompleted = progress && (progress.completed === true || progress.completed === 't' || progress.completed === 1);
 
     if (isCompleted) {
       if (completeBtn) {
