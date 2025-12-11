@@ -52,3 +52,32 @@ document.addEventListener("click", (e) => {
     header.classList.toggle("header-shifted");
   }
 });
+
+// =======================================================
+// Cargar nombre del admin en header
+// =======================================================
+
+async function loadAdminHeaderName() {
+  const label = document.getElementById("adminUserLabel");
+  if (!label) return;
+
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth?.user) {
+    label.textContent = "No autenticado";
+    return;
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, email")
+    .eq("id", auth.user.id)
+    .single();
+
+  if (profile?.full_name) {
+    label.textContent = profile.full_name;
+  } else {
+    label.textContent = auth.user.email ?? "Admin";
+  }
+}
+
+loadAdminHeaderName();
