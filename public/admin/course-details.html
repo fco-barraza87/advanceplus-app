@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Advance+ Admin — Curso</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tipografías -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS base admin + curso -->
+  <link rel="stylesheet" href="/admin/css/admin-base.css" />
+  <link rel="stylesheet" href="/admin/css/course-details.css" />
+</head>
+
+<body class="admin-body">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <span class="sidebar-logo-icon">A+</span>
+      <span class="sidebar-logo-text">Advance+</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="/admin/index.html" class="sidebar-link">Dashboard</a>
+      <a href="/admin/users.html" class="sidebar-link">Usuarios</a>
+      <a href="/admin/courses.html" class="sidebar-link sidebar-link-active">Cursos</a>
+      <a href="/admin/lessons.html" class="sidebar-link">Lecciones</a>
+      <a href="/admin/progress.html" class="sidebar-link">Progreso</a>
+      <a href="/admin/marketing.html" class="sidebar-link">Marketing</a>
+      <a href="/admin/settings.html" class="sidebar-link">Configuración</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="admin-main">
+
+    <!-- HEADER SUPERIOR -->
+    <header class="admin-header-bar">
+      <div class="admin-header-left">
+        <button id="sidebarToggle" class="admin-burger-btn">☰</button>
+        <span class="admin-header-title">Gestión de curso</span>
+      </div>
+      <div class="admin-header-right">
+        <span class="admin-user-label" id="adminUserLabel">Admin</span>
+        <button id="adminLogoutBtn" class="admin-logout-btn">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <!-- CONTENIDO -->
+    <main class="admin-content">
+
+      <!-- HEADER DE PÁGINA -->
+      <section class="page-header">
+        <div>
+          <p class="breadcrumb">
+            Cursos /
+            <span id="breadcrumbCourseTitle">Nuevo curso</span>
+          </p>
+          <h1 id="pageCourseTitle">Nuevo curso</h1>
+        </div>
+
+        <div class="page-header-actions">
+          <button id="btnSoftDelete" class="btn-outline-danger" type="button">
+            Desactivar curso
+          </button>
+          <button id="btnSaveCourse" class="btn-primary" type="button">
+            Guardar
+          </button>
+        </div>
+      </section>
+
+      <!-- TABS -->
+      <section class="tabs-wrapper">
+        <button class="tab-button tab-button-active" data-tab="general">General</button>
+        <button class="tab-button" data-tab="lessons">Lecciones</button>
+        <button class="tab-button" data-tab="enrollments">Inscritos</button>
+        <button class="tab-button" data-tab="logs">Logs</button>
+      </section>
+
+      <!-- TAB: GENERAL -->
+      <section id="tab-general" class="tab-panel tab-panel-active">
+
+        <!-- CARD: INFO BÁSICA -->
+        <section class="card">
+          <div class="card-header">
+            <h2>Información básica</h2>
+            <p class="card-subtitle">
+              Título, categoría, visibilidad y parámetros principales del curso.
+            </p>
+          </div>
+
+          <div class="form-grid-2">
+            <!-- Columna izquierda -->
+            <div class="form-field">
+              <label for="inputTitle">Título</label>
+              <input id="inputTitle" type="text" placeholder="Ej. AI7 · Reinicia tu enfoque" />
+            </div>
+
+            <div class="form-field">
+              <label for="inputSubtitle">Subtítulo</label>
+              <input id="inputSubtitle" type="text" placeholder="Subtítulo inspirador para el curso" />
+            </div>
+
+            <div class="form-field">
+              <label for="inputSlug">Slug</label>
+              <input id="inputSlug" type="text" placeholder="ai7-reinicia-tu-enfoque" />
+              <p class="field-hint">Se usa en URLs internas. Mantener en minúsculas y con guiones.</p>
+            </div>
+
+            <div class="form-field">
+              <label for="inputCategory">Categoría</label>
+              <input id="inputCategory" type="text" placeholder="Enfoque, Disciplina, Hábitos..." />
+            </div>
+
+            <div class="form-field">
+              <label for="selectVisibility">Visibilidad</label>
+              <select id="selectVisibility">
+                <option value="public">Público</option>
+                <option value="private">Privado</option>
+                <option value="in prep">En preparación</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="selectProgression">Tipo de progresión</label>
+              <select id="selectProgression">
+                <option value="free">Libre</option>
+                <option value="linear">Lineal</option>
+                <option value="daily">Diario (reto)</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="inputDurationDays">Duración (días)</label>
+              <input id="inputDurationDays" type="number" min="1" step="1" />
+            </div>
+
+            <div class="form-field">
+              <label for="inputLevel">Nivel sugerido</label>
+              <input id="inputLevel" type="number" min="1" step="1" />
+            </div>
+
+            <div class="form-field">
+              <label for="inputXpReward">XP total recomendado</label>
+              <input id="inputXpReward" type="number" min="0" step="10" />
+            </div>
+
+            <div class="form-field">
+              <label for="inputTags">Tags</label>
+              <input id="inputTags" type="text" placeholder="enfoque, disciplina, mentalidad..." />
+              <p class="field-hint">Separar por comas. Se guardan como array.</p>
+            </div>
+
+            <div class="form-field">
+              <label for="inputPriceChf">Precio (CHF)</label>
+              <input id="inputPriceChf" type="number" min="0" step="0.5" />
+            </div>
+
+            <div class="form-field">
+              <label for="inputSalePriceChf">Precio oferta (CHF)</label>
+              <input id="inputSalePriceChf" type="number" min="0" step="0.5" />
+            </div>
+
+            <div class="form-field checkbox-field">
+              <label class="checkbox-label">
+                <input id="checkboxIsPaid" type="checkbox" />
+                Curso de pago
+              </label>
+            </div>
+
+            <div class="form-field checkbox-field">
+              <label class="checkbox-label">
+                <input id="checkboxActive" type="checkbox" checked />
+                Curso activo
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- CARD: DESCRIPCIÓN Y MEDIOS -->
+        <section class="card">
+          <div class="card-header">
+            <h2>Contenido y medios</h2>
+            <p class="card-subtitle">
+              Descripción larga, portada y enlaces multimedia (audio / video / checkout).
+            </p>
+          </div>
+
+          <div class="form-grid-1">
+            <div class="form-field">
+              <label for="textareaDescription">Descripción</label>
+              <textarea id="textareaDescription" rows="5"
+                placeholder="Describe el curso, su promesa y a quién va dirigido..."></textarea>
+            </div>
+
+            <div class="form-field">
+              <label for="inputCoverUrl">URL de portada</label>
+              <input id="inputCoverUrl" type="text" placeholder="https://..." />
+            </div>
+
+            <div class="form-field">
+              <label for="inputIntroAudioUrl">Intro audio URL</label>
+              <input id="inputIntroAudioUrl" type="text" placeholder="https://..." />
+            </div>
+
+            <div class="form-field">
+              <label for="inputIntroVideoUrl">Intro video URL</label>
+              <input id="inputIntroVideoUrl" type="text" placeholder="https://..." />
+            </div>
+
+            <div class="form-field">
+              <label for="inputSystemeUrl">URL checkout Systeme.io</label>
+              <input id="inputSystemeUrl" type="text" placeholder="https://..." />
+            </div>
+          </div>
+        </section>
+
+        <!-- CARD: METADATOS -->
+        <section class="card card-meta">
+          <div class="card-header">
+            <h2>Metadatos</h2>
+          </div>
+          <p class="meta-line">
+            Creado:
+            <span id="metaCreated">—</span>
+            · Actualizado:
+            <span id="metaUpdated">—</span>
+          </p>
+          <p class="meta-line">
+            ID:
+            <span id="metaId">—</span>
+          </p>
+        </section>
+
+      </section>
+
+      <!-- TAB: LECCIONES -->
+      <section id="tab-lessons" class="tab-panel">
+        <section class="card">
+          <div class="card-header card-header-inline">
+            <div>
+              <h2>Lecciones del curso</h2>
+              <p class="card-subtitle">
+                Vista general de las lecciones asociadas a este curso.
+              </p>
+            </div>
+            <div>
+              <button id="btnGoLessons" class="btn-secondary" type="button">
+                Ir a gestión de lecciones
+              </button>
+            </div>
+          </div>
+
+          <p class="placeholder-text">
+            Aquí mostraremos el listado de lecciones cuando definamos la estructura exacta de la tabla
+            <code>lessons</code>.
+          </p>
+        </section>
+      </section>
+
+      <!-- TAB: INSCRITOS (PLACEHOLDER) -->
+      <section id="tab-enrollments" class="tab-panel">
+        <section class="card card-placeholder">
+          <div class="card-header">
+            <h2>Inscritos</h2>
+            <p class="card-subtitle">
+              Próximamente: resumen de usuarios inscritos al curso, progreso medio y filtros por estado.
+            </p>
+          </div>
+        </section>
+      </section>
+
+      <!-- TAB: LOGS (PLACEHOLDER) -->
+      <section id="tab-logs" class="tab-panel">
+        <section class="card card-placeholder">
+          <div class="card-header">
+            <h2>Logs</h2>
+            <p class="card-subtitle">
+              Próximamente: actividad relevante del curso (creación, cambios críticos, etc.).
+            </p>
+          </div>
+        </section>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- JS -->
+  <script type="module" src="/js/supabase.js"></script>
+  <script type="module" src="/admin/js/admin-auth.js"></script>
+  <script type="module" src="/admin/js/admin-course-details.js"></script>
+</body>
+
+</html>
