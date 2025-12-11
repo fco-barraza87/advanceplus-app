@@ -34,13 +34,36 @@
   <!-- MAIN -->
   <div class="admin-main">
 
-    <!-- HEADER -->
-    <div id="adminHeaderContainer"></div>
+    <!-- ============================================================
+         HEADER FIJO (también integrado aquí)
+    ============================================================ -->
+    <header class="admin-header-bar">
+      <div class="admin-header-left">
+        <button id="sidebarToggle" class="admin-burger-btn">☰</button>
+      </div>
 
-    <script type="module">
-      import { loadAdminHeader } from "/admin/js/admin-header-pro.js";
-      loadAdminHeader(); 
-    </script>
+      <div class="admin-header-right">
+        
+        <!-- Nombre + rol -->
+        <div class="admin-user-info">
+          <span id="adminUserName" class="admin-user-name">Cargando...</span>
+          <span id="adminUserRole" class="admin-user-role">—</span>
+        </div>
+
+        <!-- Avatar -->
+        <div class="admin-avatar-wrapper">
+          <div id="adminAvatar" class="admin-avatar">A</div>
+
+          <!-- Menú -->
+          <div id="adminMenu" class="admin-menu hidden">
+            <a href="/dashboard/index.html">Modo usuario</a>
+            <a href="/admin/settings.html">Configuración</a>
+            <button id="adminLogoutBtnMenu">Cerrar sesión</button>
+          </div>
+        </div>
+
+      </div>
+    </header>
 
     <!-- CONTENIDO -->
     <main class="admin-content">
