@@ -5,45 +5,67 @@ const tbody = document.getElementById("usersTableBody");
 
 let allUsers = [];
 
-const { data, error } = await supabase
-  .from("profiles")
-  .select(`
-    id,
-    full_name,
-    email,
-    avatar_url,
-    role,
-    onboarding_completed,
-    created_at
-  `)
-  .order("created_at", { ascending: false });
+// =========================================================
+// 1. Cargar lista de usuarios desde profiles
+// =========================================================
+async function loadUsers() {
+  await requireAdmin();
 
-if (error) { console.error(error); return; }
+  console.log("[admin] Cargando usuarios...");
 
-// =========================
-// 2️⃣ Obtener stats aparte
-// =========================
-for (const user of data) {
-  const { data: stats } = await supabase
-    .from("user_stats")
-    .select("xp_total, streak_current, level, streak_best")
-    .eq("user_id", user.id)
-    .single();
+  const { data: profiles, error } = await supabase
+    .from("profiles")
+    .select(`
+      id,
+      full_name,
+      email,
+      avatar_url,
+      role,
+      onboarding_completed,
+      created_at
+    `)
+    .order("created_at", { ascending: false });
 
-  user.user_stats = stats || {
-    xp_total: 0,
-    streak_current: 0,
-    level: 1,
-    streak_best: 0
-  };
+  if (error) {
+    console.error("[admin] Error cargando perfiles:", error);
+    return;
+  }
+
+  // =========================================================
+  // 2. Cargar stats por cada usuario (consulta 1:1 manual)
+  // =========================================================
+  for (let user of profiles) {
+    const { data: stats, error: statsError } = await supabase
+      .from("user_stats")
+      .select(`
+        xp_total,
+        streak_current,
+        level,
+        streak_best
+      `)
+      .eq("user_id", user.id)
+      .single();
+
+    if (statsError) {
+      console.warn(`[admin] Stats no encontrados para user_id = ${user.id}`);
+    }
+
+    user.user_stats = stats ?? {
+      xp_total: 0,
+      streak_current: 0,
+      level: 1,
+      streak_best: 0,
+    };
+  }
+
+  allUsers = profiles;
+  renderUsers(allUsers);
 }
 
-allUsers = data;
-renderUsers(allUsers);
 
-// ================================
-// Render tabla
-// ================================
+// =========================================================
+// 3. Renderizado de tabla
+// =========================================================
 function renderUsers(list) {
   tbody.innerHTML = "";
 
@@ -68,7 +90,7 @@ function renderUsers(list) {
       </td>
 
       <td>
-        ${stats.xp_total ?? 0} XP<br>
+        <strong>${stats.xp_total ?? 0} XP</strong><br>
         <span style="opacity:0.7">${stats.streak_current ?? 0} días</span>
       </td>
 
@@ -85,16 +107,18 @@ function renderUsers(list) {
   });
 }
 
-// ================================
-// Navegar al detalle
-// ================================
+
+// =========================================================
+// 4. Navegar al detalle
+// =========================================================
 window.viewUser = (id) => {
   window.location.href = `/admin/user-details.html?id=${id}`;
 };
 
-// ================================
-// Filtros
-// ================================
+
+// =========================================================
+// 5. Filtros
+// =========================================================
 document.getElementById("searchInput").addEventListener("input", applyFilters);
 document.getElementById("roleFilter").addEventListener("change", applyFilters);
 document.getElementById("onboardingFilter").addEventListener("change", applyFilters);
@@ -116,24 +140,30 @@ function applyFilters() {
   }
 
   if (role) filtered = filtered.filter(u => u.role === role);
+
   if (onboarding === "1") filtered = filtered.filter(u => u.onboarding_completed);
   if (onboarding === "0") filtered = filtered.filter(u => !u.onboarding_completed);
 
   if (activity === "xp")
-    filtered.sort((a, b) => (b.user_stats?.xp_total ?? 0) - (a.user_stats?.xp_total ?? 0));
+    filtered.sort((a, b) =>
+      (b.user_stats?.xp_total ?? 0) - (a.user_stats?.xp_total ?? 0)
+    );
 
   if (activity === "streak")
-    filtered.sort((a, b) => 
+    filtered.sort((a, b) =>
       (b.user_stats?.streak_current ?? 0) - (a.user_stats?.streak_current ?? 0)
     );
 
   if (activity === "recent")
-    filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    filtered.sort((a, b) =>
+      new Date(b.created_at) - new Date(a.created_at)
+    );
 
   renderUsers(filtered);
 }
 
-// ================================
-// Inicio
-// ================================
+
+// =========================================================
+// 6. Inicio
+// =========================================================
 loadUsers();
