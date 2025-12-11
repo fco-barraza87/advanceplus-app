@@ -1,0 +1,107 @@
+/* ============================================================
+   PAGE HEADER
+============================================================ */
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.8rem;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--ap-blue);
+}
+
+.page-subtitle {
+  font-size: 14px;
+  opacity: .7;
+}
+
+/* ============================================================
+   FILTERS
+============================================================ */
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+  flex-wrap: wrap;
+}
+
+.filter-input,
+.filter-select {
+  border: 1px solid var(--ap-border);
+  background: #f9fafb;
+  padding: .55rem .7rem;
+  border-radius: 8px;
+  font-size: 14px;
+  min-width: 180px;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  outline: none;
+  border-color: var(--ap-gold);
+  box-shadow: 0 0 0 1px rgba(192, 164, 80, .4);
+  background: #fff;
+}
+
+/* ============================================================
+   TABLE
+============================================================ */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: .7rem .4rem;
+  border-bottom: 1px solid var(--ap-border);
+  font-size: 14px;
+}
+
+.table th {
+  opacity: .7;
+  font-weight: 600;
+}
+
+.table td:last-child {
+  text-align: right;
+}
+
+.course-title {
+  font-weight: 600;
+  color: var(--ap-blue);
+}
+
+.badge {
+  font-size: 11px;
+  padding: .25rem .5rem;
+  border-radius: 6px;
+}
+
+.badge-public { background: #d1fae5; color: #065f46; }
+.badge-private { background: #fef3c7; color: #92400e; }
+.badge-inprep { background: #e0e7ff; color: #4338ca; }
+
+.badge-active { background: #d1fae5; color: #065f46; }
+.badge-inactive { background: #fee2e2; color: #991b1b; }
+
+.btn-small {
+  padding: .4rem .8rem;
+  background: var(--ap-gold);
+  border: none;
+  border-radius: 8px;
+  color: var(--ap-blue);
+  cursor: pointer;
+}
+
+.btn-small:hover {
+  opacity: .9;
+}

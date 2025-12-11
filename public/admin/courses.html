@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Advance+ Admin — Cursos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Tipografías -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS base + cursos -->
+  <link rel="stylesheet" href="/admin/css/admin-base.css" />
+  <link rel="stylesheet" href="/admin/css/courses.css" />
+</head>
+
+<body class="admin-body">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <span class="sidebar-logo-icon">A+</span>
+      <span class="sidebar-logo-text">Advance+</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="/admin/index.html" class="sidebar-link">Dashboard</a>
+      <a href="/admin/users.html" class="sidebar-link">Usuarios</a>
+      <a href="/admin/courses.html" class="sidebar-link sidebar-link-active">Cursos</a>
+      <a href="/admin/lessons.html" class="sidebar-link">Lecciones</a>
+      <a href="/admin/progress.html" class="sidebar-link">Progreso</a>
+      <a href="/admin/marketing.html" class="sidebar-link">Marketing</a>
+      <a href="/admin/settings.html" class="sidebar-link">Configuración</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="admin-main">
+
+    <!-- HEADER SUPERIOR -->
+    <header class="admin-header-bar">
+      <div class="admin-header-left">
+        <button id="sidebarToggle" class="admin-burger-btn">☰</button>
+        <span class="admin-header-title">Cursos</span>
+      </div>
+      <div class="admin-header-right">
+        <span id="adminUserLabel" class="admin-user-label">Admin</span>
+        <button id="adminLogoutBtn" class="admin-logout-btn">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <!-- CONTENIDO -->
+    <main class="admin-content">
+
+      <!-- HEADER -->
+      <section class="page-header">
+        <div>
+          <h1 class="page-title">Cursos</h1>
+          <p class="page-subtitle">Administración completa de todos los cursos disponibles.</p>
+        </div>
+
+        <button id="btnNewCourse" class="btn-primary">+ Nuevo curso</button>
+      </section>
+
+      <!-- FILTROS -->
+      <section class="filters">
+        <input id="searchInput" class="filter-input" type="text" placeholder="Buscar por título, slug o categoría...">
+
+        <select id="filterVisibility" class="filter-select">
+          <option value="">Visibilidad: todos</option>
+          <option value="public">Público</option>
+          <option value="private">Privado</option>
+          <option value="in prep">En preparación</option>
+        </select>
+
+        <select id="filterActive" class="filter-select">
+          <option value="">Estado: todos</option>
+          <option value="1">Activos</option>
+          <option value="0">Inactivos</option>
+        </select>
+
+        <select id="filterSort" class="filter-select">
+          <option value="newest">Más nuevos</option>
+          <option value="alpha">A-Z</option>
+          <option value="oldest">Más antiguos</option>
+        </select>
+      </section>
+
+      <!-- TABLA -->
+      <section class="card">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Slug</th>
+              <th>Visibilidad</th>
+              <th>Estado</th>
+              <th>Creado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="coursesTableBody"></tbody>
+        </table>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- JS -->
+  <script type="module" src="/js/supabase.js"></script>
+  <script type="module" src="/admin/js/admin-auth.js"></script>
+  <script type="module" src="/admin/js/admin-courses.js"></script>
+
+</body>
+
+</html>
