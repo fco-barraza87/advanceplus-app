@@ -7,6 +7,9 @@ async function loadComponent(id, url) {
   container.innerHTML = html;
 }
 
+/* ---------------------------------------------
+   Mover esto dentro de initAdminShell()
+----------------------------------------------*/
 function setActiveSidebarLink() {
   const links = document.querySelectorAll(".sidebar-link");
   const current = window.location.pathname;
@@ -18,20 +21,27 @@ function setActiveSidebarLink() {
   });
 }
 
-setActiveSidebarLink();
-
+/* ---------------------------------------------
+   FUNCIÓN PRINCIPAL DEL ADMIN SHELL
+----------------------------------------------*/
 async function initAdminShell() {
   await requireAdmin();
 
+  // Carga componentes dinámicos
   await loadComponent("adminSidebar", "/admin/components/admin-sidebar.html");
   await loadComponent("adminHeader", "/admin/components/admin-header.html");
+
+  // 🔥 AHORA QUE EL SIDEBAR EXISTE, ACTIVAMOS LA RUTA
+  setActiveSidebarLink();
 
   console.log("[admin] Shell loaded.");
 }
 
 initAdminShell();
 
-// Toggle del sidebar (mobile + desktop)
+/* ---------------------------------------------
+   TOGGLE SIDEBAR
+----------------------------------------------*/
 document.addEventListener("click", (e) => {
   const btn = document.getElementById("sidebarToggle");
   const sidebar = document.querySelector(".admin-sidebar");
