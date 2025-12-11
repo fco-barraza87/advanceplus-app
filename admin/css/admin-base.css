@@ -243,3 +243,97 @@ a {
     padding: 80px 1.5rem 2.5rem;
   }
 }
+
+/* --------------------------
+   HEADER PRO
+--------------------------- */
+
+.admin-header-bar {
+  height: 64px;
+  background: white;
+  border-bottom: 1px solid var(--ap-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  position: fixed;
+  top: 0;
+  left: 250px;
+  right: 0;
+  z-index: 20;
+}
+
+/* Nombre + rol */
+.admin-user-info {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+  margin-right: 12px;
+}
+
+.admin-user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ap-blue);
+}
+
+.admin-user-role {
+  font-size: 12px;
+  opacity: 0.6;
+  margin-top: -2px;
+}
+
+/* Avatar */
+.admin-avatar-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+
+.admin-avatar {
+  width: 36px;
+  height: 36px;
+  background: var(--ap-blue);
+  color: white;
+  font-size: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  border: 2px solid var(--ap-gold);
+}
+
+/* Menu */
+.admin-menu {
+  position: absolute;
+  top: 46px;
+  right: 0;
+  background: white;
+  border: 1px solid var(--ap-border);
+  border-radius: 8px;
+  width: 160px;
+  padding: 6px 0;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.admin-menu a,
+.admin-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  text-align: left;
+  border: none;
+  background: none;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--ap-blue);
+}
+
+.admin-menu a:hover,
+.admin-menu button:hover {
+  background: rgba(0,0,0,0.06);
+}
+
+.hidden {
+  display: none !important;
+}
