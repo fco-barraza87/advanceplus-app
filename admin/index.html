@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8" />
   <title>Advance+ Admin — Dashboard</title>
@@ -18,19 +17,51 @@
 
 <body class="admin-body">
 
-  <!-- SIDEBAR (cargado dinámicamente) -->
-  <div id="adminSidebar"></div>
+  <!-- ============================================================
+       SIDEBAR FIJO (ya no se carga desde components)
+  ============================================================ -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <span class="sidebar-logo-icon">A+</span>
+      <span class="sidebar-logo-text">Advance+</span>
+    </div>
 
-  <!-- ÁREA PRINCIPAL -->
+    <nav class="sidebar-nav">
+      <a href="/admin/index.html" class="sidebar-link active">Dashboard</a>
+      <a href="/admin/users.html" class="sidebar-link">Usuarios</a>
+      <a href="/admin/courses.html" class="sidebar-link">Cursos</a>
+      <a href="/admin/lessons.html" class="sidebar-link">Lecciones</a>
+      <a href="/admin/progress.html" class="sidebar-link">Progreso</a>
+      <a href="/admin/marketing.html" class="sidebar-link">Marketing</a>
+      <a href="/admin/settings.html" class="sidebar-link">Configuración</a>
+    </nav>
+  </aside>
+
+  <!-- ============================================================
+       ÁREA PRINCIPAL
+  ============================================================ -->
   <div class="admin-main">
 
-    <!-- HEADER (cargado dinámicamente) -->
-    <div id="adminHeader"></div>
+    <!-- ============================================================
+         HEADER FIJO (también integrado aquí)
+    ============================================================ -->
+    <header class="admin-header-bar">
+      <div class="admin-header-left">
+        <button id="sidebarToggle" class="admin-burger-btn">☰</button>
+      </div>
 
-    <!-- CONTENIDO DEL DASHBOARD -->
+      <div class="admin-header-right">
+        <span id="adminUserLabel" class="admin-user-label">Cargando…</span>
+        <button id="adminLogoutBtn" class="admin-logout-btn">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <!-- ============================================================
+         CONTENIDO DEL DASHBOARD
+    ============================================================ -->
     <main id="adminContent" class="admin-content">
 
-      <!-- Hero / bienvenida -->
+      <!-- Hero -->
       <section class="admin-hero">
         <div>
           <h1 class="admin-hero-title">Dashboard administrador</h1>
@@ -43,17 +74,18 @@
         </div>
       </section>
 
-      <!-- Aviso de acceso restringido -->
+      <!-- Aviso acceso restringido -->
       <section id="access-warning" class="access-warning hidden">
         <h2>Acceso restringido</h2>
         <p>
-          Este panel está disponible solo para usuarios con rol
-          <strong>admin</strong>. Si ves este mensaje y crees que es un error,
-          revisa tu rol en la tabla <code>profiles</code>.
+          Este panel es exclusivo para <strong>admins</strong>.
+          Verifica tu rol en <code>profiles</code>.
         </p>
       </section>
 
-      <!-- Bloque: Usuarios -->
+      <!-- ============================================
+           BLOQUE: USUARIOS
+      ============================================ -->
       <section class="metrics-section">
         <h2 class="metrics-title">Usuarios</h2>
 
@@ -67,9 +99,7 @@
           <article class="metric-card">
             <div class="metric-label">Usuarios activos</div>
             <div id="metric-active-users" class="metric-value">–</div>
-            <div class="metric-caption">
-              Basado en <code>profiles.onboarding_completed = true</code>
-            </div>
+            <div class="metric-caption">profiles.onboarding_completed = true</div>
           </article>
 
           <article class="metric-card">
@@ -86,7 +116,9 @@
         </div>
       </section>
 
-      <!-- Bloque: Cursos -->
+      <!-- ============================================
+           BLOQUE: CURSOS
+      ============================================ -->
       <section class="metrics-section">
         <h2 class="metrics-title">Cursos</h2>
 
@@ -117,7 +149,9 @@
         </div>
       </section>
 
-      <!-- Bloque: Actividad -->
+      <!-- ============================================
+           BLOQUE: ACTIVIDAD
+      ============================================ -->
       <section class="metrics-section">
         <h2 class="metrics-title">Actividad</h2>
 
@@ -125,30 +159,27 @@
           <article class="metric-card">
             <div class="metric-label">Lecciones completadas</div>
             <div id="metric-completed-lessons" class="metric-value">–</div>
-            <div class="metric-caption">
-              Registros en <code>progress</code> con <code>completed = true</code>
-            </div>
+            <div class="metric-caption">progress.completed = true</div>
           </article>
 
           <article class="metric-card metric-card--soft">
             <div class="metric-label">Notas</div>
             <div class="metric-caption metric-caption--body">
-              Métricas avanzadas por usuario/curso se gestionan en los módulos
-              <strong>Usuarios</strong>, <strong>Cursos</strong>,
-              <strong>Lecciones</strong> y <strong>Progreso</strong>.
+              Métricas avanzadas se gestionan en Usuarios, Cursos, Lecciones y Progreso.
             </div>
           </article>
         </div>
       </section>
 
     </main>
+
   </div>
 
-  <!-- JS -->
+  <!-- Scripts -->
   <script type="module" src="/js/supabase.js"></script>
   <script type="module" src="/admin/js/admin-auth.js"></script>
-  <script type="module" src="/admin/js/admin-shell.js"></script>
   <script type="module" src="/admin/js/admin-index.js"></script>
+  <script type="module" src="/admin/js/admin-shell.js"></script>
 
 </body>
 </html>
