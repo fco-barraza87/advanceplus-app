@@ -83,6 +83,7 @@ function applyFilters() {
 // INICIO
 loadUsers();
 
+
 async function loadAdminHeaderName() {
   const nameEl = document.getElementById("adminUserName");
   const roleEl = document.getElementById("adminUserRole");
