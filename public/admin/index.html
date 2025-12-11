@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Advance+ Admin — Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tipografías -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS base admin + dashboard -->
+  <link rel="stylesheet" href="/admin/css/admin-base.css" />
+  <link rel="stylesheet" href="/admin/css/dashboard.css" />
+</head>
+
+<body class="admin-body">
+
+  <!-- ============================================================
+       SIDEBAR FIJO (ya no se carga desde components)
+  ============================================================ -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <span class="sidebar-logo-icon">A+</span>
+      <span class="sidebar-logo-text">Advance+</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="/admin/index.html" class="sidebar-link active">Dashboard</a>
+      <a href="/admin/users.html" class="sidebar-link">Usuarios</a>
+      <a href="/admin/courses.html" class="sidebar-link">Cursos</a>
+      <a href="/admin/lessons.html" class="sidebar-link">Lecciones</a>
+      <a href="/admin/progress.html" class="sidebar-link">Progreso</a>
+      <a href="/admin/marketing.html" class="sidebar-link">Marketing</a>
+      <a href="/admin/settings.html" class="sidebar-link">Configuración</a>
+    </nav>
+  </aside>
+
+  <!-- ============================================================
+       ÁREA PRINCIPAL
+  ============================================================ -->
+  <div class="admin-main">
+
+    <!-- ============================================================
+         HEADER FIJO (también integrado aquí)
+    ============================================================ -->
+    <header class="admin-header-bar">
+      <div class="admin-header-left">
+        <button id="sidebarToggle" class="admin-burger-btn">☰</button>
+      </div>
+
+      <div class="admin-header-right">
+        
+        <!-- Nombre + rol -->
+        <div class="admin-user-info">
+          <span id="adminUserName" class="admin-user-name">Cargando...</span>
+          <span id="adminUserRole" class="admin-user-role">—</span>
+        </div>
+
+        <!-- Avatar -->
+        <div class="admin-avatar-wrapper">
+          <div id="adminAvatar" class="admin-avatar">A</div>
+
+          <!-- Menú -->
+          <div id="adminMenu" class="admin-menu hidden">
+            <a href="/dashboard/index.html">Modo usuario</a>
+            <a href="/admin/settings.html">Configuración</a>
+            <button id="adminLogoutBtnMenu">Cerrar sesión</button>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+
+    <!-- ============================================================
+         CONTENIDO DEL DASHBOARD
+    ============================================================ -->
+    <main id="adminContent" class="admin-content">
+
+      <!-- Hero -->
+      <section class="admin-hero">
+        <div>
+          <h1 class="admin-hero-title">Dashboard administrador</h1>
+          <p class="admin-hero-subtitle">
+            Visión general de usuarios, cursos y actividad dentro de Advance+.
+          </p>
+        </div>
+        <div class="admin-hero-meta">
+          <span id="dashboard-last-updated" class="admin-hero-updated">Actualizado: —</span>
+        </div>
+      </section>
+
+      <!-- Aviso acceso restringido -->
+      <section id="access-warning" class="access-warning hidden">
+        <h2>Acceso restringido</h2>
+        <p>
+          Este panel es exclusivo para <strong>admins</strong>.
+          Verifica tu rol en <code>profiles</code>.
+        </p>
+      </section>
+
+      <!-- ============================================
+           BLOQUE: USUARIOS
+      ============================================ -->
+      <section class="metrics-section">
+        <h2 class="metrics-title">Usuarios</h2>
+
+        <div class="metrics-grid">
+          <article class="metric-card">
+            <div class="metric-label">Usuarios totales</div>
+            <div id="metric-total-users" class="metric-value">–</div>
+            <div class="metric-caption">Perfiles en <code>profiles</code></div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-label">Usuarios activos</div>
+            <div id="metric-active-users" class="metric-value">–</div>
+            <div class="metric-caption">profiles.onboarding_completed = true</div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-label">Admins</div>
+            <div id="metric-admins" class="metric-value">–</div>
+            <div class="metric-caption">role = "admin"</div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-label">Coaches</div>
+            <div id="metric-coaches" class="metric-value">–</div>
+            <div class="metric-caption">role = "coach"</div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ============================================
+           BLOQUE: CURSOS
+      ============================================ -->
+      <section class="metrics-section">
+        <h2 class="metrics-title">Cursos</h2>
+
+        <div class="metrics-grid">
+          <article class="metric-card">
+            <div class="metric-label">Cursos totales</div>
+            <div id="metric-total-courses" class="metric-value">–</div>
+            <div class="metric-caption">Registros en <code>courses</code></div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-label">Cursos activos</div>
+            <div id="metric-active-courses" class="metric-value">–</div>
+            <div class="metric-caption">active = true</div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-label">En preparación</div>
+            <div id="metric-prep-courses" class="metric-value">–</div>
+            <div class="metric-caption">visibility = "in prep"</div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-label">Cursos públicos</div>
+            <div id="metric-public-courses" class="metric-value">–</div>
+            <div class="metric-caption">visibility = "public"</div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ============================================
+           BLOQUE: ACTIVIDAD
+      ============================================ -->
+      <section class="metrics-section">
+        <h2 class="metrics-title">Actividad</h2>
+
+        <div class="metrics-grid metrics-grid--wide">
+          <article class="metric-card">
+            <div class="metric-label">Lecciones completadas</div>
+            <div id="metric-completed-lessons" class="metric-value">–</div>
+            <div class="metric-caption">progress.completed = true</div>
+          </article>
+
+          <article class="metric-card metric-card--soft">
+            <div class="metric-label">Notas</div>
+            <div class="metric-caption metric-caption--body">
+              Métricas avanzadas se gestionan en Usuarios, Cursos, Lecciones y Progreso.
+            </div>
+          </article>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="/js/supabase.js"></script>
+  <script type="module" src="/admin/js/admin-auth.js"></script>
+  <script type="module" src="/admin/js/admin-index.js"></script>
+  <script type="module" src="/admin/js/admin-shell.js"></script>
+
+</body>
+</html>

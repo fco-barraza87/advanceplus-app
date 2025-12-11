@@ -1,0 +1,339 @@
+/* ========================================================
+   TOKENS VISUALES ADMIN
+   ======================================================== */
+
+:root {
+  --ap-blue: #0F1E44;
+  --ap-gold: #C0A450;
+  --ap-border: #E5E7EB;
+  --ap-radius: 12px;
+  --ap-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --ap-transition: 0.25s ease;
+
+  --ap-bg-light: #F7F9FC;
+  --ap-text-light: rgba(255, 255, 255, 0.9);
+  --ap-text-dark: #1F2937;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body.admin-body {
+  margin: 0;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--ap-bg-light);
+  color: var(--ap-text-dark);
+}
+
+a {
+  color: inherit;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ========================================================
+   SIDEBAR – Advance+ Premium
+   ======================================================== */
+
+.admin-sidebar {
+  width: 250px;
+  background: var(--ap-blue);
+  color: white;
+  padding: 2rem 1.4rem;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  transition: transform 0.3s ease;
+  z-index: 30;
+}
+
+/* LOGO */
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 5px;
+}
+
+.sidebar-logo-icon {
+  background: var(--ap-gold);
+  color: var(--ap-blue);
+  padding: 6px 10px;
+  font-size: 20px;
+  font-weight: 800;
+  border-radius: 6px;
+}
+
+.sidebar-logo-text {
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* NAV LINKS */
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sidebar-link {
+  text-decoration: none;
+  color: white;
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  font-size: 15px;
+  opacity: 0.85;
+  transition: var(--ap-transition);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.12);
+  opacity: 1;
+}
+
+.sidebar-link.active {
+  background: var(--ap-gold);
+  color: var(--ap-blue);
+  font-weight: 700;
+  opacity: 1;
+}
+
+/* Sidebar oculto (móvil) */
+
+.sidebar-closed {
+  transform: translateX(-260px);
+}
+
+/* ========================================================
+   HEADER – Advance+ Premium
+   ======================================================== */
+
+.admin-header-bar {
+  height: 64px;
+  background: white;
+  border-bottom: 1px solid var(--ap-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  position: fixed;
+  top: 0;
+  left: 250px;
+  right: 0;
+  z-index: 20;
+  box-shadow: 0 1px 0 rgba(15, 30, 68, 0.05);
+  transition: left 0.3s ease;
+}
+
+.admin-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-burger-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--ap-blue);
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.admin-burger-btn:hover {
+  background: #eee;
+}
+
+.admin-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-user-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ap-blue);
+}
+
+.admin-logout-btn {
+  background: var(--ap-gold);
+  color: var(--ap-blue);
+  padding: 7px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--ap-transition);
+}
+
+.admin-logout-btn:hover {
+  background: #d8bb6a;
+}
+
+/* HEADER cuando el sidebar está cerrado */
+
+.header-shifted {
+  left: 0 !important;
+}
+
+/* ========================================================
+   LAYOUT PRINCIPAL
+   ======================================================== */
+
+.admin-main {
+  margin-left: 250px;
+}
+
+.admin-content {
+  padding: 88px 2.5rem 3rem; /* 64px header + margen */
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+/* Aviso acceso restringido */
+
+.access-warning {
+  border: 1px solid #FBBF24;
+  background: #FFFBEB;
+  color: #92400E;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  margin-bottom: 1.75rem;
+  font-size: 14px;
+}
+
+/* ========================================================
+   RESPONSIVE
+   ======================================================== */
+
+@media (max-width: 900px) {
+
+  .admin-sidebar {
+    transform: translateX(-260px);
+  }
+
+  .admin-header-bar {
+    left: 0;
+  }
+
+  .admin-main {
+    margin-left: 0;
+  }
+
+  .admin-content {
+    padding: 80px 1.5rem 2.5rem;
+  }
+}
+
+/* --------------------------
+   HEADER PRO
+--------------------------- */
+
+.admin-header-bar {
+  height: 64px;
+  background: white;
+  border-bottom: 1px solid var(--ap-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  position: fixed;
+  top: 0;
+  left: 250px;
+  right: 0;
+  z-index: 20;
+}
+
+/* Nombre + rol */
+.admin-user-info {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+  margin-right: 12px;
+}
+
+.admin-user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ap-blue);
+}
+
+.admin-user-role {
+  font-size: 12px;
+  opacity: 0.6;
+  margin-top: -2px;
+}
+
+/* Avatar */
+.admin-avatar-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+
+.admin-avatar {
+  width: 36px;
+  height: 36px;
+  background: var(--ap-blue);
+  color: white;
+  font-size: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  border: 2px solid var(--ap-gold);
+}
+
+/* Menu */
+.admin-menu {
+  position: absolute;
+  top: 46px;
+  right: 0;
+  background: white;
+  border: 1px solid var(--ap-border);
+  border-radius: 8px;
+  width: 160px;
+  padding: 6px 0;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.admin-menu a,
+.admin-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  text-align: left;
+  border: none;
+  background: none;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--ap-blue);
+}
+
+.admin-menu a:hover,
+.admin-menu button:hover {
+  background: rgba(0,0,0,0.06);
+}
+
+.hidden {
+  display: none !important;
+}

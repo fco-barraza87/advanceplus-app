@@ -1,0 +1,110 @@
+/* ========================================================
+   DASHBOARD METRICS — ADVANCE+
+   Estilos de tarjetas, grids, hero y métricas generales.
+   ======================================================== */
+
+/* --------------------------
+   HERO
+--------------------------- */
+
+.admin-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2.5rem;
+}
+
+.admin-hero-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ap-blue);
+}
+
+.admin-hero-subtitle {
+  font-size: 15px;
+  opacity: 0.8;
+  margin-top: 6px;
+}
+
+.admin-hero-updated {
+  background: white;
+  border: 1px solid var(--ap-border);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* --------------------------
+   MÉTRICAS
+--------------------------- */
+
+.metrics-section {
+  margin-bottom: 3rem;
+}
+
+.metrics-header {
+  margin-bottom: 1rem;
+}
+
+.metrics-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ap-blue);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.2rem;
+}
+
+.metrics-grid--wide {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* --------------------------
+   TARJETAS
+--------------------------- */
+
+.metric-card {
+  background: white;
+  border: 1px solid var(--ap-border);
+  border-radius: var(--ap-radius);
+  padding: 1.5rem;
+  box-shadow: var(--ap-shadow);
+  transition: var(--ap-transition);
+}
+
+.metric-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+}
+
+.metric-card--soft {
+  background: #f8f9fb;
+}
+
+.metric-label {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.6;
+  margin-bottom: 0.4rem;
+}
+
+.metric-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ap-blue);
+}
+
+.metric-caption {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.metric-caption--body {
+  margin-top: 10px;
+  line-height: 1.45;
+}

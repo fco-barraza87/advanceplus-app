@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Advance+ Admin — Usuario</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tipografías -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS base admin + módulo usuarios -->
+  <link rel="stylesheet" href="/admin/css/admin-base.css" />
+  <link rel="stylesheet" href="/admin/css/users.css" />
+</head>
+
+<body class="admin-body">
+
+  <!-- SIDEBAR FIJO -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <span class="sidebar-logo-icon">A+</span>
+      <span class="sidebar-logo-text">Advance+</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="/admin/index.html" class="sidebar-link">Dashboard</a>
+      <a href="/admin/users.html" class="sidebar-link active">Usuarios</a>
+      <a href="/admin/courses.html" class="sidebar-link">Cursos</a>
+      <a href="/admin/lessons.html" class="sidebar-link">Lecciones</a>
+      <a href="/admin/progress.html" class="sidebar-link">Progreso</a>
+      <a href="/admin/marketing.html" class="sidebar-link">Marketing</a>
+      <a href="/admin/settings.html" class="sidebar-link">Configuración</a>
+    </nav>
+  </aside>
+
+  <!-- ÁREA PRINCIPAL -->
+  <div class="admin-main">
+
+    <!-- HEADER SUPERIOR -->
+    <header class="admin-header-bar">
+      <div class="admin-header-left">
+        <button class="admin-burger-btn" id="sidebarToggle">☰</button>
+      </div>
+      <div class="admin-header-right">
+        <span id="adminUserLabel" class="admin-user-label">Cargando…</span>
+        <button id="adminLogoutBtn" class="admin-logout-btn">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <!-- CONTENIDO -->
+    <main class="admin-content user-details-content">
+
+      <!-- BARRA SUPERIOR / HERO -->
+      <section class="user-details-hero">
+        <div class="hero-left">
+          <button class="btn-ghost" onclick="window.location.href='/admin/users.html'">← Volver</button>
+          <div>
+            <h1 class="user-details-title" id="userNameTitle">Usuario</h1>
+            <p class="user-details-subtitle">
+              Edición completa del perfil, estadísticas y cursos.
+            </p>
+          </div>
+        </div>
+        <div class="hero-right">
+          <span id="userIdLabel" class="user-id-pill">ID: —</span>
+        </div>
+      </section>
+
+      <!-- ALERTA SI NO SE ENCUENTRA EL USUARIO -->
+      <section id="userNotFound" class="user-alert user-alert--error hidden">
+        No se encontró el usuario. Revisa el parámetro <code>?id=</code> en la URL.
+      </section>
+
+      <!-- GRID PRINCIPAL -->
+      <section class="user-details-grid">
+
+        <!-- COLUMNA IZQUIERDA: PERFIL EDITABLE -->
+        <div class="user-card">
+          <h2 class="user-card-title">Perfil</h2>
+
+          <div class="user-profile-header">
+            <img id="userAvatar" src="/images/default-avatar.png" alt="Avatar" class="user-avatar-lg">
+            <div>
+              <div class="user-name-line">
+                <input type="text" id="fullNameInput" class="input-main-name" placeholder="Nombre completo" />
+              </div>
+              <input type="email" id="emailInput" class="input-sub" placeholder="Email" />
+              <div class="user-role-row">
+                <label for="roleSelect">Rol</label>
+                <select id="roleSelect" class="input-select">
+                  <option value="user">User</option>
+                  <option value="coach">Coach</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="user-form-grid">
+
+            <div class="form-group">
+              <label for="countryInput">País</label>
+              <input type="text" id="countryInput" class="input-control" placeholder="País">
+            </div>
+
+            <div class="form-group">
+              <label for="languageInput">Idioma (app)</label>
+              <input type="text" id="languageInput" class="input-control" placeholder="es, en, de…">
+            </div>
+
+            <div class="form-group">
+              <label for="timezoneInput">Zona horaria</label>
+              <input type="text" id="timezoneInput" class="input-control" placeholder="Europe/Zurich">
+            </div>
+
+            <div class="form-group">
+              <label for="phoneInput">Teléfono</label>
+              <input type="text" id="phoneInput" class="input-control" placeholder="+41…">
+            </div>
+
+            <div class="form-group">
+              <label for="genderInput">Género</label>
+              <input type="text" id="genderInput" class="input-control" placeholder="">
+            </div>
+
+            <div class="form-group">
+              <label for="birthdateInput">Fecha de nacimiento</label>
+              <input type="date" id="birthdateInput" class="input-control">
+            </div>
+
+            <div class="form-group">
+              <label for="coachingStyleInput">Estilo de coaching</label>
+              <input type="text" id="coachingStyleInput" class="input-control" placeholder="motivador…">
+            </div>
+
+            <div class="form-group">
+              <label for="learningStyleInput">Estilo de aprendizaje</label>
+              <input type="text" id="learningStyleInput" class="input-control" placeholder="audio, visual…">
+            </div>
+
+            <div class="form-group">
+              <label for="themePreferenceInput">Tema (UI)</label>
+              <input type="text" id="themePreferenceInput" class="input-control" placeholder="auto, light, dark">
+            </div>
+
+            <div class="form-group">
+              <label for="bannerUrlInput">Banner URL</label>
+              <input type="text" id="bannerUrlInput" class="input-control" placeholder="https://…">
+            </div>
+
+          </div>
+
+          <div class="user-flags-row">
+            <label class="toggle-inline">
+              <input type="checkbox" id="onboardingCheckbox">
+              <span>Onboarding completado</span>
+            </label>
+          </div>
+
+          <div class="user-card-footer">
+            <button id="saveProfileBtn" class="btn-primary">Guardar cambios</button>
+          </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: GAMIFICACIÓN + ACCIONES -->
+        <div class="user-side-column">
+
+          <!-- CARD: GAMIFICACIÓN -->
+          <div class="user-card">
+            <h2 class="user-card-title">Gamificación</h2>
+
+            <div class="stats-grid">
+              <div class="stat-block">
+                <span class="stat-label">XP total</span>
+                <span id="statXpTotal" class="stat-value">0</span>
+              </div>
+              <div class="stat-block">
+                <span class="stat-label">Nivel</span>
+                <span id="statLevel" class="stat-value">1</span>
+              </div>
+              <div class="stat-block">
+                <span class="stat-label">Racha actual</span>
+                <span id="statStreakCurrent" class="stat-value">0</span>
+              </div>
+              <div class="stat-block">
+                <span class="stat-label">Mejor racha</span>
+                <span id="statStreakBest" class="stat-value">0</span>
+              </div>
+            </div>
+
+            <div class="user-card-footer">
+              <button id="resetXpBtn" class="btn-secondary">Resetear XP y rachas</button>
+            </div>
+          </div>
+
+          <!-- CARD: ACCIONES ADMIN -->
+          <div class="user-card">
+            <h2 class="user-card-title">Acciones admin</h2>
+
+            <div class="actions-list">
+              <button id="resetOnboardingBtn" class="btn-outline">
+                Resetear onboarding
+              </button>
+
+              <button id="resetProgressBtn" class="btn-outline btn-danger">
+                Resetear progreso completo
+              </button>
+            </div>
+
+            <p class="actions-note">
+              ⚠ Estas acciones son irreversibles. Úsalas solo cuando sea estrictamente necesario.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- CURSOS DEL USUARIO -->
+      <section class="user-courses-section">
+        <div class="section-header">
+          <h2>Cursos del usuario</h2>
+        </div>
+
+        <div id="userCoursesEmpty" class="user-alert hidden">
+          Este usuario aún no tiene cursos asignados.
+        </div>
+
+        <div id="userCoursesList" class="user-courses-grid">
+          <!-- Se llena por JS -->
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- JS -->
+  <script type="module" src="/js/supabase.js"></script>
+  <script type="module" src="/admin/js/admin-auth.js"></script>
+  <script type="module" src="/admin/js/admin-user-details.js"></script>
+
+</body>
+</html>

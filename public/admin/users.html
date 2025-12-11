@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Advance+ Admin – Usuarios</title>
+
+  <link rel="stylesheet" href="/admin/css/admin-base.css" />
+  <link rel="stylesheet" href="/admin/css/dashboard.css" />
+  <link rel="stylesheet" href="/admin/css/users.css" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body class="admin-body">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <span class="sidebar-logo-icon">A+</span>
+      <span class="sidebar-logo-text">Advance+</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="/admin/index.html" class="sidebar-link">Dashboard</a>
+      <a href="/admin/users.html" class="sidebar-link active">Usuarios</a>
+      <a href="/admin/courses.html" class="sidebar-link">Cursos</a>
+      <a href="/admin/lessons.html" class="sidebar-link">Lecciones</a>
+      <a href="/admin/progress.html" class="sidebar-link">Progreso</a>
+      <a href="/admin/marketing.html" class="sidebar-link">Marketing</a>
+      <a href="/admin/settings.html" class="sidebar-link">Configuración</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="admin-main">
+
+
+
+    <main class="admin-content">
+
+      <h1 class="page-title">Usuarios</h1>
+      <p class="page-subtitle">Administra perfiles, roles, onboarding y actividad general.</p>
+
+      <!-- FILTROS -->
+      <section class="users-filters">
+        <input id="searchInput" class="input-text" placeholder="Buscar por nombre o email...">
+
+        <select id="roleFilter" class="input-select">
+          <option value="">Todos los roles</option>
+          <option value="admin">Admins</option>
+          <option value="coach">Coaches</option>
+          <option value="user">Usuarios</option>
+        </select>
+
+        <select id="onboardingFilter" class="input-select">
+          <option value="">Onboarding: Todos</option>
+          <option value="1">Completado</option>
+          <option value="0">Pendiente</option>
+        </select>
+
+        <select id="activityFilter" class="input-select">
+          <option value="">Orden</option>
+          <option value="xp">Más XP</option>
+          <option value="streak">Mejor racha</option>
+          <option value="recent">Más recientes</option>
+        </select>
+      </section>
+
+      <!-- TABLA -->
+      <section class="users-table-wrapper">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Rol</th>
+              <th>XP / Racha</th>
+              <th>Onboarding</th>
+              <th>Fecha creación</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <!-- Render dinámico -->
+          </tbody>
+        </table>
+      </section>
+
+    </main>
+  </div>
+
+  <script type="module" src="/admin/js/admin-users.js"></script>
+</body>
+</html>
