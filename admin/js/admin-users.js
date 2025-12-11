@@ -11,9 +11,9 @@ let allUsers = [];
 async function loadUsers() {
   await requireAdmin();
 
-const { data, error } = await supabase
-  .from("profiles")
-  .select(`
+  const { data, error } = await supabase
+    .from("profiles")
+    .select(`
       id,
       full_name,
       email,
@@ -27,9 +27,46 @@ const { data, error } = await supabase
         level,
         streak_best
       )
-  `)
-.order("created_at", { ascending: false });
+    `)
+    .order("created_at", { ascending: false });
 
+  if (error) {
+    console.error("Error cargando usuarios:", error);
+    return;
+  }
+
+  allUsers = data;
+  renderUsers(allUsers);
+}
+
+
+// ================================
+// Render tabla
+// ================================
+// ================================
+// Cargar usuarios
+// ================================
+async function loadUsers() {
+  await requireAdmin();
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select(`
+      id,
+      full_name,
+      email,
+      avatar_url,
+      role,
+      onboarding_completed,
+      created_at,
+      user_stats:user_stats (
+        xp_total,
+        streak_current,
+        level,
+        streak_best
+      )
+    `)
+    .order("created_at", { ascending: false });
 
   if (error) {
     console.error("Error cargando usuarios:", error);
@@ -47,6 +84,8 @@ function renderUsers(list) {
   tbody.innerHTML = "";
 
   list.forEach(u => {
+    const stats = u.user_stats ?? {}; // seguridad
+
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
@@ -64,17 +103,14 @@ function renderUsers(list) {
         <span class="role-chip role-${u.role}">${u.role}</span>
       </td>
 
-      <td>${u.user_stats?.xp_total ?? 0} XP
-      <br>
-        <span style="opacity:0.7">
-          ${u.user_stats?.streak_current ?? 0} días
-        </span>
+      <td>
+        ${stats.xp_total ?? 0} XP<br>
+        <span style="opacity:0.7">${stats.streak_current ?? 0} días</span>
       </td>
-
 
       <td>${u.onboarding_completed ? "✔" : "❌"}</td>
 
-      <td>${u.created_at?.split("T")[0]}</td>
+      <td>${u.created_at?.split("T")[0] ?? ""}</td>
 
       <td>
         <button class="btn-small" onclick="viewUser('${u.id}')">Ver</button>
@@ -84,6 +120,7 @@ function renderUsers(list) {
     tbody.appendChild(tr);
   });
 }
+
 
 // ================================
 // Navegar al detalle
