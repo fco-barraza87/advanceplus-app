@@ -11,20 +11,25 @@ let allUsers = [];
 async function loadUsers() {
   await requireAdmin();
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select(`
+const { data, error } = await supabase
+  .from("profiles")
+  .select(`
       id,
       full_name,
       email,
       avatar_url,
       role,
       onboarding_completed,
-      xp_total,
-      streak_current,
-      created_at
-    `)
-    .order("created_at", { ascending: false });
+      created_at,
+      user_stats:user_stats (
+        xp_total,
+        streak_current,
+        level,
+        streak_best
+      )
+  `)
+.order("created_at", { ascending: false });
+
 
   if (error) {
     console.error("Error cargando usuarios:", error);
@@ -59,7 +64,13 @@ function renderUsers(list) {
         <span class="role-chip role-${u.role}">${u.role}</span>
       </td>
 
-      <td>${u.xp_total} XP<br><span style="opacity:0.7">${u.streak_current} días</span></td>
+      <td>${u.user_stats?.xp_total ?? 0} XP
+      <br>
+        <span style="opacity:0.7">
+          ${u.user_stats?.streak_current ?? 0} días
+        </span>
+      </td>
+
 
       <td>${u.onboarding_completed ? "✔" : "❌"}</td>
 
@@ -108,7 +119,7 @@ function applyFilters() {
   if (onboarding === "1") filtered = filtered.filter(u => u.onboarding_completed);
   if (onboarding === "0") filtered = filtered.filter(u => !u.onboarding_completed);
 
-  if (activity === "xp") filtered.sort((a, b) => b.xp_total - a.xp_total);
+  if (activity === "xp") filtered.sort((a, b) => (b.user_stats?.xp_total ?? 0) - (a.user_stats?.xp_total ?? 0));
   if (activity === "streak") filtered.sort((a, b) => b.streak_current - a.streak_current);
   if (activity === "recent") filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
