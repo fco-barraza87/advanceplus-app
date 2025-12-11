@@ -162,3 +162,16 @@
     margin-left: 0 !important;
   }
 }
+
+:root {
+  --ap-blue: #0F1E44;
+  --ap-gold: #C0A450;
+  --ap-border: #E5E7EB;
+  --ap-radius: 12px;
+  --ap-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --ap-transition: 0.25s ease;
+
+  --ap-bg-light: #F7F9FC;
+  --ap-text-light: rgba(255,255,255,0.9);
+  --ap-text-dark: #1F2937;
+}
