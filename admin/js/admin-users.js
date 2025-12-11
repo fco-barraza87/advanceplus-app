@@ -39,44 +39,6 @@ async function loadUsers() {
   renderUsers(allUsers);
 }
 
-
-// ================================
-// Render tabla
-// ================================
-// ================================
-// Cargar usuarios
-// ================================
-async function loadUsers() {
-  await requireAdmin();
-
-  const { data, error } = await supabase
-    .from("profiles")
-    .select(`
-      id,
-      full_name,
-      email,
-      avatar_url,
-      role,
-      onboarding_completed,
-      created_at,
-      user_stats:user_stats (
-        xp_total,
-        streak_current,
-        level,
-        streak_best
-      )
-    `)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Error cargando usuarios:", error);
-    return;
-  }
-
-  allUsers = data;
-  renderUsers(allUsers);
-}
-
 // ================================
 // Render tabla
 // ================================
@@ -84,7 +46,7 @@ function renderUsers(list) {
   tbody.innerHTML = "";
 
   list.forEach(u => {
-    const stats = u.user_stats ?? {}; // seguridad
+    const stats = u.user_stats ?? {};
 
     const tr = document.createElement("tr");
 
@@ -121,7 +83,6 @@ function renderUsers(list) {
   });
 }
 
-
 // ================================
 // Navegar al detalle
 // ================================
@@ -156,12 +117,21 @@ function applyFilters() {
   if (onboarding === "1") filtered = filtered.filter(u => u.onboarding_completed);
   if (onboarding === "0") filtered = filtered.filter(u => !u.onboarding_completed);
 
-  if (activity === "xp") filtered.sort((a, b) => (b.user_stats?.xp_total ?? 0) - (a.user_stats?.xp_total ?? 0));
-  if (activity === "streak") filtered.sort((a, b) => b.streak_current - a.streak_current);
-  if (activity === "recent") filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  if (activity === "xp")
+    filtered.sort((a, b) => (b.user_stats?.xp_total ?? 0) - (a.user_stats?.xp_total ?? 0));
+
+  if (activity === "streak")
+    filtered.sort((a, b) => 
+      (b.user_stats?.streak_current ?? 0) - (a.user_stats?.streak_current ?? 0)
+    );
+
+  if (activity === "recent")
+    filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
   renderUsers(filtered);
 }
 
-// INICIO
+// ================================
+// Inicio
+// ================================
 loadUsers();
