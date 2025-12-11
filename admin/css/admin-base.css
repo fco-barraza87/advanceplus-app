@@ -1,4 +1,42 @@
 /* ========================================================
+   TOKENS VISUALES ADMIN
+   ======================================================== */
+
+:root {
+  --ap-blue: #0F1E44;
+  --ap-gold: #C0A450;
+  --ap-border: #E5E7EB;
+  --ap-radius: 12px;
+  --ap-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --ap-transition: 0.25s ease;
+
+  --ap-bg-light: #F7F9FC;
+  --ap-text-light: rgba(255, 255, 255, 0.9);
+  --ap-text-dark: #1F2937;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body.admin-body {
+  margin: 0;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--ap-bg-light);
+  color: var(--ap-text-dark);
+}
+
+a {
+  color: inherit;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ========================================================
    SIDEBAR – Advance+ Premium
    ======================================================== */
 
@@ -65,7 +103,7 @@
 }
 
 .sidebar-link:hover {
-  background: rgba(255,255,255,0.12);
+  background: rgba(255, 255, 255, 0.12);
   opacity: 1;
 }
 
@@ -76,7 +114,8 @@
   opacity: 1;
 }
 
-/* Sidebar oculto (versión móvil) */
+/* Sidebar oculto (móvil) */
+
 .sidebar-closed {
   transform: translateX(-260px);
 }
@@ -98,7 +137,14 @@
   left: 250px;
   right: 0;
   z-index: 20;
+  box-shadow: 0 1px 0 rgba(15, 30, 68, 0.05);
   transition: left 0.3s ease;
+}
+
+.admin-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .admin-burger-btn {
@@ -115,9 +161,14 @@
   background: #eee;
 }
 
+.admin-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .admin-user-label {
   font-size: 14px;
-  margin-right: 1rem;
   font-weight: 500;
   color: var(--ap-blue);
 }
@@ -138,10 +189,36 @@
   background: #d8bb6a;
 }
 
-/* HEADER ajustado cuando sidebar se cierra */
+/* HEADER cuando el sidebar está cerrado */
 
 .header-shifted {
   left: 0 !important;
+}
+
+/* ========================================================
+   LAYOUT PRINCIPAL
+   ======================================================== */
+
+.admin-main {
+  margin-left: 250px;
+}
+
+.admin-content {
+  padding: 88px 2.5rem 3rem; /* 64px header + margen */
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+/* Aviso acceso restringido */
+
+.access-warning {
+  border: 1px solid #FBBF24;
+  background: #FFFBEB;
+  color: #92400E;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  margin-bottom: 1.75rem;
+  font-size: 14px;
 }
 
 /* ========================================================
@@ -159,19 +236,10 @@
   }
 
   .admin-main {
-    margin-left: 0 !important;
+    margin-left: 0;
   }
-}
 
-:root {
-  --ap-blue: #0F1E44;
-  --ap-gold: #C0A450;
-  --ap-border: #E5E7EB;
-  --ap-radius: 12px;
-  --ap-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --ap-transition: 0.25s ease;
-
-  --ap-bg-light: #F7F9FC;
-  --ap-text-light: rgba(255,255,255,0.9);
-  --ap-text-dark: #1F2937;
+  .admin-content {
+    padding: 80px 1.5rem 2.5rem;
+  }
 }
