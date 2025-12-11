@@ -1,3 +1,5 @@
+import { supabase } from "/js/supabase.js";
+
 import { requireAdmin } from "./admin-auth.js";
 
 async function loadComponent(id, url) {
