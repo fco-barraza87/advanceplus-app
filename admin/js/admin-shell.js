@@ -27,17 +27,18 @@ function setActiveSidebarLink() {
 async function initAdminShell() {
   await requireAdmin();
 
-  // Carga componentes dinámicos
+  // 1. Cargar sidebar
   await loadComponent("adminSidebar", "/admin/components/admin-sidebar.html");
+
+  // 2. Cargar header
   await loadComponent("adminHeader", "/admin/components/admin-header.html");
 
-  // 🔥 AHORA QUE EL SIDEBAR EXISTE, ACTIVAMOS LA RUTA
-  setActiveSidebarLink();
-
   console.log("[admin] Shell loaded.");
+
+  // 3. IMPORTANTE → Ahora que el header EXISTE, actualizamos el nombre
+  await loadAdminHeaderName();
 }
 
-initAdminShell();
 
 /* ---------------------------------------------
    TOGGLE SIDEBAR
@@ -59,7 +60,10 @@ document.addEventListener("click", (e) => {
 
 async function loadAdminHeaderName() {
   const label = document.getElementById("adminUserLabel");
-  if (!label) return;
+  if (!label) {
+    console.warn("[admin] Header not yet loaded.");
+    return;
+  }
 
   const { data: auth } = await supabase.auth.getUser();
   if (!auth?.user) {
@@ -69,7 +73,7 @@ async function loadAdminHeaderName() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, email")
+    .select("full_name, email, role")
     .eq("id", auth.user.id)
     .single();
 
@@ -79,5 +83,3 @@ async function loadAdminHeaderName() {
     label.textContent = auth.user.email ?? "Admin";
   }
 }
-
-loadAdminHeaderName();
