@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8" />
-  <title>Advance+ Admin – Usuarios</title>
+  <title>Advance+ Admin · Usuarios</title>
 
   <link rel="stylesheet" href="/admin/css/admin-base.css" />
   <link rel="stylesheet" href="/admin/css/dashboard.css" />
   <link rel="stylesheet" href="/admin/css/users.css" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
 
 <body class="admin-body">
@@ -35,22 +34,47 @@
   <!-- MAIN -->
   <div class="admin-main">
 
-    <!-- HEADER -->
-    <div id="adminHeaderContainer"></div>
+    <!-- ============================================================
+         HEADER FIJO (también integrado aquí)
+    ============================================================ -->
+    <header class="admin-header-bar">
+      <div class="admin-header-left">
+        <button id="sidebarToggle" class="admin-burger-btn">☰</button>
+      </div>
 
-    <script type="module">
-      import { loadAdminHeader } from "/admin/js/admin-header-pro.js";
-      loadAdminHeader();
-    </script>
+      <div class="admin-header-right">
+        
+        <!-- Nombre + rol -->
+        <div class="admin-user-info">
+          <span id="adminUserName" class="admin-user-name">Cargando...</span>
+          <span id="adminUserRole" class="admin-user-role">—</span>
+        </div>
 
+        <!-- Avatar -->
+        <div class="admin-avatar-wrapper">
+          <div id="adminAvatar" class="admin-avatar">A</div>
+
+          <!-- Menú -->
+          <div id="adminMenu" class="admin-menu hidden">
+            <a href="/dashboard/index.html">Modo usuario</a>
+            <a href="/admin/settings.html">Configuración</a>
+            <button id="adminLogoutBtnMenu">Cerrar sesión</button>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    
+    <!-- CONTENIDO -->
     <main class="admin-content">
 
       <h1 class="page-title">Usuarios</h1>
-      <p class="page-subtitle">Administra perfiles, roles, onboarding y actividad general.</p>
+      <p class="page-subtitle">Administración de roles, actividad y estado de cada usuario.</p>
 
       <!-- FILTROS -->
       <section class="users-filters">
-        <input id="searchInput" class="input-text" placeholder="Buscar por nombre o email...">
+        <input id="searchInput" class="input-text" placeholder="Buscar por nombre o email..." />
 
         <select id="roleFilter" class="input-select">
           <option value="">Todos los roles</option>
@@ -59,17 +83,10 @@
           <option value="user">Usuarios</option>
         </select>
 
-        <select id="onboardingFilter" class="input-select">
-          <option value="">Onboarding: Todos</option>
-          <option value="1">Completado</option>
-          <option value="0">Pendiente</option>
-        </select>
-
-        <select id="activityFilter" class="input-select">
-          <option value="">Orden</option>
-          <option value="xp">Más XP</option>
-          <option value="streak">Mejor racha</option>
-          <option value="recent">Más recientes</option>
+        <select id="statusFilter" class="input-select">
+          <option value="">Todos los estados</option>
+          <option value="completed">Onboarding completado</option>
+          <option value="pending">Onboarding pendiente</option>
         </select>
       </section>
 
@@ -78,14 +95,15 @@
         <table class="users-table">
           <thead>
             <tr>
-              <th>Usuario</th>
+              <th>Nombre</th>
+              <th>Email</th>
               <th>Rol</th>
-              <th>XP / Racha</th>
               <th>Onboarding</th>
-              <th>Fecha creación</th>
-              <th>Acciones</th>
+              <th>Creado</th>
+              <th></th>
             </tr>
           </thead>
+
           <tbody id="usersTableBody">
             <!-- Render dinámico -->
           </tbody>
@@ -96,5 +114,6 @@
   </div>
 
   <script type="module" src="/admin/js/admin-users.js"></script>
+
 </body>
 </html>
