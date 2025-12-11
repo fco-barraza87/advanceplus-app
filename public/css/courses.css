@@ -1,0 +1,746 @@
+/* ============================================================
+   Advance+ · Cursos y Retos (Diseño premium optimizado)
+============================================================ */
+
+/* ============================================================
+   TARJETA PRINCIPAL DE RETO / CURSO
+============================================================ */
+
+.course-card {
+  background: var(--color-primary-dark);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  transition: var(--transition-normal);
+}
+
+.course-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* ------------------------------------------------------------
+   PORTADA DEL CURSO (si existe)
+------------------------------------------------------------ */
+
+.course-cover {
+  width: 100%;
+  height: 160px;
+  border-radius: var(--radius-md);
+  background-size: cover;
+  background-position: center;
+  margin-bottom: var(--space-sm);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ------------------------------------------------------------
+   TEXTO Y TITULOS
+------------------------------------------------------------ */
+
+.course-title {
+  color: var(--color-white);
+  font-size: var(--text-md);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.course-desc {
+  color: var(--color-gray-1);
+  font-size: var(--text-sm);
+  line-height: var(--line-normal);
+  margin-top: -2px;
+}
+
+/* ------------------------------------------------------------
+   PILLS (categoría, duración, dificultad)
+------------------------------------------------------------ */
+
+.course-meta-row {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-top: var(--space-xs);
+}
+
+.course-pill {
+  padding: var(--space-xs) var(--space-sm);
+  background: rgba(255,255,255,0.10);
+  border-radius: var(--radius-round);
+  font-size: var(--text-xs);
+  color: var(--color-white-muted);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  border: 1px solid rgba(255,255,255,0.12);
+  user-select: none;
+}
+
+/* ------------------------------------------------------------
+   BOTÓN PRINCIPAL DE ACCESO / CONTINUAR
+------------------------------------------------------------ */
+
+.course-btn {
+  align-self: flex-start;
+  margin-top: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  background: var(--gradient-cyan);
+  color: var(--color-primary-dark);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.course-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* ============================================================
+   GRID — EXPLORAR RETOS
+============================================================ */
+
+.courses-grid {
+  display: grid;
+  gap: var(--space-lg);
+  margin-top: var(--space-md);
+}
+
+@media (min-width: 600px) {
+  .courses-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 960px) {
+  .courses-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ============================================================
+   CARRUSEL — RETOS ACTIVOS
+============================================================ */
+
+.courses-carousel {
+  display: flex;
+  gap: var(--space-md);
+  overflow-x: auto;
+  padding-bottom: var(--space-sm);
+  padding-right: var(--space-xs);
+  scroll-snap-type: x mandatory;
+}
+
+.course-card {
+  scroll-snap-align: start;
+}
+
+.courses-carousel::-webkit-scrollbar {
+  height: 6px;
+}
+
+.courses-carousel::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: var(--radius-round);
+}
+
+/* ============================================================
+   ESTADOS VACÍOS
+============================================================ */
+
+.course-card.placeholder {
+  text-align: center;
+  border: 1px dashed rgba(255,255,255,0.25);
+  padding: var(--space-lg);
+}
+
+.course-card.placeholder h3 {
+  color: var(--color-white);
+  font-size: var(--text-md);
+}
+
+.course-card.placeholder p {
+  color: var(--color-gray-2);
+  font-size: var(--text-sm);
+}
+
+/* ============================================================
+   LAYOUT PÁGINA DE CURSOS
+============================================================ */
+
+.courses-page .dash-section + .dash-section {
+  margin-top: var(--space-lg);
+}
+
+.course-price {
+  margin-top: var(--space-sm);
+  font-size: var(--text-sm);
+  color: var(--color-accent-gold);
+}
+
+.course-price del {
+  color: var(--color-gray-2);
+  margin-right: 0.35rem;
+  font-size: var(--text-xs);
+}
+
+/* Progreso dentro de la card (retos activos) */
+.course-progress-row {
+  margin-top: var(--space-sm);
+}
+
+.course-progress-label {
+  font-size: var(--text-xs);
+  color: var(--color-gray-2);
+  margin-bottom: 0.25rem;
+}
+
+.course-progress-bar {
+  width: 100%;
+  height: 8px;
+  border-radius: var(--radius-round);
+  background: rgba(255,255,255,0.12);
+  overflow: hidden;
+}
+
+.course-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-round);
+  background: var(--gradient-cyan);
+  width: 0%;
+}
+
+
+/* ========= Curso hero ========= */
+.course-category-label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-gray-2);
+  margin-bottom: var(--space-xs);
+}
+
+.course-main-title {
+  font-size: var(--text-xl);
+  color: var(--color-white);
+  margin-bottom: var(--space-xs);
+}
+
+.course-subtitle-hero {
+  font-size: var(--text-sm);
+  color: var(--color-gray-1);
+  margin-bottom: var(--space-md);
+}
+
+.course-hero-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+@media (min-width: 860px) {
+  .course-hero-grid {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+.course-hero-left {
+  flex: 1.1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.course-hero-right {
+  flex: 1;
+}
+
+.course-hero-image {
+  width: 100%;
+  height: 220px;
+  border-radius: var(--radius-lg);
+  background-size: cover;
+  background-position: center;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.course-short-promise {
+  font-size: var(--text-sm);
+  color: var(--color-gray-1);
+}
+
+.course-meta-hero {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+/* progreso curso */
+.course-progress-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.course-progress-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-xs);
+  color: var(--color-gray-2);
+}
+
+.course-progress-bar {
+  width: 100%;
+  height: 10px;
+  background: rgba(255,255,255,0.12);
+  border-radius: var(--radius-round);
+  overflow: hidden;
+}
+
+.course-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--gradient-cyan);
+  border-radius: var(--radius-round);
+  transition: width 0.4s ease-out;
+}
+
+.course-cta-btn {
+  margin-top: var(--space-sm);
+}
+
+.course-cta-note {
+  font-size: var(--text-xs);
+  color: var(--color-gray-2);
+}
+
+/* ========= Lista de lecciones ========= */
+.lessons-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.lesson-item-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-dark);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.lesson-item-card.clickable {
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.lesson-item-card.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.lesson-item-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.lesson-day-pill {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-gray-2);
+}
+
+.lesson-title-main {
+  font-size: var(--text-md);
+  color: var(--color-white);
+}
+
+.lesson-sub-meta {
+  font-size: var(--text-xs);
+  color: var(--color-gray-2);
+}
+
+.lesson-item-right {
+  font-size: 1.4rem;
+}
+
+.lesson-status.done {
+  color: var(--color-accent-cyan);
+}
+
+.lesson-status.locked {
+  color: var(--color-gray-3);
+}
+
+.lesson-status.go {
+  color: var(--color-accent-gold);
+}
+
+.lesson-locked {
+  opacity: 0.6;
+}
+
+/* ========= Lección view ========= */
+.lesson-header-section .lesson-back-btn {
+  margin-bottom: var(--space-md);
+}
+
+.lesson-course-label {
+  font-size: var(--text-xs);
+  color: var(--color-gray-2);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.lesson-title {
+  font-size: var(--text-xl);
+  color: var(--color-white);
+  margin-top: var(--space-xs);
+  margin-bottom: var(--space-xs);
+}
+
+.lesson-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-gray-1);
+  margin-bottom: var(--space-sm);
+}
+
+.lesson-meta {
+  font-size: var(--text-xs);
+  color: var(--color-gray-2);
+}
+
+/* contenido */
+.lesson-content {
+  font-size: var(--text-sm);
+  color: var(--color-white);
+  line-height: var(--line-normal);
+}
+
+.lesson-content p + p {
+  margin-top: var(--space-sm);
+}
+
+.lesson-media {
+  margin-top: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.lesson-audio-player,
+.lesson-video-player {
+  width: 100%;
+}
+
+.lesson-image {
+  width: 100%;
+  border-radius: var(--radius-md);
+}
+
+/* ejercicio */
+.lesson-exercise-text {
+  font-size: var(--text-sm);
+  color: var(--color-gray-1);
+  margin-bottom: var(--space-sm);
+}
+
+.lesson-reflection-input {
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.04);
+  padding: var(--space-sm) var(--space-md);
+  color: var(--color-white);
+  font-size: var(--text-sm);
+  resize: vertical;
+}
+
+.lesson-save-note {
+  font-size: var(--text-xs);
+  color: var(--color-gray-2);
+  margin-top: var(--space-xs);
+}
+
+/* ========= Modal feedback ========= */
+.lesson-feedback-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.lesson-feedback-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--color-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.lesson-feedback-card h2 {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-xs);
+}
+
+.lesson-feedback-card p {
+  font-size: var(--text-sm);
+  color: var(--color-gray-2);
+  margin-bottom: var(--space-md);
+}
+
+.feedback-stars {
+  display: flex;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
+}
+
+.feedback-star {
+  background: transparent;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: var(--color-gray-3);
+  transition: transform 0.15s, color 0.15s;
+}
+
+.feedback-star.selected {
+  color: var(--color-accent-gold);
+  transform: scale(1.1);
+}
+
+.feedback-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+/* -------- NAV GRID -------- */
+.lesson-nav-grid {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 20px;
+}
+
+/* -------- NAV BUTTONS -------- */
+.nav-btn {
+  flex: 1;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 15px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  cursor: pointer;
+  transition: 0.2s ease;
+  text-align: center;
+}
+
+.nav-btn:hover {
+  background: rgba(255,255,255,0.14);
+}
+
+/* Cuando está deshabilitado */
+.nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* -------- COMPLETE BADGE -------- */
+.completed-badge {
+  background: #1dbf73 !important;
+  color: #fff !important;
+  padding: 14px 20px;
+  border-radius: 14px;
+  font-size: 16px;
+  width: 100%;
+  text-align: center;
+  border: none;
+  cursor: default;
+  box-shadow: 0 4px 12px rgba(29,191,115,0.3);
+}
+
+
+/* CONFETTI */
+.confetti-piece {
+  position: fixed;
+  width: 8px;
+  height: 14px;
+  background-color: var(--ap-gold, #C9A86A);
+  opacity: 0.9;
+  top: -20px;
+  left: 50%;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 9999;
+  animation: confetti-fall 2.4s ease-out forwards;
+}
+
+/* Animación caída */
+@keyframes confetti-fall {
+  0% { transform: translateX(0) rotate(0); }
+  100% {
+    transform: translateX(var(--x-move)) translateY(120vh) rotate(340deg);
+    opacity: 0.2;
+  }
+}
+
+/* Fade-in del botón completado */
+.completed-badge {
+  animation: completedFade 0.9s ease-out forwards;
+}
+
+@keyframes completedFade {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Glow sutil al completar */
+.lesson-content,
+.lesson-header-section {
+  transition: box-shadow 0.4s ease;
+}
+
+.lesson-glow {
+  box-shadow: 0 0 20px rgba(201, 168, 106, 0.45);
+}
+
+
+/* ===== MODAL MINDSET A+ ===== */
+
+.mindset-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 8, 20, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.mindset-modal.hidden {
+  display: none;
+}
+
+.mindset-card {
+  background: #0f1e44;
+  border-radius: 18px;
+  padding: 20px 18px 18px;
+  max-width: 480px;
+  width: 92%;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+  color: #f7f7fb;
+  position: relative;
+}
+
+.mindset-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: #f7f7fb;
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.mindset-step.hidden {
+  display: none;
+}
+
+.mindset-card h2 {
+  font-size: 1.3rem;
+  margin-bottom: 6px;
+}
+
+.mindset-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 14px;
+}
+
+.mindset-label {
+  font-size: 0.85rem;
+  margin: 12px 0 4px;
+  opacity: 0.9;
+}
+
+.mindset-mood-block {
+  margin-bottom: 14px;
+}
+
+.mindset-mood-row {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.mood-btn {
+  flex: 1;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(11, 24, 60, 0.9);
+  color: #fff;
+  padding: 6px 0;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.mood-btn.active,
+.mood-btn:hover {
+  border-color: #c9a86a;
+  background: rgba(201, 168, 106, 0.15);
+}
+
+.mindset-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.mindset-slider-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  margin-bottom: 2px;
+}
+
+.mindset-slider input[type="range"] {
+  width: 100%;
+}
+
+.mindset-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.mindset-actions .btn-outline,
+.mindset-actions .btn {
+  font-size: 0.85rem;
+}
+
+/* Reusar estilo de .lesson-reflection-input aquí funciona perfecto */

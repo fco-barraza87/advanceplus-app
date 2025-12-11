@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lección · Advance+</title>
+
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/courses.css">
+</head>
+
+<body class="app-bg dashboard-page">
+
+  <!-- HEADER GLOBAL -->
+  <div id="appHeader"></div>
+
+<main class="dashboard-main">
+  <div class="dashboard-wrapper">
+
+    <!-- ENCABEZADO LECCIÓN -->
+    <section class="dash-section lesson-header-section">
+      <button class="btn-outline lesson-back-btn" id="lessonBackBtn">
+        ← Volver al curso
+      </button>
+
+      <p class="lesson-course-label" id="lessonCourseLabel"></p>
+      <h1 class="lesson-title" id="lessonTitle">Cargando lección...</h1>
+      <p class="lesson-subtitle" id="lessonSubtitle"></p>
+
+      <p class="lesson-meta" id="lessonMeta"></p>
+    </section>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <section class="dash-section lesson-content-section">
+      <div id="lessonContent" class="lesson-content"></div>
+
+      <div id="lessonMedia" class="lesson-media"></div>
+    </section>
+
+    <!-- EJERCICIO / REFLEXIÓN -->
+    <section class="dash-section lesson-exercise-section">
+      <h2 class="section-title">Ejercicio del día</h2>
+      <p id="lessonExerciseText" class="lesson-exercise-text">
+        Escribe aquí tu reflexión o lo que vas a aplicar hoy.
+      </p>
+
+      <textarea id="lessonReflectionInput" class="lesson-reflection-input" rows="6"
+        placeholder="Escribe tus ideas, compromisos o aprendizajes clave..."></textarea>
+
+      <p class="lesson-save-note" id="lessonSaveNote">Se guarda automáticamente.</p>
+    </section>
+
+    <!-- FEEDBACK EN LA PÁGINA -->
+    <section class="dash-section lesson-feedback-section" id="feedbackSection">
+      <h2 class="section-title">Tu feedback</h2>
+      <p class="lesson-feedback-sub">
+        ¿Cómo te sentiste con esta lección? Nos ayuda a mejorar tu experiencia.
+      </p>
+
+      <div class="feedback-stars" id="feedbackStars">
+        <!-- estrellas por JS -->
+      </div>
+
+      <textarea id="feedbackComment" class="lesson-reflection-input" rows="4"
+        placeholder="Escribe aquí lo que más te ayudó o qué mejorarías... (opcional)"></textarea>
+
+
+
+      <p id="feedbackSavedMsg" class="feedback-saved-msg" style="display:none;">
+        ✔ Feedback guardado
+      </p>
+    </section>
+
+
+    <!-- NAVEGACIÓN ENTRE LECCIONES (NUEVO) -->
+    <section class="dash-section lesson-navigation-section">
+    <div class="lesson-nav-grid">
+        <button class="nav-btn prev" id="prevLessonBtn">
+        ← Lección anterior
+        </button>
+
+        <button class="nav-btn next" id="nextLessonBtn">
+        Siguiente lección →
+        </button>
+    </div>
+</section>
+
+
+    <!-- CTA COMPLETAR -->
+    <section class="dash-section lesson-complete-section">
+    <button class="btn btn-primary complete-btn" id="completeLessonBtn">
+        Marcar lección como completada
+    </button>
+    </section>
+
+
+  </div>
+</main>
+
+
+    <!-- MODAL MINDSET (2 PASOS) -->
+  <div class="mindset-modal hidden" id="mindsetModal">
+    <div class="mindset-card">
+      <button class="mindset-close" id="mindsetCloseX">×</button>
+
+      <!-- PASO 1: MOOD + SLIDERS -->
+      <div class="mindset-step" id="mindsetStep1">
+        <h2>Registro de mindset de hoy</h2>
+        <p class="mindset-subtitle">
+          ¿Cómo terminas este bloque de enfoque?
+        </p>
+
+        <!-- Mood rápido -->
+        <div class="mindset-mood-block">
+          <p class="mindset-label">¿Cómo te sientes ahora mismo?</p>
+          <div class="mindset-mood-row" id="mindsetMoodRow">
+            <button type="button" class="mood-btn" data-value="1">😞</button>
+            <button type="button" class="mood-btn" data-value="2">😕</button>
+            <button type="button" class="mood-btn" data-value="3">😐</button>
+            <button type="button" class="mood-btn" data-value="4">🙂</button>
+            <button type="button" class="mood-btn" data-value="5">😄</button>
+          </div>
+        </div>
+
+        <!-- Sliders de Enfoque / Energía / Motivación / Claridad / Confianza -->
+        <div class="mindset-sliders">
+          <div class="mindset-slider">
+            <div class="mindset-slider-header">
+              <span>Enfoque</span>
+              <span id="mindsetFocusValue">3 / 5</span>
+            </div>
+            <input type="range" id="mindsetFocus" min="1" max="5" value="3" />
+          </div>
+
+          <div class="mindset-slider">
+            <div class="mindset-slider-header">
+              <span>Energía</span>
+              <span id="mindsetEnergyValue">3 / 5</span>
+            </div>
+            <input type="range" id="mindsetEnergy" min="1" max="5" value="3" />
+          </div>
+
+          <div class="mindset-slider">
+            <div class="mindset-slider-header">
+              <span>Motivación</span>
+              <span id="mindsetMotivationValue">3 / 5</span>
+            </div>
+            <input type="range" id="mindsetMotivation" min="1" max="5" value="3" />
+          </div>
+
+          <div class="mindset-slider">
+            <div class="mindset-slider-header">
+              <span>Claridad</span>
+              <span id="mindsetClarityValue">3 / 5</span>
+            </div>
+            <input type="range" id="mindsetClarity" min="1" max="5" value="3" />
+          </div>
+
+          <div class="mindset-slider">
+            <div class="mindset-slider-header">
+              <span>Confianza</span>
+              <span id="mindsetConfidenceValue">3 / 5</span>
+            </div>
+            <input type="range" id="mindsetConfidence" min="1" max="5" value="3" />
+          </div>
+        </div>
+
+        <div class="mindset-actions">
+          <button type="button" class="btn-outline" id="mindsetSkipStep1">
+            Saltar por hoy
+          </button>
+          <button type="button" class="btn btn-primary" id="mindsetNextStep">
+            Continuar →
+          </button>
+        </div>
+      </div>
+
+      <!-- PASO 2: PREGUNTAS CORTAS -->
+      <div class="mindset-step hidden" id="mindsetStep2">
+        <h2>Integra tu avance</h2>
+        <p class="mindset-subtitle">
+          3 preguntas rápidas para consolidar tu mindset.
+        </p>
+
+        <label class="mindset-label" for="mindsetNoteBest">
+          1. ¿Qué fue lo mejor de esta sesión / lección?
+        </label>
+        <textarea
+          id="mindsetNoteBest"
+          class="lesson-reflection-input"
+          rows="3"
+          placeholder="Escribe uno o dos momentos clave..."
+        ></textarea>
+
+        <label class="mindset-label" for="mindsetNoteChallenge">
+          2. ¿Qué desafío enfrentaste hoy?
+        </label>
+        <textarea
+          id="mindsetNoteChallenge"
+          class="lesson-reflection-input"
+          rows="3"
+          placeholder="Describe brevemente el reto principal..."
+        ></textarea>
+
+        <label class="mindset-label" for="mindsetNoteDecision">
+          3. ¿Qué decisión consciente tomarás para mañana?
+        </label>
+        <textarea
+          id="mindsetNoteDecision"
+          class="lesson-reflection-input"
+          rows="3"
+          placeholder="Define un compromiso simple y concreto..."
+        ></textarea>
+
+        <div class="mindset-actions">
+          <button type="button" class="btn-outline" id="mindsetBackStep">
+            ← Volver
+          </button>
+          <button type="button" class="btn btn-primary" id="mindsetSaveBtn">
+            Guardar mindset y continuar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABBAR -->
+  <nav class="tabbar">
+    <button class="tab-btn" onclick="location.href='/dashboard/index.html'">
+      <span>🏠</span>
+      <small>Inicio</small>
+    </button>
+
+    <button class="tab-btn active" onclick="location.href='/curso/index.html'">
+      <span>📘</span>
+      <small>Retos</small>
+    </button>
+
+    <button class="tab-btn" onclick="location.href='/perfil/index.html'">
+      <span>👤</span>
+      <small>Perfil</small>
+    </button>
+
+    <button class="tab-btn" onclick="location.href='/perfil/datos.html'">
+      <span>📊</span>
+      <small>Progreso</small>
+    </button>
+  </nav>
+
+  <!-- PROTECCIÓN POR ROL -->
+  <script type="module">
+    import { protectPage } from "/js/router.js";
+    protectPage({ allowedRoles: ["user"] });
+  </script>
+
+  <!-- HEADER -->
+  <script type="module">
+    import { loadHeader } from "/components/header.js";
+    loadHeader();
+  </script>
+
+  <!-- LÓGICA LECCIÓN -->
+  <script type="module" src="/js/lesson.js"></script>
+
+</body>
+</html>
+
+
+

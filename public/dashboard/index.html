@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Advance+ · Dashboard</title>
+
+  <!-- ESTILOS GLOBALES -->
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/courses.css">
+  <link rel="stylesheet" href="/css/tabbar.css">
+</head>
+
+<body class="app-bg dashboard-page">
+
+  <!-- HEADER GLOBAL -->
+  <div id="appHeader"></div>
+
+  <main class="dashboard-main">
+    <div class="dashboard-wrapper">
+
+      <!-- HERO VISUAL GRANDE -->
+      <section class="dash-hero">
+        <div class="dash-hero-inner">
+
+          <div class="dash-hero-left">
+            <p class="hero-kicker">Bienvenido de vuelta</p>
+            <h1 class="hero-title">Tu entrenamiento de hoy</h1>
+            <p class="hero-subtitle">
+              Suma XP, mantiene tu racha activa y avanza en tus retos Advance+.
+            </p>
+          </div>
+
+          <div class="dash-hero-right">
+            <div class="hero-stats-grid">
+
+              <!-- Racha -->
+              <article class="hero-card">
+                <span class="hero-card-label">Racha activa</span>
+                <div class="hero-card-value" id="streakCurrent">0</div>
+                <p class="hero-card-meta">
+                  Mejor racha: <span id="streakBest">0</span> días
+                </p>
+                <div class="streak-goal-bar">
+                  <div class="streak-goal-fill" id="streakBarFill"></div>
+                </div>
+                <p class="hero-card-meta small">Objetivo: 21 días</p>
+              </article>
+
+              <!-- Nivel -->
+              <article class="hero-card">
+                <span class="hero-card-label">Nivel Advance+</span>
+                <div class="hero-card-value" id="userLevel">1</div>
+                <p class="hero-card-meta" id="xpThisLevel">0 / 100 XP</p>
+                <p class="hero-card-meta" id="nextLevel">Siguiente: Nivel 2</p>
+                <div class="xp-bar">
+                  <div class="xp-bar-fill" id="xpFill"></div>
+                </div>
+              </article>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- MISIÓN DEL DÍA -->
+      <section class="dash-section">
+        <h2 class="section-title">Misión del día</h2>
+
+        <!-- Misión normal -->
+        <article id="missionCard" class="mission-card">
+          <div class="mission-header">
+            <span class="dash-pill" id="missionMeta">Próximamente</span>
+          </div>
+          <h3 class="mission-title" id="missionTitle">Tu próxima misión está en camino</h3>
+          <p class="mission-desc" id="missionDesc">
+            Muy pronto verás aquí la misión diaria de tu reto activo.
+          </p>
+          <button id="missionBtn" class="mission-btn">
+            Ir a la lección
+          </button>
+        </article>
+
+        <!-- Promo cuando no haya curso activo -->
+        <article id="missionPromoCard" class="mission-card" style="display:none;">
+          <h3 class="mission-title">Activa tu siguiente reto</h3>
+          <p class="mission-desc">
+            Aún no tienes un reto activo, o ya terminaste todos tus cursos.
+            Elige tu próximo programa y sigue avanzando.
+          </p>
+          <button id="missionPromoBtn" class="mission-btn">
+            Ver todos los retos
+          </button>
+        </article>
+      </section>
+
+      <!-- COACH IA -->
+      <section class="dash-section">
+        <h2 class="section-title">Coach IA · Mensaje de hoy</h2>
+
+        <article id="coachMessageCard" class="coach-message-card" style="display:none;">
+          <p class="coach-message-style" id="coachMessageStyle"></p>
+          <p class="coach-message-text" id="coachMessageText"></p>
+          <p class="coach-message-meta" id="coachMessageTime"></p>
+        </article>
+
+        <p id="coachMessageEmpty" class="empty-message">
+          Muy pronto verás aquí mensajes personalizados de tu Coach IA.
+        </p>
+      </section>
+
+      <!-- RETOS ACTIVOS -->
+      <section class="dash-section">
+        <div class="section-header-row">
+          <h2 class="section-title">Tus retos activos</h2>
+          <span id="activeChallengesCount" class="section-subtitle">0 activos</span>
+        </div>
+
+        <div id="activeChallengesCarousel" class="courses-carousel">
+          <!-- tarjetas horizontales por JS -->
+        </div>
+
+        <p id="noActiveChallenges" class="empty-message">
+          Aún no tienes retos activos. Empieza con AI7 o el Curso de Bienvenida.
+        </p>
+      </section>
+
+      <!-- SECCIÓN · EXPLORAR RETOS -->
+      <section class="dash-section">
+        <h2 class="section-title">Explorar retos</h2>
+        <p class="section-subtitle">
+          Descubre otros retos Advance+ para seguir entrenando tu enfoque, energía y disciplina.
+        </p>
+
+        <div id="exploreCoursesGrid" class="explore-grid">
+          <!-- Cards via JS -->
+        </div>
+
+        <p id="exploreCoursesEmpty" class="empty-text" style="display:none;">
+          Muy pronto verás aquí nuevos retos disponibles.
+        </p>
+      </section>
+
+      <!-- EXPLORAR RETOS 
+      <section class="dash-section">
+        <h2 class="section-title">Explorar retos</h2>
+        <div id="coursesGrid" class="courses-grid">
+           tarjetas de cursos por JS -->
+       <!-- </div>
+        <p id="noAvailableMessage" class="empty-message">
+          Muy pronto llegarán más retos Advance+.
+        </p>
+      </section> -->
+
+    </div>
+  </main>
+
+  <!-- TABBAR GLOBAL 
+  <nav class="tabbar">
+    <button class="tab-btn active" onclick="location.href='/dashboard/index.html'">
+      <span>🏠</span>
+      <small>Inicio</small>
+    </button>
+
+    <button class="tab-btn" onclick="location.href='/curso/index.html'">
+      <span>📘</span>
+      <small>Retos</small>
+    </button>
+
+    <button class="tab-btn" onclick="location.href='/perfil/index.html'">
+      <span>👤</span>
+      <small>Perfil</small>
+    </button>
+
+    <button class="tab-btn" onclick="location.href='/perfil/datos.html'">
+      <span>📊</span>
+      <small>Progreso</small>
+    </button>
+  </nav> -->
+
+  <!-- PROTECCIÓN POR ROL -->
+  <script type="module">
+    import { protectPage } from "/js/router.js";
+    protectPage({ allowedRoles: ["user"] });
+  </script>
+
+  <!-- HEADER -->
+  <script type="module">
+    import { loadHeader } from "/components/header.js";
+    loadHeader();
+  </script>
+
+  <!-- LÓGICA DASHBOARD -->
+  <script type="module" src="/js/dashboard-user.js"></script>
+
+  <div id="appTabbar"></div>
+
+  <script type="module">
+    import { loadTabbar } from "/components/tabbar.js";
+    loadTabbar();
+  </script>
+
+
+</body>
+</html>
+
+<!-- -->

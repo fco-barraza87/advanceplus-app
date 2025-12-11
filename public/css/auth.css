@@ -1,0 +1,186 @@
+/* ============================================================
+   Advance+ · Auth UI (Login & Register)
+   Versión optimizada — Diseño premium & consistente
+============================================================ */
+
+/* ----------------------------------------------
+   CONTENEDOR PRINCIPAL
+---------------------------------------------- */
+
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: var(--space-lg);
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ----------------------------------------------
+   TARJETA DE AUTENTICACIÓN
+---------------------------------------------- */
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--color-primary-light);
+  padding: var(--space-xl);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(4px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Glow suave decorativo */
+.auth-card::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: -20%;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(74,242,197,0.15), transparent 65%);
+  opacity: 0.7;
+}
+
+.auth-card::after {
+  content: "";
+  position: absolute;
+  bottom: -20%;
+  right: -20%;
+  width: 65%;
+  height: 65%;
+  background: radial-gradient(circle, rgba(201,168,87,0.15), transparent 70%);
+  opacity: 0.6;
+}
+
+/* ----------------------------------------------
+   HEADER DEL FORMULARIO
+---------------------------------------------- */
+
+.auth-header {
+  text-align: center;
+  margin-bottom: var(--space-lg);
+  position: relative;
+  z-index: 2;
+}
+
+.auth-logo {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--accent-cyan);
+  margin-bottom: var(--space-sm);
+  letter-spacing: -0.03em;
+}
+
+.auth-header h2 {
+  font-size: var(--text-xl);
+  color: var(--color-white);
+  margin-bottom: var(--space-xs);
+  font-weight: 600;
+}
+
+.auth-header p {
+  color: var(--color-gray-2);
+  font-size: var(--text-sm);
+}
+
+/* ----------------------------------------------
+   CAMPOS
+---------------------------------------------- */
+
+.auth-field {
+  margin-bottom: var(--space-md);
+  position: relative;
+  z-index: 2;
+}
+
+.auth-field label {
+  display: block;
+  margin-bottom: var(--space-xs);
+  color: var(--color-gray-1);
+  font-size: var(--text-sm);
+}
+
+/* Postura premium para input */
+.auth-field .input:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(74,242,197,0.15);
+  background: rgba(255,255,255,0.10);
+  transition: 0.2s ease-out;
+}
+
+/* Password toggle (para futuro) */
+.input-icon-right {
+  position: absolute;
+  right: 12px;
+  top: 37px;
+  cursor: pointer;
+  color: var(--color-gray-2);
+}
+
+/* ----------------------------------------------
+   BOTÓN
+---------------------------------------------- */
+
+.auth-btn {
+  width: 100%;
+  margin-top: var(--space-sm);
+  position: relative;
+  z-index: 2;
+}
+
+.auth-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ----------------------------------------------
+   CAMBIO ENTRE LOGIN / REGISTER
+---------------------------------------------- */
+
+.auth-switch {
+  text-align: center;
+  margin-top: var(--space-lg);
+  font-size: var(--text-sm);
+  color: var(--color-gray-2);
+  position: relative;
+  z-index: 2;
+}
+
+.auth-switch a {
+  color: var(--accent-cyan);
+  font-weight: 600;
+  transition: var(--transition-normal);
+}
+
+.auth-switch a:hover {
+  color: var(--accent-gold);
+}
+
+/* ----------------------------------------------
+   MENSAJE DE ERROR
+---------------------------------------------- */
+
+.auth-error {
+  margin-top: var(--space-sm);
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  background: rgba(255,60,60,0.12);
+  border: 1px solid rgba(255,60,60,0.25);
+  color: #ff6b6b;
+  font-size: var(--text-sm);
+  text-align: center;
+  display: none;
+}
+
+.auth-error.show {
+  display: block;
+}

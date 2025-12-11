@@ -1,0 +1,275 @@
+/* ============================================================
+   Advance+ · Componentes globales
+   Header · Tabbar · Botones · Cards · Pills · Inputs · Layout
+============================================================ */
+
+/* ------------------------------------------------------------
+   CARD GENÉRICA
+------------------------------------------------------------ */
+
+.card-base {
+  background: var(--color-primary-dark);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: var(--shadow-card);
+  transition: var(--transition-normal);
+}
+
+.card-base:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* ------------------------------------------------------------
+   TEXTOS BASE
+------------------------------------------------------------ */
+
+.title-sm {
+  font-size: var(--text-md);
+  color: var(--color-white);
+  font-weight: 600;
+}
+
+.title-md {
+  font-size: var(--text-lg);
+  color: var(--color-white);
+  font-weight: 700;
+}
+
+.text-muted {
+  color: var(--color-gray-2);
+}
+
+.text-accent {
+  color: var(--accent-cyan);
+}
+
+/* ------------------------------------------------------------
+   PILLS (etiquetas pequeñas)
+------------------------------------------------------------ */
+
+.pill {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-round);
+  font-size: var(--text-xs);
+  background: rgba(255,255,255,0.10);
+  color: var(--color-white-muted);
+  letter-spacing: 0.03em;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+/* ------------------------------------------------------------
+   BOTONES GLOBALes A+
+------------------------------------------------------------ */
+
+.btn {
+  padding: 0.65rem 1.2rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  font-size: var(--text-sm);
+  transition: var(--transition-normal);
+}
+
+.btn-primary {
+  background: var(--gradient-cyan);
+  color: var(--color-primary-dark);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.25);
+  color: var(--color-white);
+}
+
+.btn-outline:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+/* Botón destructivo (opcional) */
+.btn-danger {
+  background: var(--color-error);
+  color: var(--color-white);
+}
+
+.btn-danger:hover {
+  filter: brightness(1.1);
+}
+
+/* ------------------------------------------------------------
+   INPUTS GLOBALES
+------------------------------------------------------------ */
+
+.input {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.07);
+  color: var(--color-white);
+  font-size: var(--text-sm);
+}
+
+.input::placeholder {
+  color: rgba(255,255,255,0.45);
+}
+
+/* ------------------------------------------------------------
+   HEADER PRINCIPAL A+
+------------------------------------------------------------ */
+
+.ap-header {
+  width: 100%;
+  height: 64px;
+  background: var(--color-primary);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-lg);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  box-shadow: var(--shadow-soft);
+}
+
+.ap-logo {
+  font-size: var(--text-xl);
+  color: var(--color-white);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  cursor: pointer;
+}
+
+.ap-nav {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.ap-nav a {
+  color: var(--color-gray-1);
+  font-size: var(--text-sm);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.ap-nav a:hover {
+  color: var(--color-white);
+}
+
+.ap-header-right {
+  display: flex;
+  align-items: center;
+}
+
+/* Avatar */
+.ap-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-round);
+  border: 2px solid rgba(255,255,255,0.18);
+  cursor: pointer;
+  object-fit: cover;
+}
+
+/* Dropdown */
+.ap-dropdown {
+  position: absolute;
+  right: 0;
+  top: 58px;
+  background: var(--color-primary-light);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255,255,255,0.08);
+  width: 210px;
+  padding: var(--space-md);
+  display: none;
+  box-shadow: var(--shadow-card);
+}
+
+.ap-dropdown.show {
+  display: block;
+}
+
+.ap-user-name {
+  color: var(--color-white);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-sm);
+  text-align: center;
+}
+
+.ap-logout-btn {
+  width: 100%;
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  background: var(--accent-gold);
+  color: var(--color-primary-dark);
+  font-weight: 600;
+  transition: var(--transition-normal);
+}
+
+.ap-logout-btn:hover {
+  filter: brightness(1.15);
+}
+
+/* ------------------------------------------------------------
+   TABBAR · VERSIÓN MOBILE APP (Fija en Bottom)
+------------------------------------------------------------ */
+
+.tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--color-primary-dark);
+  height: 64px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  z-index: var(--z-header);
+  backdrop-filter: blur(10px);
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-gray-2);
+  font-size: var(--text-xs);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  gap: 0.15rem;
+  transition: var(--transition-normal);
+}
+
+.tab-btn span {
+  font-size: 1.35rem;
+}
+
+.tab-btn.active {
+  color: var(--accent-cyan);
+}
+
+.tab-btn:hover {
+  transform: translateY(-2px);
+  color: var(--color-white);
+}
+
+
+.ap-nav a.active-link {
+  color: var(--color-white);
+  font-weight: 600;
+  border-bottom: 2px solid var(--color-accent-cyan);
+  padding-bottom: 2px;
+}

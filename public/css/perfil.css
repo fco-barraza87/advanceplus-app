@@ -1,0 +1,342 @@
+/* ===============================
+   PERFIL · LAYOUT GENERAL
+================================= */
+
+.profile-header {
+  margin-bottom: 0.5rem;
+}
+
+.profile-header-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  max-width: 560px;
+}
+
+/* GRID PRINCIPAL */
+.profile-grid {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.profile-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* En pantallas grandes → 2 columnas */
+@media (min-width: 900px) {
+  .profile-grid {
+    grid-template-columns: 1.2fr 1fr;
+    align-items: flex-start;
+  }
+}
+
+/* Tarjetas de perfil */
+.profile-card {
+  border-radius: 18px;
+  padding: 1.5rem;
+  background: rgba(10, 18, 40, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* Títulos */
+.profile-block-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.profile-block-subtitle {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin-bottom: 1rem;
+}
+
+.profile-subsection-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+/* ===============================
+   FORMULARIO
+================================= */
+
+.profile-label {
+  display: block;
+  font-size: 0.8rem;
+  opacity: 0.85;
+  margin-bottom: 0.25rem;
+  margin-top: 0.8rem;
+}
+
+.profile-input {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(8, 16, 32, 0.9);
+  color: #ffffff;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.profile-input:focus {
+  border-color: #3ee98a;
+  box-shadow: 0 0 0 1px rgba(62, 233, 138, 0.4);
+}
+
+.profile-row-2 {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.2rem;
+}
+
+@media (min-width: 700px) {
+  .profile-row-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Texto estático (email, fechas) */
+.profile-static {
+  font-size: 0.9rem;
+  opacity: 0.92;
+}
+
+.account-info-box {
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  background: rgba(6, 14, 32, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 1rem;
+}
+
+.label-small {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.65;
+}
+
+/* ===============================
+   AVATAR
+================================= */
+
+.avatar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+@media (min-width: 640px) {
+  .avatar-row {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.avatar-wrapper {
+  width: 88px;
+  height: 88px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 2px solid rgba(62, 233, 138, 0.8);
+  box-shadow: 0 0 0 3px rgba(62, 233, 138, 0.15);
+  flex-shrink: 0;
+}
+
+.avatar-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.btn-avatar,
+.btn-avatar-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.5rem 1.2rem;
+  font-size: 0.85rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.btn-avatar {
+  background: linear-gradient(135deg, #3ee98a, #22c1c3);
+  color: #02101f;
+  font-weight: 600;
+}
+
+.btn-avatar:hover {
+  filter: brightness(1.05);
+}
+
+.btn-avatar-delete {
+  background: transparent;
+  color: #ff7b8a;
+  border-color: rgba(255, 123, 138, 0.5);
+}
+
+.btn-avatar-delete:hover {
+  background: rgba(255, 123, 138, 0.12);
+}
+
+.avatar-hint {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+/* ===============================
+   MODAL AVATAR
+================================= */
+
+.avatar-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(1, 4, 12, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.avatar-modal.hidden {
+  display: none !important;
+}
+
+.avatar-modal-content {
+  width: 100%;
+  max-width: 420px;
+  background: #050b18;
+  border-radius: 18px;
+  padding: 1.25rem 1.5rem 1.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.75);
+}
+
+.avatar-modal-content h3 {
+  margin: 0 0 0.1rem;
+  font-size: 1rem;
+}
+
+.avatar-modal-subtitle {
+  font-size: 0.8rem;
+  opacity: 0.75;
+  margin-bottom: 0.8rem;
+}
+
+.avatar-crop-container {
+  width: 100%;
+  max-height: 340px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #020713;
+  margin-bottom: 0.9rem;
+}
+
+.avatar-crop-container img {
+  width: 100%;
+  display: block;
+}
+
+.avatar-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* ===============================
+   SWITCHES (notificaciones / objetivos)
+================================= */
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.switch-wrapper {
+  position: relative;
+  width: 42px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.switch-wrapper input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.18);
+  transition: 0.2s;
+}
+
+.switch-slider::before {
+  content: "";
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  top: 3px;
+  border-radius: 999px;
+  background-color: #ffffff;
+  transition: 0.2s;
+}
+
+.switch-wrapper input:checked + .switch-slider {
+  background: linear-gradient(135deg, #3ee98a, #22c1c3);
+}
+
+.switch-wrapper input:checked + .switch-slider::before {
+  transform: translateX(18px);
+}
+
+/* ===============================
+   BOTÓN GUARDAR
+================================= */
+
+.btn-save-profile {
+  width: 100%;
+  margin-top: 0.8rem;
+  border-radius: 999px;
+  padding: 0.7rem 1rem;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #3ee98a, #22c1c3);
+  color: #02101f;
+}
+
+.btn-save-profile:hover {
+  filter: brightness(1.05);
+}
+
+.save-message {
+  font-size: 0.8rem;
+  margin-top: 0.45rem;
+}
