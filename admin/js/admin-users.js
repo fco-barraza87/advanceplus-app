@@ -5,39 +5,41 @@ const tbody = document.getElementById("usersTableBody");
 
 let allUsers = [];
 
-// ================================
-// Cargar usuarios
-// ================================
-async function loadUsers() {
-  await requireAdmin();
+const { data, error } = await supabase
+  .from("profiles")
+  .select(`
+    id,
+    full_name,
+    email,
+    avatar_url,
+    role,
+    onboarding_completed,
+    created_at
+  `)
+  .order("created_at", { ascending: false });
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select(`
-      id,
-      full_name,
-      email,
-      avatar_url,
-      role,
-      onboarding_completed,
-      created_at,
-      user_stats:user_stats (
-        xp_total,
-        streak_current,
-        level,
-        streak_best
-      )
-    `)
-    .order("created_at", { ascending: false });
+if (error) { console.error(error); return; }
 
-  if (error) {
-    console.error("Error cargando usuarios:", error);
-    return;
-  }
+// =========================
+// 2️⃣ Obtener stats aparte
+// =========================
+for (const user of data) {
+  const { data: stats } = await supabase
+    .from("user_stats")
+    .select("xp_total, streak_current, level, streak_best")
+    .eq("user_id", user.id)
+    .single();
 
-  allUsers = data;
-  renderUsers(allUsers);
+  user.user_stats = stats || {
+    xp_total: 0,
+    streak_current: 0,
+    level: 1,
+    streak_best: 0
+  };
 }
+
+allUsers = data;
+renderUsers(allUsers);
 
 // ================================
 // Render tabla
