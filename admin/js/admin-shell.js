@@ -83,3 +83,8 @@ async function loadAdminHeaderName() {
     label.textContent = auth.user.email ?? "Admin";
   }
 }
+
+/* ---------------------------------------------
+   EJECUTAR INICIO DEL PANEL ADMIN
+----------------------------------------------*/
+initAdminShell();
