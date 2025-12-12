@@ -5,6 +5,8 @@
   <title>Advance+ Admin · Lección</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="/admin/css/admin-base.css" />
@@ -13,81 +15,110 @@
 
 <body class="admin-body">
 
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <span class="sidebar-logo-icon">A+</span>
+      <span class="sidebar-logo-text">Advance+</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="/admin/index.html" class="sidebar-link">Dashboard</a>
+      <a href="/admin/users.html" class="sidebar-link">Usuarios</a>
+      <a href="/admin/courses.html" class="sidebar-link">Cursos</a>
+      <a href="/admin/lessons.html" class="sidebar-link active">Lecciones</a>
+      <a href="/admin/progress.html" class="sidebar-link">Progreso</a>
+      <a href="/admin/marketing.html" class="sidebar-link">Marketing</a>
+      <a href="/admin/settings.html" class="sidebar-link">Configuración</a>
+    </nav>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
   <div class="admin-main">
 
+    <!-- ================= HEADER ================= -->
     <header class="admin-header-bar">
       <div class="admin-header-left">
         <button id="sidebarToggle" class="admin-burger-btn">☰</button>
-        <h1 class="admin-page-title">Editar lección</h1>
       </div>
 
       <div class="admin-header-right">
-        <button id="btnSaveLesson" class="btn-primary-gold">Guardar cambios</button>
+        <div class="admin-user-info">
+          <span id="adminUserName" class="admin-user-name">Cargando...</span>
+          <span id="adminUserRole" class="admin-user-role">—</span>
+        </div>
+
+        <div class="admin-avatar-wrapper">
+          <div id="adminAvatar" class="admin-avatar">A</div>
+          <div id="adminMenu" class="admin-menu hidden">
+            <a href="/dashboard/index.html">Modo usuario</a>
+            <a href="/admin/settings.html">Configuración</a>
+            <button id="adminLogoutBtnMenu">Cerrar sesión</button>
+          </div>
+        </div>
       </div>
     </header>
 
+    <!-- ================= CONTENT ================= -->
     <main class="admin-content">
 
+      <!-- Header del módulo -->
+      <div class="module-header">
+        <div>
+          <h1>Editar lección</h1>
+          <p>Edición completa de la lección seleccionada.</p>
+        </div>
+
+        <div class="module-actions">
+          <a href="/admin/lessons.html" class="btn-secondary">
+            ← Volver
+          </a>
+
+          <button id="btnSaveLesson" class="btn-primary-gold">
+            Guardar cambios
+          </button>
+        </div>
+      </div>
+
+      <!-- FORMULARIO -->
       <form id="lessonForm" class="lesson-form">
 
-        <!-- BLOQUE BÁSICO -->
+        <!-- === INFORMACIÓN BÁSICA === -->
         <section class="form-section">
           <h2>Información básica</h2>
 
           <div class="form-grid">
-            <label>
-              Día
-              <input type="number" id="day" min="1" />
-            </label>
-
-            <label>
-              Título
-              <input type="text" id="title" />
-            </label>
-
-            <label>
-              Subtítulo
-              <input type="text" id="subtitle" />
-            </label>
-
-            <label>
-              Duración (min)
-              <input type="number" id="duration" />
-            </label>
-
-            <label>
-              XP recompensa
-              <input type="number" id="xp_reward" />
-            </label>
+            <label>Día <input type="number" id="day" min="1"></label>
+            <label>Título <input type="text" id="title"></label>
+            <label>Subtítulo <input type="text" id="subtitle"></label>
+            <label>Duración (min) <input type="number" id="duration"></label>
+            <label>XP recompensa <input type="number" id="xp_reward"></label>
 
             <label class="checkbox">
-              <input type="checkbox" id="is_checkpoint" />
+              <input type="checkbox" id="is_checkpoint">
               Checkpoint
             </label>
           </div>
         </section>
 
-        <!-- CONTENIDO -->
+        <!-- === CONTENIDO === -->
         <section class="form-section">
           <h2>Contenido</h2>
 
-          <label>
-            Texto principal
+          <label>Texto principal
             <textarea id="text_content" rows="6"></textarea>
           </label>
 
-          <label>
-            Ejercicio
+          <label>Ejercicio
             <textarea id="exercise_content" rows="4"></textarea>
           </label>
 
-          <label>
-            HTML avanzado
+          <label>HTML avanzado
             <textarea id="content_html" rows="4"></textarea>
           </label>
         </section>
 
-        <!-- MEDIA -->
+        <!-- === MEDIA === -->
         <section class="form-section">
           <h2>Media</h2>
 
@@ -100,29 +131,28 @@
           </div>
         </section>
 
-        <!-- IA -->
+        <!-- === IA === -->
         <section class="form-section">
           <h2>IA</h2>
 
-          <label>
-            Prompt IA
+          <label>Prompt IA
             <textarea id="ai_prompt" rows="4"></textarea>
           </label>
 
-          <label>
-            Meta IA (JSON)
+          <label>Meta IA (JSON)
             <textarea id="ai_meta" rows="4"></textarea>
           </label>
         </section>
 
       </form>
-
     </main>
   </div>
 
+  <!-- Scripts -->
   <script type="module" src="/js/supabase.js"></script>
   <script type="module" src="/admin/js/admin-auth.js"></script>
   <script type="module" src="/admin/js/admin-lesson-details.js"></script>
+  <script type="module" src="/admin/js/admin-shell.js"></script>
 
 </body>
 </html>

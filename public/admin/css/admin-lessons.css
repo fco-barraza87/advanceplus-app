@@ -282,3 +282,17 @@ label.checkbox {
   align-items: center;
   gap: 10px;
 }
+
+.module-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-secondary {
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--ap-border);
+  background: white;
+  font-weight: 500;
+  cursor: pointer;
+}
