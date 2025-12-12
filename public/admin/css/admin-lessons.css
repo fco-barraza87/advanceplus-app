@@ -1,0 +1,236 @@
+/* ========================================================
+   LECCIONES – LISTA
+   ======================================================== */
+
+.admin-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.admin-hero-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ap-blue);
+}
+
+.admin-hero-subtitle {
+  margin-top: 4px;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.admin-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-primary {
+  background: var(--ap-gold);
+  color: var(--ap-blue);
+  border: none;
+  padding: 0.55rem 1.2rem;
+  font-size: 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: var(--ap-shadow);
+  transition: var(--ap-transition);
+}
+
+.btn-primary:hover {
+  background: #d8bb6a;
+}
+
+/* -----------------------------
+   FILTROS
+------------------------------ */
+
+.filters-section {
+  margin-bottom: 1.5rem;
+}
+
+.filters-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 13px;
+}
+
+.filter-item label {
+  opacity: 0.7;
+}
+
+.filter-item input,
+.filter-item select {
+  border-radius: 999px;
+  border: 1px solid var(--ap-border);
+  padding: 0.45rem 0.8rem;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+
+.filter-item input:focus,
+.filter-item select:focus {
+  border-color: var(--ap-blue);
+}
+
+.filter-grow {
+  width: 100%;
+}
+
+/* -----------------------------
+   TABLA
+------------------------------ */
+
+.table-section {
+  margin-top: 0.5rem;
+}
+
+.table-wrapper {
+  background: #fff;
+  border-radius: var(--ap-radius);
+  box-shadow: var(--ap-shadow);
+  border: 1px solid var(--ap-border);
+  overflow: hidden;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-table thead {
+  background: #f4f6fb;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eef0f5;
+}
+
+.admin-table th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.7;
+}
+
+.admin-table tbody tr:hover {
+  background: #fafbff;
+}
+
+/* Curso y título */
+
+.lesson-course {
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.lesson-title-main {
+  font-weight: 600;
+}
+
+.lesson-title-sub {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* Chips */
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  background: #eef0ff;
+  color: var(--ap-blue);
+  margin-right: 4px;
+  margin-bottom: 3px;
+}
+
+/* Checkpoint pill */
+
+.checkpoint-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.checkpoint-yes {
+  background: rgba(76, 175, 80, 0.10);
+  color: #2e7d32;
+}
+
+.checkpoint-no {
+  background: rgba(158, 158, 158, 0.10);
+  color: #616161;
+}
+
+/* Botones pequeños */
+
+.btn-small,
+.btn-icon {
+  border-radius: 999px;
+  border: 1px solid var(--ap-border);
+  background: #fff;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-right: 4px;
+  transition: var(--ap-transition);
+}
+
+.btn-icon {
+  padding: 3px 7px;
+}
+
+.btn-small:hover,
+.btn-icon:hover {
+  background: #f4f6fb;
+}
+
+/* Columna orden */
+
+.order-controls {
+  display: flex;
+  gap: 4px;
+}
+
+/* Responsive */
+
+@media (max-width: 1080px) {
+  .filters-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .filters-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-table th:nth-child(4),
+  .admin-table td:nth-child(4),
+  .admin-table th:nth-child(8),
+  .admin-table td:nth-child(8) {
+    display: none;
+  }
+}
