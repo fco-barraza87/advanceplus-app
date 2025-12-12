@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Advance+ Admin · Lección</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/admin/css/admin-base.css" />
+  <link rel="stylesheet" href="/admin/css/admin-lessons.css" />
+</head>
+
+<body class="admin-body">
+
+  <div class="admin-main">
+
+    <header class="admin-header-bar">
+      <div class="admin-header-left">
+        <button id="sidebarToggle" class="admin-burger-btn">☰</button>
+        <h1 class="admin-page-title">Editar lección</h1>
+      </div>
+
+      <div class="admin-header-right">
+        <button id="btnSaveLesson" class="btn-primary-gold">Guardar cambios</button>
+      </div>
+    </header>
+
+    <main class="admin-content">
+
+      <form id="lessonForm" class="lesson-form">
+
+        <!-- BLOQUE BÁSICO -->
+        <section class="form-section">
+          <h2>Información básica</h2>
+
+          <div class="form-grid">
+            <label>
+              Día
+              <input type="number" id="day" min="1" />
+            </label>
+
+            <label>
+              Título
+              <input type="text" id="title" />
+            </label>
+
+            <label>
+              Subtítulo
+              <input type="text" id="subtitle" />
+            </label>
+
+            <label>
+              Duración (min)
+              <input type="number" id="duration" />
+            </label>
+
+            <label>
+              XP recompensa
+              <input type="number" id="xp_reward" />
+            </label>
+
+            <label class="checkbox">
+              <input type="checkbox" id="is_checkpoint" />
+              Checkpoint
+            </label>
+          </div>
+        </section>
+
+        <!-- CONTENIDO -->
+        <section class="form-section">
+          <h2>Contenido</h2>
+
+          <label>
+            Texto principal
+            <textarea id="text_content" rows="6"></textarea>
+          </label>
+
+          <label>
+            Ejercicio
+            <textarea id="exercise_content" rows="4"></textarea>
+          </label>
+
+          <label>
+            HTML avanzado
+            <textarea id="content_html" rows="4"></textarea>
+          </label>
+        </section>
+
+        <!-- MEDIA -->
+        <section class="form-section">
+          <h2>Media</h2>
+
+          <div class="form-grid">
+            <label>Audio URL <input type="text" id="audio_url"></label>
+            <label>Video URL <input type="text" id="video_url"></label>
+            <label>Imagen URL <input type="text" id="image_url"></label>
+            <label>Meditación URL <input type="text" id="meditation_url"></label>
+            <label>Descarga URL <input type="text" id="download_url"></label>
+          </div>
+        </section>
+
+        <!-- IA -->
+        <section class="form-section">
+          <h2>IA</h2>
+
+          <label>
+            Prompt IA
+            <textarea id="ai_prompt" rows="4"></textarea>
+          </label>
+
+          <label>
+            Meta IA (JSON)
+            <textarea id="ai_meta" rows="4"></textarea>
+          </label>
+        </section>
+
+      </form>
+
+    </main>
+  </div>
+
+  <script type="module" src="/js/supabase.js"></script>
+  <script type="module" src="/admin/js/admin-auth.js"></script>
+  <script type="module" src="/admin/js/admin-lesson-details.js"></script>
+
+</body>
+</html>

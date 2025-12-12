@@ -234,3 +234,51 @@
     display: none;
   }
 }
+
+
+.lesson-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.form-section {
+  background: white;
+  border: 1px solid var(--ap-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.form-section h2 {
+  font-size: 18px;
+  margin-bottom: 1rem;
+  color: var(--ap-blue);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.form-grid label,
+.form-section label {
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-section textarea,
+.form-section input {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--ap-border);
+  font-size: 14px;
+}
+
+label.checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
