@@ -105,3 +105,21 @@
 .btn-small:hover {
   opacity: .9;
 }
+
+
+.btn-primary-gold {
+  background: var(--ap-gold);
+  color: var(--ap-blue);
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: 0.25s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-primary-gold:hover {
+  background: #e3c670;
+  transform: translateY(-1px);
+}
