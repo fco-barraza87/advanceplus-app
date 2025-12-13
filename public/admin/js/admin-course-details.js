@@ -313,21 +313,21 @@ const btnEnrollUser = document.getElementById("btnEnrollUser");
 async function loadCourseUsers() {
   if (!courseId || !usersTbody) return;
 
-  const { data, error } = await supabase
-    .from("user_courses")
-    .select(`
-      user_id,
-      is_active,
-      frozen_at,
-      removed_at,
-      profiles (
-        full_name,
-        email,
-        avatar_url
-      )
-    `)
-    .eq("course_id", courseId)
-    .is("removed_at", null);
+const { data, error } = await supabase
+  .from("user_courses")
+  .select(`
+    user_id,
+    is_active,
+    frozen_at,
+    removed_at,
+    profiles:profiles!user_courses_user_id_fkey (
+      full_name,
+      email,
+      avatar_url
+    )
+  `)
+  .eq("course_id", courseId)
+  .is("removed_at", null);
 
   if (error) {
     console.error("[admin] Error cargando inscritos", error);
