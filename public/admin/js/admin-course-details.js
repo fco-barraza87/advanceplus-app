@@ -345,6 +345,11 @@ async function loadCourseUsers() {
     return;
   }
 
+  // 3️⃣ Crear mapa de perfiles (FALTABA ESTO)
+  const profilesMap = Object.fromEntries(
+    profiles.map(p => [p.id, p])
+  );
+
   // 4️⃣ Traer progreso de TODOS los usuarios del curso
   const { data: progressRows, error: errProgress } = await supabase
     .from("progress")
