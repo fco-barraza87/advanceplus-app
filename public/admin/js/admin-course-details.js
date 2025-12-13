@@ -229,6 +229,12 @@ function renderLessons() {
         <button data-action="down" data-id="${l.id}" ${i === courseLessonsCache.length - 1 ? "disabled" : ""}>↓</button>
         <button data-action="edit" data-id="${l.id}">Editar</button>
         <button data-action="duplicate" data-id="${l.id}">Duplicar</button>
+        <button
+          class="btn-small btn-outline-danger"
+          data-action="delete"
+          data-id="${l.id}">
+          Eliminar
+        </button>
       </td>`;
     lessonsTbody.appendChild(tr);
   });

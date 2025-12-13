@@ -163,7 +163,12 @@ saveBtn.addEventListener("click", async () => {
       `/admin/course-details.html?id=${courseId}&tab=lessons`;
   } else {
     // Fallback: lista global
-    window.location.href = "/admin/lessons.html";
+    if (courseId) {
+      window.location.href = `/admin/course-details.html?id=${courseId}&tab=lessons`;
+    } else {
+      window.location.href = "/admin/lessons.html";
+    }
+
   }
 
 });
