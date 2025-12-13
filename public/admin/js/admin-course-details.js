@@ -410,6 +410,66 @@ async function loadCourseLessons() {
   });
 }
 
+// =======================================================
+// REORDENAR LECCIONES DEL CURSO (ESTILO SaaS REAL)
+// =======================================================
+
+let courseLessonsCache = [];
+
+async function loadCourseLessons() {
+  if (!lessonsTbody || !courseId) return;
+
+  const { data, error } = await supabase
+    .from("lessons")
+    .select("id, day, title, xp_reward, is_checkpoint")
+    .eq("course_id", courseId)
+    .order("day", { ascending: true });
+
+  if (error) {
+    console.error("[admin] Error cargando lecciones", error);
+    lessonsTbody.innerHTML = `<tr><td colspan="5">Error</td></tr>`;
+    return;
+  }
+
+  courseLessonsCache = data || [];
+  renderCourseLessons();
+}
+
+function renderCourseLessons() {
+  lessonsTbody.innerHTML = "";
+
+  if (!courseLessonsCache.length) {
+    lessonsTbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="table-placeholder">
+          Este curso aún no tiene lecciones.
+        </td>
+      </tr>`;
+    return;
+  }
+
+  courseLessonsCache.forEach((lesson, index) => {
+    const isFirst = index === 0;
+    const isLast = index === courseLessonsCache.length - 1;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>Día ${lesson.day}</td>
+      <td>${lesson.title ?? "(Sin título)"}</td>
+      <td>${lesson.xp_reward ?? 0}</td>
+      <td>${lesson.is_checkpoint ? "✔" : "—"}</td>
+      <td class="table-actions">
+        <button class="btn-icon" data-action="up" data-id="${lesson.id}" ${isFirst ? "disabled" : ""}>↑</button>
+        <button class="btn-icon" data-action="down" data-id="${lesson.id}" ${isLast ? "disabled" : ""}>↓</button>
+        <button class="btn-small" data-action="edit" data-id="${lesson.id}">Editar</button>
+        <button class="btn-small btn-outline" data-action="duplicate" data-id="${lesson.id}">Duplicar</button>
+      </td>
+    `;
+    lessonsTbody.appendChild(tr);
+  });
+}
+
+
 async function moveLessonUp(lessonId, currentDay) {
   if (currentDay <= 1) return;
 
@@ -454,52 +514,59 @@ window.duplicateLesson = (id) => {
 // Ejecutar al cargar curso
 loadCourseLessons();
 
+lessonsTbody.addEventListener("click", async (e) => {
+  const btn = e.target.closest("button");
+  if (!btn || btn.disabled) return;
 
-// =======================================================
-// REORDENAR LECCIONES (UP / DOWN)
-// =======================================================
+  const id = btn.dataset.id;
+  const action = btn.dataset.action;
 
-window.moveLessonUp = async (lessonId, currentDay) => {
-  if (currentDay <= 1) return;
+  if (!id || !action) return;
 
-  await swapLessonDays(lessonId, currentDay, currentDay - 1);
-};
-
-window.moveLessonDown = async (lessonId, currentDay) => {
-  await swapLessonDays(lessonId, currentDay, currentDay + 1);
-};
-
-async function swapLessonDays(lessonId, dayA, dayB) {
-  // 1. Buscar la otra lección
-  const { data: otherLesson, error: fetchError } = await supabase
-    .from("lessons")
-    .select("id")
-    .eq("course_id", courseId)
-    .eq("day", dayB)
-    .single();
-
-  if (fetchError || !otherLesson) {
-    console.warn("No hay lección para intercambiar");
-    return;
+  if (action === "edit") {
+    window.location.href = `/admin/lesson-details.html?id=${id}`;
   }
 
-  // 2. Intercambiar días (transacción lógica)
-  const { error: updateError1 } = await supabase
+  if (action === "duplicate") {
+    window.location.href =
+      `/admin/lesson-details.html?duplicate=${id}&course_id=${courseId}`;
+  }
+
+  if (action === "up" || action === "down") {
+    await moveLessonInCourse(id, action);
+  }
+});
+
+
+async function moveLessonInCourse(lessonId, direction) {
+  const index = courseLessonsCache.findIndex(l => l.id === lessonId);
+  if (index === -1) return;
+
+  const swapIndex = direction === "up" ? index - 1 : index + 1;
+  if (swapIndex < 0 || swapIndex >= courseLessonsCache.length) return;
+
+  const current = courseLessonsCache[index];
+  const other = courseLessonsCache[swapIndex];
+
+  const dayA = current.day ?? 0;
+  const dayB = other.day ?? 0;
+
+  const { error: e1 } = await supabase
     .from("lessons")
     .update({ day: dayB })
-    .eq("id", lessonId);
+    .eq("id", current.id);
 
-  const { error: updateError2 } = await supabase
+  const { error: e2 } = await supabase
     .from("lessons")
     .update({ day: dayA })
-    .eq("id", otherLesson.id);
+    .eq("id", other.id);
 
-  if (updateError1 || updateError2) {
-    alert("Error reordenando lecciones");
-    console.error(updateError1 || updateError2);
+  if (e1 || e2) {
+    console.error("Error reordenando", e1 || e2);
     return;
   }
 
-  // 3. Refrescar tabla
   await loadCourseLessons();
-};
+}
+
+
