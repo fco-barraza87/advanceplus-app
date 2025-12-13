@@ -313,21 +313,12 @@ const btnEnrollUser = document.getElementById("btnEnrollUser");
 async function loadCourseUsers() {
   if (!courseId || !usersTbody) return;
 
-const { data, error } = await supabase
-  .from("user_courses")
-  .select(`
-    user_id,
-    is_active,
-    frozen_at,
-    removed_at,
-    profiles:profiles!user_courses_user_id_fkey (
-      full_name,
-      email,
-      avatar_url
-    )
-  `)
-  .eq("course_id", courseId)
-  .is("removed_at", null);
+  // 1️⃣ Traer inscripciones
+  const { data: enrollments, error } = await supabase
+    .from("user_courses")
+    .select("user_id, is_active, frozen_at, removed_at")
+    .eq("course_id", courseId)
+    .is("removed_at", null);
 
   if (error) {
     console.error("[admin] Error cargando inscritos", error);
@@ -336,8 +327,37 @@ const { data, error } = await supabase
     return;
   }
 
-  renderCourseUsers(data || []);
+  if (!enrollments.length) {
+    renderCourseUsers([]);
+    return;
+  }
+
+  // 2️⃣ Traer perfiles
+  const userIds = enrollments.map(e => e.user_id);
+
+  const { data: profiles, error: errProfiles } = await supabase
+    .from("profiles")
+    .select("id, full_name, email, avatar_url")
+    .in("id", userIds);
+
+  if (errProfiles) {
+    console.error("[admin] Error cargando perfiles", errProfiles);
+    return;
+  }
+
+  // 3️⃣ Merge manual (control total)
+  const profilesMap = Object.fromEntries(
+    profiles.map(p => [p.id, p])
+  );
+
+  const merged = enrollments.map(e => ({
+    ...e,
+    profile: profilesMap[e.user_id] || null
+  }));
+
+  renderCourseUsers(merged);
 }
+
 
 
 function renderCourseUsers(list) {
@@ -354,7 +374,9 @@ function renderCourseUsers(list) {
   }
 
   list.forEach(row => {
-    const user = row.profiles;
+    const user = row.profile;
+    if (!user) return;
+
     const status = row.frozen_at
       ? "Congelado"
       : row.is_active
