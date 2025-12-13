@@ -8,6 +8,7 @@ let courseId = null;
 // Helpers DOM
 const $ = (id) => document.getElementById(id);
 
+
 // -------------------------------------------
 // INIT
 // -------------------------------------------
@@ -392,6 +393,8 @@ async function loadCourseLessons() {
       <td>${lesson.xp_reward ?? 0}</td>
       <td>${lesson.is_checkpoint ? "✔" : "—"}</td>
       <td class="table-actions">
+        <button class="btn-icon" onclick="moveLessonUp('${lesson.id}', ${lesson.day})">↑</button>
+        <button class="btn-icon" onclick="moveLessonDown('${lesson.id}', ${lesson.day})">↓</button>
         <button class="btn-small"
           onclick="editLesson('${lesson.id}')">
           Editar
@@ -406,6 +409,38 @@ async function loadCourseLessons() {
     lessonsTbody.appendChild(tr);
   });
 }
+
+async function moveLessonUp(lessonId, currentDay) {
+  if (currentDay <= 1) return;
+
+  await swapLessonDay(lessonId, currentDay, currentDay - 1);
+}
+
+async function moveLessonDown(lessonId, currentDay) {
+  await swapLessonDay(lessonId, currentDay, currentDay + 1);
+}
+
+async function swapLessonDay(lessonId, fromDay, toDay) {
+  if (!courseId) return;
+
+  // buscar la lección vecina
+  const { data: other, error } = await supabase
+    .from("lessons")
+    .select("id")
+    .eq("course_id", courseId)
+    .eq("day", toDay)
+    .single();
+
+  if (error || !other) return;
+
+  // swap
+  await supabase.from("lessons").update({ day: toDay }).eq("id", lessonId);
+  await supabase.from("lessons").update({ day: fromDay }).eq("id", other.id);
+
+  // recargar tabla
+  await loadCourseLessons();
+}
+
 
 // Navegación
 window.editLesson = (id) => {
