@@ -3,6 +3,7 @@ import { requireAdmin } from "/admin/js/admin-auth.js";
 
 const params = new URLSearchParams(window.location.search);
 const lessonId = params.get("id");
+const courseId = params.get("course_id"); // ✅ NUEVO
 
 const form = document.getElementById("lessonForm");
 const saveBtn = document.getElementById("btnSaveLesson");
@@ -17,6 +18,13 @@ const fields = [
 
 async function init() {
   await requireAdmin();
+
+  // ✅ VALIDACIÓN SOLO PARA CREAR
+  if (!lessonId && !courseId) {
+    alert("Esta lección debe pertenecer a un curso.");
+    window.location.href = "/admin/courses.html";
+    return;
+  }
 
   if (lessonId) {
     titleEl.textContent = "Editar lección";
@@ -92,9 +100,8 @@ saveBtn.addEventListener("click", async () => {
       .update(payload)
       .eq("id", lessonId);
   } else {
-    // CREAR
-    // ⚠️ course_id debe venir del admin (ver nota abajo)
-    payload.course_id = await getDefaultCourseId();
+    // ✅ CREAR — course_id VIENE DE LA URL
+    payload.course_id = courseId;
 
     result = await supabase
       .from("lessons")
@@ -110,25 +117,3 @@ saveBtn.addEventListener("click", async () => {
   alert("Lección guardada correctamente");
   window.location.href = "/admin/lessons.html";
 });
-
-
-// ================================
-// Obtener curso por defecto
-// ================================
-async function getDefaultCourseId() {
-  const { data, error } = await supabase
-    .from("courses")
-    .select("id")
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .single();
-
-  if (error || !data) {
-    alert("No hay cursos disponibles. Crea un curso primero.");
-    throw error;
-  }
-
-  return data.id;
-}
-
-
