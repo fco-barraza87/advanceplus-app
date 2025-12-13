@@ -207,6 +207,7 @@ async function loadCourseLessons() {
     .from("lessons")
     .select("id, day, title, xp_reward, is_checkpoint")
     .eq("course_id", courseId)
+    .eq("is_deleted", false)
     .order("day", { ascending: true });
 
   courseLessonsCache = data || [];
@@ -252,7 +253,36 @@ lessonsTbody.addEventListener("click", async (e) => {
   if (action === "up" || action === "down") {
     await moveLesson(id, action);
   }
+
+  if (action === "delete") {
+    const ok = confirm(
+      "¿Eliminar esta lección?\nNo se borrará definitivamente."
+    );
+    if (!ok) return;
+
+    await softDeleteLesson(id);
+  }
+
 });
+
+
+async function softDeleteLesson(lessonId) {
+  const { error } = await supabase
+    .from("lessons")
+    .update({
+      is_deleted: true,
+      deleted_at: new Date().toISOString()
+    })
+    .eq("id", lessonId);
+
+  if (error) {
+    console.error("Error eliminando lección:", error);
+    alert("No se pudo eliminar la lección");
+    return;
+  }
+
+  await loadCourseLessons();
+}
 
 async function moveLesson(id, dir) {
   const i = courseLessonsCache.findIndex(l => l.id === id);
