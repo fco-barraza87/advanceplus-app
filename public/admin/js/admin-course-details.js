@@ -22,6 +22,7 @@ async function init() {
 
   if (courseId) {
     await loadCourse(courseId);
+    await loadCourseLessons(); // 👈 AQUÍ
   } else {
     setupNewCourseMode();
   }
@@ -333,15 +334,87 @@ function formatDate(value) {
 }
 
 
-document.getElementById("btnNewLesson")?.addEventListener("click", () => {
-  const params = new URLSearchParams(window.location.search);
-  const courseId = params.get("id");
+// =======================================================
+// LECCIONES DEL CURSO
+// =======================================================
 
+const lessonsTbody = document.getElementById("courseLessonsBody");
+const btnNewLesson = document.getElementById("btnNewLesson");
+
+// Botón nueva lección
+btnNewLesson?.addEventListener("click", () => {
   if (!courseId) {
-    alert("No se pudo determinar el curso.");
+    alert("Guarda el curso antes de crear lecciones.");
     return;
   }
-
   window.location.href =
     `/admin/lesson-details.html?course_id=${courseId}`;
 });
+
+
+// Cargar lecciones
+async function loadCourseLessons() {
+  if (!lessonsTbody || !courseId) return;
+
+  const { data, error } = await supabase
+    .from("lessons")
+    .select("id, day, title, xp_reward, is_checkpoint")
+    .eq("course_id", courseId)
+    .order("day", { ascending: true });
+
+  if (error) {
+    console.error("[admin] Error cargando lecciones", error);
+    lessonsTbody.innerHTML = `
+      <tr><td colspan="5">Error cargando lecciones</td></tr>
+    `;
+    return;
+  }
+
+  if (!data.length) {
+    lessonsTbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="table-placeholder">
+          Este curso aún no tiene lecciones.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  lessonsTbody.innerHTML = "";
+
+  data.forEach(lesson => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>Día ${lesson.day}</td>
+      <td>${lesson.title ?? "(Sin título)"}</td>
+      <td>${lesson.xp_reward ?? 0}</td>
+      <td>${lesson.is_checkpoint ? "✔" : "—"}</td>
+      <td class="table-actions">
+        <button class="btn-small"
+          onclick="editLesson('${lesson.id}')">
+          Editar
+        </button>
+        <button class="btn-small btn-outline"
+          onclick="duplicateLesson('${lesson.id}')">
+          Duplicar
+        </button>
+      </td>
+    `;
+
+    lessonsTbody.appendChild(tr);
+  });
+}
+
+// Navegación
+window.editLesson = (id) => {
+  window.location.href = `/admin/lesson-details.html?id=${id}`;
+};
+
+window.duplicateLesson = (id) => {
+  window.location.href = `/admin/lesson-details.html?duplicate=${id}&course_id=${courseId}`;
+};
+
+// Ejecutar al cargar curso
+loadCourseLessons();

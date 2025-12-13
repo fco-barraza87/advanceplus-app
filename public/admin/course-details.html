@@ -242,32 +242,48 @@
       </section>
 
       <!-- TAB: LECCIONES -->
+<!-- TAB: LECCIONES -->
       <section id="tab-lessons" class="tab-panel">
+
         <section class="card">
           <div class="card-header card-header-inline">
             <div>
               <h2>Lecciones del curso</h2>
               <p class="card-subtitle">
-                Vista general de las lecciones asociadas a este curso.
+                Lecciones asociadas a este curso, ordenadas por día.
               </p>
             </div>
 
-            <div class="header-actions">
-              <button id="btnNewLesson" class="btn-primary" type="button">
+            <div class="card-actions">
+              <button id="btnNewLesson" class="btn-primary">
                 ➕ Nueva lección
-              </button>
-
-              <button id="btnGoLessons" class="btn-secondary" type="button">
-                Ver todas
               </button>
             </div>
           </div>
-          <p class="placeholder-text">
-            Aquí mostraremos el listado de lecciones cuando definamos la estructura exacta de la tabla
-            <code>lessons</code>.
-          </p>
+
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Día</th>
+                <th>Título</th>
+                <th>XP</th>
+                <th>Checkpoint</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="courseLessonsBody">
+              <tr>
+                <td colspan="5" class="table-placeholder">
+                  Cargando lecciones…
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
         </section>
+
       </section>
+
 
       <!-- TAB: INSCRITOS (PLACEHOLDER) -->
       <section id="tab-enrollments" class="tab-panel">

@@ -338,3 +338,33 @@
   background: var(--ap-gold);
   border-radius: 2px;
 }
+
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--ap-border);
+  text-align: left;
+  font-size: 14px;
+}
+
+.admin-table th {
+  font-weight: 600;
+  color: var(--ap-blue);
+  background: #fafafa;
+}
+
+.table-placeholder {
+  text-align: center;
+  opacity: 0.6;
+}
+
+.table-actions button {
+  margin-right: 6px;
+}
