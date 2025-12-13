@@ -3,7 +3,8 @@ import { requireAdmin } from "/admin/js/admin-auth.js";
 
 const params = new URLSearchParams(window.location.search);
 const lessonId = params.get("id");
-const courseId = params.get("course_id"); // ✅ NUEVO
+const duplicateId = params.get("duplicate"); // 🆕
+const courseId = params.get("course_id");    // ya correcto
 
 const form = document.getElementById("lessonForm");
 const saveBtn = document.getElementById("btnSaveLesson");
@@ -29,10 +30,16 @@ async function init() {
   if (lessonId) {
     titleEl.textContent = "Editar lección";
     await loadLesson();
-  } else {
+  } 
+  else if (duplicateId) {
+    titleEl.textContent = "Duplicar lección";
+    await duplicateLesson(duplicateId);
+  }
+  else {
     titleEl.textContent = "Nueva lección";
     setDefaults();
   }
+
 }
 
 init();
@@ -73,6 +80,39 @@ async function loadLesson() {
   document.getElementById("is_checkpoint").checked = !!data.is_checkpoint;
 }
 
+// ================================
+// DUPLICAR LECCIÓN
+// ================================
+async function duplicateLesson(sourceLessonId) {
+  const { data, error } = await supabase
+    .from("lessons")
+    .select("*")
+    .eq("id", sourceLessonId)
+    .single();
+
+  if (error || !data) {
+    alert("No se pudo duplicar la lección");
+    console.error(error);
+    return;
+  }
+
+  // Copiar campos editables
+  fields.forEach(f => {
+    const el = document.getElementById(f);
+    if (el && data[f] !== null) {
+      el.value = data[f];
+    }
+  });
+
+  // Ajustes SaaS estándar
+  document.getElementById("title").value =
+    `Copia · ${data.title ?? ""}`;
+
+  document.getElementById("day").value =
+    (data.day ?? 1) + 1;
+
+  document.getElementById("is_checkpoint").checked = false;
+}
 
 // ================================
 // GUARDAR (CREAR / EDITAR)
