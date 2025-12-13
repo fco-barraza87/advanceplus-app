@@ -130,3 +130,10 @@ async function getDefaultCourseId() {
 
   return data.id;
 }
+
+
+document.getElementById("btnNewLesson")?.addEventListener("click", () => {
+  const courseId = getCourseIdFromURL(); // ya lo tienes
+  window.location.href =
+    `/admin/lesson-details.html?course_id=${courseId}`;
+});
