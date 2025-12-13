@@ -294,3 +294,47 @@
     flex-wrap: wrap;
   }
 }
+
+
+/* =====================================================
+   TABS — Course Details
+===================================================== */
+
+.tabs-wrapper {
+  display: flex;
+  gap: 1.5rem;
+  border-bottom: 1px solid var(--ap-border);
+  margin-bottom: 2rem;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 0.75rem 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #6b7280; /* gris */
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.tab-button:hover {
+  color: var(--ap-blue);
+}
+
+.tab-button-active {
+  color: var(--ap-blue);
+  font-weight: 600;
+}
+
+.tab-button-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--ap-gold);
+  border-radius: 2px;
+}
