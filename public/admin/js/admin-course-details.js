@@ -20,6 +20,11 @@ async function init() {
 
   setupSidebarToggle();
   setupTabs();
+  const urlTab = new URLSearchParams(window.location.search).get("tab");
+  if (urlTab) {
+    document.querySelector(`.tab-button[data-tab="${urlTab}"]`)?.click();
+  }
+
   setupActions();
 
   if (courseId) {

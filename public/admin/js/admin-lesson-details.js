@@ -155,5 +155,15 @@ saveBtn.addEventListener("click", async () => {
   }
 
   alert("Lección guardada correctamente");
-  window.location.href = "/admin/lessons.html";
+
+  // 👉 Volver al contexto correcto
+  if (courseId) {
+    // Volver al curso, tab Lecciones
+    window.location.href =
+      `/admin/course-details.html?id=${courseId}&tab=lessons`;
+  } else {
+    // Fallback: lista global
+    window.location.href = "/admin/lessons.html";
+  }
+
 });
