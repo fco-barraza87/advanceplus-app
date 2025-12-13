@@ -331,3 +331,17 @@ function formatDate(value) {
     minute: "2-digit"
   });
 }
+
+
+document.getElementById("btnNewLesson")?.addEventListener("click", () => {
+  const params = new URLSearchParams(window.location.search);
+  const courseId = params.get("id");
+
+  if (!courseId) {
+    alert("No se pudo determinar el curso.");
+    return;
+  }
+
+  window.location.href =
+    `/admin/lesson-details.html?course_id=${courseId}`;
+});
