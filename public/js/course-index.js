@@ -292,6 +292,24 @@ async function init() {
     return;
   }
 
+  // 🔐 VALIDACIÓN DE ACCESO (OBLIGATORIA)
+  const { data: access } = await supabase
+    .from("user_courses")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("course_id", courseId)
+    .is("removed_at", null)
+    .eq("is_active", true)
+    .is("frozen_at", null)
+    .maybeSingle();
+
+  if (!access) {
+    alert("No tienes acceso a este curso");
+    window.location.href = "/dashboard/index.html";
+    return;
+  }
+
+  // ⬇️ SOLO SI TIENE ACCESO, SE CARGA EL CURSO
   try {
     const { course, userCourse, progress } = await loadCourseAndState(
       user.id,
@@ -306,7 +324,6 @@ async function init() {
     if (isEnrolled) {
       await renderLessonsList(course, progress, progressInfo);
     } else {
-      // Si no está inscrito todavía, mostramos la lista pero toda bloqueada
       const fakeProgress = [];
       const fakeInfo = {
         ...progressInfo,
@@ -320,5 +337,8 @@ async function init() {
     window.location.href = "/dashboard/index.html";
   }
 }
+
+
+
 
 init();

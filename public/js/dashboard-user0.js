@@ -131,11 +131,9 @@ async function renderGamification(stats, profile, userId) {
 async function loadActiveCourses(userId) {
   const { data: userCourses } = await supabase
     .from("user_courses")
-    .select("course_id, started_at")
+    .select("course_id, status, started_at")
     .eq("user_id", userId)
-    .is("removed_at", null)
-    .eq("is_active", true)
-    .is("frozen_at", null)
+    .eq("status", "active")
     .order("started_at", { ascending: false });
 
   const list = [];
@@ -143,16 +141,15 @@ async function loadActiveCourses(userId) {
   for (const uc of userCourses || []) {
     const { data: course } = await supabase
       .from("courses")
-      .select("id, title, slug, cover_url, category, level, duration_days")
+      .select("id, title, slug, cover_url, category, level, duration_days, active")
       .eq("id", uc.course_id)
       .single();
 
-    if (course) list.push(course);
+    if (course?.active) list.push(course);
   }
 
   return list;
 }
-
 
 function renderActiveCourses(courses, user) {
   const carousel = qs("#activeChallengesCarousel");
