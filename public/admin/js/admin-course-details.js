@@ -345,17 +345,38 @@ async function loadCourseUsers() {
     return;
   }
 
-  // 3️⃣ Merge manual (control total)
-  const profilesMap = Object.fromEntries(
-    profiles.map(p => [p.id, p])
-  );
+  // 4️⃣ Traer progreso de TODOS los usuarios del curso
+  const { data: progressRows, error: errProgress } = await supabase
+    .from("progress")
+    .select("user_id, completed")
+    .eq("course_id", courseId);
 
-  const merged = enrollments.map(e => ({
-    ...e,
-    profile: profilesMap[e.user_id] || null
-  }));
+  if (errProgress) {
+    console.error("[admin] Error cargando progreso", errProgress);
+  }
+
+  // Agrupar progreso por usuario
+  const progressByUser = {};
+  (progressRows || []).forEach(p => {
+    if (!progressByUser[p.user_id]) {
+      progressByUser[p.user_id] = { total: 0, completed: 0 };
+    }
+    progressByUser[p.user_id].total++;
+    if (p.completed) progressByUser[p.user_id].completed++;
+  });
+
+  // 5️⃣ Merge final (con progreso)
+  const merged = enrollments.map(e => {
+    const prog = progressByUser[e.user_id] || { total: 0, completed: 0 };
+    return {
+      ...e,
+      profile: profilesMap[e.user_id] || null,
+      progress: prog
+    };
+  });
 
   renderCourseUsers(merged);
+
 }
 
 
@@ -383,12 +404,25 @@ function renderCourseUsers(list) {
       ? "Activo"
       : "Inactivo";
 
+    // ✅ PROGRESO
+    const total = row.progress?.total || 0;
+    const done = row.progress?.completed || 0;
+
+    let progressLabel = "—";
+    if (total > 0) {
+      const pct = Math.round((done / total) * 100);
+      progressLabel =
+        done >= total
+          ? "Completado"
+          : `${done} / ${total} (${pct}%)`;
+    }
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${user.full_name ?? "—"}</td>
       <td>${user.email ?? "—"}</td>
       <td>${status}</td>
-      <td>—</td>
+      <td>${progressLabel}</td>
       <td class="table-actions">
         <button data-action="freeze" data-user="${row.user_id}">
           ${row.frozen_at ? "Descongelar" : "Congelar"}
