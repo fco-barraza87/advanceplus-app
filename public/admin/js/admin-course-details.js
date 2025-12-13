@@ -453,3 +453,53 @@ window.duplicateLesson = (id) => {
 
 // Ejecutar al cargar curso
 loadCourseLessons();
+
+
+// =======================================================
+// REORDENAR LECCIONES (UP / DOWN)
+// =======================================================
+
+window.moveLessonUp = async (lessonId, currentDay) => {
+  if (currentDay <= 1) return;
+
+  await swapLessonDays(lessonId, currentDay, currentDay - 1);
+};
+
+window.moveLessonDown = async (lessonId, currentDay) => {
+  await swapLessonDays(lessonId, currentDay, currentDay + 1);
+};
+
+async function swapLessonDays(lessonId, dayA, dayB) {
+  // 1. Buscar la otra lección
+  const { data: otherLesson, error: fetchError } = await supabase
+    .from("lessons")
+    .select("id")
+    .eq("course_id", courseId)
+    .eq("day", dayB)
+    .single();
+
+  if (fetchError || !otherLesson) {
+    console.warn("No hay lección para intercambiar");
+    return;
+  }
+
+  // 2. Intercambiar días (transacción lógica)
+  const { error: updateError1 } = await supabase
+    .from("lessons")
+    .update({ day: dayB })
+    .eq("id", lessonId);
+
+  const { error: updateError2 } = await supabase
+    .from("lessons")
+    .update({ day: dayA })
+    .eq("id", otherLesson.id);
+
+  if (updateError1 || updateError2) {
+    alert("Error reordenando lecciones");
+    console.error(updateError1 || updateError2);
+    return;
+  }
+
+  // 3. Refrescar tabla
+  await loadCourseLessons();
+};
