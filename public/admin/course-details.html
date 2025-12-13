@@ -285,17 +285,49 @@
       </section>
 
 
-      <!-- TAB: INSCRITOS (PLACEHOLDER) -->
+      <!-- TAB: INSCRITOS -->
       <section id="tab-enrollments" class="tab-panel">
-        <section class="card card-placeholder">
-          <div class="card-header">
-            <h2>Inscritos</h2>
-            <p class="card-subtitle">
-              Próximamente: resumen de usuarios inscritos al curso, progreso medio y filtros por estado.
-            </p>
+
+        <section class="card">
+          <div class="card-header card-header-inline">
+            <div>
+              <h2>Usuarios inscritos</h2>
+              <p class="card-subtitle">
+                Gestión de usuarios inscritos en este curso.
+              </p>
+            </div>
+
+            <div class="card-actions">
+              <button id="btnEnrollUser" class="btn-primary">
+                ➕ Inscribir usuario
+              </button>
+            </div>
           </div>
+
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Email</th>
+                <th>Estado</th>
+                <th>Progreso</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+
+            <tbody id="courseUsersBody">
+              <tr>
+                <td colspan="5" class="table-placeholder">
+                  Cargando usuarios…
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
         </section>
+
       </section>
+
 
       <!-- TAB: LOGS (PLACEHOLDER) -->
       <section id="tab-logs" class="tab-panel">

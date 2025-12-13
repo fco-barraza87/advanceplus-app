@@ -30,6 +30,7 @@ async function init() {
   if (courseId) {
     await loadCourse(courseId);
     await loadCourseLessons();
+    await loadCourseUsers();
   } else {
     setupNewCourseMode();
   }
@@ -303,3 +304,145 @@ async function moveLesson(id, dir) {
 
   await loadCourseLessons();
 }
+
+
+const usersTbody = document.getElementById("courseUsersBody");
+const btnEnrollUser = document.getElementById("btnEnrollUser");
+
+
+async function loadCourseUsers() {
+  if (!courseId || !usersTbody) return;
+
+  const { data, error } = await supabase
+    .from("user_courses")
+    .select(`
+      user_id,
+      is_active,
+      frozen_at,
+      removed_at,
+      profiles (
+        full_name,
+        email,
+        avatar_url
+      )
+    `)
+    .eq("course_id", courseId)
+    .is("removed_at", null);
+
+  if (error) {
+    console.error("[admin] Error cargando inscritos", error);
+    usersTbody.innerHTML =
+      `<tr><td colspan="5">Error cargando usuarios</td></tr>`;
+    return;
+  }
+
+  renderCourseUsers(data || []);
+}
+
+
+function renderCourseUsers(list) {
+  usersTbody.innerHTML = "";
+
+  if (!list.length) {
+    usersTbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="table-placeholder">
+          No hay usuarios inscritos en este curso.
+        </td>
+      </tr>`;
+    return;
+  }
+
+  list.forEach(row => {
+    const user = row.profiles;
+    const status = row.frozen_at
+      ? "Congelado"
+      : row.is_active
+      ? "Activo"
+      : "Inactivo";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${user.full_name ?? "—"}</td>
+      <td>${user.email ?? "—"}</td>
+      <td>${status}</td>
+      <td>—</td>
+      <td class="table-actions">
+        <button data-action="freeze" data-user="${row.user_id}">
+          ${row.frozen_at ? "Descongelar" : "Congelar"}
+        </button>
+        <button data-action="reset" data-user="${row.user_id}">
+          Reset progreso
+        </button>
+        <button data-action="remove" data-user="${row.user_id}">
+          Quitar
+        </button>
+      </td>
+    `;
+    usersTbody.appendChild(tr);
+  });
+}
+
+
+usersTbody?.addEventListener("click", async (e) => {
+  const btn = e.target.closest("button");
+  if (!btn) return;
+
+  const userId = btn.dataset.user;
+  const action = btn.dataset.action;
+
+  if (!userId || !action) return;
+
+  if (action === "freeze") {
+    await supabase.rpc("freeze_user_course", {
+      p_user: userId,
+      p_course: courseId,
+      p_freeze: btn.textContent === "Congelar"
+    });
+  }
+
+  if (action === "reset") {
+    const ok = confirm("¿Resetear progreso del usuario en este curso?");
+    if (!ok) return;
+
+    await supabase.rpc("reset_user_course_progress", {
+      p_user: userId,
+      p_course: courseId
+    });
+  }
+
+  if (action === "remove") {
+    const ok = confirm("¿Quitar usuario del curso?");
+    if (!ok) return;
+
+    await supabase.rpc("remove_user_from_course", {
+      p_user: userId,
+      p_course: courseId
+    });
+  }
+
+  await loadCourseUsers();
+});
+
+btnEnrollUser?.addEventListener("click", async () => {
+  const email = prompt("Email del usuario a inscribir:");
+  if (!email) return;
+
+  const { data: user } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("email", email)
+    .single();
+
+  if (!user) {
+    alert("Usuario no encontrado");
+    return;
+  }
+
+  await supabase.rpc("enroll_user_to_course", {
+    p_user: user.id,
+    p_course: courseId
+  });
+
+  await loadCourseUsers();
+});
