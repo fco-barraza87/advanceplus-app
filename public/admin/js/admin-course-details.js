@@ -515,61 +515,60 @@ const feedbackTbody = document.getElementById("courseFeedbackBody");
 async function loadCourseFeedback() {
   if (!courseId || !feedbackTbody) return;
 
-  // 1) Traer feedback del curso
-  const { data: feedbackRows, error: errFb } = await supabase
+  const lessonId = document.getElementById("filterLesson")?.value;
+  const rating = document.getElementById("filterRating")?.value;
+  const commentFilter = document.getElementById("filterComment")?.value;
+
+  let query = supabase
     .from("lesson_feedback")
-    .select("id, user_id, lesson_id, day, rating, comment, created_at")
+    .select(`
+      id,
+      day,
+      rating,
+      comment,
+      created_at,
+      profiles (
+        full_name,
+        email
+      ),
+      lessons (
+        title
+      )
+    `)
     .eq("course_id", courseId)
     .order("created_at", { ascending: false });
 
-  if (errFb) {
-    console.error("[admin] Error cargando feedback", errFb);
-    feedbackTbody.innerHTML = `<tr><td colspan="6">Error cargando feedback</td></tr>`;
+  // 🔹 Filtro por lección
+  if (lessonId) {
+    query = query.eq("lesson_id", lessonId);
+  }
+
+  // 🔹 Filtro por rating
+  if (rating) {
+    query = query.eq("rating", Number(rating));
+  }
+
+  // 🔹 Filtro por comentario
+  if (commentFilter === "with") {
+    query = query.not("comment", "is", null);
+  }
+
+  if (commentFilter === "without") {
+    query = query.is("comment", null);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("[admin] Error cargando feedback", error);
+    feedbackTbody.innerHTML =
+      `<tr><td colspan="6">Error cargando feedback</td></tr>`;
     return;
   }
 
-  if (!feedbackRows?.length) {
-    renderCourseFeedback([]);
-    return;
-  }
-
-  // 2) Traer perfiles involucrados
-  const userIds = [...new Set(feedbackRows.map(r => r.user_id).filter(Boolean))];
-
-  const { data: profiles, error: errProfiles } = await supabase
-    .from("profiles")
-    .select("id, full_name, email")
-    .in("id", userIds);
-
-  if (errProfiles) {
-    console.error("[admin] Error cargando perfiles feedback", errProfiles);
-  }
-
-  const profilesMap = Object.fromEntries((profiles || []).map(p => [p.id, p]));
-
-  // 3) Traer títulos de lecciones involucradas
-  const lessonIds = [...new Set(feedbackRows.map(r => r.lesson_id).filter(Boolean))];
-
-  const { data: lessons, error: errLessons } = await supabase
-    .from("lessons")
-    .select("id, title")
-    .in("id", lessonIds);
-
-  if (errLessons) {
-    console.error("[admin] Error cargando lessons feedback", errLessons);
-  }
-
-  const lessonsMap = Object.fromEntries((lessons || []).map(l => [l.id, l]));
-
-  // 4) Merge final
-  const merged = feedbackRows.map(fb => ({
-    ...fb,
-    profile: profilesMap[fb.user_id] || null,
-    lesson: lessonsMap[fb.lesson_id] || null
-  }));
-
-  renderCourseFeedback(merged);
+  renderCourseFeedback(data || []);
 }
+
 
 function renderCourseFeedback(list) {
   feedbackTbody.innerHTML = "";
@@ -613,6 +612,13 @@ function renderCourseFeedback(list) {
   });
 }
 
+// =======================================================
+// FEEDBACK FILTERS EVENTS
+// =======================================================
 
-
+document
+  .getElementById("btnApplyFeedbackFilters")
+  ?.addEventListener("click", () => {
+    loadCourseFeedback();
+  });
 
