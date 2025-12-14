@@ -598,6 +598,8 @@ async function loadCourseFeedback(reset = true) {
     profile: profilesMap[fb.user_id] || null,
     lesson: lessonsMap[fb.lesson_id] || null
   }));
+  
+  renderFeedbackKpis(merged);
 
   computeFeedbackInsights(merged);
   renderCourseFeedback(merged, !reset);
@@ -679,6 +681,53 @@ function computeFeedbackInsights(list) {
     user: f.profile?.full_name,
     created_at: f.created_at
   }));
+}
+
+// feedbackinsight
+function renderFeedbackKpis(list) {
+  if (!list || !list.length) {
+    document.getElementById("kpiAvgRating").textContent = "—";
+    document.getElementById("kpiTotalFeedback").textContent = "0";
+    document.getElementById("kpiFrictionLessons").textContent = "0";
+    document.getElementById("kpiQualityAlert").style.display = "none";
+    return;
+  }
+
+  // ⭐ Rating promedio
+  const ratings = list.filter(f => typeof f.rating === "number");
+  const avgRating =
+    ratings.reduce((sum, f) => sum + f.rating, 0) / ratings.length;
+
+  // ⚠️ Fricción por lección
+  const friction = {};
+  list.forEach(f => {
+    if (!f.lesson?.title) return;
+    if (!friction[f.lesson.title]) {
+      friction[f.lesson.title] = { total: 0, low: 0 };
+    }
+    friction[f.lesson.title].total++;
+    if (f.rating <= 2) friction[f.lesson.title].low++;
+  });
+
+  const frictionLessons = Object.entries(friction)
+    .filter(([, v]) => v.low / v.total >= 0.4);
+
+  // 🔴 Alerta calidad
+  const showAlert =
+    avgRating < 3.5 || frictionLessons.length > 0;
+
+  // 🎯 Render KPIs
+  document.getElementById("kpiAvgRating").textContent =
+    avgRating.toFixed(2);
+
+  document.getElementById("kpiTotalFeedback").textContent =
+    list.length;
+
+  document.getElementById("kpiFrictionLessons").textContent =
+    frictionLessons.length;
+
+  document.getElementById("kpiQualityAlert").style.display =
+    showAlert ? "block" : "none";
 }
 
 
