@@ -515,34 +515,106 @@ const feedbackTbody = document.getElementById("courseFeedbackBody");
 async function loadCourseFeedback() {
   if (!courseId || !feedbackTbody) return;
 
-  const { data, error } = await supabase
+  // 1) Traer feedback del curso
+  const { data: feedbackRows, error: errFb } = await supabase
     .from("lesson_feedback")
-    .select(`
-      id,
-      day,
-      rating,
-      comment,
-      created_at,
-      profiles:profiles!lesson_feedback_user_id_fkey (
-        full_name,
-        email
-      ),
-      lessons:lessons!lesson_feedback_lesson_id_fkey (
-        title
-      )
-    `)
+    .select("id, user_id, lesson_id, day, rating, comment, created_at")
     .eq("course_id", courseId)
     .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("[admin] Error cargando feedback", error);
-    feedbackTbody.innerHTML =
-      `<tr><td colspan="6">Error cargando feedback</td></tr>`;
+  if (errFb) {
+    console.error("[admin] Error cargando feedback", errFb);
+    feedbackTbody.innerHTML = `<tr><td colspan="6">Error cargando feedback</td></tr>`;
     return;
   }
 
-  renderCourseFeedback(data || []);
+  if (!feedbackRows?.length) {
+    renderCourseFeedback([]);
+    return;
+  }
+
+  // 2) Traer perfiles involucrados
+  const userIds = [...new Set(feedbackRows.map(r => r.user_id).filter(Boolean))];
+
+  const { data: profiles, error: errProfiles } = await supabase
+    .from("profiles")
+    .select("id, full_name, email")
+    .in("id", userIds);
+
+  if (errProfiles) {
+    console.error("[admin] Error cargando perfiles feedback", errProfiles);
+  }
+
+  const profilesMap = Object.fromEntries((profiles || []).map(p => [p.id, p]));
+
+  // 3) Traer títulos de lecciones involucradas
+  const lessonIds = [...new Set(feedbackRows.map(r => r.lesson_id).filter(Boolean))];
+
+  const { data: lessons, error: errLessons } = await supabase
+    .from("lessons")
+    .select("id, title")
+    .in("id", lessonIds);
+
+  if (errLessons) {
+    console.error("[admin] Error cargando lessons feedback", errLessons);
+  }
+
+  const lessonsMap = Object.fromEntries((lessons || []).map(l => [l.id, l]));
+
+  // 4) Merge final
+  const merged = feedbackRows.map(fb => ({
+    ...fb,
+    profile: profilesMap[fb.user_id] || null,
+    lesson: lessonsMap[fb.lesson_id] || null
+  }));
+
+  renderCourseFeedback(merged);
 }
+
+function renderCourseFeedback(list) {
+  feedbackTbody.innerHTML = "";
+
+  if (!list.length) {
+    feedbackTbody.innerHTML = `
+      <tr>
+        <td colspan="6" class="table-placeholder">
+          No hay feedback aún.
+        </td>
+      </tr>`;
+    return;
+  }
+
+  list.forEach(fb => {
+    const userName = fb.profile?.full_name ?? "—";
+    const userEmail = fb.profile?.email ?? "—";
+    const lessonTitle = fb.lesson?.title ?? "—";
+    const rating = fb.rating ?? "—";
+    const comment = fb.comment ?? "—";
+    const dayLabel = fb.day ? `Día ${fb.day}` : "—";
+    const when = fb.created_at ? new Date(fb.created_at).toLocaleString() : "—";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>
+        <div style="display:flex;flex-direction:column;gap:2px;">
+          <span>${userName}</span>
+          <span style="opacity:.7;font-size:12px;">${userEmail}</span>
+        </div>
+      </td>
+      <td>${lessonTitle}</td>
+      <td>${dayLabel}</td>
+      <td>${rating}</td>
+      <td style="max-width:420px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+        ${comment}
+      </td>
+      <td>${when}</td>
+    `;
+    feedbackTbody.appendChild(tr);
+  });
+}
+
+
+
 
 function renderCourseFeedback(list) {
   feedbackTbody.innerHTML = "";
