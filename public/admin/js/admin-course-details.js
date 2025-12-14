@@ -32,6 +32,8 @@ async function init() {
     await loadCourseLessons();
     await loadCourseUsers();
     await loadCourseFeedback();
+    await populateFeedbackLessonFilter();
+
   } else {
     setupNewCourseMode();
   }
@@ -571,48 +573,145 @@ async function loadCourseFeedback() {
   renderCourseFeedback(merged);
 }
 
-function renderCourseFeedback(list) {
-  feedbackTbody.innerHTML = "";
+async function loadCourseFeedback() {
+  if (!courseId || !feedbackTbody) return;
 
-  if (!list.length) {
-    feedbackTbody.innerHTML = `
-      <tr>
-        <td colspan="6" class="table-placeholder">
-          No hay feedback aún.
-        </td>
-      </tr>`;
+  // 🎛️ Leer filtros UI
+  const lessonId = document.getElementById("filterLesson")?.value || "";
+  const rating = document.getElementById("filterRating")?.value || "";
+  const commentFilter = document.getElementById("filterComment")?.value || "";
+
+  // 🧠 Query base
+  let query = supabase
+    .from("lesson_feedback")
+    .select(`
+      id,
+      day,
+      rating,
+      comment,
+      created_at,
+      user_id,
+      lesson_id
+    `)
+    .eq("course_id", courseId)
+    .order("created_at", { ascending: false });
+
+  // 🎯 Aplicar filtros reales
+  if (lessonId) query = query.eq("lesson_id", lessonId);
+  if (rating) query = query.eq("rating", Number(rating));
+  if (commentFilter === "with") query = query.not("comment", "is", null);
+  if (commentFilter === "without") query = query.is("comment", null);
+
+  const { data: feedback, error } = await query;
+
+  if (error) {
+    console.error("[admin] Error cargando feedback", error);
+    feedbackTbody.innerHTML =
+      `<tr><td colspan="6">Error cargando feedback</td></tr>`;
     return;
   }
 
-  list.forEach(fb => {
-    const userName = fb.profile?.full_name ?? "—";
-    const userEmail = fb.profile?.email ?? "—";
-    const lessonTitle = fb.lesson?.title ?? "—";
-    const rating = fb.rating ?? "—";
-    const comment = fb.comment ?? "—";
-    const dayLabel = fb.day ? `Día ${fb.day}` : "—";
-    const when = fb.created_at ? new Date(fb.created_at).toLocaleString() : "—";
+  if (!feedback.length) {
+    renderCourseFeedback([]);
+    return;
+  }
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>
-        <div style="display:flex;flex-direction:column;gap:2px;">
-          <span>${userName}</span>
-          <span style="opacity:.7;font-size:12px;">${userEmail}</span>
-        </div>
-      </td>
-      <td>${lessonTitle}</td>
-      <td>${dayLabel}</td>
-      <td>${rating}</td>
-      <td style="max-width:420px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-        ${comment}
-      </td>
-      <td>${when}</td>
-    `;
-    feedbackTbody.appendChild(tr);
+  // 👤 Traer usuarios
+  const userIds = [...new Set(feedback.map(f => f.user_id))];
+  const lessonIds = [...new Set(feedback.map(f => f.lesson_id))];
+
+  const [{ data: profiles }, { data: lessons }] = await Promise.all([
+    supabase.from("profiles").select("id, full_name, email").in("id", userIds),
+    supabase.from("lessons").select("id, title").in("id", lessonIds)
+  ]);
+
+  const profilesMap = Object.fromEntries(profiles.map(p => [p.id, p]));
+  const lessonsMap = Object.fromEntries(lessons.map(l => [l.id, l]));
+
+  // 🔗 Merge FINAL (MISMO SHAPE QUE ANTES)
+  const merged = feedback.map(fb => ({
+    ...fb,
+    profile: profilesMap[fb.user_id] || null,
+    lesson: lessonsMap[fb.lesson_id] || null
+  }));
+
+  // 📊 Analítica PRO
+  computeFeedbackInsights(merged);
+
+  // 🎨 Render
+  renderCourseFeedback(merged);
+}
+
+// =======================================================
+// FEEDBACK FILTERS EVENTS
+// =======================================================
+
+document
+  .getElementById("btnApplyFeedbackFilters")
+  ?.addEventListener("click", () => {
+    loadCourseFeedback();
+  });
+
+
+
+  // filterlessons
+async function populateFeedbackLessonFilter() {
+  const select = document.getElementById("filterLesson");
+  if (!select || !courseId) return;
+
+  const { data: lessons } = await supabase
+    .from("lessons")
+    .select("id, title")
+    .eq("course_id", courseId)
+    .eq("is_deleted", false)
+    .order("day");
+
+  lessons.forEach(l => {
+    const opt = document.createElement("option");
+    opt.value = l.id;
+    opt.textContent = l.title;
+    select.appendChild(opt);
   });
 }
 
 
+// metricas pro
 
+function computeFeedbackInsights(list) {
+  if (!list.length) return;
+
+  // ⭐ Rating promedio
+  const ratings = list.filter(f => typeof f.rating === "number");
+  const avgRating =
+    ratings.reduce((s, r) => s + r.rating, 0) / ratings.length;
+
+  // 🔥 Fricción por lección
+  const friction = {};
+  list.forEach(f => {
+    if (!f.lesson?.title) return;
+    if (!friction[f.lesson.title]) {
+      friction[f.lesson.title] = { total: 0, low: 0 };
+    }
+    friction[f.lesson.title].total++;
+    if (f.rating <= 2) friction[f.lesson.title].low++;
+  });
+
+  const lessonsAtRisk = Object.entries(friction)
+    .filter(([, v]) => v.low / v.total >= 0.4)
+    .map(([k]) => k);
+
+  console.group("📊 Feedback Insights");
+  console.log("⭐ Rating promedio:", avgRating.toFixed(2));
+  console.log("⚠️ Lecciones con fricción:", lessonsAtRisk);
+  console.groupEnd();
+
+  // 🤖 Input Coach IA
+  window.__coachIA_feedback_input = list.map(f => ({
+    lesson: f.lesson?.title,
+    rating: f.rating,
+    comment: f.comment,
+    user: f.profile?.full_name,
+    created_at: f.created_at
+  }));
+}
 
