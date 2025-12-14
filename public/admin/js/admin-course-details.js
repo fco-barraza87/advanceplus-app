@@ -514,64 +514,6 @@ btnEnrollUser?.addEventListener("click", async () => {
 
 const feedbackTbody = document.getElementById("courseFeedbackBody");
 
-async function loadCourseFeedback() {
-  if (!courseId || !feedbackTbody) return;
-
-  // 1) Traer feedback del curso
-  const { data: feedbackRows, error: errFb } = await supabase
-    .from("lesson_feedback")
-    .select("id, user_id, lesson_id, day, rating, comment, created_at")
-    .eq("course_id", courseId)
-    .order("created_at", { ascending: false });
-
-  if (errFb) {
-    console.error("[admin] Error cargando feedback", errFb);
-    feedbackTbody.innerHTML = `<tr><td colspan="6">Error cargando feedback</td></tr>`;
-    return;
-  }
-
-  if (!feedbackRows?.length) {
-    renderCourseFeedback([]);
-    return;
-  }
-
-  // 2) Traer perfiles involucrados
-  const userIds = [...new Set(feedbackRows.map(r => r.user_id).filter(Boolean))];
-
-  const { data: profiles, error: errProfiles } = await supabase
-    .from("profiles")
-    .select("id, full_name, email")
-    .in("id", userIds);
-
-  if (errProfiles) {
-    console.error("[admin] Error cargando perfiles feedback", errProfiles);
-  }
-
-  const profilesMap = Object.fromEntries((profiles || []).map(p => [p.id, p]));
-
-  // 3) Traer títulos de lecciones involucradas
-  const lessonIds = [...new Set(feedbackRows.map(r => r.lesson_id).filter(Boolean))];
-
-  const { data: lessons, error: errLessons } = await supabase
-    .from("lessons")
-    .select("id, title")
-    .in("id", lessonIds);
-
-  if (errLessons) {
-    console.error("[admin] Error cargando lessons feedback", errLessons);
-  }
-
-  const lessonsMap = Object.fromEntries((lessons || []).map(l => [l.id, l]));
-
-  // 4) Merge final
-  const merged = feedbackRows.map(fb => ({
-    ...fb,
-    profile: profilesMap[fb.user_id] || null,
-    lesson: lessonsMap[fb.lesson_id] || null
-  }));
-
-  renderCourseFeedback(merged);
-}
 
 async function loadCourseFeedback() {
   if (!courseId || !feedbackTbody) return;
