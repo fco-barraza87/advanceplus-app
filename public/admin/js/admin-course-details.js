@@ -598,7 +598,7 @@ async function loadCourseFeedback(reset = true) {
     profile: profilesMap[fb.user_id] || null,
     lesson: lessonsMap[fb.lesson_id] || null
   }));
-  
+
   renderFeedbackKpis(merged);
 
   computeFeedbackInsights(merged);
@@ -670,7 +670,7 @@ function computeFeedbackInsights(list) {
 
   console.group("📊 Feedback Insights");
   console.log("⭐ Rating promedio:", avgRating.toFixed(2));
-  console.log("⚠️ Lecciones con fricción:", lessonsAtRisk);
+  console.log("⚠️ Lecciones con fricción (que rankearon y no dejaron comentario o viceversa):", lessonsAtRisk);
   console.groupEnd();
 
   // 🤖 Input Coach IA
