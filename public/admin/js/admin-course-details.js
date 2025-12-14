@@ -5,6 +5,13 @@ import { requireAdmin } from "/admin/js/admin-auth.js";
 let courseId = null;
 let courseLessonsCache = [];
 
+// ================================
+// FEEDBACK PAGINATION
+// ================================
+let feedbackOffset = 0;
+const FEEDBACK_LIMIT = 30;
+let feedbackHasMore = true;
+
 // Helpers DOM
 const $ = (id) => document.getElementById(id);
 
@@ -515,7 +522,13 @@ btnEnrollUser?.addEventListener("click", async () => {
 const feedbackTbody = document.getElementById("courseFeedbackBody");
 
 
-async function loadCourseFeedback() {
+async function loadCourseFeedback(reset = true) {
+  if (reset) {
+    feedbackOffset = 0;
+    feedbackHasMore = true;
+    feedbackTbody.innerHTML = "";
+  }
+
   if (!courseId || !feedbackTbody) return;
 
   // 🎛️ Leer filtros UI
@@ -524,19 +537,32 @@ async function loadCourseFeedback() {
   const commentFilter = document.getElementById("filterComment")?.value || "";
 
   // 🧠 Query base
-  let query = supabase
-    .from("lesson_feedback")
-    .select(`
-      id,
-      day,
-      rating,
-      comment,
-      created_at,
-      user_id,
-      lesson_id
-    `)
-    .eq("course_id", courseId)
-    .order("created_at", { ascending: false });
+let query = supabase
+  .from("lesson_feedback")
+  .select(`
+    id,
+    day,
+    rating,
+    comment,
+    created_at,
+    user_id,
+    lesson_id
+  `)
+  .eq("course_id", courseId)
+  .order("created_at", { ascending: false })
+  .range(
+    feedbackOffset,
+    feedbackOffset + FEEDBACK_LIMIT - 1
+  );
+
+
+  if (feedback.length < FEEDBACK_LIMIT) {
+  feedbackHasMore = false;
+  document.getElementById("btnLoadMoreFeedback")?.classList.add("hidden");
+    } else {
+      document.getElementById("btnLoadMoreFeedback")?.classList.remove("hidden");
+    }
+
 
   // 🎯 Aplicar filtros reales
   if (lessonId) query = query.eq("lesson_id", lessonId);
@@ -581,7 +607,7 @@ async function loadCourseFeedback() {
   computeFeedbackInsights(merged);
 
   // 🎨 Render
-  renderCourseFeedback(merged);
+  renderCourseFeedback(merged, !reset);
 }
 
 // =======================================================
@@ -594,6 +620,11 @@ document
     loadCourseFeedback();
   });
 
+document
+  .getElementById("btnLoadMoreFeedback")
+  ?.addEventListener("click", () => {
+    loadCourseFeedback(false);
+  });
 
 
   // filterlessons
@@ -657,7 +688,10 @@ function computeFeedbackInsights(list) {
   }));
 }
 
-function renderCourseFeedback(list) {
+feedbackOffset += feedback.length;
+
+function renderCourseFeedback(list, append = false) {
+  if (!append) feedbackTbody.innerHTML = "";
   feedbackTbody.innerHTML = "";
 
   if (!list.length) {
