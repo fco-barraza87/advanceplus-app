@@ -616,29 +616,3 @@ function renderCourseFeedback(list) {
 
 
 
-function renderCourseFeedback(list) {
-  feedbackTbody.innerHTML = "";
-
-  if (!list.length) {
-    feedbackTbody.innerHTML = `
-      <tr>
-        <td colspan="6" class="table-placeholder">
-          No hay feedback aún.
-        </td>
-      </tr>`;
-    return;
-  }
-
-  list.forEach(fb => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${fb.profiles?.full_name ?? "—"}</td>
-      <td>${fb.lessons?.title ?? "—"}</td>
-      <td>Día ${fb.day}</td>
-      <td>${fb.rating ?? "—"}</td>
-      <td>${fb.comment ?? "—"}</td>
-      <td>${new Date(fb.created_at).toLocaleString()}</td>
-    `;
-    feedbackTbody.appendChild(tr);
-  });
-}
