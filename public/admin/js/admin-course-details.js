@@ -523,68 +523,65 @@ const feedbackTbody = document.getElementById("courseFeedbackBody");
 
 
 async function loadCourseFeedback(reset = true) {
+  if (!courseId || !feedbackTbody) return;
+
   if (reset) {
     feedbackOffset = 0;
     feedbackHasMore = true;
     feedbackTbody.innerHTML = "";
   }
 
-  if (!courseId || !feedbackTbody) return;
-
-  // 🎛️ Leer filtros UI
+  // 🎛️ Filtros UI
   const lessonId = document.getElementById("filterLesson")?.value || "";
   const rating = document.getElementById("filterRating")?.value || "";
   const commentFilter = document.getElementById("filterComment")?.value || "";
 
   // 🧠 Query base
-let query = supabase
-  .from("lesson_feedback")
-  .select(`
-    id,
-    day,
-    rating,
-    comment,
-    created_at,
-    user_id,
-    lesson_id
-  `)
-  .eq("course_id", courseId)
-  .order("created_at", { ascending: false })
-  .range(
-    feedbackOffset,
-    feedbackOffset + FEEDBACK_LIMIT - 1
-  );
+  let query = supabase
+    .from("lesson_feedback")
+    .select(`
+      id,
+      day,
+      rating,
+      comment,
+      created_at,
+      user_id,
+      lesson_id
+    `)
+    .eq("course_id", courseId)
+    .order("created_at", { ascending: false })
+    .range(feedbackOffset, feedbackOffset + FEEDBACK_LIMIT - 1);
 
-
-  if (feedback.length < FEEDBACK_LIMIT) {
-  feedbackHasMore = false;
-  document.getElementById("btnLoadMoreFeedback")?.classList.add("hidden");
-    } else {
-      document.getElementById("btnLoadMoreFeedback")?.classList.remove("hidden");
-    }
-
-
-  // 🎯 Aplicar filtros reales
+  // 🎯 Filtros reales
   if (lessonId) query = query.eq("lesson_id", lessonId);
   if (rating) query = query.eq("rating", Number(rating));
   if (commentFilter === "with") query = query.not("comment", "is", null);
   if (commentFilter === "without") query = query.is("comment", null);
 
+  // 🚀 Fetch
   const { data: feedback, error } = await query;
 
   if (error) {
     console.error("[admin] Error cargando feedback", error);
-    feedbackTbody.innerHTML =
-      `<tr><td colspan="6">Error cargando feedback</td></tr>`;
     return;
   }
 
-  if (!feedback.length) {
+  // 📦 Control paginación
+  if (feedback.length < FEEDBACK_LIMIT) {
+    feedbackHasMore = false;
+    document.getElementById("btnLoadMoreFeedback")?.classList.add("hidden");
+  } else {
+    document.getElementById("btnLoadMoreFeedback")?.classList.remove("hidden");
+  }
+
+  feedbackOffset += feedback.length;
+
+  if (!feedback.length && reset) {
     renderCourseFeedback([]);
     return;
   }
 
-  // 👤 Traer usuarios
+  // 👤 Usuarios + lecciones
   const userIds = [...new Set(feedback.map(f => f.user_id))];
   const lessonIds = [...new Set(feedback.map(f => f.lesson_id))];
 
@@ -596,17 +593,13 @@ let query = supabase
   const profilesMap = Object.fromEntries(profiles.map(p => [p.id, p]));
   const lessonsMap = Object.fromEntries(lessons.map(l => [l.id, l]));
 
-  // 🔗 Merge FINAL (MISMO SHAPE QUE ANTES)
   const merged = feedback.map(fb => ({
     ...fb,
     profile: profilesMap[fb.user_id] || null,
     lesson: lessonsMap[fb.lesson_id] || null
   }));
 
-  // 📊 Analítica PRO
   computeFeedbackInsights(merged);
-
-  // 🎨 Render
   renderCourseFeedback(merged, !reset);
 }
 
@@ -688,13 +681,11 @@ function computeFeedbackInsights(list) {
   }));
 }
 
-feedbackOffset += feedback.length;
 
 function renderCourseFeedback(list, append = false) {
   if (!append) feedbackTbody.innerHTML = "";
-  feedbackTbody.innerHTML = "";
 
-  if (!list.length) {
+  if (!list.length && !append) {
     feedbackTbody.innerHTML = `
       <tr>
         <td colspan="6" class="table-placeholder">
@@ -705,31 +696,23 @@ function renderCourseFeedback(list, append = false) {
   }
 
   list.forEach(fb => {
-    const userName = fb.profile?.full_name ?? "—";
-    const userEmail = fb.profile?.email ?? "—";
-    const lessonTitle = fb.lesson?.title ?? "—";
-    const rating = fb.rating ?? "—";
-    const comment = fb.comment ?? "—";
-    const dayLabel = fb.day ? `Día ${fb.day}` : "—";
-    const when = fb.created_at
-      ? new Date(fb.created_at).toLocaleString()
-      : "—";
-
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>
         <div style="display:flex;flex-direction:column;gap:2px;">
-          <span>${userName}</span>
-          <span style="opacity:.7;font-size:12px;">${userEmail}</span>
+          <span>${fb.profile?.full_name ?? "—"}</span>
+          <span style="opacity:.7;font-size:12px;">
+            ${fb.profile?.email ?? "—"}
+          </span>
         </div>
       </td>
-      <td>${lessonTitle}</td>
-      <td>${dayLabel}</td>
-      <td>${rating}</td>
+      <td>${fb.lesson?.title ?? "—"}</td>
+      <td>${fb.day ? `Día ${fb.day}` : "—"}</td>
+      <td>${fb.rating ?? "—"}</td>
       <td style="max-width:420px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-        ${comment}
+        ${fb.comment ?? "—"}
       </td>
-      <td>${when}</td>
+      <td>${new Date(fb.created_at).toLocaleString()}</td>
     `;
     feedbackTbody.appendChild(tr);
   });
