@@ -31,6 +31,7 @@ async function init() {
     await loadCourse(courseId);
     await loadCourseLessons();
     await loadCourseUsers();
+    await loadCourseFeedback();
   } else {
     setupNewCourseMode();
   }
@@ -507,3 +508,65 @@ btnEnrollUser?.addEventListener("click", async () => {
 
   await loadCourseUsers();
 });
+
+
+const feedbackTbody = document.getElementById("courseFeedbackBody");
+
+async function loadCourseFeedback() {
+  if (!courseId || !feedbackTbody) return;
+
+  const { data, error } = await supabase
+    .from("lesson_feedback")
+    .select(`
+      id,
+      day,
+      rating,
+      comment,
+      created_at,
+      profiles:profiles!lesson_feedback_user_id_fkey (
+        full_name,
+        email
+      ),
+      lessons:lessons!lesson_feedback_lesson_id_fkey (
+        title
+      )
+    `)
+    .eq("course_id", courseId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("[admin] Error cargando feedback", error);
+    feedbackTbody.innerHTML =
+      `<tr><td colspan="6">Error cargando feedback</td></tr>`;
+    return;
+  }
+
+  renderCourseFeedback(data || []);
+}
+
+function renderCourseFeedback(list) {
+  feedbackTbody.innerHTML = "";
+
+  if (!list.length) {
+    feedbackTbody.innerHTML = `
+      <tr>
+        <td colspan="6" class="table-placeholder">
+          No hay feedback aún.
+        </td>
+      </tr>`;
+    return;
+  }
+
+  list.forEach(fb => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${fb.profiles?.full_name ?? "—"}</td>
+      <td>${fb.lessons?.title ?? "—"}</td>
+      <td>Día ${fb.day}</td>
+      <td>${fb.rating ?? "—"}</td>
+      <td>${fb.comment ?? "—"}</td>
+      <td>${new Date(fb.created_at).toLocaleString()}</td>
+    `;
+    feedbackTbody.appendChild(tr);
+  });
+}
