@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coach IA · Advance+</title>
+
+  <!-- ESTILOS GLOBALES -->
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+
+<body class="app-bg dashboard-page">
+
+  <!-- HEADER GLOBAL -->
+  <div id="appHeader"></div>
+
+  <main class="dashboard-main">
+    <div class="dashboard-wrapper">
+
+      <!-- HEADER COACH -->
+      <section class="dash-section coach-header">
+        <p class="coach-label">Coach IA · Advance+</p>
+        <h1 class="coach-title">
+          Día <span id="coachDay">3</span> · Disciplina Radical
+        </h1>
+        <p class="coach-subtitle" id="coachContext">
+          Reflexión y cierre de la lección de hoy
+        </p>
+      </section>
+
+      <!-- CHAT -->
+      <section class="dash-section coach-chat">
+
+        <!-- MENSAJE COACH -->
+        <div class="coach-card coach-message">
+          <p class="coach-message-text">
+            He leído tus respuestas. Antes de avanzar, quiero que observes algo importante.
+          </p>
+        </div>
+
+        <!-- CARD REFLEXIÓN -->
+        <div class="coach-card coach-insight">
+          <h4>🧠 Observación</h4>
+          <p>
+            Hoy cumpliste la acción, pero noté que hubo resistencia al inicio.
+            Eso es normal cuando estás reprogramando disciplina.
+          </p>
+        </div>
+
+        <!-- CARD CHEQUEO -->
+        <div class="coach-card coach-check">
+          <h4>🔍 Chequeo rápido</h4>
+          <p>¿Cumpliste la misión del día anterior?</p>
+
+          <div class="coach-check-options">
+            <button class="btn btn-outline">Sí</button>
+            <button class="btn btn-outline">Parcial</button>
+            <button class="btn btn-outline">No</button>
+          </div>
+        </div>
+
+        <!-- RESPUESTA USUARIO -->
+        <div class="coach-card user-message">
+          <p class="user-message-text">
+            Me costó empezar, pero una vez en movimiento fue más fácil.
+          </p>
+        </div>
+
+        <!-- CARD MISIÓN -->
+        <div class="coach-card coach-mission">
+          <h4>🎯 Misión 24h</h4>
+          <p>
+            Mañana, ejecuta la acción clave en menos de 2 minutos,
+            incluso si no tienes ganas.
+          </p>
+          <p class="coach-mission-note">
+            La disciplina no se negocia, se entrena.
+          </p>
+        </div>
+
+        <!-- CARD CIERRE -->
+        <div class="coach-card coach-close">
+          <h4>🔥 Cierre del día</h4>
+          <p>
+            Hoy ganaste una repetición más de carácter.
+            Descansa. Mañana seguimos.
+          </p>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <!-- INPUT FIJO -->
+  <div class="coach-input-bar">
+    <input
+      type="text"
+      id="coachInput"
+      placeholder="Escribe tu reflexión..."
+    />
+    <button class="btn btn-primary" id="coachSendBtn">
+      Enviar
+    </button>
+  </div>
+
+  <!-- TABBAR GLOBAL -->
+  <nav class="tabbar">
+    <button class="tab-btn" onclick="location.href='/dashboard/index.html'">
+      <span>🏠</span>
+      <small>Inicio</small>
+    </button>
+
+    <button class="tab-btn active" onclick="location.href='/curso/index.html'">
+      <span>📘</span>
+      <small>Retos</small>
+    </button>
+
+    <button class="tab-btn" onclick="location.href='/perfil/index.html'">
+      <span>👤</span>
+      <small>Perfil</small>
+    </button>
+
+    <button class="tab-btn" onclick="location.href='/perfil/datos.html'">
+      <span>📊</span>
+      <small>Progreso</small>
+    </button>
+  </nav>
+
+  <!-- PROTECCIÓN -->
+  <script type="module">
+    import { protectPage } from "/js/router.js";
+    protectPage({ allowedRoles: ["user"] });
+  </script>
+
+  <!-- HEADER -->
+  <script type="module">
+    import { loadHeader } from "/components/header.js";
+    loadHeader();
+  </script>
+
+</body>
+</html>
