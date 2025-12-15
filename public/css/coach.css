@@ -1,0 +1,62 @@
+.coach-chat {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 120px; /* espacio para input fijo */
+}
+
+.coach-card {
+  background: var(--card-bg);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow-soft);
+}
+
+.coach-message {
+  border-left: 4px solid var(--primary);
+}
+
+.coach-insight {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.coach-mission {
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.08),
+    rgba(255,255,255,0.02)
+  );
+}
+
+.coach-close {
+  border: 1px dashed rgba(255,255,255,0.2);
+}
+
+.user-message {
+  align-self: flex-end;
+  background: var(--primary);
+  color: #fff;
+  max-width: 85%;
+}
+
+.coach-input-bar {
+  position: fixed;
+  bottom: 56px; /* encima del tabbar */
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  background: var(--app-bg);
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+@media (max-width: 480px) {
+  .coach-title {
+    font-size: 1.2rem;
+  }
+
+  .coach-card {
+    font-size: 0.95rem;
+  }
+}
