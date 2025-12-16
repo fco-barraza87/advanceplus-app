@@ -744,11 +744,14 @@ async function init() {
           );
 
           if (alreadyLogged) {
-            redirectAfterLesson(course, lesson, redirectInfo);
+            if (!hasCoach) {
+              redirectAfterLesson(course, lesson, redirectInfo);
+            }
           } else {
             pendingRedirect = { course, lesson, redirectInfo };
             openMindsetModal();
           }
+
 
         };
       }
@@ -865,12 +868,22 @@ async function initMissionCheckin(userId, courseId, lesson, dayNum) {
   const card = qs("#missionCheckinCard");
   if (!card) return;
 
+  // 🔑 buscar lección anterior
+  const { data: prevLesson } = await supabase
+    .from("lessons")
+    .select("id")
+    .eq("course_id", courseId)
+    .eq("day", dayNum - 1)
+    .maybeSingle();
+
+  if (!prevLesson) return;
+
   const { data: existing } = await supabase
     .from("mission_checkins")
     .select("id")
     .eq("user_id", userId)
     .eq("course_id", courseId)
-    .eq("lesson_id", lesson.id)
+    .eq("lesson_id", prevLesson.id)
     .maybeSingle();
 
   if (existing) return;
@@ -885,7 +898,7 @@ async function initMissionCheckin(userId, courseId, lesson, dayNum) {
       await supabase.from("mission_checkins").insert({
         user_id: userId,
         course_id: courseId,
-        lesson_id: lesson.id,
+        lesson_id: prevLesson.id,
         day: dayNum - 1,
         result: btn.dataset.result,
         note: noteInput?.value || null
@@ -898,6 +911,7 @@ async function initMissionCheckin(userId, courseId, lesson, dayNum) {
     skipBtn.onclick = () => card.classList.add("hidden");
   }
 }
+
 
 /* ---------- COACH IA ---------- */
 async function callCoachEngine({ courseId, lesson, day, actionType, userInput }) {
@@ -952,8 +966,17 @@ function renderCoachCard(blocks) {
     content.appendChild(div);
   });
 
+  // 👉 botón continuar
+  const btn = document.createElement("button");
+  btn.className = "btn btn-primary";
+  btn.textContent = "Continuar";
+  btn.onclick = () => redirectFromMindset();
+
+  content.appendChild(btn);
+
   card.classList.remove("hidden");
 }
+
 
 // ==================================================
 // === COACH IA PATCH END ============================
