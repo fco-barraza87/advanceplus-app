@@ -917,7 +917,7 @@ async function initMissionCheckin(userId, courseId, lesson, dayNum) {
 async function callCoachEngine({ courseId, lesson, day, actionType, userInput }) {
   const session = (await supabase.auth.getSession()).data.session;
 
-  const res = await fetch("/functions/v1/coach-engine", {
+  const res = await fetch("/supabase/functions/coach-engine/index.ts", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
