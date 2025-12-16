@@ -629,7 +629,6 @@ async function init() {
       progress.completed = progress.completed === 1;
     }
 
-    await initMissionCheckin(user.id, courseId, lesson, dayNum);
 
     /* ============================
        Cargar reflexión previa
@@ -650,7 +649,6 @@ async function init() {
       }, 5000);
     }
 
-    
     renderLessonHeader(course, lesson, dayNum);
     renderLessonContent(lesson);
     setupFeedbackStars();
@@ -720,22 +718,6 @@ async function init() {
             course,
             lesson.day
           );
-
-          const hasCoach = await hasActiveCoach(course.id);
-
-          if (hasCoach) {
-            const coachResponse = await callCoachEngine({
-              courseId: course.id,
-              lesson,
-              day: lesson.day,
-              actionType: "post_lesson",
-              userInput: feedback?.comment || reflection?.content || ""
-            });
-
-            if (coachResponse?.blocks) {
-              renderCoachCard(coachResponse.blocks);
-            }
-          }
 
           const alreadyLogged = await hasMindsetLogForLesson(
             user.id,
@@ -842,119 +824,3 @@ async function init() {
 }
 
 init();
-
-
-// ==================================================
-// === COACH IA PATCH START ==========================
-// ==================================================
-
-async function hasActiveCoach(courseId) {
-  const { data, error } = await supabase
-    .rpc("has_active_coach", {
-      p_user: (await supabase.auth.getUser()).data.user.id,
-      p_course: courseId
-    });
-
-  return data === true;
-}
-
-/* ---------- MICRO-CHEQUEO ---------- */
-async function initMissionCheckin(userId, courseId, lesson, dayNum) {
-  if (dayNum <= 1) return;
-
-  const card = qs("#missionCheckinCard");
-  if (!card) return;
-
-  const { data: existing } = await supabase
-    .from("mission_checkins")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("course_id", courseId)
-    .eq("lesson_id", lesson.id)
-    .maybeSingle();
-
-  if (existing) return;
-
-  card.classList.remove("hidden");
-
-  const noteInput = qs("#missionCheckinNote");
-  const skipBtn = qs("#missionCheckinSkip");
-
-  card.querySelectorAll("button[data-result]").forEach(btn => {
-    btn.onclick = async () => {
-      await supabase.from("mission_checkins").insert({
-        user_id: userId,
-        course_id: courseId,
-        lesson_id: lesson.id,
-        day: dayNum - 1,
-        result: btn.dataset.result,
-        note: noteInput?.value || null
-      });
-      card.classList.add("hidden");
-    };
-  });
-
-  if (skipBtn) {
-    skipBtn.onclick = () => card.classList.add("hidden");
-  }
-}
-
-/* ---------- COACH IA ---------- */
-async function callCoachEngine({ courseId, lesson, day, actionType, userInput }) {
-  const session = (await supabase.auth.getSession()).data.session;
-
-  const res = await fetch("/functions/v1/coach-engine", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${session.access_token}`
-    },
-    body: JSON.stringify({
-      course_id: courseId,
-      lesson_id: lesson.id,
-      day,
-      action_type: actionType,
-      intent: "coach_card",
-      user_input: userInput || null
-    })
-  });
-
-  if (!res.ok) {
-    console.warn("[coach] error:", await res.text());
-    return null;
-  }
-
-  return res.json();
-}
-
-function renderCoachCard(blocks) {
-  const card = qs("#coachCard");
-  const content = qs("#coachCardContent");
-
-  if (!card || !content || !blocks?.length) return;
-
-  content.innerHTML = "";
-
-  blocks.forEach(b => {
-    const div = document.createElement("div");
-    div.className = `coach-block coach-${b.type}`;
-
-    if (b.title) {
-      const h4 = document.createElement("h4");
-      h4.textContent = b.title;
-      div.appendChild(h4);
-    }
-
-    const p = document.createElement("p");
-    p.textContent = b.text;
-    div.appendChild(p);
-
-    content.appendChild(div);
-  });
-
-  card.classList.remove("hidden");
-}
-
-// ==================================================
-// === COACH IA PATCH END ============================
-// ==================================================
