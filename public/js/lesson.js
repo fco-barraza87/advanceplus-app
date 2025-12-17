@@ -600,7 +600,7 @@ async function initMissionCheckin(userId, courseId, dayNum) {
         note: noteInput?.value?.trim() || null
       });
 
-      card.classList.add("hidden");
+      card.classList.add("answered");
     };
   });
 
