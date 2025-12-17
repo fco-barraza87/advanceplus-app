@@ -3,34 +3,24 @@ import { supabase } from "/js/supabase.js";
 
 const qs = (s) => document.querySelector(s);
 
+/* =====================================================
+   Utils
+===================================================== */
 function getQueryParam(key) {
-  const url = new URL(window.location.href);
-  return url.searchParams.get(key);
+  return new URL(window.location.href).searchParams.get(key);
 }
 
-/* ==========================================
-   Helpers de fecha
-========================================== */
-function todayISO() {
-  const d = new Date();
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-/* ==========================================
-   1. Usuario actual
-========================================== */
+/* =====================================================
+   Auth
+===================================================== */
 async function getCurrentUser() {
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data?.user) return null;
-  return data.user;
+  const { data } = await supabase.auth.getUser();
+  return data?.user || null;
 }
 
-/* ==========================================
-   2. Cargar curso + lección + progreso
-========================================== */
+/* =====================================================
+   Load data
+===================================================== */
 async function loadLessonData(userId, courseId, day) {
   const dayNum = Number(day) || 1;
 
@@ -40,7 +30,7 @@ async function loadLessonData(userId, courseId, day) {
     .eq("id", courseId)
     .maybeSingle();
 
-  if (!course) throw new Error("Curso no encontrado.");
+  if (!course) throw new Error("Curso no encontrado");
 
   const { data: lesson } = await supabase
     .from("lessons")
@@ -49,7 +39,7 @@ async function loadLessonData(userId, courseId, day) {
     .eq("day", dayNum)
     .maybeSingle();
 
-  if (!lesson) throw new Error(`No existe lección día ${dayNum}.`);
+  if (!lesson) throw new Error("Lección no encontrada");
 
   const { data: progress } = await supabase
     .from("progress")
@@ -61,7 +51,7 @@ async function loadLessonData(userId, courseId, day) {
 
   const { data: reflection } = await supabase
     .from("lesson_reflections")
-    .select("id, content")
+    .select("content")
     .eq("user_id", userId)
     .eq("course_id", courseId)
     .eq("lesson_id", lesson.id)
@@ -69,7 +59,7 @@ async function loadLessonData(userId, courseId, day) {
 
   const { data: feedback } = await supabase
     .from("lesson_feedback")
-    .select("id, rating, comment")
+    .select("rating, comment")
     .eq("user_id", userId)
     .eq("course_id", courseId)
     .eq("lesson_id", lesson.id)
@@ -78,134 +68,82 @@ async function loadLessonData(userId, courseId, day) {
   return { course, lesson, progress, reflection, feedback };
 }
 
-/* ==========================================
-   Guardar reflexión
-========================================== */
-async function saveReflection(userId, courseId, lesson) {
-  const el = qs("#lessonReflectionInput");
-  if (!el) return;
-  const content = el.value.trim();
-
-  const { data: existing } = await supabase
-    .from("lesson_reflections")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("course_id", courseId)
-    .eq("lesson_id", lesson.id)
-    .maybeSingle();
-
-  if (existing?.id) {
-    await supabase
-      .from("lesson_reflections")
-      .update({ content })
-      .eq("id", existing.id);
-  } else {
-    await supabase.from("lesson_reflections").insert({
-      user_id: userId,
-      course_id: courseId,
-      lesson_id: lesson.id,
-      day: lesson.day,
-      content
-    });
-  }
-}
-
-/* ==========================================
-   Render lección
-========================================== */
+/* =====================================================
+   Render
+===================================================== */
 function renderLessonHeader(course, lesson, day) {
-  qs("#lessonBackBtn")?.addEventListener("click", () => {
-    window.location.href = `/curso/index.html?c=${course.id}`;
-  });
-
-  if (qs("#lessonCourseLabel"))
-    qs("#lessonCourseLabel").textContent =
-      `${course.category || "Reto"} · ${course.title}`;
-
   qs("#lessonTitle").textContent = lesson.title || `Día ${day}`;
   qs("#lessonSubtitle").textContent = lesson.subtitle || "";
   qs("#lessonMeta").textContent =
-    `Día ${day} · ${lesson.duration || 10} min · XP ${lesson.xp_reward || 25}`;
+    `Día ${day} · ${lesson.duration || 5} min · XP ${lesson.xp_reward || 20}`;
 }
 
 function renderLessonContent(lesson) {
-  if (lesson.content_html) qs("#lessonContent").innerHTML = lesson.content_html;
-  if (lesson.exercise_content)
-    qs("#lessonExerciseText").innerHTML = lesson.exercise_content;
+  const contentEl = qs("#lessonContent");
+  const exerciseEl = qs("#lessonExerciseText");
+
+  if (contentEl) {
+    if (lesson.content_html) {
+      contentEl.innerHTML = lesson.content_html;
+    } else if (lesson.text_content) {
+      contentEl.innerHTML = lesson.text_content;
+    } else {
+      contentEl.innerHTML = "<p>Contenido próximamente.</p>";
+    }
+  }
+
+  if (exerciseEl && lesson.exercise_content) {
+    exerciseEl.innerHTML = lesson.exercise_content;
+  }
 }
 
-/* ==========================================
-   Feedback
-========================================== */
+/* =====================================================
+   Feedback stars (FIX REAL)
+===================================================== */
 function setupFeedbackStars() {
-  const c = qs("#feedbackStars");
-  if (!c) return;
-  c.innerHTML = "";
-  c.dataset.selected = "0";
+  const container = qs("#feedbackStars");
+  if (!container) return;
 
-  for (let i = 1; i <= 5; i++) {
-    const b = document.createElement("button");
-    b.textContent = "★";
-    b.dataset.value = i;
-    b.onclick = () => {
-      c.dataset.selected = i;
-      [...c.children].forEach(x =>
-        x.classList.toggle("selected", x.dataset.value <= i)
+  const stars = container.querySelectorAll(".feedback-star");
+  container.dataset.selected ||= "0";
+
+  stars.forEach(star => {
+    star.onclick = () => {
+      const val = Number(star.dataset.value);
+      container.dataset.selected = String(val);
+      stars.forEach(s =>
+        s.classList.toggle("selected", Number(s.dataset.value) <= val)
       );
     };
-    c.appendChild(b);
-  }
+  });
 }
 
-async function saveFeedback(userId, courseId, lesson) {
-  const rating = Number(qs("#feedbackStars")?.dataset.selected || 0);
-  const comment = qs("#feedbackComment")?.value.trim() || "";
-  if (!rating && !comment) return;
-
-  const { data: existing } = await supabase
-    .from("lesson_feedback")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("course_id", courseId)
-    .eq("lesson_id", lesson.id)
-    .maybeSingle();
-
-  if (existing?.id) {
-    await supabase.from("lesson_feedback")
-      .update({ rating, comment })
-      .eq("id", existing.id);
-  } else {
-    await supabase.from("lesson_feedback").insert({
-      user_id: userId,
-      course_id: courseId,
-      lesson_id: lesson.id,
-      day: lesson.day,
-      rating,
-      comment
-    });
-  }
-}
-
-/* ==========================================
+/* =====================================================
    Mindset
-========================================== */
+===================================================== */
 let pendingRedirect = null;
+
+function initMindsetUI() {
+  const moodRow = qs("#mindsetMoodRow");
+  if (!moodRow) return;
+
+  moodRow.dataset.selected = "3";
+  moodRow.querySelectorAll("button").forEach(btn => {
+    btn.onclick = () => {
+      moodRow.dataset.selected = btn.dataset.value;
+      moodRow.querySelectorAll("button").forEach(b =>
+        b.classList.toggle("active", b === btn)
+      );
+    };
+  });
+}
 
 function openMindsetModal() {
   qs("#mindsetModal")?.classList.remove("hidden");
 }
+
 function closeMindsetModal() {
   qs("#mindsetModal")?.classList.add("hidden");
-}
-
-async function saveMindsetLog(userId, courseId, lesson) {
-  await supabase.from("mindset_logs").insert({
-    user_id: userId,
-    course_id: courseId,
-    lesson_id: lesson.id,
-    day: lesson.day,
-    mood: Number(qs("#mindsetMoodRow")?.dataset.selected || null)
-  });
 }
 
 async function hasMindsetLogForLesson(userId, courseId, lessonId) {
@@ -216,15 +154,15 @@ async function hasMindsetLogForLesson(userId, courseId, lessonId) {
     .eq("course_id", courseId)
     .eq("lesson_id", lessonId)
     .maybeSingle();
+
   return !!data;
 }
 
-/* ==========================================
+/* =====================================================
    Coach IA
-========================================== */
+===================================================== */
 async function hasActiveCoach(courseId) {
   const { data } = await supabase.rpc("has_active_coach", {
-    p_user: (await supabase.auth.getUser()).data.user.id,
     p_course: courseId
   });
   return data === true;
@@ -245,50 +183,50 @@ async function callCoachEngine(payload) {
 function renderCoachCard(blocks) {
   const card = qs("#coachCard");
   const content = qs("#coachCardContent");
-  if (!card || !content) return;
+  if (!card || !blocks) return;
+
   content.innerHTML = "";
   blocks.forEach(b => {
-    const p = document.createElement("p");
-    p.textContent = b.text;
-    content.appendChild(p);
+    const div = document.createElement("div");
+    div.innerHTML = `<h4>${b.title || ""}</h4><p>${b.text}</p>`;
+    content.appendChild(div);
   });
+
   const btn = document.createElement("button");
+  btn.className = "btn btn-primary";
   btn.textContent = "Continuar";
-  btn.onclick = redirectFromMindset;
+  btn.onclick = () => {
+    card.classList.add("hidden");
+    openMindsetModal();
+  };
+
   content.appendChild(btn);
   card.classList.remove("hidden");
 }
 
-function redirectFromMindset() {
-  if (!pendingRedirect) return;
-  const { course, lesson, redirectInfo } = pendingRedirect;
-  const { nextDay } = redirectInfo;
-  window.location.href =
-    `/curso/lesson.html?c=${course.id}&day=${nextDay}`;
-}
-
-/* ==========================================
+/* =====================================================
    INIT
-========================================== */
+===================================================== */
 async function init() {
   const user = await getCurrentUser();
   if (!user) return;
 
   const courseId = getQueryParam("c");
-  const dayNum = Number(getQueryParam("day") || 1);
+  const day = getQueryParam("day") || "1";
 
   const { course, lesson, progress, reflection, feedback } =
-    await loadLessonData(user.id, courseId, dayNum);
+    await loadLessonData(user.id, courseId, day);
 
-  renderLessonHeader(course, lesson, dayNum);
+  renderLessonHeader(course, lesson, day);
   renderLessonContent(lesson);
   setupFeedbackStars();
+  initMindsetUI();
 
-  qs("#completeLessonBtn")?.addEventListener("click", async () => {
-    await saveReflection(user.id, courseId, lesson);
-    await saveFeedback(user.id, courseId, lesson);
+  const completeBtn = qs("#completeLessonBtn");
+  if (!completeBtn) return;
 
-    const redirectInfo = { nextDay: lesson.day + 1 };
+  completeBtn.onclick = async () => {
+    const redirectInfo = { course, lesson };
 
     if (await hasActiveCoach(course.id)) {
       const coach = await callCoachEngine({
@@ -297,20 +235,21 @@ async function init() {
         day: lesson.day,
         action_type: "post_lesson"
       });
+
       if (coach?.blocks) {
-        pendingRedirect = { course, lesson, redirectInfo };
+        pendingRedirect = redirectInfo;
         renderCoachCard(coach.blocks);
         return;
       }
     }
 
-    if (await hasMindsetLogForLesson(user.id, courseId, lesson.id)) {
-      redirectFromMindset();
+    if (await hasMindsetLogForLesson(user.id, course.id, lesson.id)) {
+      window.location.href = `/curso/index.html?c=${course.id}`;
     } else {
-      pendingRedirect = { course, lesson, redirectInfo };
+      pendingRedirect = redirectInfo;
       openMindsetModal();
     }
-  });
+  };
 }
 
 init();
