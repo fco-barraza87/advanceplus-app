@@ -586,6 +586,49 @@ function redirectFromMindset() {
 }
 
 /* ==========================================
+   Verificar si ya existe mindset log
+========================================== */
+async function hasMindsetLogForLesson(userId, courseId, lessonId) {
+  const { data, error } = await supabase
+    .from("mindset_logs")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("course_id", courseId)
+    .eq("lesson_id", lessonId)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.warn("[lesson] Error comprobando mindset_logs:", error);
+    return false;
+  }
+
+  return !!data;
+}
+
+/* ==========================================
+   Verificar si ya existe mindset log
+========================================== */
+async function hasMindsetLogForLesson(userId, courseId, lessonId) {
+  const { data, error } = await supabase
+    .from("mindset_logs")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("course_id", courseId)
+    .eq("lesson_id", lessonId)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.warn("[lesson] Error comprobando mindset_logs:", error);
+    return false;
+  }
+
+  return !!data;
+}
+
+
+/* ==========================================
    9. INIT
 ========================================== */
 async function init() {
