@@ -1,0 +1,4 @@
+project_id = "lmlfvbzukymtkcyfromr"
+
+[functions.coach-engine]
+verify_jwt = false

@@ -868,7 +868,6 @@ async function initMissionCheckin(userId, courseId, lesson, dayNum) {
   const card = qs("#missionCheckinCard");
   if (!card) return;
 
-  // 🔑 buscar lección anterior
   const { data: prevLesson } = await supabase
     .from("lessons")
     .select("id")
@@ -912,26 +911,26 @@ async function initMissionCheckin(userId, courseId, lesson, dayNum) {
   }
 }
 
-
 /* ---------- COACH IA ---------- */
 async function callCoachEngine({ courseId, lesson, day, actionType, userInput }) {
-  const session = (await supabase.auth.getSession()).data.session;
 
-  const res = await fetch("/functions/v1/coach-engine", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${session.access_token}`
-    },
-    body: JSON.stringify({
-      course_id: courseId,
-      lesson_id: lesson.id,
-      day,
-      action_type: actionType,
-      intent: "coach_card",
-      user_input: userInput || null
-    })
-  });
+  const res = await fetch(
+    "https://lmlfvbzukymtkcyfromr.supabase.co/functions/v1/coach-engine",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        course_id: courseId,
+        lesson_id: lesson.id,
+        day,
+        action_type: actionType,
+        intent: "coach_card",
+        user_input: userInput || null
+      })
+    }
+  );
 
   if (!res.ok) {
     console.warn("[coach] error:", await res.text());
@@ -966,17 +965,14 @@ function renderCoachCard(blocks) {
     content.appendChild(div);
   });
 
-  // 👉 botón continuar
   const btn = document.createElement("button");
   btn.className = "btn btn-primary";
   btn.textContent = "Continuar";
   btn.onclick = () => redirectFromMindset();
 
   content.appendChild(btn);
-
   card.classList.remove("hidden");
 }
-
 
 // ==================================================
 // === COACH IA PATCH END ============================
