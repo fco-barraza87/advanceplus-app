@@ -469,27 +469,38 @@ function goToMindsetStep(step) {
   }
 }
 
-async function hasMindsetLogForLesson(userId, courseId, lessonId) {
-  try {
-    const { data, error } = await supabase
-      .from("mindset_logs")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("course_id", courseId)
-      .eq("lesson_id", lessonId)
-      .maybeSingle();
+// Guardamos redirect pendiente SIEMPRE
+pendingRedirect = { course, lesson, redirectInfo };
 
-    if (error) {
-      console.warn("[lesson] Error comprobando mindset_logs:", error);
-      return false;
-    }
+// 1️⃣ Mostrar Coach Card si tiene coach
+if (hasCoach) {
+  const coachResponse = await callCoachEngine({
+    courseId: course.id,
+    lesson,
+    day: lesson.day,
+    actionType: "post_lesson",
+    userInput: feedback?.comment || reflection?.content || ""
+  });
 
-    return !!data;
-  } catch (e) {
-    console.warn("[lesson] Error inesperado en hasMindsetLogForLesson:", e);
-    return false;
+  if (coachResponse?.blocks) {
+    renderCoachCard(coachResponse.blocks);
+    return; // ⛔ esperamos acción del usuario
   }
 }
+
+// 2️⃣ Si no hay coach, seguimos flujo normal
+const alreadyLogged = await hasMindsetLogForLesson(
+  user.id,
+  courseId,
+  lesson.id
+);
+
+if (alreadyLogged) {
+  redirectFromMindset();
+} else {
+  openMindsetModal();
+}
+
 
 
 async function saveMindsetLog(userId, courseId, lesson) {
