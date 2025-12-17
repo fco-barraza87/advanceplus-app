@@ -469,24 +469,7 @@ function goToMindsetStep(step) {
   }
 }
 
-// Guardamos redirect pendiente SIEMPRE
-pendingRedirect = { course, lesson, redirectInfo };
 
-// 1️⃣ Mostrar Coach Card si tiene coach
-if (hasCoach) {
-  const coachResponse = await callCoachEngine({
-    courseId: course.id,
-    lesson,
-    day: lesson.day,
-    actionType: "post_lesson",
-    userInput: feedback?.comment || reflection?.content || ""
-  });
-
-  if (coachResponse?.blocks) {
-    renderCoachCard(coachResponse.blocks);
-    return; // ⛔ esperamos acción del usuario
-  }
-}
 
 // 2️⃣ Si no hay coach, seguimos flujo normal
 const alreadyLogged = await hasMindsetLogForLesson(
@@ -745,6 +728,8 @@ async function init() {
 
             if (coachResponse?.blocks) {
               renderCoachCard(coachResponse.blocks);
+              pendingRedirect = { course, lesson, redirectInfo }
+              return   // ✅ AQUÍ SÍ ES VÁLIDO
             }
           }
 
