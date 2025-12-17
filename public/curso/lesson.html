@@ -105,12 +105,31 @@
      COACH IA CARD
     ========================= -->
     <section id="coachCard" class="dash-section coach-card hidden">
-    <div id="coachCardContent"></div>
 
-    <button id="openCoachChatBtn" class="btn-outline">
+      <div id="coachCardContent"></div>
+
+      <!-- CHAT COACH (mock inicial) -->
+      <div id="coachChat" class="coach-chat hidden">
+        <div id="coachChatMessages" class="coach-chat-messages"></div>
+
+        <div class="coach-chat-input">
+          <input
+            type="text"
+            id="coachChatInput"
+            placeholder="Escribe tu mensaje..."
+          />
+          <button id="coachChatSend" class="btn btn-primary">
+            Enviar
+          </button>
+        </div>
+      </div>
+
+      <button id="openCoachChatBtn" class="btn-outline">
         💬 Hablar con mi Coach
-    </button>
+      </button>
+
     </section>
+
 
 
     <!-- NAVEGACIÓN ENTRE LECCIONES (NUEVO) -->
