@@ -591,14 +591,25 @@ async function initMissionCheckin(userId, courseId, dayNum) {
   // botones resultado
   card.querySelectorAll("button[data-result]").forEach((btn) => {
     btn.onclick = async () => {
-      await supabase.from("mission_checkins").insert({
-        user_id: userId,
-        course_id: courseId,
-        lesson_id: prevLesson.id,
-        day: dayNum - 1,
-        result: btn.dataset.result,
-        note: noteInput?.value?.trim() || null
-      });
+      const { data: existing } = await supabase
+        .from("mission_checkins")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("course_id", courseId)
+        .eq("lesson_id", prevLesson.id)
+        .maybeSingle();
+
+      if (!existing) {
+        await supabase.from("mission_checkins").insert({
+          user_id: userId,
+          course_id: courseId,
+          lesson_id: prevLesson.id,
+          day: dayNum - 1,
+          result: btn.dataset.result,
+          note: noteInput?.value || null
+        });
+      }
+
 
       card.classList.add("answered");
     };
@@ -972,6 +983,24 @@ async function init() {
 
           // si mostró coach, no hacemos return (NO rompemos nada),
           // pero dejamos que el usuario presione "Continuar" y luego siga.
+
+          const hasCoach = await hasActiveCoach(course.id);
+
+          if (hasCoach) {
+            const coachResponse = await callCoachEngine({
+              courseId: course.id,
+              lesson,
+              day: lesson.day,
+              actionType: "post_lesson",
+              userInput: reflection?.content || feedback?.comment || ""
+            });
+
+            if (coachResponse?.blocks?.length) {
+              renderCoachCard(coachResponse.blocks);
+              pendingRedirect = { course, lesson, redirectInfo };
+              return; // ⛔ detenemos el flujo aquí
+            }
+          }
 
           const alreadyLogged = await hasMindsetLogForLesson(
             user.id,
