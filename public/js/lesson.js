@@ -903,6 +903,15 @@ async function initCompleteFlow({ userId, course, courseId, lesson, profile, pro
     const ok = await completeLesson(userId, course, lesson);
     if (!ok) return;
 
+    // 🔁 Reordenar visual final: Mindset → Coach → Feedback → Chat
+    const coachBlock = document.querySelector("#lessonCoachBlock");
+    const feedbackSection = document.querySelector(".lesson-feedback-section");
+    const lessonChatBlock = document.querySelector("#lessonChatBlock");
+
+    feedbackSection?.after(coachBlock);
+    lessonChatBlock?.after(feedbackSection);
+
+
     // 3) habilitar siguiente (si existe)
     const totalDays = course.duration_days || 1;
     if (nextBtn && dayNum < totalDays) {
