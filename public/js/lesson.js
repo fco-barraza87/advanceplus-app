@@ -394,33 +394,30 @@ async function saveFeedback(userId, courseId, lesson) {
 }
 
 /* ============================================================
-   Mission checkin (NO se cierra al click de icono + UPSERT evita 409)
+   Mission checkin (click = guarda + se cierra)
 ============================================================ */
 async function initMissionCheckin(userId, courseId, lesson) {
   const dayNum = Number(lesson.day) || 1;
   if (dayNum <= 1) return;
 
-  // Soporta ambos HTMLs
   const cardOld = firstEl("#missionCheckinCard");
   const blockNew = firstEl("#missionCheckinBlock");
   const root = cardOld || blockNew;
   if (!root) return;
 
   const noteEl = firstEl("#missionCheckinNote");
-  const skipOld = firstEl("#missionCheckinSkip");
-  const continueNew = firstEl("#missionCheckinContinue");
 
-  // buscar lección anterior
+  // Buscar lección anterior
   const { data: prevLesson, error: plErr } = await supabase
     .from("lessons")
-    .select("id, day")
+    .select("id")
     .eq("course_id", courseId)
     .eq("day", dayNum - 1)
     .maybeSingle();
 
   if (plErr || !prevLesson?.id) return;
 
-  // ¿ya existe?
+  // ¿Ya existe checkin?
   const { data: existing } = await supabase
     .from("mission_checkins")
     .select("id")
@@ -434,121 +431,103 @@ async function initMissionCheckin(userId, courseId, lesson) {
     return;
   }
 
-  // Mostrar checkin
+  // Mostrar
   show(root);
 
-  let selected = null;
-
-  // NO cerrar al click del icono: solo seleccionar
+  // Click en icono = guardar + cerrar
   qa(`${cardOld ? "#missionCheckinCard" : "#missionCheckinBlock"} button[data-result]`)
     .forEach((btn) => {
-      btn.onclick = () => {
-        selected = btn.dataset.result;
-        qa(`${cardOld ? "#missionCheckinCard" : "#missionCheckinBlock"} button[data-result]`)
-          .forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
+      btn.onclick = async () => {
+        const result = btn.dataset.result;
+
+        const row = {
+          user_id: userId,
+          course_id: courseId,
+          lesson_id: prevLesson.id,
+          day: dayNum - 1,
+          result,
+          note: noteEl ? (noteEl.value || "").trim() || null : null
+        };
+
+        const { error } = await supabase
+          .from("mission_checkins")
+          .upsert(row, { onConflict: "user_id,course_id,lesson_id" });
+
+        if (error) {
+          console.warn("[lesson] mission_checkins error:", error);
+          alert("No se pudo guardar el chequeo.");
+          return;
+        }
+
+        hide(root);
       };
     });
-
-  async function submitCheckin() {
-    if (!selected) {
-      alert("Selecciona una opción.");
-      return;
-    }
-
-    const row = {
-      user_id: userId,
-      course_id: courseId,
-      lesson_id: prevLesson.id,
-      day: dayNum - 1,
-      result: selected,
-      note: noteEl ? (noteEl.value || "").trim() || null : null
-    };
-
-    // UPSERT evita 409 por unique(user_id,course_id,lesson_id)
-    const { error } = await supabase
-      .from("mission_checkins")
-      .upsert(row, { onConflict: "user_id,course_id,lesson_id" });
-
-    if (error) {
-      console.warn("[lesson] mission_checkins upsert error:", error);
-      alert("No se pudo guardar el chequeo. Intenta de nuevo.");
-      return;
-    }
-
-    // Mensaje correcto (no “felicidades completaste el curso”)
-    // En tu UI “bonita” simplemente lo ocultamos y listo.
-    hide(root);
-  }
-
-  // HTML nuevo: botón continuar
-  if (continueNew) continueNew.onclick = submitCheckin;
-
-  // HTML antiguo: al usuario le falta un botón “Guardar”. Si no existe, lo creamos.
-  if (cardOld && !continueNew) {
-    let btn = firstEl("#missionCheckinSubmitBtn");
-    if (!btn) {
-      btn = document.createElement("button");
-      btn.id = "missionCheckinSubmitBtn";
-      btn.className = "btn btn-primary";
-      btn.textContent = "Guardar chequeo y continuar";
-      btn.style.marginTop = "10px";
-      root.appendChild(btn);
-    }
-    btn.onclick = submitCheckin;
-  }
-
-  if (skipOld) {
-    skipOld.onclick = () => hide(root);
-  }
 }
 
+
 /* ============================================================
-   Mindset inline (mantiene tu UI “bonita” + soporta HTML nuevo)
+   Mindset inline (autosave, sin botones)
 ============================================================ */
 function initMindsetUI() {
   const moodRow = firstEl("#mindsetMoodRow");
+
   if (moodRow) {
-    // default
-    if (!moodRow.dataset.selected && !moodRow.dataset.value) {
-      moodRow.dataset.selected = "3";
+    if (!moodRow.dataset.value) {
       moodRow.dataset.value = "3";
     }
 
-    // botones (ambos HTMLs)
     const btns = Array.from(moodRow.querySelectorAll("button"));
     btns.forEach((btn) => {
       btn.addEventListener("click", () => {
         const v = btn.dataset.value;
-        moodRow.dataset.selected = v;
         moodRow.dataset.value = v;
         btns.forEach((b) => b.classList.toggle("active", b === btn));
+        debounceSaveMindset();
       });
     });
   }
 
-  // sliders con labels (HTML bonito) o sin labels (HTML nuevo)
-  const sliderPairs = [
-    ["mindsetFocus", "mindsetFocusValue"],
-    ["mindsetEnergy", "mindsetEnergyValue"],
-    ["mindsetMotivation", "mindsetMotivationValue"],
-    ["mindsetClarity", "mindsetClarityValue"],
-    ["mindsetConfidence", "mindsetConfidenceValue"]
+  const sliders = [
+    "mindsetFocus",
+    "mindsetEnergy",
+    "mindsetMotivation",
+    "mindsetClarity",
+    "mindsetConfidence"
   ];
 
-  sliderPairs.forEach(([id, labelId]) => {
+  sliders.forEach((id) => {
     const input = firstEl("#" + id);
-    const label = firstEl("#" + labelId);
     if (!input) return;
-
-    const update = () => {
-      if (label) label.textContent = `${input.value} / 5`;
-    };
-
-    input.addEventListener("input", update);
-    update();
+    input.addEventListener("input", debounceSaveMindset);
   });
+
+  const decision = firstEl("#mindsetNoteDecision");
+  if (decision) {
+    decision.addEventListener("input", debounceSaveMindset);
+  }
 }
+
+/* -------------------------
+   Autosave mindset
+-------------------------- */
+let mindsetTimeout = null;
+
+function debounceSaveMindset() {
+  clearTimeout(mindsetTimeout);
+  mindsetTimeout = setTimeout(saveMindsetAuto, 600);
+}
+
+async function saveMindsetAuto() {
+  const user = await getCurrentUser();
+  if (!user || !window.__currentLesson) return;
+
+  await saveMindsetLog(
+    user.id,
+    getQueryParam("c"),
+    window.__currentLesson
+  );
+}
+
 
 async function hasMindsetLogForLesson(userId, courseId, lessonId) {
   const { data, error } = await supabase
@@ -1010,6 +989,8 @@ async function init() {
     const profile = await loadUserProfile(user.id);
     const { course, lesson, progress, reflection, feedback } =
       await loadLessonData(user.id, courseId, dayNum);
+      window.__currentLesson = lesson;
+
 
     // Render
     renderHeader(course, lesson, dayNum);
@@ -1034,8 +1015,8 @@ async function init() {
       course,
       lesson,
       profile,
-      actionType: "pre_lesson",
-      userInput: ""
+      actionType: "post_lesson",
+      userInput: qs("#lessonExerciseInput")?.value || ""
     });
 
     /* ==================================================
