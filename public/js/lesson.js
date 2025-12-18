@@ -104,8 +104,8 @@ async function loadLessonData(userId, courseId, day) {
     .eq("course_id", courseId)
     .eq("day", dayNum)
     .maybeSingle();
-  if (lErr) throw new Error("Error cargando lección: " + lErr 🇵
- ería " + lErr.message);
+  if (lErr) throw new Error("Error cargando lección: " + lErr.message);
+
   if (!lesson) throw new Error(`No existe lección para el día ${dayNum} en este curso.`);
 
   const { data: progress, error: pErr } = await supabase
