@@ -1025,7 +1025,7 @@ async function init() {
       lesson,
       profile,
       actionType: "post_lesson",
-      userInput: qs("#lessonExerciseInput")?.value || ""
+      userInput: q("#lessonExerciseInput")?.value || ""
     });
 
     /* ==================================================
