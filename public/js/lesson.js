@@ -70,19 +70,20 @@ async function getCurrentUser() {
 }
 
 async function loadUserProfile(userId) {
-  // Ajusta el select si tu tabla profiles tiene otros campos.
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, goals_json, coach_style, full_name, display_name")
+    .select("id, goals_json, coach_style, full_name")
     .eq("id", userId)
     .maybeSingle();
 
   if (error) {
     console.warn("[lesson] loadUserProfile error:", error);
-    return { id: userId, goals_json: {} };
+    return { id: userId, goals_json: {}, coach_style: "neutro" };
   }
-  return data || { id: userId, goals_json: {} };
+
+  return data || { id: userId, goals_json: {}, coach_style: "neutro" };
 }
+
 
 /* ============================================================
    Load core data
@@ -1037,6 +1038,14 @@ async function init() {
       userInput: ""
     });
 
+    /* ==================================================
+       🔧 MEJORA 1: Día 1 → Coach NO sticky
+    ================================================== */
+    const coachBlock = document.querySelector("#lessonCoachBlock");
+    if (coachBlock && lesson.day === 1) {
+      coachBlock.classList.remove("sticky-coach");
+    }
+
     // Chat coach
     initCoachChat({ course, lesson, profile });
 
@@ -1047,6 +1056,20 @@ async function init() {
       dayNum,
       completed: progress ? isTrue(progress.completed) : false
     });
+
+    /* ==================================================
+       🔧 MEJORA 2: Mostrar CTA si NO está completada
+    ================================================== */
+    const ctaBlock = document.querySelector("#lessonCtaBlock");
+    const isCompleted =
+      progress &&
+      (progress.completed === true ||
+        progress.completed === "t" ||
+        progress.completed === 1);
+
+    if (ctaBlock && !isCompleted) {
+      ctaBlock.classList.remove("hidden");
+    }
 
     // Complete flow (inline)
     await initCompleteFlow({
@@ -1065,5 +1088,6 @@ async function init() {
     window.location.href = "/dashboard/index.html";
   }
 }
+
 
 init();
