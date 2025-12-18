@@ -31,250 +31,253 @@
   <!-- HEADER GLOBAL -->
   <div id="appHeader"></div>
 
-<main class="lesson-page">
+<main class="dashboard-main">
+  <div class="dashboard-wrapper">
 
-  <!-- 1. HEADER LECCIÓN -->
-  <section id="lessonHeader" class="lesson-header block">
-    <button id="btnBackToCourse" class="btn-outline">
-      ← Volver al curso
-    </button>
-
-    <p id="lessonCourseLabel" class="lesson-course-label"></p>
-    <h1 id="lessonTitle" class="lesson-title">Cargando lección...</h1>
-    <p id="lessonSubtitle" class="lesson-subtitle"></p>
-
-    <p id="lessonMeta" class="lesson-meta"></p>
-  </section>
-
-  <!-- 2. MICRO-CHEQUEO (CONDICIONAL) -->
-  <section
-    id="missionCheckinBlock"
-    class="block coach-checkin hidden"
-  >
-    <h3 class="coach-checkin-title">Chequeo rápido</h3>
-
-    <p class="coach-checkin-text">
-      Ayer te propusiste una acción. ¿Cómo te fue?
-    </p>
-
-    <div class="coach-checkin-actions">
-      <button data-result="done" class="btn-outline">
-        ✅ La hice
+    <!-- =========================
+      ENCABEZADO LECCIÓN
+    ========================= -->
+    <section class="dash-section lesson-header-section">
+      <button class="btn-outline lesson-back-btn" id="lessonBackBtn">
+        ← Volver al curso
       </button>
-      <button data-result="partial" class="btn-outline">
-        ⚠️ Parcial
-      </button>
-      <button data-result="skipped" class="btn-outline">
-        ❌ No la hice
-      </button>
-    </div>
 
-    <textarea
-      id="missionCheckinNote"
-      class="coach-checkin-note"
-      placeholder="¿Qué fue lo más difícil? (opcional)"
-      rows="3"
-    ></textarea>
+      <p class="lesson-course-label" id="lessonCourseLabel"></p>
+      <h1 class="lesson-title" id="lessonTitle">Cargando lección...</h1>
+      <p class="lesson-subtitle" id="lessonSubtitle"></p>
+      <p class="lesson-meta" id="lessonMeta"></p>
 
-    <button
-      id="missionCheckinContinue"
-      class="btn btn-primary"
+      <!-- línea IA sutil -->
+      <p class="coach-miniline" id="lessonAiMetaLine" style="display:none;"></p>
+    </section>
+
+    <!-- =========================
+      COACH IA (STICKY, PREMIUM)
+    ========================= -->
+    <section
+      id="lessonCoachBlock"
+      class="dash-section coach-card sticky-coach hidden"
     >
-      Continuar
-    </button>
-  </section>
+      <h3 class="coach-card-title">Tu Coach</h3>
 
-  <!-- 3. CONTENIDO CENTRAL -->
-  <section
-    id="lessonContentBlock"
-    class="block lesson-content-section"
-  >
-    <div
-      id="lessonContentHtml"
-      class="lesson-content"
-    >
-      <!-- HTML de la lección -->
-    </div>
+      <div id="coachMessage" class="coach-message"></div>
 
-    <div
-      id="lessonMedia"
-      class="lesson-media"
-    >
-      <!-- audio / video / imagen -->
-    </div>
-  </section>
-
-  <!-- 4. EJERCICIO DEL DÍA -->
-  <section
-    id="lessonExerciseBlock"
-    class="block lesson-exercise-section"
-  >
-    <h2 class="section-title">
-      Ejercicio del día
-    </h2>
-
-    <p
-      id="lessonExerciseText"
-      class="lesson-exercise-text"
-    ></p>
-
-    <textarea
-      id="lessonExerciseInput"
-      class="lesson-reflection-input"
-      rows="6"
-      placeholder="Escribe aquí tu reflexión, compromiso o aprendizaje clave..."
-    ></textarea>
-
-    <p class="lesson-save-note">
-      Se guarda automáticamente
-    </p>
-  </section>
-
-  <!-- 5. REGISTRO DE ESTADO (MINDSET) -->
-  <section
-    id="lessonMindsetBlock"
-    class="block lesson-mindset-section"
-  >
-    <h2 class="section-title">
-      Registro de estado
-    </h2>
-
-    <p class="lesson-mindset-subtitle">
-      ¿Cómo terminas esta lección?
-    </p>
-
-    <!-- Mood -->
-    <div
-      id="mindsetMoodRow"
-      class="mindset-mood-row"
-    >
-      <button type="button" data-value="1">😞</button>
-      <button type="button" data-value="2">😕</button>
-      <button type="button" data-value="3">😐</button>
-      <button type="button" data-value="4">🙂</button>
-      <button type="button" data-value="5">😄</button>
-    </div>
-
-    <!-- Sliders -->
-    <div class="mindset-sliders">
-
-      <div class="mindset-slider">
-        <span>Enfoque</span>
-        <input type="range" id="mindsetFocus" min="1" max="5" value="3" />
+      <div class="coach-card-actions">
+        <button id="openCoachChatBtn" class="btn-outline">
+          💬 Hablar con mi Coach
+        </button>
+        <button id="coachCardRefreshBtn" class="btn-outline">
+          🔄 Otra guía
+        </button>
       </div>
+    </section>
 
-      <div class="mindset-slider">
-        <span>Energía</span>
-        <input type="range" id="mindsetEnergy" min="1" max="5" value="3" />
-      </div>
-
-      <div class="mindset-slider">
-        <span>Motivación</span>
-        <input type="range" id="mindsetMotivation" min="1" max="5" value="3" />
-      </div>
-
-      <div class="mindset-slider">
-        <span>Claridad</span>
-        <input type="range" id="mindsetClarity" min="1" max="5" value="3" />
-      </div>
-
-      <div class="mindset-slider">
-        <span>Confianza</span>
-        <input type="range" id="mindsetConfidence" min="1" max="5" value="3" />
-      </div>
-
-    </div>
-  </section>
-
-  <!-- 6. COACH IA (UNA SOLA CARD) -->
-  <section
-    id="lessonCoachBlock"
-    class="block coach-card hidden"
-  >
-    <h3 class="coach-card-title">
-      Tu Coach
-    </h3>
-
-    <div
-      id="coachMessage"
-      class="coach-message"
+    <!-- =========================
+      MICRO-CHEQUEO DÍA ANTERIOR
+    ========================= -->
+    <section
+      id="missionCheckinBlock"
+      class="dash-section coach-checkin hidden"
     >
-      <!-- mensaje IA -->
-    </div>
-  </section>
+      <h3 class="coach-checkin-title">Chequeo rápido</h3>
+      <p class="coach-checkin-text">
+        Ayer te propusiste una acción. ¿Cómo te fue?
+      </p>
 
-  <!-- 7. CTA PRINCIPAL -->
-  <section
-    id="lessonCtaBlock"
-    class="block lesson-cta hidden"
-  >
-    <button
-      id="btnCompleteLesson"
-      class="btn btn-primary btn-large"
-    >
-      Continuar
-    </button>
-  </section>
-
-  <!-- 8. FEEDBACK (COLAPSADO) -->
-  <section
-    id="lessonFeedbackBlock"
-    class="block lesson-feedback-section"
-  >
-    <button
-      id="toggleFeedback"
-      class="btn-link"
-    >
-      ¿Quieres dejar un comentario sobre esta lección?
-    </button>
-
-    <div
-      id="feedbackForm"
-      class="hidden"
-    >
-      <div
-        id="feedbackStars"
-        class="feedback-stars"
-      ></div>
+      <div class="coach-checkin-actions">
+        <button data-result="done" class="btn-outline">✅ La hice</button>
+        <button data-result="partial" class="btn-outline">⚠️ Parcial</button>
+        <button data-result="skipped" class="btn-outline">❌ No la hice</button>
+      </div>
 
       <textarea
-        id="feedbackComment"
-        class="lesson-reflection-input"
-        rows="4"
-        placeholder="Escribe aquí tu comentario (opcional)..."
+        id="missionCheckinNote"
+        class="coach-checkin-note"
+        rows="3"
+        placeholder="¿Qué fue lo más difícil? (opcional)"
       ></textarea>
-    </div>
-  </section>
 
-  <!-- 9. CHAT IA (OPCIONAL, PERSISTENTE) -->
-  <section
-    id="lessonChatBlock"
-    class="block coach-chat hidden"
-  >
-    <h3 class="coach-chat-title">
-      Habla con tu Coach
-    </h3>
-
-    <div
-      id="coachChatMessages"
-      class="coach-chat-messages"
-    ></div>
-
-    <div class="coach-chat-input">
-      <input
-        id="coachChatInput"
-        type="text"
-        placeholder="Escribe tu mensaje..."
-      />
       <button
-        id="coachChatSend"
+        id="missionCheckinContinue"
         class="btn btn-primary"
       >
-        Enviar
+        Continuar
       </button>
-    </div>
-  </section>
+    </section>
 
+    <!-- =========================
+      CONTENIDO PRINCIPAL
+    ========================= -->
+    <section class="dash-section lesson-content-section">
+      <div id="lessonContentHtml" class="lesson-content"></div>
+      <div id="lessonMedia" class="lesson-media"></div>
+    </section>
+
+    <!-- =========================
+      EJERCICIO DEL DÍA
+    ========================= -->
+    <section class="dash-section lesson-exercise-section">
+      <h2 class="section-title">Ejercicio del día</h2>
+
+      <p id="lessonExerciseText" class="lesson-exercise-text"></p>
+
+      <textarea
+        id="lessonExerciseInput"
+        class="lesson-reflection-input"
+        rows="6"
+        placeholder="Escribe aquí tu reflexión, compromiso o aprendizaje clave..."
+      ></textarea>
+
+      <p class="lesson-save-note">
+        Se guarda automáticamente
+      </p>
+    </section>
+
+    <!-- =========================
+      CTA PRINCIPAL
+    ========================= -->
+    <section
+      id="lessonCtaBlock"
+      class="dash-section lesson-complete-section hidden"
+    >
+      <button
+        id="btnCompleteLesson"
+        class="btn btn-primary complete-btn"
+      >
+        Marcar lección como completada
+      </button>
+    </section>
+
+    <!-- =========================
+      MINDSET INLINE (SIN MODAL)
+    ========================= -->
+    <section
+      id="lessonMindsetBlock"
+      class="dash-section mindset-inline hidden"
+    >
+      <h2 class="section-title">Registro de mindset</h2>
+      <p class="lesson-feedback-sub">
+        Esto fortalece tu progreso y alimenta al Coach IA.
+      </p>
+
+      <div class="mindset-mood-block">
+        <p class="mindset-label">¿Cómo te sientes ahora mismo?</p>
+        <div class="mindset-mood-row" id="mindsetMoodRow">
+          <button data-value="1">😞</button>
+          <button data-value="2">😕</button>
+          <button data-value="3">😐</button>
+          <button data-value="4">🙂</button>
+          <button data-value="5">😄</button>
+        </div>
+      </div>
+
+      <div class="mindset-sliders">
+        <div class="mindset-slider">
+          <span>Enfoque</span>
+          <input type="range" id="mindsetFocus" min="1" max="5" value="3" />
+        </div>
+
+        <div class="mindset-slider">
+          <span>Energía</span>
+          <input type="range" id="mindsetEnergy" min="1" max="5" value="3" />
+        </div>
+
+        <div class="mindset-slider">
+          <span>Motivación</span>
+          <input type="range" id="mindsetMotivation" min="1" max="5" value="3" />
+        </div>
+
+        <div class="mindset-slider">
+          <span>Claridad</span>
+          <input type="range" id="mindsetClarity" min="1" max="5" value="3" />
+        </div>
+
+        <div class="mindset-slider">
+          <span>Confianza</span>
+          <input type="range" id="mindsetConfidence" min="1" max="5" value="3" />
+        </div>
+      </div>
+
+      <textarea
+        id="mindsetNoteDecision"
+        class="lesson-reflection-input"
+        rows="3"
+        placeholder="¿Qué decisión tomarás para mañana?"
+      ></textarea>
+
+      <button
+        id="mindsetSaveBtn"
+        class="btn btn-primary"
+        style="margin-top:12px;"
+      >
+        Guardar mindset y continuar →
+      </button>
+    </section>
+
+    <!-- =========================
+      FEEDBACK (COLAPSADO)
+    ========================= -->
+    <section class="dash-section lesson-feedback-section">
+      <button id="toggleFeedback" class="btn-link">
+        ¿Quieres dejar un comentario sobre esta lección?
+      </button>
+
+      <div id="feedbackForm" class="hidden">
+        <div id="feedbackStars" class="feedback-stars"></div>
+
+        <textarea
+          id="feedbackComment"
+          class="lesson-reflection-input"
+          rows="4"
+          placeholder="Comentario opcional..."
+        ></textarea>
+      </div>
+    </section>
+
+    <!-- =========================
+      CHAT IA (OPCIONAL)
+    ========================= -->
+    <section
+      id="lessonChatBlock"
+      class="dash-section coach-chat hidden"
+    >
+      <h3 class="coach-chat-title">Habla con tu Coach</h3>
+
+      <div
+        id="coachChatMessages"
+        class="coach-chat-messages"
+      ></div>
+
+      <div class="coach-chat-input">
+        <input
+          id="coachChatInput"
+          type="text"
+          placeholder="Escribe tu mensaje..."
+        />
+        <button
+          id="coachChatSend"
+          class="btn btn-primary"
+        >
+          Enviar
+        </button>
+      </div>
+    </section>
+
+    <!-- =========================
+      NAVEGACIÓN
+    ========================= -->
+    <section class="dash-section lesson-navigation-section">
+      <div class="lesson-nav-grid">
+        <button class="nav-btn prev" id="prevLessonBtn">
+          ← Lección anterior
+        </button>
+        <button class="nav-btn next" id="nextLessonBtn">
+          Siguiente lección →
+        </button>
+      </div>
+    </section>
+
+  </div>
 </main>
 
 
