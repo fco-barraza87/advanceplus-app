@@ -16,6 +16,7 @@ const mindsetState = {
   decision: ""
 };
 
+let isInsideMindset = false;
 
 /* ============================================================
    Helpers DOM (con fallback entre versiones de HTML)
@@ -323,14 +324,22 @@ function setupFeedbackStars() {
     star.textContent = "★";
     star.style.cursor = "pointer";
 
-    star.onclick = () => {
-      const value = Number(star.dataset.value);
-      container.dataset.selected = String(value);
-      Array.from(container.children).forEach((child) => {
-        const v = Number(child.dataset.value);
-        child.classList.toggle("selected", v <= value);
-      });
-    };
+  star.onclick = async () => {
+    const value = Number(star.dataset.value);
+    container.dataset.selected = String(value);
+
+    Array.from(container.children).forEach((child) => {
+      const v = Number(child.dataset.value);
+      child.classList.toggle("selected", v <= value);
+    });
+
+    await saveFeedback(
+      (await getCurrentUser()).id,
+      getQueryParam("c"),
+      window.__currentLesson
+    );
+  };
+
 
     container.appendChild(star);
   }
@@ -342,20 +351,25 @@ function initFeedbackCollapse() {
 
   if (!toggle) return;
 
-  toggle.onclick = () => {
+  toggle.onclick = (e) => {
+    e.preventDefault();
+    e.stopPropagation(); // 🔒 CLAVE: no burbujea a mindset
+
     if (form) {
-      form.classList.toggle("hidden");
+      form.classList.remove("hidden");
       form.scrollIntoView({ behavior: "smooth", block: "start" });
-    } else {
-      // fallback: mostrar todo el bloque feedback
-      const section = toggle.closest(".lesson-feedback-section");
-      if (section) {
-        section.classList.remove("hidden");
-        section.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+      return;
+    }
+
+    // fallback: mostrar todo el bloque feedback
+    const section = toggle.closest(".lesson-feedback-section");
+    if (section) {
+      section.classList.remove("hidden");
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 }
+
 
 
 function initFeedbackCTA() {
@@ -378,16 +392,23 @@ function restoreFeedback(feedback) {
   const commentEl = firstEl("#feedbackComment");
   if (!starsContainer) return;
 
-  if (feedback && typeof feedback.rating === "number" && feedback.rating > 0) {
-    starsContainer.dataset.selected = String(feedback.rating);
-    Array.from(starsContainer.children).forEach((child) => {
-      const val = Number(child.dataset.value);
-      child.classList.toggle("selected", val <= feedback.rating);
-    });
-  }
+  const rating =
+    feedback && typeof feedback.rating === "number" && feedback.rating >= 1
+      ? feedback.rating
+      : 3; // ⭐ default
 
-  if (commentEl && feedback?.comment) commentEl.value = feedback.comment;
+  starsContainer.dataset.selected = String(rating);
+
+  Array.from(starsContainer.children).forEach((child) => {
+    const val = Number(child.dataset.value);
+    child.classList.toggle("selected", val <= rating);
+  });
+
+  if (commentEl && typeof feedback?.comment === "string") {
+    commentEl.value = feedback.comment;
+  }
 }
+
 
 async function saveFeedback(userId, courseId, lesson) {
   const starsContainer = firstEl("#feedbackStars");
@@ -710,6 +731,8 @@ async function saveMindsetLog(userId, courseId, lesson) {
 let mindsetSaveTimeout = null;
 
 function debounceSaveMindset() {
+  if (!isInsideMindset) return;
+
   clearTimeout(mindsetSaveTimeout);
   mindsetSaveTimeout = setTimeout(async () => {
     const user = await getCurrentUser();
@@ -722,6 +745,7 @@ function debounceSaveMindset() {
     );
   }, 700);
 }
+
 
 
 /* ============================================================
