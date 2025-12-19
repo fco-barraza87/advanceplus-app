@@ -394,7 +394,7 @@ async function saveFeedback(userId, courseId, lesson) {
 }
 
 /* ============================================================
-   Mission checkin (click = guarda + se cierra)
+   Mission checkin (click = guarda, NUNCA se oculta)
 ============================================================ */
 async function initMissionCheckin(userId, courseId, lesson) {
   const dayNum = Number(lesson.day) || 1;
@@ -417,24 +417,10 @@ async function initMissionCheckin(userId, courseId, lesson) {
 
   if (plErr || !prevLesson?.id) return;
 
-  // ¿Ya existe checkin?
-  const { data: existing } = await supabase
-    .from("mission_checkins")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("course_id", courseId)
-    .eq("lesson_id", prevLesson.id)
-    .maybeSingle();
-
-  if (existing?.id) {
-    hide(root);
-    return;
-  }
-
-  // Mostrar
+  // Mostrar SIEMPRE (aunque ya exista checkin)
   show(root);
 
-  // Click en icono = guardar + cerrar
+  // Click = guardar (sin cerrar)
   qa(`${cardOld ? "#missionCheckinCard" : "#missionCheckinBlock"} button[data-result]`)
     .forEach((btn) => {
       btn.onclick = async () => {
@@ -459,10 +445,12 @@ async function initMissionCheckin(userId, courseId, lesson) {
           return;
         }
 
-        hide(root);
+        // feedback visual opcional (no obligatorio)
+        btn.classList.add("active");
       };
     });
 }
+
 
 
 /* ============================================================
@@ -1019,14 +1007,7 @@ async function init() {
     // Mission checkin
     await initMissionCheckin(user.id, courseId, lesson);
 
-    // Coach (persistente)
-    await showCoachCardIfActive({
-      course,
-      lesson,
-      profile,
-      actionType: "post_lesson",
-      userInput: q("#lessonExerciseInput")?.value || ""
-    });
+
 
     /* ==================================================
        🔧 MEJORA 1: Día 1 → Coach NO sticky
