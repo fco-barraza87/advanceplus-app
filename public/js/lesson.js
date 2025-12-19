@@ -337,17 +337,26 @@ function setupFeedbackStars() {
 }
 
 function initFeedbackCollapse() {
-  // HTML nuevo
   const toggle = firstEl("#toggleFeedback");
   const form = firstEl("#feedbackForm");
-  if (toggle && form) {
-    toggle.onclick = () => form.classList.toggle("hidden");
-    return;
-  }
 
-  // HTML antiguo (si quieres colapsarlo sin re-estructurar HTML)
-  // Si NO existe toggleFeedback, no tocamos nada.
+  if (!toggle) return;
+
+  toggle.onclick = () => {
+    if (form) {
+      form.classList.toggle("hidden");
+      form.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      // fallback: mostrar todo el bloque feedback
+      const section = toggle.closest(".lesson-feedback-section");
+      if (section) {
+        section.classList.remove("hidden");
+        section.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  };
 }
+
 
 function restoreFeedback(feedback) {
   const starsContainer = firstEl("#feedbackStars");
@@ -503,7 +512,14 @@ function initMindsetUI() {
 
     qa("button", moodRow).forEach((btn) => {
       btn.onclick = () => {
-        const v = Number(btn.dataset.value);
+        const raw = btn.dataset.value;
+        const v = Number(raw);
+
+        if (!Number.isInteger(v) || v < 1 || v > 5) {
+          console.warn("[mindset] mood inválido:", raw);
+          return;
+        }
+
         mindsetState.mood = v;
         moodRow.dataset.value = String(v);
 
@@ -514,6 +530,7 @@ function initMindsetUI() {
         debounceSaveMindset();
       };
     });
+
   }
 
   const sliders = [
