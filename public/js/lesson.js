@@ -550,26 +550,6 @@ function initMindsetUI() {
 }
 
 
-/* -------------------------
-   Autosave mindset
--------------------------- */
-let mindsetTimeout = null;
-
-function debounceSaveMindset() {
-  clearTimeout(mindsetTimeout);
-  mindsetTimeout = setTimeout(saveMindsetAuto, 600);
-}
-
-async function saveMindsetAuto() {
-  const user = await getCurrentUser();
-  if (!user || !window.__currentLesson) return;
-
-  await saveMindsetLog(
-    user.id,
-    getQueryParam("c"),
-    window.__currentLesson
-  );
-}
 
 
 async function hasMindsetLogForLesson(userId, courseId, lessonId) {
