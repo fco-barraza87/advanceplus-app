@@ -1,6 +1,22 @@
 // /js/lesson.js — Definitivo (robusto + compatible con HTML antiguo y nuevo)
 import { supabase } from "/js/supabase.js";
 
+// ================================
+// Mindset State (fuente única de verdad)
+// ================================
+const mindsetState = {
+  mood: 3,
+  enfoque: 3,
+  energia: 3,
+  motivacion: 3,
+  claridad: 3,
+  confianza: 3,
+  best: "",
+  challenge: "",
+  decision: ""
+};
+
+
 /* ============================================================
    Helpers DOM (con fallback entre versiones de HTML)
 ============================================================ */
@@ -483,40 +499,56 @@ function initMindsetUI() {
   const moodRow = firstEl("#mindsetMoodRow");
 
   if (moodRow) {
-    if (!moodRow.dataset.value) {
-      moodRow.dataset.value = "3";
-    }
+    moodRow.dataset.value = String(mindsetState.mood);
 
-    const btns = Array.from(moodRow.querySelectorAll("button"));
-    btns.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const v = btn.dataset.value;
-        moodRow.dataset.value = v;
-        btns.forEach((b) => b.classList.toggle("active", b === btn));
+    qa("button", moodRow).forEach((btn) => {
+      btn.onclick = () => {
+        const v = Number(btn.dataset.value);
+        mindsetState.mood = v;
+        moodRow.dataset.value = String(v);
+
+        qa("button", moodRow).forEach((b) =>
+          b.classList.toggle("active", b === btn)
+        );
+
         debounceSaveMindset();
-      });
+      };
     });
   }
 
   const sliders = [
-    "mindsetFocus",
-    "mindsetEnergy",
-    "mindsetMotivation",
-    "mindsetClarity",
-    "mindsetConfidence"
+    ["mindsetFocus", "enfoque"],
+    ["mindsetEnergy", "energia"],
+    ["mindsetMotivation", "motivacion"],
+    ["mindsetClarity", "claridad"],
+    ["mindsetConfidence", "confianza"]
   ];
 
-  sliders.forEach((id) => {
+  sliders.forEach(([id, key]) => {
     const input = firstEl("#" + id);
     if (!input) return;
-    input.addEventListener("input", debounceSaveMindset);
+
+    input.value = mindsetState[key];
+    input.addEventListener("input", () => {
+      mindsetState[key] = Number(input.value);
+      debounceSaveMindset();
+    });
   });
 
-  const decision = firstEl("#mindsetNoteDecision");
-  if (decision) {
-    decision.addEventListener("input", debounceSaveMindset);
-  }
+  const bindText = (id, key) => {
+    const el = firstEl(id);
+    if (!el) return;
+    el.addEventListener("input", () => {
+      mindsetState[key] = el.value.trim();
+      debounceSaveMindset();
+    });
+  };
+
+  bindText("#mindsetNoteBest", "best");
+  bindText("#mindsetNoteChallenge", "challenge");
+  bindText("#mindsetNoteDecision", "decision");
 }
+
 
 /* -------------------------
    Autosave mindset
@@ -554,37 +586,57 @@ async function hasMindsetLogForLesson(userId, courseId, lessonId) {
 }
 
 async function saveMindsetLog(userId, courseId, lesson) {
-  const moodRow = firstEl("#mindsetMoodRow");
-  const mood = moodRow?.dataset.selected || moodRow?.dataset.value || null;
-
-  const enfoque = Number(firstEl("#mindsetFocus")?.value || 0) || null;
-  const energia = Number(firstEl("#mindsetEnergy")?.value || 0) || null;
-  const motivacion = Number(firstEl("#mindsetMotivation")?.value || 0) || null;
-  const claridad = Number(firstEl("#mindsetClarity")?.value || 0) || null;
-  const confianza = Number(firstEl("#mindsetConfidence")?.value || 0) || null;
-
-  // preguntas (solo en HTML bonito)
-  const best = (firstVal("#mindsetNoteBest") || "").trim();
-  const challenge = (firstVal("#mindsetNoteChallenge") || "").trim();
-  const decision = (firstVal("#mindsetNoteDecision") || "").trim();
-  const notes = (best || challenge || decision) ? safeJson({ best, challenge, decision }) : null;
-
   try {
     await supabase.from("mindset_logs").insert({
       user_id: userId,
       course_id: courseId,
       lesson_id: lesson.id,
       day: lesson.day,
-      mood: mood ? Number(mood) : null,
-      enfoque, energia, motivacion, claridad, confianza,
-      notes
+
+      mood: mindsetState.mood,
+      enfoque: mindsetState.enfoque,
+      energia: mindsetState.energia,
+      motivacion: mindsetState.motivacion,
+      claridad: mindsetState.claridad,
+      confianza: mindsetState.confianza,
+
+      notes:
+        mindsetState.best ||
+        mindsetState.challenge ||
+        mindsetState.decision
+          ? JSON.stringify({
+              best: mindsetState.best,
+              challenge: mindsetState.challenge,
+              decision: mindsetState.decision
+            })
+          : null
     });
+
+    console.log("[mindset] guardado correctamente");
     return true;
   } catch (e) {
-    console.warn("[lesson] saveMindsetLog error:", e);
+    console.warn("[mindset] error al guardar:", e);
     return false;
   }
 }
+
+
+let mindsetSaveTimeout = null;
+
+function debounceSaveMindset() {
+  clearTimeout(mindsetSaveTimeout);
+  mindsetSaveTimeout = setTimeout(async () => {
+    const user = await getCurrentUser();
+    if (!user || !window.__currentLesson) return;
+
+    await saveMindsetLog(
+      user.id,
+      getQueryParam("c"),
+      window.__currentLesson
+    );
+  }, 700);
+}
+
 
 /* ============================================================
    Progress + Redirect
