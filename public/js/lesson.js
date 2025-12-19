@@ -314,7 +314,7 @@ function setupFeedbackStars() {
   if (!container) return;
 
   container.innerHTML = "";
-  container.dataset.selected = "0";
+  container.dataset.selected = "3"; // ⭐ default visual
 
   for (let i = 1; i <= 5; i++) {
     const star = document.createElement("button");
@@ -322,28 +322,48 @@ function setupFeedbackStars() {
     star.className = "feedback-star";
     star.dataset.value = String(i);
     star.textContent = "★";
-    star.style.cursor = "pointer";
 
-  star.onclick = async () => {
-    const value = Number(star.dataset.value);
-    container.dataset.selected = String(value);
+    star.onclick = async () => {
+      const value = Number(star.dataset.value);
+      container.dataset.selected = String(value);
 
-    Array.from(container.children).forEach((child) => {
-      const v = Number(child.dataset.value);
-      child.classList.toggle("selected", v <= value);
-    });
+      Array.from(container.children).forEach((child) => {
+        const v = Number(child.dataset.value);
+        child.classList.toggle("selected", v <= value);
+      });
 
-    await saveFeedback(
-      (await getCurrentUser()).id,
-      getQueryParam("c"),
-      window.__currentLesson
-    );
-  };
-
+      await saveFeedback(
+        (await getCurrentUser()).id,
+        getQueryParam("c"),
+        window.__currentLesson
+      );
+    };
 
     container.appendChild(star);
   }
 }
+
+function initFeedbackAutosave() {
+  const commentEl = firstEl("#feedbackComment");
+  if (!commentEl) return;
+
+  let t = null;
+
+  commentEl.addEventListener("input", () => {
+    clearTimeout(t);
+    t = setTimeout(async () => {
+      const user = await getCurrentUser();
+      if (!user || !window.__currentLesson) return;
+
+      await saveFeedback(
+        user.id,
+        getQueryParam("c"),
+        window.__currentLesson
+      );
+    }, 600);
+  });
+}
+
 
 function initFeedbackCollapse() {
   const toggle = firstEl("#toggleFeedback");
@@ -541,6 +561,15 @@ async function initMissionCheckin(userId, courseId, lesson) {
    Mindset inline (autosave, sin botones)
 ============================================================ */
 function initMindsetUI() {
+  const root = firstEl("#mindsetInline", "#lessonMindsetBlock");
+  if (root) {
+    root.addEventListener("mouseenter", () => {
+      isInsideMindset = true;
+    });
+    root.addEventListener("mouseleave", () => {
+      isInsideMindset = false;
+    });
+  }
   const moodRow = firstEl("#mindsetMoodRow");
 
   if (moodRow) {
@@ -1068,58 +1097,21 @@ async function initCompleteFlow({ userId, course, courseId, lesson, profile, pro
   if (!completeBtn) return;
 
   completeBtn.onclick = async () => {
-    // 1) guardar entradas
-    await saveReflection(userId, courseId, lesson);
-    await saveFeedback(userId, courseId, lesson);
-
-    // 2) marcar progreso
     const ok = await completeLesson(userId, course, lesson);
     if (!ok) return;
 
-    // 🔁 Reordenar visual final: Mindset → Coach → Feedback → Chat
-    const coachBlock = document.querySelector("#lessonCoachBlock");
-    const feedbackSection = document.querySelector(".lesson-feedback-section");
-    const lessonChatBlock = document.querySelector("#lessonChatBlock");
+    await showCoachCardIfActive({
+      course,
+      lesson,
+      profile,
+      actionType: "post_lesson",
+      userInput: ""
+    });
 
-    feedbackSection?.after(coachBlock);
-    lessonChatBlock?.after(feedbackSection);
-
-
-    // 3) habilitar siguiente (si existe)
-    const totalDays = course.duration_days || 1;
-    if (nextBtn && dayNum < totalDays) {
-      nextBtn.disabled = false;
-      nextBtn.style.opacity = "1";
-      nextBtn.textContent = "Siguiente lección →";
-      nextBtn.onclick = () => window.location.href = `/curso/lesson.html?c=${courseId}&day=${dayNum + 1}`;
-    }
-
-    // 4) si ya hay mindset log, redirect directo (pero actualizamos coach post_lesson)
-    const alreadyLogged = await hasMindsetLogForLesson(userId, courseId, lesson.id);
-    if (alreadyLogged) {
-      await showCoachCardIfActive({
-        course,
-        lesson,
-        profile,
-        actionType: "post_lesson",
-        userInput: ((firstVal("#feedbackComment") || "") + " " + (getReflectionTextarea()?.value || "")).trim()
-      });
-
-      const redirectInfo = await computeNextDayForRedirect(userId, course);
-      redirectAfterLesson(course, lesson, redirectInfo);
-      return;
-    }
-
-    // 5) mostrar mindset inline
-    if (mindsetInline) {
-      show(mindsetInline);
-      mindsetInline.scrollIntoView({ behavior: "smooth", block: "start" });
-    } else {
-      // si no hay bloque, hacemos redirect igual (no rompemos)
-      const redirectInfo = await computeNextDayForRedirect(userId, course);
-      redirectAfterLesson(course, lesson, redirectInfo);
-    }
+    const redirectInfo = await computeNextDayForRedirect(userId, course);
+    redirectAfterLesson(course, lesson, redirectInfo);
   };
+
 
   if (mindsetSaveBtn) {
     mindsetSaveBtn.onclick = async () => {
@@ -1184,6 +1176,7 @@ async function init() {
     // Feedback
     setupFeedbackStars();
     restoreFeedback(feedback);
+    initFeedbackAutosave();
     initFeedbackCollapse();
     initFeedbackCTA();
 
