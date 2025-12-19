@@ -1,4 +1,4 @@
-// /js/lesson.js — CAPA 3 · Boot + Checkin + Ejercicio + Mindset
+// /js/lesson.js — CAPA 2 · Boot + Mission Checkins + Ejercicio
 import { supabase } from "/js/supabase.js";
 
 /* ============================================================
@@ -22,7 +22,7 @@ async function getCurrentUser() {
 /* ============================================================
    Load base data
 ============================================================ */
-async function loadLessonBase(courseId, day) {
+async function loadLessonBase(userId, courseId, day) {
   const dayNum = Number(day) || 1;
 
   const { data: course } = await supabase
@@ -46,7 +46,7 @@ async function loadLessonBase(courseId, day) {
 }
 
 /* ============================================================
-   Render header + content
+   Render header
 ============================================================ */
 function renderHeader(course, lesson, dayNum) {
   q("#lessonBackBtn")?.addEventListener("click", () => {
@@ -70,6 +70,9 @@ function renderHeader(course, lesson, dayNum) {
   }
 }
 
+/* ============================================================
+   Render content
+============================================================ */
 function renderContent(lesson) {
   q("#lessonContentHtml").innerHTML =
     lesson.content_html || "<p>Contenido próximamente.</p>";
@@ -110,6 +113,7 @@ async function initMissionCheckin({ userId, courseId, lesson }) {
 
   const block = q("#missionCheckinBlock");
   if (!block) return;
+
   block.classList.remove("hidden");
 
   const noteEl = q("#missionCheckinNote");
@@ -134,10 +138,13 @@ async function initMissionCheckin({ userId, courseId, lesson }) {
 
   if (existing) {
     selectedResult = existing.result || null;
-    if (existing.note) noteEl.value = existing.note;
+    if (noteEl && existing.note) noteEl.value = existing.note;
 
     qa("#missionCheckinBlock button[data-result]").forEach(btn => {
-      btn.classList.toggle("active", btn.dataset.result === selectedResult);
+      btn.classList.toggle(
+        "active",
+        btn.dataset.result === selectedResult
+      );
     });
   }
 
@@ -152,45 +159,53 @@ async function initMissionCheckin({ userId, courseId, lesson }) {
         lesson_id: prevLesson.id,
         day: dayNum - 1,
         result: selectedResult,
-        note: noteEl.value.trim() || null
+        note: noteEl?.value?.trim() || null
       }, {
         onConflict: "user_id,course_id,lesson_id"
       });
   }
 
   qa("#missionCheckinBlock button[data-result]").forEach(btn => {
-    btn.onclick = () => {
+    btn.addEventListener("click", () => {
       selectedResult = btn.dataset.result;
       qa("#missionCheckinBlock button[data-result]").forEach(b =>
         b.classList.toggle("active", b === btn)
       );
       save();
-    };
+    });
   });
 
-  noteEl.addEventListener("input", save);
+  noteEl?.addEventListener("input", () => {
+    if (!selectedResult) return;
+    save();
+  });
 }
 
 /* ============================================================
-   Ejercicio del día (Capa 2)
+   Ejercicio del día — lesson_reflections (Capa 2)
 ============================================================ */
 async function initLessonReflection({ userId, courseId, lesson }) {
   const textarea = q("#lessonExerciseInput");
   if (!textarea) return;
 
+  // Hidratar si existe
   const { data: existing } = await supabase
     .from("lesson_reflections")
-    .select("content")
+    .select("id, content")
     .eq("user_id", userId)
     .eq("course_id", courseId)
     .eq("lesson_id", lesson.id)
     .maybeSingle();
 
-  if (existing?.content) textarea.value = existing.content;
+  if (existing?.content) {
+    textarea.value = existing.content;
+  }
 
   let t = null;
 
   async function save() {
+    const content = textarea.value.trim();
+
     await supabase
       .from("lesson_reflections")
       .upsert({
@@ -198,7 +213,7 @@ async function initLessonReflection({ userId, courseId, lesson }) {
         course_id: courseId,
         lesson_id: lesson.id,
         day: lesson.day,
-        content: textarea.value.trim()
+        content
       }, {
         onConflict: "user_id,course_id,lesson_id"
       });
@@ -210,143 +225,6 @@ async function initLessonReflection({ userId, courseId, lesson }) {
   });
 
   textarea.addEventListener("blur", save);
-}
-
-/* ============================================================
-   Mindset (Capa 3)
-============================================================ */
-async function initMindset({ userId, courseId, lesson }) {
-  const block = q("#lessonMindsetBlock");
-  if (!block) return;
-  block.classList.remove("hidden");
-
-  const moodRow = q("#mindsetMoodRow");
-  const sliders = {
-    enfoque: q("#mindsetFocus"),
-    energia: q("#mindsetEnergy"),
-    motivacion: q("#mindsetMotivation"),
-    claridad: q("#mindsetClarity"),
-    confianza: q("#mindsetConfidence")
-  };
-
-  const notes = {
-    best: q("#mindsetNoteBest"),
-    challenge: q("#mindsetNoteChallenge"),
-    decision: q("#mindsetNoteDecision")
-  };
-
-  const state = {
-    mood: 3,
-    enfoque: 3,
-    energia: 3,
-    motivacion: 3,
-    claridad: 3,
-    confianza: 3,
-    best: "",
-    challenge: "",
-    decision: ""
-  };
-
-  // Hidratar
-  const { data } = await supabase
-    .from("mindset_logs")
-    .select("*")
-    .eq("user_id", userId)
-    .eq("course_id", courseId)
-    .eq("lesson_id", lesson.id)
-    .maybeSingle();
-
-  if (data) {
-    Object.assign(state, {
-      mood: data.mood ?? 3,
-      enfoque: data.enfoque ?? 3,
-      energia: data.energia ?? 3,
-      motivacion: data.motivacion ?? 3,
-      claridad: data.claridad ?? 3,
-      confianza: data.confianza ?? 3
-    });
-
-    if (data.notes) {
-      try {
-        const n = JSON.parse(data.notes);
-        state.best = n.best || "";
-        state.challenge = n.challenge || "";
-        state.decision = n.decision || "";
-      } catch {}
-    }
-  }
-
-  // Aplicar a UI
-  qa("#mindsetMoodRow button").forEach(btn => {
-    btn.classList.toggle(
-      "active",
-      Number(btn.dataset.value) === state.mood
-    );
-  });
-
-  Object.entries(sliders).forEach(([k, el]) => {
-    if (el) el.value = state[k];
-  });
-
-  Object.entries(notes).forEach(([k, el]) => {
-    if (el) el.value = state[k];
-  });
-
-  let t = null;
-
-  async function save() {
-    await supabase
-      .from("mindset_logs")
-      .upsert({
-        user_id: userId,
-        course_id: courseId,
-        lesson_id: lesson.id,
-        day: lesson.day,
-        mood: state.mood,
-        enfoque: state.enfoque,
-        energia: state.energia,
-        motivacion: state.motivacion,
-        claridad: state.claridad,
-        confianza: state.confianza,
-        notes: JSON.stringify({
-          best: state.best,
-          challenge: state.challenge,
-          decision: state.decision
-        })
-      }, {
-        onConflict: "user_id,course_id,lesson_id"
-      });
-  }
-
-  function debounceSave() {
-    clearTimeout(t);
-    t = setTimeout(save, 600);
-  }
-
-  // Bindings
-  qa("#mindsetMoodRow button").forEach(btn => {
-    btn.onclick = () => {
-      state.mood = Number(btn.dataset.value);
-      qa("#mindsetMoodRow button").forEach(b =>
-        b.classList.toggle("active", b === btn)
-      );
-      debounceSave();
-    };
-  });
-
-  Object.entries(sliders).forEach(([k, el]) => {
-    el.addEventListener("input", () => {
-      state[k] = Number(el.value);
-      debounceSave();
-    });
-  });
-
-  Object.entries(notes).forEach(([k, el]) => {
-    el.addEventListener("input", () => {
-      state[k] = el.value.trim();
-      debounceSave();
-    });
-  });
 }
 
 /* ============================================================
@@ -369,14 +247,29 @@ async function init() {
 
   try {
     const { course, lesson, dayNum } =
-      await loadLessonBase(courseId, day);
+      await loadLessonBase(user.id, courseId, day);
+
+    window.__lessonState = {
+      userId: user.id,
+      courseId,
+      lessonId: lesson.id,
+      day: dayNum
+    };
 
     renderHeader(course, lesson, dayNum);
     renderContent(lesson);
 
-    await initMissionCheckin({ userId: user.id, courseId, lesson });
-    await initLessonReflection({ userId: user.id, courseId, lesson });
-    await initMindset({ userId: user.id, courseId, lesson });
+    await initMissionCheckin({
+      userId: user.id,
+      courseId,
+      lesson
+    });
+
+    await initLessonReflection({
+      userId: user.id,
+      courseId,
+      lesson
+    });
 
   } catch (e) {
     console.error("[lesson]", e);
