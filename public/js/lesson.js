@@ -525,9 +525,10 @@ function initMindsetUI() {
   if (moodRow) {
     moodRow.dataset.value = String(mindsetState.mood);
 
-    qa("button", moodRow).forEach((btn) => {
+    qa("button[data-value]", moodRow).forEach((btn) => {
       btn.onclick = () => {
         const raw = btn.dataset.value;
+        if (raw === undefined) return;
         const v = Number(raw);
 
         if (!Number.isInteger(v) || v < 1 || v > 5) {
