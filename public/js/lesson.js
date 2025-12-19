@@ -394,69 +394,84 @@ async function saveFeedback(userId, courseId, lesson) {
 }
 
 /* ============================================================
-   Mission checkin (persistente, NO se oculta, guarda note bien)
+   Mission checkin — FIX definitivo (guarda note correctamente)
 ============================================================ */
 async function initMissionCheckin(userId, courseId, lesson) {
   const dayNum = Number(lesson.day) || 1;
   if (dayNum <= 1) return;
 
-  const root = firstEl("#missionCheckinBlock", "#missionCheckinCard");
+  const root = firstEl("#missionCheckinCard", "#missionCheckinBlock");
   if (!root) return;
 
-  const noteEl = firstEl(
-    "#missionCheckinNote",
-    "#missionCheckinBlock textarea",
-    "#missionCheckinCard textarea"
-  );
+  const noteEl = firstEl("#missionCheckinNote");
+  if (!noteEl) return;
 
-  // Buscar lección anterior
-  const { data: prevLesson, error: plErr } = await supabase
+  // buscar lección anterior
+  const { data: prevLesson } = await supabase
     .from("lessons")
     .select("id")
     .eq("course_id", courseId)
     .eq("day", dayNum - 1)
     .maybeSingle();
 
-  if (plErr || !prevLesson?.id) return;
+  if (!prevLesson?.id) return;
+
+  // cargar existente (si existe)
+  const { data: existing } = await supabase
+    .from("mission_checkins")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("course_id", courseId)
+    .eq("lesson_id", prevLesson.id)
+    .maybeSingle();
+
+  let selectedResult = existing?.result || null;
+  if (existing?.note) noteEl.value = existing.note;
 
   show(root);
 
-  // Click = guardar / actualizar (NO cerrar)
-  qa("#missionCheckinBlock button[data-result], #missionCheckinCard button[data-result]")
-    .forEach((btn) => {
-      btn.onclick = async () => {
-        const result = btn.dataset.result;
+  // botones resultado → SOLO seleccionan
+  qa("button[data-result]", root).forEach((btn) => {
+    btn.onclick = () => {
+      selectedResult = btn.dataset.result;
 
-        // UI feedback
-        qa("#missionCheckinBlock button[data-result], #missionCheckinCard button[data-result]")
-          .forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
+      qa("button[data-result]", root).forEach(b =>
+        b.classList.toggle("active", b === btn)
+      );
 
-        const note =
-          noteEl && typeof noteEl.value === "string"
-            ? noteEl.value.trim()
-            : null;
+      debounceSave();
+    };
+  });
 
-        const row = {
-          user_id: userId,
-          course_id: courseId,
-          lesson_id: prevLesson.id,
-          day: dayNum - 1,
-          result,
-          note: note || null
-        };
+  // autosave del texto
+  noteEl.addEventListener("input", debounceSave);
 
-        const { error } = await supabase
-          .from("mission_checkins")
-          .upsert(row, {
-            onConflict: "user_id,course_id,lesson_id"
-          });
+  let t = null;
+  function debounceSave() {
+    clearTimeout(t);
+    t = setTimeout(saveCheckin, 600);
+  }
 
-        if (error) {
-          console.warn("[lesson] mission_checkins error:", error);
-        }
-      };
-    });
+  async function saveCheckin() {
+    if (!selectedResult) return;
+
+    const row = {
+      user_id: userId,
+      course_id: courseId,
+      lesson_id: prevLesson.id,
+      day: dayNum - 1,
+      result: selectedResult,
+      note: noteEl.value.trim() || null
+    };
+
+    const { error } = await supabase
+      .from("mission_checkins")
+      .upsert(row, { onConflict: "user_id,course_id,lesson_id" });
+
+    if (error) {
+      console.warn("[mission_checkin] save error:", error);
+    }
+  }
 }
 
 
