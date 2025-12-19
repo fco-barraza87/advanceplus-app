@@ -628,36 +628,47 @@ async function hasMindsetLogForLesson(userId, courseId, lessonId) {
 }
 
 async function saveMindsetLog(userId, courseId, lesson) {
+  const payload = {
+    user_id: userId,
+    course_id: courseId,
+    lesson_id: lesson.id,
+    day: lesson.day,
+
+    mood: mindsetState.mood,
+    enfoque: mindsetState.enfoque,
+    energia: mindsetState.energia,
+    motivacion: mindsetState.motivacion,
+    claridad: mindsetState.claridad,
+    confianza: mindsetState.confianza,
+
+    notes:
+      mindsetState.best ||
+      mindsetState.challenge ||
+      mindsetState.decision
+        ? JSON.stringify({
+            best: mindsetState.best,
+            challenge: mindsetState.challenge,
+            decision: mindsetState.decision
+          })
+        : null
+  };
+
   try {
-    await supabase.from("mindset_logs").insert({
-      user_id: userId,
-      course_id: courseId,
-      lesson_id: lesson.id,
-      day: lesson.day,
+    const { error } = await supabase
+      .from("mindset_logs")
+      .upsert(payload, {
+        onConflict: "user_id,course_id,lesson_id"
+      });
 
-      mood: mindsetState.mood,
-      enfoque: mindsetState.enfoque,
-      energia: mindsetState.energia,
-      motivacion: mindsetState.motivacion,
-      claridad: mindsetState.claridad,
-      confianza: mindsetState.confianza,
+    if (error) {
+      console.warn("[mindset] upsert error:", error);
+      return false;
+    }
 
-      notes:
-        mindsetState.best ||
-        mindsetState.challenge ||
-        mindsetState.decision
-          ? JSON.stringify({
-              best: mindsetState.best,
-              challenge: mindsetState.challenge,
-              decision: mindsetState.decision
-            })
-          : null
-    });
-
-    console.log("[mindset] guardado correctamente");
+    console.log("[mindset] upsert OK", payload);
     return true;
   } catch (e) {
-    console.warn("[mindset] error al guardar:", e);
+    console.warn("[mindset] unexpected error:", e);
     return false;
   }
 }
