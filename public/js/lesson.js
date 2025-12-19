@@ -550,6 +550,68 @@ function initMindsetUI() {
 }
 
 
+/* ============================================================
+   Load Mindset from DB (DB → UI → State)
+============================================================ */
+async function loadMindsetForLesson(userId, courseId, lesson) {
+  const { data, error } = await supabase
+    .from("mindset_logs")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("course_id", courseId)
+    .eq("lesson_id", lesson.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) return;
+
+  // ---------- STATE ----------
+  mindsetState.mood = data.mood ?? 3;
+  mindsetState.enfoque = data.enfoque ?? 3;
+  mindsetState.energia = data.energia ?? 3;
+  mindsetState.motivacion = data.motivacion ?? 3;
+  mindsetState.claridad = data.claridad ?? 3;
+  mindsetState.confianza = data.confianza ?? 3;
+
+  if (data.notes) {
+    try {
+      const n = JSON.parse(data.notes);
+      mindsetState.best = n.best || "";
+      mindsetState.challenge = n.challenge || "";
+      mindsetState.decision = n.decision || "";
+    } catch {}
+  }
+
+  // ---------- UI ----------
+  const moodRow = q("#mindsetMoodRow");
+  if (moodRow) {
+    moodRow.dataset.value = String(mindsetState.mood);
+    qa("button", moodRow).forEach(btn => {
+      btn.classList.toggle(
+        "active",
+        Number(btn.dataset.value) === mindsetState.mood
+      );
+    });
+  }
+
+  const map = [
+    ["mindsetFocus", "enfoque"],
+    ["mindsetEnergy", "energia"],
+    ["mindsetMotivation", "motivacion"],
+    ["mindsetClarity", "claridad"],
+    ["mindsetConfidence", "confianza"]
+  ];
+
+  map.forEach(([id, key]) => {
+    const input = q("#" + id);
+    if (input) input.value = mindsetState[key];
+  });
+
+  if (q("#mindsetNoteBest")) q("#mindsetNoteBest").value = mindsetState.best;
+  if (q("#mindsetNoteChallenge")) q("#mindsetNoteChallenge").value = mindsetState.challenge;
+  if (q("#mindsetNoteDecision")) q("#mindsetNoteDecision").value = mindsetState.decision;
+}
 
 
 async function hasMindsetLogForLesson(userId, courseId, lessonId) {
@@ -1058,6 +1120,8 @@ async function init() {
 
     // Mindset UI
     initMindsetUI();
+    await loadMindsetForLesson(user.id, courseId, lesson);
+
 
     // Mission checkin
     await initMissionCheckin(user.id, courseId, lesson);
