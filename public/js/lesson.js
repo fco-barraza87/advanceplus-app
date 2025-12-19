@@ -777,26 +777,7 @@ function debounceSaveMindset() {
 
 
 
-/* ============================================================
-   Progress + Redirect
-============================================================ */
-async function completeLesson(userId, course, lesson) {
-  const xp = lesson.xp_reward || 0;
 
-  const { error } = await supabase.rpc("finish_lesson", {
-    p_user_id: userId,
-    p_course_id: course.id,
-    p_day: lesson.day,
-    p_xp: xp
-  });
-
-  if (error) {
-    console.error("[lesson] finish_lesson error:", error);
-    alert("No se pudo completar la lección (RPC).");
-    return false;
-  }
-  return true;
-}
 
 async function computeNextDayForRedirect(userId, course) {
   const { data: allProgress, error } = await supabase
@@ -1055,90 +1036,31 @@ function initNavigation({ course, courseId, dayNum, completed }) {
 
   if (nextBtn) {
     if (dayNum < totalDays) {
-      if (completed) {
-        nextBtn.onclick = () => window.location.href = `/curso/lesson.html?c=${courseId}&day=${dayNum + 1}`;
-      } else {
-        nextBtn.disabled = true;
-        nextBtn.style.opacity = "0.4";
-        nextBtn.textContent = "Completa esta lección para continuar →";
-      }
+      nextBtn.disabled = false;
+      nextBtn.style.opacity = "1";
+      nextBtn.textContent = "Siguiente lección →";
+
+      nextBtn.onclick = async () => {
+        // 1) marcar progreso al avanzar
+        await supabase.rpc("finish_lesson", {
+          p_user_id: userId,
+          p_course_id: course.id,
+          p_day: lesson.day,
+          p_xp: lesson.xp_reward || 0
+        });
+
+        // 2) ir a la siguiente lección
+        window.location.href = `/curso/lesson.html?c=${courseId}&day=${dayNum + 1}`;
+      };
     } else {
       nextBtn.disabled = true;
       nextBtn.textContent = "Fin del curso 🎉";
       nextBtn.style.opacity = "0.4";
     }
   }
+
 }
 
-/* ============================================================
-   Complete flow (inline)
-   - Completar lección -> mostrar mindset inline (si no existe)
-   - Guardar mindset -> coach post_mindset -> redirect
-============================================================ */
-async function initCompleteFlow({ userId, course, courseId, lesson, profile, progress, dayNum }) {
-  const completed = progress ? isTrue(progress.completed) : false;
-
-  const completeBtn = firstEl("#completeLessonBtn", "#btnCompleteLesson");
-  const mindsetInline = firstEl("#mindsetInline", "#lessonMindsetBlock");
-  const mindsetSaveBtn = firstEl("#mindsetSaveBtn");
-  const nextBtn = firstEl("#nextLessonBtn");
-
-  if (completed) {
-    if (completeBtn) {
-      completeBtn.outerHTML = `
-        <button class="btn completed-badge" disabled>
-          ✓ Lección ya completada
-        </button>
-      `;
-    }
-    return;
-  }
-
-  if (!completeBtn) return;
-
-  completeBtn.onclick = async () => {
-    const ok = await completeLesson(userId, course, lesson);
-    if (!ok) return;
-
-    await showCoachCardIfActive({
-      course,
-      lesson,
-      profile,
-      actionType: "post_lesson",
-      userInput: ""
-    });
-
-    const redirectInfo = await computeNextDayForRedirect(userId, course);
-    redirectAfterLesson(course, lesson, redirectInfo);
-  };
-
-
-  if (mindsetSaveBtn) {
-    mindsetSaveBtn.onclick = async () => {
-      const saved = await saveMindsetLog(userId, courseId, lesson);
-      if (!saved) {
-        alert("No se pudo guardar el mindset. Intenta nuevamente.");
-        return;
-      }
-
-      // coach después del mindset (si está activo)
-      await showCoachCardIfActive({
-        course,
-        lesson,
-        profile,
-        actionType: "post_mindset",
-        userInput: safeJson({
-          reflection: (getReflectionTextarea()?.value || "").trim(),
-          feedback: (firstVal("#feedbackComment") || "").trim(),
-          mood: firstEl("#mindsetMoodRow")?.dataset?.selected || firstEl("#mindsetMoodRow")?.dataset?.value || null
-        })
-      });
-
-      const redirectInfo = await computeNextDayForRedirect(userId, course);
-      redirectAfterLesson(course, lesson, redirectInfo);
-    };
-  }
-}
 
 /* ============================================================
    INIT
@@ -1213,7 +1135,7 @@ async function init() {
     /* ==================================================
        🔧 MEJORA 2: Mostrar CTA si NO está completada
     ================================================== */
-    const ctaBlock = document.querySelector("#lessonCtaBlock");
+
     const isCompleted =
       progress &&
       (progress.completed === true ||
