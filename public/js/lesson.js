@@ -394,18 +394,20 @@ async function saveFeedback(userId, courseId, lesson) {
 }
 
 /* ============================================================
-   Mission checkin (click = guarda, NUNCA se oculta)
+   Mission checkin (persistente, NO se oculta, guarda note bien)
 ============================================================ */
 async function initMissionCheckin(userId, courseId, lesson) {
   const dayNum = Number(lesson.day) || 1;
   if (dayNum <= 1) return;
 
-  const cardOld = firstEl("#missionCheckinCard");
-  const blockNew = firstEl("#missionCheckinBlock");
-  const root = cardOld || blockNew;
+  const root = firstEl("#missionCheckinBlock", "#missionCheckinCard");
   if (!root) return;
 
-  const noteEl = firstEl("#missionCheckinNote");
+  const noteEl = firstEl(
+    "#missionCheckinNote",
+    "#missionCheckinBlock textarea",
+    "#missionCheckinCard textarea"
+  );
 
   // Buscar lección anterior
   const { data: prevLesson, error: plErr } = await supabase
@@ -417,14 +419,23 @@ async function initMissionCheckin(userId, courseId, lesson) {
 
   if (plErr || !prevLesson?.id) return;
 
-  // Mostrar SIEMPRE (aunque ya exista checkin)
   show(root);
 
-  // Click = guardar (sin cerrar)
-  qa(`${cardOld ? "#missionCheckinCard" : "#missionCheckinBlock"} button[data-result]`)
+  // Click = guardar / actualizar (NO cerrar)
+  qa("#missionCheckinBlock button[data-result], #missionCheckinCard button[data-result]")
     .forEach((btn) => {
       btn.onclick = async () => {
         const result = btn.dataset.result;
+
+        // UI feedback
+        qa("#missionCheckinBlock button[data-result], #missionCheckinCard button[data-result]")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        const note =
+          noteEl && typeof noteEl.value === "string"
+            ? noteEl.value.trim()
+            : null;
 
         const row = {
           user_id: userId,
@@ -432,21 +443,18 @@ async function initMissionCheckin(userId, courseId, lesson) {
           lesson_id: prevLesson.id,
           day: dayNum - 1,
           result,
-          note: noteEl ? (noteEl.value || "").trim() || null : null
+          note: note || null
         };
 
         const { error } = await supabase
           .from("mission_checkins")
-          .upsert(row, { onConflict: "user_id,course_id,lesson_id" });
+          .upsert(row, {
+            onConflict: "user_id,course_id,lesson_id"
+          });
 
         if (error) {
           console.warn("[lesson] mission_checkins error:", error);
-          alert("No se pudo guardar el chequeo.");
-          return;
         }
-
-        // feedback visual opcional (no obligatorio)
-        btn.classList.add("active");
       };
     });
 }
