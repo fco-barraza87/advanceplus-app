@@ -358,6 +358,21 @@ function initFeedbackCollapse() {
 }
 
 
+function initFeedbackCTA() {
+  const cta = firstEl("#feedbackCta");
+  const form = firstEl("#feedbackForm");
+
+  if (!cta || !form) return;
+
+  cta.style.cursor = "pointer";
+
+  cta.onclick = () => {
+    form.classList.remove("hidden");
+    form.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+}
+
+
 function restoreFeedback(feedback) {
   const starsContainer = firstEl("#feedbackStars");
   const commentEl = firstEl("#feedbackComment");
@@ -1145,6 +1160,8 @@ async function init() {
     setupFeedbackStars();
     restoreFeedback(feedback);
     initFeedbackCollapse();
+    initFeedbackCTA();
+
 
     // Mindset UI
     initMindsetUI();
