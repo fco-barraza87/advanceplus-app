@@ -1,4 +1,4 @@
-// /js/lesson.js — CAPA 4 · Boot + Checkin + Ejercicio + Mindset + Feedback
+// /js/lesson.js — CAPA 3 · Boot + Checkin + Ejercicio + Mindset
 import { supabase } from "/js/supabase.js";
 
 /* ============================================================
@@ -247,6 +247,7 @@ async function initMindset({ userId, courseId, lesson }) {
     decision: ""
   };
 
+  // Hidratar
   const { data } = await supabase
     .from("mindset_logs")
     .select("*")
@@ -275,6 +276,7 @@ async function initMindset({ userId, courseId, lesson }) {
     }
   }
 
+  // Aplicar a UI
   qa("#mindsetMoodRow button").forEach(btn => {
     btn.classList.toggle(
       "active",
@@ -321,6 +323,7 @@ async function initMindset({ userId, courseId, lesson }) {
     t = setTimeout(save, 600);
   }
 
+  // Bindings
   qa("#mindsetMoodRow button").forEach(btn => {
     btn.onclick = () => {
       state.mood = Number(btn.dataset.value);
@@ -343,87 +346,6 @@ async function initMindset({ userId, courseId, lesson }) {
       state[k] = el.value.trim();
       debounceSave();
     });
-  });
-}
-
-/* ============================================================
-   Feedback (Capa 4)
-============================================================ */
-async function initFeedback({ userId, courseId, lesson }) {
-  const starsWrap = q("#feedbackStars");
-  const commentEl = q("#feedbackComment");
-  if (!starsWrap || !commentEl) return;
-
-  // Mostrar siempre (inline)
-  q("#feedbackForm")?.classList.remove("hidden");
-
-  let state = {
-    rating: 3,
-    comment: ""
-  };
-
-  // Hidratar
-  const { data } = await supabase
-    .from("lesson_feedback")
-    .select("*")
-    .eq("user_id", userId)
-    .eq("course_id", courseId)
-    .eq("lesson_id", lesson.id)
-    .maybeSingle();
-
-  if (data) {
-    state.rating = data.rating ?? 3;
-    state.comment = data.comment ?? "";
-  }
-
-  // Render estrellas
-  starsWrap.innerHTML = "";
-  for (let i = 1; i <= 5; i++) {
-    const star = document.createElement("button");
-    star.type = "button";
-    star.textContent = "★";
-    star.dataset.value = i;
-    star.className = "feedback-star";
-    if (i <= state.rating) star.classList.add("selected");
-
-    star.onclick = () => {
-      state.rating = i;
-      qa(".feedback-star").forEach(s =>
-        s.classList.toggle("selected", Number(s.dataset.value) <= i)
-      );
-      save();
-    };
-
-    starsWrap.appendChild(star);
-  }
-
-  commentEl.value = state.comment;
-
-  let t = null;
-
-  function debounceSave() {
-    clearTimeout(t);
-    t = setTimeout(save, 600);
-  }
-
-  async function save() {
-    await supabase
-      .from("lesson_feedback")
-      .upsert({
-        user_id: userId,
-        course_id: courseId,
-        lesson_id: lesson.id,
-        day: lesson.day,
-        rating: state.rating,
-        comment: commentEl.value.trim() || null
-      }, {
-        onConflict: "user_id,course_id,lesson_id"
-      });
-  }
-
-  commentEl.addEventListener("input", () => {
-    state.comment = commentEl.value;
-    debounceSave();
   });
 }
 
@@ -455,7 +377,6 @@ async function init() {
     await initMissionCheckin({ userId: user.id, courseId, lesson });
     await initLessonReflection({ userId: user.id, courseId, lesson });
     await initMindset({ userId: user.id, courseId, lesson });
-    await initFeedback({ userId: user.id, courseId, lesson });
 
   } catch (e) {
     console.error("[lesson]", e);
