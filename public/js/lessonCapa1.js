@@ -1,4 +1,4 @@
-// /js/lesson.js — CAPA 2 · Boot + Mission Checkins + Ejercicio
+// /js/lesson.js — CAPA 1 · Boot + Mission Checkins
 import { supabase } from "/js/supabase.js";
 
 /* ============================================================
@@ -114,11 +114,13 @@ async function initMissionCheckin({ userId, courseId, lesson }) {
   const block = q("#missionCheckinBlock");
   if (!block) return;
 
+  // mostrar SIEMPRE (no se vuelve a ocultar)
   block.classList.remove("hidden");
 
   const noteEl = q("#missionCheckinNote");
   let selectedResult = null;
 
+  // buscar lección anterior
   const { data: prevLesson } = await supabase
     .from("lessons")
     .select("id")
@@ -128,6 +130,7 @@ async function initMissionCheckin({ userId, courseId, lesson }) {
 
   if (!prevLesson) return;
 
+  // hidratar si existe
   const { data: existing } = await supabase
     .from("mission_checkins")
     .select("*")
@@ -182,52 +185,6 @@ async function initMissionCheckin({ userId, courseId, lesson }) {
 }
 
 /* ============================================================
-   Ejercicio del día — lesson_reflections (Capa 2)
-============================================================ */
-async function initLessonReflection({ userId, courseId, lesson }) {
-  const textarea = q("#lessonExerciseInput");
-  if (!textarea) return;
-
-  // Hidratar si existe
-  const { data: existing } = await supabase
-    .from("lesson_reflections")
-    .select("id, content")
-    .eq("user_id", userId)
-    .eq("course_id", courseId)
-    .eq("lesson_id", lesson.id)
-    .maybeSingle();
-
-  if (existing?.content) {
-    textarea.value = existing.content;
-  }
-
-  let t = null;
-
-  async function save() {
-    const content = textarea.value.trim();
-
-    await supabase
-      .from("lesson_reflections")
-      .upsert({
-        user_id: userId,
-        course_id: courseId,
-        lesson_id: lesson.id,
-        day: lesson.day,
-        content
-      }, {
-        onConflict: "user_id,course_id,lesson_id"
-      });
-  }
-
-  textarea.addEventListener("input", () => {
-    clearTimeout(t);
-    t = setTimeout(save, 700);
-  });
-
-  textarea.addEventListener("blur", save);
-}
-
-/* ============================================================
    INIT
 ============================================================ */
 async function init() {
@@ -260,12 +217,6 @@ async function init() {
     renderContent(lesson);
 
     await initMissionCheckin({
-      userId: user.id,
-      courseId,
-      lesson
-    });
-
-    await initLessonReflection({
       userId: user.id,
       courseId,
       lesson
