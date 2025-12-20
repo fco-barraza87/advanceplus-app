@@ -229,29 +229,16 @@
   position: fixed;
   bottom: 0;
   left: 0;
-  right: 0;
-
-  height: 64px;              /* altura fija */
-  padding-bottom: env(safe-area-inset-bottom);
-  
+  width: 100%;
+  background: var(--color-primary-dark);
+  height: 64px;
   display: flex;
   justify-content: space-around;
   align-items: center;
-
-  box-sizing: border-box;
-  
-  background: linear-gradient(
-    180deg,
-    rgba(10, 25, 61, 0.95),
-    rgba(10, 25, 61, 1)
-  );
-
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-
-  z-index: 1000;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  z-index: var(--z-header);
+  backdrop-filter: blur(10px);
 }
-
 
 .tab-btn {
   background: transparent;
@@ -286,9 +273,3 @@
   border-bottom: 2px solid var(--color-accent-cyan);
   padding-bottom: 2px;
 }
-
-.dashboard-main,
-.dashboard-wrapper {
-  padding-bottom: calc(64px + env(safe-area-inset-bottom));
-}
-

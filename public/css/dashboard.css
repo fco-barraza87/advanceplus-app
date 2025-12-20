@@ -3,14 +3,13 @@
 ============================================================ */
 
 .dashboard-page {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   background: var(--color-primary-dark);
 }
 
 .dashboard-main {
-  flex: 1;
   padding: var(--space-md) var(--space-md) calc(64px + var(--space-md));
 }
 
