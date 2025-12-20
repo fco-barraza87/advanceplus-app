@@ -286,3 +286,9 @@
   border-bottom: 2px solid var(--color-accent-cyan);
   padding-bottom: 2px;
 }
+
+.dashboard-main,
+.dashboard-wrapper {
+  padding-bottom: calc(64px + env(safe-area-inset-bottom));
+}
+
