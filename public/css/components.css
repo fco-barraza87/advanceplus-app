@@ -334,10 +334,28 @@
 }
 
 .coach-actions .btn-primary {
-  flex: 1;
-  padding: 0.55rem 0.9rem;
-  font-size: var(--text-sm);
+  background: var(--gradient-cyan);
+  color: var(--color-primary-dark);
+  border: none;
+  box-shadow: 0 6px 16px rgba(74,242,197,0.35);
 }
+
+.coach-actions .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(74,242,197,0.45);
+}
+
+.coach-actions .btn-primary.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.coach-actions .btn-secondary {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: var(--color-white);
+}
+
 
 .coach-actions .btn-outline {
   padding: 0.5rem 0.8rem;
@@ -366,6 +384,23 @@
   color: var(--color-primary-dark);
   border-color: transparent;
   box-shadow: 0 4px 10px rgba(74,242,197,0.35);
+}
+
+.check-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* clave */
+  margin: 12px 0;
+}
+
+.check-pill {
+  padding: 10px 14px;
+  font-size: var(--text-sm);
+  border-radius: 14px;
+}
+
+.check-card {
+  padding: var(--space-lg);
 }
 
 
