@@ -380,23 +380,30 @@
   flex-wrap: wrap;
 }
 
+/* ===== CHEQUEO RÁPIDO — BOTONES PREMIUM ===== */
+
 .coach-checkin-actions button {
   flex: 1;
   min-width: 110px;
-  transition: all 0.2s ease;
+  border-radius: 999px; /* 🔥 full pill */
+  padding: 10px 14px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 /* Estado activo */
 .coach-checkin-actions button.active {
-  background: rgba(74, 242, 197, 0.15);
+  background: rgba(74, 242, 197, 0.18);
   border-color: var(--accent-cyan);
   color: var(--color-white);
-  box-shadow: 0 0 0 1px rgba(74,242,197,0.35);
+  box-shadow:
+    0 0 0 1px rgba(74,242,197,0.45),
+    0 6px 16px rgba(0,0,0,0.25);
 }
 
 /* Atenuar no seleccionados */
 .coach-checkin-actions.has-selection button:not(.active) {
-  opacity: 0.5;
+  opacity: 0.45;
 }
 
 
