@@ -229,16 +229,29 @@
   position: fixed;
   bottom: 0;
   left: 0;
-  width: 100%;
-  background: var(--color-primary-dark);
-  height: 64px;
+  right: 0;
+
+  height: 64px;              /* altura fija */
+  padding-bottom: env(safe-area-inset-bottom);
+  
   display: flex;
   justify-content: space-around;
   align-items: center;
-  border-top: 1px solid rgba(255,255,255,0.08);
-  z-index: var(--z-header);
-  backdrop-filter: blur(10px);
+
+  box-sizing: border-box;
+  
+  background: linear-gradient(
+    180deg,
+    rgba(10, 25, 61, 0.95),
+    rgba(10, 25, 61, 1)
+  );
+
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  z-index: 1000;
 }
+
 
 .tab-btn {
   background: transparent;
