@@ -605,13 +605,15 @@ async function init() {
     // 👉 Coach al final, observador
     await initCoachIA({ userId: user.id, courseId, lesson });
 
+    // ✅ CAPA 6 — AQUÍ Y SOLO AQUÍ
+    initNavigation({ userId: user.id, course, lesson });
+
   } catch (e) {
     console.error("[lesson]", e);
     alert("No se pudo cargar la lección");
     window.location.href = "/dashboard/index.html";
   }
 
-  initNavigation({ userId: user.id, course, lesson });
 
 }
 
