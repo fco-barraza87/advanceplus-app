@@ -169,6 +169,23 @@ async function initMissionCheckin({ userId, courseId, lesson }) {
   });
 
   noteEl.addEventListener("input", save);
+
+  const actionsWrap = document.querySelector(".coach-checkin-actions");
+
+  qa("#missionCheckinBlock button[data-result]").forEach(btn => {
+    btn.onclick = () => {
+      selectedResult = btn.dataset.result;
+
+      actionsWrap.classList.add("has-selection");
+
+      qa("#missionCheckinBlock button[data-result]").forEach(b => {
+        b.classList.toggle("active", b === btn);
+      });
+
+      save();
+    };
+  });
+
 }
 
 /* ============================================================
