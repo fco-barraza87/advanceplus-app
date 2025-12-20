@@ -275,13 +275,62 @@
 }
 
 /* ------------------------------------------------------------
+   Volver al curso
+------------------------------------------------------------ */
+.lesson-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 14px;
+  border-radius: var(--radius-round);
+
+  font-size: var(--text-sm);
+  font-weight: 500;
+
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: var(--color-white);
+
+  transition: var(--transition-fast);
+}
+
+.lesson-back-btn:hover {
+  background: rgba(255,255,255,0.14);
+  transform: translateX(-2px);
+}
+
+
+/* ------------------------------------------------------------
    Tu Coach
 ------------------------------------------------------------ */
 /* Coach actions */
 .coach-actions {
   display: flex;
-  gap: var(--space-sm);
+  gap: 10px;
+  flex-wrap: wrap;
   margin-top: var(--space-sm);
+}
+
+.coach-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 14px;
+  font-size: var(--text-sm);
+  border-radius: var(--radius-round);
+
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: var(--color-white);
+
+  transition: var(--transition-fast);
+}
+
+.coach-actions .btn:hover {
+  background: rgba(255,255,255,0.18);
+  transform: translateY(-1px);
 }
 
 .coach-actions .btn-primary {
@@ -310,6 +359,13 @@
 
 #missionCheckinBlock button[data-result] span {
   font-size: 1rem; /* emoji */
+}
+
+.check-pill.active {
+  background: var(--gradient-cyan);
+  color: var(--color-primary-dark);
+  border-color: transparent;
+  box-shadow: 0 4px 10px rgba(74,242,197,0.35);
 }
 
 
