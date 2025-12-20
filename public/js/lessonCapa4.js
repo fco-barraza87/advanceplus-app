@@ -1,4 +1,4 @@
-// /js/lesson.js — CAPA 5 · Coach IA observador
+// /js/lesson.js — CAPA 4 · Boot + Checkin + Ejercicio + Mindset + Feedback
 import { supabase } from "/js/supabase.js";
 
 /* ============================================================
@@ -20,7 +20,7 @@ async function getCurrentUser() {
 }
 
 /* ============================================================
-   Load base
+   Load base data
 ============================================================ */
 async function loadLessonBase(courseId, day) {
   const dayNum = Number(day) || 1;
@@ -46,7 +46,7 @@ async function loadLessonBase(courseId, day) {
 }
 
 /* ============================================================
-   Render header + content (sin cambios)
+   Render header + content
 ============================================================ */
 function renderHeader(course, lesson, dayNum) {
   q("#lessonBackBtn")?.addEventListener("click", () => {
@@ -428,93 +428,6 @@ async function initFeedback({ userId, courseId, lesson }) {
 }
 
 /* ============================================================
-   Coach IA — Observador puro (Capa 5)
-============================================================ */
-async function initCoachIA({ userId, courseId, lesson }) {
-  const coachBlock = q("#lessonCoachBlock");
-  const coachMsg = q("#coachMessage");
-  if (!coachBlock || !coachMsg) return;
-
-  // 1. Verificar acceso
-  const { data: access } = await supabase
-    .from("user_coach_access")
-    .select("active")
-    .eq("user_id", userId)
-    .eq("course_id", courseId)
-    .maybeSingle();
-
-  if (!access?.active) return;
-
-  // 2. Recolectar contexto (read-only)
-  const [
-    checkin,
-    reflection,
-    mindset,
-    feedback
-  ] = await Promise.all([
-    supabase.from("mission_checkins").select("*")
-      .eq("user_id", userId).eq("course_id", courseId)
-      .order("created_at", { ascending: false }).limit(1).maybeSingle(),
-
-    supabase.from("lesson_reflections").select("*")
-      .eq("user_id", userId).eq("lesson_id", lesson.id).maybeSingle(),
-
-    supabase.from("mindset_logs").select("*")
-      .eq("user_id", userId).eq("lesson_id", lesson.id).maybeSingle(),
-
-    supabase.from("lesson_feedback").select("*")
-      .eq("user_id", userId).eq("lesson_id", lesson.id).maybeSingle()
-  ]);
-
-  const context = {
-    lesson: {
-      id: lesson.id,
-      day: lesson.day,
-      title: lesson.title,
-      ai_meta: lesson.ai_meta || null
-    },
-    checkin: checkin?.data || null,
-    reflection: reflection?.data || null,
-    mindset: mindset?.data || null,
-    feedback: feedback?.data || null
-  };
-
-  // 3. Llamar Edge Function (si existe)
-  try {
-    const session = (await supabase.auth.getSession())?.data?.session;
-    if (!session?.access_token) return;
-
-    const res = await fetch(
-      "https://lmlfvbzukymtkcyfromr.supabase.co/functions/v1/coach-engine",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify({
-          intent: "lesson_observer",
-          course_id: courseId,
-          lesson_id: lesson.id,
-          context
-        })
-      }
-    );
-
-    if (!res.ok) return;
-    const out = await res.json();
-
-    if (out?.message) {
-      coachMsg.textContent = out.message;
-      coachBlock.classList.remove("hidden");
-    }
-
-  } catch {
-    // Silencio total: nunca rompe la lección
-  }
-}
-
-/* ============================================================
    INIT
 ============================================================ */
 async function init() {
@@ -543,9 +456,6 @@ async function init() {
     await initLessonReflection({ userId: user.id, courseId, lesson });
     await initMindset({ userId: user.id, courseId, lesson });
     await initFeedback({ userId: user.id, courseId, lesson });
-
-    // 👉 Coach al final, observador
-    await initCoachIA({ userId: user.id, courseId, lesson });
 
   } catch (e) {
     console.error("[lesson]", e);
