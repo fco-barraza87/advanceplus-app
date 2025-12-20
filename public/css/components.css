@@ -301,147 +301,113 @@
 }
 
 
-/* ------------------------------------------------------------
-   Tu Coach
------------------------------------------------------------- */
-/* Coach actions */
-.coach-actions {
+/* ===============================
+   CARD · TU COACH
+================================ */
+
+.coach-card {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.coach-card-title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.coach-message {
+  font-size: var(--text-sm);
+  color: var(--color-gray-1);
+}
+
+.coach-card-actions {
+  display: flex;
+  gap: 12px;
   margin-top: var(--space-sm);
 }
 
-.coach-actions .btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-
-  padding: 8px 14px;
+.coach-card-actions .btn-outline {
+  flex: 1;
+  justify-content: center;
   font-size: var(--text-sm);
+  padding: 0.65rem 0;
+}
+
+
+/* ===============================
+   CHEQUEO RÁPIDO
+================================ */
+
+.coach-checkin {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.coach-checkin-title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.coach-checkin-text {
+  font-size: var(--text-sm);
+  color: var(--color-gray-1);
+}
+
+.coach-checkin-actions {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.coach-checkin-actions button {
+  flex: 1;
+  padding: 0.6rem 0;
   border-radius: var(--radius-round);
+  font-size: var(--text-sm);
+}
 
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: var(--color-white);
 
+/* ===============================
+   REGISTRO DE MINDSET
+================================ */
+
+.mindset-label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.mindset-mood-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mindset-mood-row button {
+  flex: 1;
+  font-size: 1.4rem;
+  padding: 6px 0;
+  border-radius: var(--radius-round);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
   transition: var(--transition-fast);
 }
 
-.coach-actions .btn:hover {
-  background: rgba(255,255,255,0.18);
-  transform: translateY(-1px);
+.mindset-mood-row button:hover,
+.mindset-mood-row button.active {
+  background: rgba(201,168,106,0.2);
+  border-color: var(--accent-gold);
 }
 
-.coach-actions .btn-primary {
-  background: var(--gradient-cyan);
-  color: var(--color-primary-dark);
-  border: none;
-  box-shadow: 0 6px 16px rgba(74,242,197,0.35);
-}
-
-.coach-actions .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 22px rgba(74,242,197,0.45);
-}
-
-.coach-actions .btn-primary.disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.coach-actions .btn-secondary {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.25);
-  color: var(--color-white);
-}
-
-
-.coach-actions .btn-outline {
-  padding: 0.5rem 0.8rem;
-  font-size: var(--text-xs);
-  opacity: 0.85;
-}
-
-/* ------------------------------------------------------------
-   Chequeo Rápido
------------------------------------------------------------- */
-#missionCheckinBlock button[data-result] {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0.45rem 0.7rem;
-  border-radius: 999px;
-  font-size: var(--text-xs);
-}
-
-#missionCheckinBlock button[data-result] span {
-  font-size: 1rem; /* emoji */
-}
-
-.check-pill.active {
-  background: var(--gradient-cyan);
-  color: var(--color-primary-dark);
-  border-color: transparent;
-  box-shadow: 0 4px 10px rgba(74,242,197,0.35);
-}
-
-.check-options {
-  display: flex;
-  flex-direction: column;
-  gap: 10px; /* clave */
-  margin: 12px 0;
-}
-
-.check-pill {
-  padding: 10px 14px;
+.mindset-slider span {
   font-size: var(--text-sm);
-  border-radius: 14px;
-}
-
-.check-card {
-  padding: var(--space-lg);
+  color: var(--color-gray-1);
 }
 
 
-/* ------------------------------------------------------------
-   Registro de Mindset - Emoticons
------------------------------------------------------------- */
-#mindsetMoodRow button {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.12);
-}
-
-#mindsetMoodRow button.active {
-  background: rgba(74,242,197,0.18);
-  border-color: var(--accent-cyan);
-}
-
-
-/* ------------------------------------------------------------
-   Registro de Mindset — Títulos y preguntas
------------------------------------------------------------- */
-.mindset-question {
-  margin-top: var(--space-md);
-}
-
-.mindset-question label {
-  display: block;
-  font-size: var(--text-sm);
-  color: var(--color-white);
-  margin-bottom: var(--space-xs);
-}
-
-.mindset-question textarea {
-  margin-bottom: var(--space-sm);
-}
 
 /* ------------------------------------------------------------
    Sliders (Enfoque, Energía, etc.) — aire visual
