@@ -273,3 +273,93 @@
   border-bottom: 2px solid var(--color-accent-cyan);
   padding-bottom: 2px;
 }
+
+/* ------------------------------------------------------------
+   Tu Coach
+------------------------------------------------------------ */
+/* Coach actions */
+.coach-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.coach-actions .btn-primary {
+  flex: 1;
+  padding: 0.55rem 0.9rem;
+  font-size: var(--text-sm);
+}
+
+.coach-actions .btn-outline {
+  padding: 0.5rem 0.8rem;
+  font-size: var(--text-xs);
+  opacity: 0.85;
+}
+
+/* ------------------------------------------------------------
+   Chequeo Rápido
+------------------------------------------------------------ */
+#missionCheckinBlock button[data-result] {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  font-size: var(--text-xs);
+}
+
+#missionCheckinBlock button[data-result] span {
+  font-size: 1rem; /* emoji */
+}
+
+
+/* ------------------------------------------------------------
+   Registro de Mindset - Emoticons
+------------------------------------------------------------ */
+#mindsetMoodRow button {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+#mindsetMoodRow button.active {
+  background: rgba(74,242,197,0.18);
+  border-color: var(--accent-cyan);
+}
+
+
+/* ------------------------------------------------------------
+   Registro de Mindset — Títulos y preguntas
+------------------------------------------------------------ */
+.mindset-question {
+  margin-top: var(--space-md);
+}
+
+.mindset-question label {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--color-white);
+  margin-bottom: var(--space-xs);
+}
+
+.mindset-question textarea {
+  margin-bottom: var(--space-sm);
+}
+
+/* ------------------------------------------------------------
+   Sliders (Enfoque, Energía, etc.) — aire visual
+------------------------------------------------------------ */
+.mindset-slider {
+  margin-bottom: var(--space-md);
+}
+
+.mindset-slider-header {
+  font-size: var(--text-xs);
+  color: var(--color-gray-1);
+}
