@@ -1,8 +1,6 @@
+@ -1,780 +1,637 @@
 // /js/lesson.js — CAPA 5 · Coach IA observador
 import { supabase } from "/js/supabase.js";
-
-let lastCoachContext = null;
-
 
 /* ============================================================
    Helpers
@@ -13,6 +11,8 @@ const qa = (s) => Array.from(document.querySelectorAll(s));
 function getQueryParam(key) {
   return new URL(window.location.href).searchParams.get(key);
 }
+
+let lastCoachContext = null;
 
 /* ============================================================
    Auth
@@ -486,11 +486,11 @@ async function initCoachIA({ userId, courseId, lesson }) {
       .eq("user_id", userId).eq("lesson_id", lesson.id).maybeSingle()
   ]);
 
-  lastCoachContext = {
-    course_id: courseId,
-    lesson_id: lesson.id,
-    context
-  };
+
+
+
+
+
 
 
   const context = {
@@ -505,6 +505,14 @@ async function initCoachIA({ userId, courseId, lesson }) {
     mindset: mindset?.data || null,
     feedback: feedback?.data || null
   };
+
+    // 🔁 Guardar contexto para el chat con el Coach
+  window.lastCoachContext = {
+    course_id: courseId,
+    lesson_id: lesson.id,
+    context
+  };
+
 
   // 3. Llamar Edge Function (si existe)
   try {
@@ -555,6 +563,123 @@ async function initCoachIA({ userId, courseId, lesson }) {
 
 }
 
+// ================================
+// Coach Chat (Opción A - inline)
+// ================================
+function qs(id) { return document.querySelector(id); }
+
+function appendCoachMsg(container, who, text) {
+  const wrap = document.createElement("div");
+  wrap.style.display = "flex";
+  wrap.style.justifyContent = who === "user" ? "flex-end" : "flex-start";
+  wrap.style.margin = "8px 0";
+
+  const bubble = document.createElement("div");
+  bubble.textContent = text;
+  bubble.style.maxWidth = "85%";
+  bubble.style.padding = "10px 12px";
+  bubble.style.borderRadius = "14px";
+  bubble.style.border = "1px solid rgba(255,255,255,0.14)";
+  bubble.style.background = who === "user" ? "rgba(74,242,197,0.14)" : "rgba(255,255,255,0.06)";
+  bubble.style.color = "#fff";
+  bubble.style.whiteSpace = "pre-wrap";
+
+  wrap.appendChild(bubble);
+  container.appendChild(wrap);
+  container.scrollTop = container.scrollHeight;
+}
+
+async function callCoachEngine(payload) {
+  // Ajusta si tu lesson.js ya tiene un helper fetchWithAuth / supabase token etc.
+  // Aquí asumo que ya estás enviando Authorization Bearer como en tu request de la captura.
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+
+  const res = await fetch(`${SUPABASE_FUNCTIONS_URL}/coach-engine`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    const t = await res.text().catch(() => "");
+    throw new Error(`coach-engine ${res.status}: ${t}`);
+  }
+
+  return res.json();
+}
+
+function initCoachChatUI() {
+  const btnOpen = qs("#openCoachChatBtn");
+  const blockChat = qs("#lessonChatBlock");
+  const list = qs("#coachChatMessages");
+  const input = qs("#coachChatInput");
+  const btnSend = qs("#coachChatSend");
+
+  if (!btnOpen || !blockChat || !list || !input || !btnSend) return;
+
+  // 1) Toggle chat
+  btnOpen.addEventListener("click", () => {
+    const isHidden = blockChat.classList.contains("hidden");
+    blockChat.classList.toggle("hidden", !isHidden);
+
+    // enfoque al input al abrir
+    if (isHidden) setTimeout(() => input.focus(), 60);
+  });
+
+  // 2) Send (click + enter)
+  async function send() {
+    const text = (input.value || "").trim();
+    if (!text) return;
+
+    input.value = "";
+    appendCoachMsg(list, "user", text);
+
+    // IMPORTANTE:
+    // usa el MISMO context pack que ya mandas en lesson_observer
+    // aquí lo referencio como `lastCoachContext` (lo defines tú, ver nota abajo).
+    const payload = {
+      intent: "chat",
+      course_id: lastCoachContext?.course_id,
+      lesson_id: lastCoachContext?.lesson_id,
+      context: lastCoachContext?.context,
+      user_input: text
+    };
+
+    try {
+      btnSend.disabled = true;
+      const out = await callCoachEngine(payload);
+
+      // Compatible con ambos formatos:
+      // - { message: "..." }
+      // - { blocks: [{type:"coach_message", text:"..."}] }
+      const msg =
+        out?.message ??
+        out?.blocks?.find(b => b?.type === "coach_message")?.text ??
+        "Ok. Te leo.";
+
+      appendCoachMsg(list, "coach", msg);
+    } catch (e) {
+      console.error(e);
+      appendCoachMsg(list, "coach", "⚠️ No pude responder en este momento. Intenta de nuevo.");
+    } finally {
+      btnSend.disabled = false;
+      input.focus();
+    }
+  }
+
+  btnSend.addEventListener("click", send);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      send();
+    }
+  });
+}
+
 
 /* ============================================================
    Capa 6 - Navegación
@@ -597,95 +722,6 @@ function initNavigation({ userId, course, lesson }) {
   }
 }
 
-/* ============================================================
-   Coach Chat — Capa 5.1 (inline, sin estado)
-============================================================ */
-function initCoachChat() {
-  const btnOpen = document.getElementById("openCoachChatBtn");
-  const chatBlock = document.getElementById("lessonChatBlock");
-  const messages = document.getElementById("coachChatMessages");
-  const input = document.getElementById("coachChatInput");
-  const sendBtn = document.getElementById("coachChatSend");
-
-  if (!btnOpen || !chatBlock || !messages || !input || !sendBtn) return;
-
-  // Abrir / cerrar chat
-  btnOpen.addEventListener("click", () => {
-    chatBlock.classList.toggle("hidden");
-    setTimeout(() => input.focus(), 50);
-  });
-
-  // Enviar mensaje
-  async function send() {
-    const text = input.value.trim();
-    if (!text || !lastCoachContext) return;
-
-    input.value = "";
-    appendMessage("user", text);
-
-    try {
-      const session = (await supabase.auth.getSession())?.data?.session;
-      if (!session?.access_token) throw new Error("No session");
-
-      const res = await fetch(
-        "https://lmlfvbzukymtkcyfromr.supabase.co/functions/v1/coach-engine",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`
-          },
-          body: JSON.stringify({
-            intent: "chat",
-            course_id: lastCoachContext.course_id,
-            lesson_id: lastCoachContext.lesson_id,
-            context: lastCoachContext.context,
-            user_input: text
-          })
-        }
-      );
-
-      const out = await res.json();
-      appendMessage("coach", out?.message || "Te leo.");
-
-    } catch {
-      appendMessage(
-        "coach",
-        "⚠️ No pude responder ahora. Intenta de nuevo."
-      );
-    }
-  }
-
-  sendBtn.addEventListener("click", send);
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      send();
-    }
-  });
-
-  function appendMessage(role, text) {
-    const row = document.createElement("div");
-    row.style.display = "flex";
-    row.style.justifyContent = role === "user" ? "flex-end" : "flex-start";
-
-    const bubble = document.createElement("div");
-    bubble.textContent = text;
-    bubble.style.maxWidth = "80%";
-    bubble.style.padding = "10px 12px";
-    bubble.style.margin = "6px 0";
-    bubble.style.borderRadius = "14px";
-    bubble.style.background =
-      role === "user"
-        ? "rgba(74,242,197,0.18)"
-        : "rgba(255,255,255,0.08)";
-    bubble.style.color = "#fff";
-
-    row.appendChild(bubble);
-    messages.appendChild(row);
-    messages.scrollTop = messages.scrollHeight;
-  }
-}
 
 
 /* ============================================================
@@ -721,11 +757,9 @@ async function init() {
     // 👉 Coach al final, observador
     await initCoachIA({ userId: user.id, courseId, lesson });
 
-    // 👉 CAPA 5.1 — Chat del Coach (usa ese contexto)
-    initCoachChat();
-
     // ✅ CAPA 6 — AQUÍ Y SOLO AQUÍ
     initNavigation({ userId: user.id, course, lesson });
+
 
   } catch (e) {
     console.error("[lesson]", e);
@@ -735,5 +769,3 @@ async function init() {
 
 
 }
-
-init();
