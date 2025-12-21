@@ -1,94 +1,106 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 serve(async (req) => {
   try {
-    // 🔒 Solo POST
-    if (req.method !== "POST") {
-      return new Response("Method Not Allowed", { status: 405 });
+    // 🌐 CORS preflight
+    if (req.method === "OPTIONS") {
+      return new Response(null, {
+        status: 204,
+        headers: corsHeaders,
+      });
     }
 
-    // 🧠 Body
-    const body = await req.json();
-
-    const {
-      course_id,
-      lesson_id,
-      day,
-      action_type,
-      intent,
-      user_input
-    } = body || {};
-
-    // 🛑 Validación mínima
-    if (!course_id || !lesson_id || !action_type) {
+    // 🔒 Solo POST
+    if (req.method !== "POST") {
       return new Response(
-        JSON.stringify({ error: "Invalid payload" }),
-        { status: 400 }
+        JSON.stringify({ error: "Method not allowed" }),
+        {
+          status: 405,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
       );
     }
 
-    // 🎭 RESPUESTAS MOCK SEGÚN CONTEXTO
-    let blocks = [];
+    // 🧠 Parse body
+    const body = await req.json();
 
-    if (action_type === "post_lesson") {
-      blocks = [
+    const { intent, course_id, lesson_id, context } = body ?? {};
+
+    // 🛑 Validación mínima
+    if (!intent || !course_id || !lesson_id) {
+      return new Response(
+        JSON.stringify({ error: "Invalid payload" }),
         {
-          type: "coach_message",
-          text: "He leído tu cierre de hoy."
-        },
-        {
-          type: "insight",
-          title: "Observación",
-          text:
-            user_input
-              ? "Lo que escribiste muestra conciencia, no perfección. Eso es disciplina real."
-              : "Hoy avanzaste aunque no todo esté claro. Eso ya es progreso."
-        },
-        {
-          type: "close",
-          title: "Cierre del día",
-          text: "No busques hacerlo mejor mañana. Solo vuelve."
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
         }
-      ];
+      );
     }
 
-    else if (action_type === "check_in") {
-      blocks = [
-        {
-          type: "coach_message",
-          text: "Gracias por ser honesto con tu proceso."
-        },
-        {
-          type: "insight",
-          title: "Lectura rápida",
-          text: "La constancia no es cumplir siempre, es volver rápido."
-        }
-      ];
+    // 🧠 Coach observador (mock determinista)
+    let message = "Estoy aquí para acompañarte.";
+
+    if (intent === "lesson_observer") {
+      const mood = context?.mindset?.mood ?? null;
+      const reflection = context?.reflection?.content ?? "";
+
+      if (mood !== null && mood <= 2) {
+        message =
+          "Hoy no fue fácil, y aun así estuviste aquí. Eso es disciplina en acción.";
+      } else if (reflection.length > 40) {
+        message =
+          "Tu reflexión muestra intención real. No busques perfección, busca continuidad.";
+      } else {
+        message =
+          "Hoy hiciste lo más importante: no romper la cadena.";
+      }
     }
 
-    else {
-      blocks = [
-        {
-          type: "coach_message",
-          text: "Estoy aquí para acompañarte."
-        }
-      ];
+    // 💬 Chat libre con el Coach (sin GPT aún)
+    if (intent === "chat") {
+      const text = (body?.user_input || "").trim();
+
+      message = text
+        ? "Te leo. Dime: ¿qué es lo más importante que quieres resolver ahora de esta lección?"
+        : "Escríbeme lo que te pasa y te guío.";
     }
 
-    // ✅ RESPUESTA FINAL
+
     return new Response(
-      JSON.stringify({ blocks }),
+      JSON.stringify({ message }),
       {
         status: 200,
-        headers: { "Content-Type": "application/json" }
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
       }
     );
 
   } catch (err) {
-    console.error("[coach-engine mock error]", err);
+    console.error("[coach-engine]", err);
+
     return new Response(
-      JSON.stringify({ error: "Internal error" }),
-      { status: 500 }
+      JSON.stringify({ error: "Internal server error" }),
+      {
+        status: 500,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
+      }
     );
   }
 });

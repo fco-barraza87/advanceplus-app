@@ -11,6 +11,8 @@ function getQueryParam(key) {
   return new URL(window.location.href).searchParams.get(key);
 }
 
+let lastCoachContext = null;
+
 /* ============================================================
    Auth
 ============================================================ */
@@ -496,6 +498,14 @@ async function initCoachIA({ userId, courseId, lesson }) {
     feedback: feedback?.data || null
   };
 
+    // 🔁 Guardar contexto para el chat con el Coach
+  window.lastCoachContext = {
+    course_id: courseId,
+    lesson_id: lesson.id,
+    context
+  };
+
+
   // 3. Llamar Edge Function (si existe)
   try {
     const session = (await supabase.auth.getSession())?.data?.session;
@@ -543,6 +553,123 @@ async function initCoachIA({ userId, courseId, lesson }) {
     coachBlock.classList.remove("hidden");
   }
 
+}
+
+// ================================
+// Coach Chat (Opción A - inline)
+// ================================
+function qs(id) { return document.querySelector(id); }
+
+function appendCoachMsg(container, who, text) {
+  const wrap = document.createElement("div");
+  wrap.style.display = "flex";
+  wrap.style.justifyContent = who === "user" ? "flex-end" : "flex-start";
+  wrap.style.margin = "8px 0";
+
+  const bubble = document.createElement("div");
+  bubble.textContent = text;
+  bubble.style.maxWidth = "85%";
+  bubble.style.padding = "10px 12px";
+  bubble.style.borderRadius = "14px";
+  bubble.style.border = "1px solid rgba(255,255,255,0.14)";
+  bubble.style.background = who === "user" ? "rgba(74,242,197,0.14)" : "rgba(255,255,255,0.06)";
+  bubble.style.color = "#fff";
+  bubble.style.whiteSpace = "pre-wrap";
+
+  wrap.appendChild(bubble);
+  container.appendChild(wrap);
+  container.scrollTop = container.scrollHeight;
+}
+
+async function callCoachEngine(payload) {
+  // Ajusta si tu lesson.js ya tiene un helper fetchWithAuth / supabase token etc.
+  // Aquí asumo que ya estás enviando Authorization Bearer como en tu request de la captura.
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+
+  const res = await fetch(`${SUPABASE_FUNCTIONS_URL}/coach-engine`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    const t = await res.text().catch(() => "");
+    throw new Error(`coach-engine ${res.status}: ${t}`);
+  }
+
+  return res.json();
+}
+
+function initCoachChatUI() {
+  const btnOpen = qs("#openCoachChatBtn");
+  const blockChat = qs("#lessonChatBlock");
+  const list = qs("#coachChatMessages");
+  const input = qs("#coachChatInput");
+  const btnSend = qs("#coachChatSend");
+
+  if (!btnOpen || !blockChat || !list || !input || !btnSend) return;
+
+  // 1) Toggle chat
+  btnOpen.addEventListener("click", () => {
+    const isHidden = blockChat.classList.contains("hidden");
+    blockChat.classList.toggle("hidden", !isHidden);
+
+    // enfoque al input al abrir
+    if (isHidden) setTimeout(() => input.focus(), 60);
+  });
+
+  // 2) Send (click + enter)
+  async function send() {
+    const text = (input.value || "").trim();
+    if (!text) return;
+
+    input.value = "";
+    appendCoachMsg(list, "user", text);
+
+    // IMPORTANTE:
+    // usa el MISMO context pack que ya mandas en lesson_observer
+    // aquí lo referencio como `lastCoachContext` (lo defines tú, ver nota abajo).
+    const payload = {
+      intent: "chat",
+      course_id: lastCoachContext?.course_id,
+      lesson_id: lastCoachContext?.lesson_id,
+      context: lastCoachContext?.context,
+      user_input: text
+    };
+
+    try {
+      btnSend.disabled = true;
+      const out = await callCoachEngine(payload);
+
+      // Compatible con ambos formatos:
+      // - { message: "..." }
+      // - { blocks: [{type:"coach_message", text:"..."}] }
+      const msg =
+        out?.message ??
+        out?.blocks?.find(b => b?.type === "coach_message")?.text ??
+        "Ok. Te leo.";
+
+      appendCoachMsg(list, "coach", msg);
+    } catch (e) {
+      console.error(e);
+      appendCoachMsg(list, "coach", "⚠️ No pude responder en este momento. Intenta de nuevo.");
+    } finally {
+      btnSend.disabled = false;
+      input.focus();
+    }
+  }
+
+  btnSend.addEventListener("click", send);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      send();
+    }
+  });
 }
 
 
