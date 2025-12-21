@@ -4,6 +4,9 @@ import { supabase } from "/js/supabase.js";
 /* ============================================================
    Helpers
 ============================================================ */
+let lastCoachContext = null;
+
+
 const q = (s) => document.querySelector(s);
 const qa = (s) => Array.from(document.querySelectorAll(s));
 
@@ -496,6 +499,13 @@ async function initCoachIA({ userId, courseId, lesson }) {
     feedback: feedback?.data || null
   };
 
+  // ✅ AQUÍ — guardar contexto para el chat (Capa 5 → 5.1)
+  lastCoachContext = {
+    course_id: courseId,
+    lesson_id: lesson.id,
+    context
+  };
+
   // 3. Llamar Edge Function (si existe)
   try {
     const session = (await supabase.auth.getSession())?.data?.session;
@@ -543,6 +553,96 @@ async function initCoachIA({ userId, courseId, lesson }) {
     coachBlock.classList.remove("hidden");
   }
 
+}
+
+/* ============================================================
+   Coach Chat — Capa 5.1 (inline, sin estado)
+============================================================ */
+function initCoachChat() {
+  const btnOpen = document.getElementById("openCoachChatBtn");
+  const chatBlock = document.getElementById("lessonChatBlock");
+  const messages = document.getElementById("coachChatMessages");
+  const input = document.getElementById("coachChatInput");
+  const sendBtn = document.getElementById("coachChatSend");
+
+  if (!btnOpen || !chatBlock || !messages || !input || !sendBtn) return;
+
+  // Abrir / cerrar chat
+  btnOpen.addEventListener("click", () => {
+    chatBlock.classList.toggle("hidden");
+    setTimeout(() => input.focus(), 50);
+  });
+
+  // Enviar mensaje
+  async function send() {
+    const text = input.value.trim();
+    if (!text || !lastCoachContext) return;
+
+    input.value = "";
+    appendMessage("user", text);
+
+    try {
+      const session = (await supabase.auth.getSession())?.data?.session;
+      if (!session?.access_token) throw new Error("No session");
+
+      const res = await fetch(
+        "https://lmlfvbzukymtkcyfromr.supabase.co/functions/v1/coach-engine",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({
+            intent: "chat",
+            course_id: lastCoachContext.course_id,
+            lesson_id: lastCoachContext.lesson_id,
+            context: lastCoachContext.context,
+            user_input: text
+          })
+        }
+      );
+
+      const out = await res.json();
+      appendMessage("coach", out?.message || "Te leo.");
+
+    } catch {
+      appendMessage(
+        "coach",
+        "⚠️ No pude responder ahora. Intenta de nuevo."
+      );
+    }
+  }
+
+  sendBtn.addEventListener("click", send);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      send();
+    }
+  });
+
+  function appendMessage(role, text) {
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.justifyContent = role === "user" ? "flex-end" : "flex-start";
+
+    const bubble = document.createElement("div");
+    bubble.textContent = text;
+    bubble.style.maxWidth = "80%";
+    bubble.style.padding = "10px 12px";
+    bubble.style.margin = "6px 0";
+    bubble.style.borderRadius = "14px";
+    bubble.style.background =
+      role === "user"
+        ? "rgba(74,242,197,0.18)"
+        : "rgba(255,255,255,0.08)";
+    bubble.style.color = "#fff";
+
+    row.appendChild(bubble);
+    messages.appendChild(row);
+    messages.scrollTop = messages.scrollHeight;
+  }
 }
 
 
@@ -621,6 +721,9 @@ async function init() {
 
     // 👉 Coach al final, observador
     await initCoachIA({ userId: user.id, courseId, lesson });
+
+    // 👉 CAPA 5.1 — Chat del Coach (usa ese contexto)
+    initCoachChat();
 
     // ✅ CAPA 6 — AQUÍ Y SOLO AQUÍ
     initNavigation({ userId: user.id, course, lesson });
