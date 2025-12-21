@@ -1,22 +1,29 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
+/* ============================================================
+   CORS
+============================================================ */
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+/* ============================================================
+   Handler
+============================================================ */
 serve(async (req) => {
   try {
-    // 🌐 CORS preflight
+    /* ----------------------------
+       CORS preflight
+    ---------------------------- */
     if (req.method === "OPTIONS") {
-      return new Response(null, {
-        status: 204,
-        headers: corsHeaders,
-      });
+      return new Response(null, { status: 204, headers: corsHeaders });
     }
 
-    // 🔒 Solo POST
+    /* ----------------------------
+       Only POST
+    ---------------------------- */
     if (req.method !== "POST") {
       return new Response(
         JSON.stringify({ error: "Method not allowed" }),
@@ -30,12 +37,22 @@ serve(async (req) => {
       );
     }
 
-    // 🧠 Parse body
+    /* ----------------------------
+       Parse body
+    ---------------------------- */
     const body = await req.json();
 
-    const { intent, course_id, lesson_id, context } = body ?? {};
+    const {
+      intent,
+      course_id,
+      lesson_id,
+      context,
+      user_input,
+    } = body ?? {};
 
-    // 🛑 Validación mínima
+    /* ----------------------------
+       Minimal validation
+    ---------------------------- */
     if (!intent || !course_id || !lesson_id) {
       return new Response(
         JSON.stringify({ error: "Invalid payload" }),
@@ -49,35 +66,62 @@ serve(async (req) => {
       );
     }
 
-    // 🧠 Coach observador (mock determinista)
-    let message = "Estoy aquí para acompañarte.";
+    /* ============================================================
+       COACH LOGIC (MOCK · DETERMINISTIC)
+    ============================================================ */
+    let message = "Estoy aquí contigo.";
 
+    /* ----------------------------
+       Intent: lesson_observer
+    ---------------------------- */
     if (intent === "lesson_observer") {
       const mood = context?.mindset?.mood ?? null;
       const reflection = context?.reflection?.content ?? "";
 
       if (mood !== null && mood <= 2) {
         message =
-          "Hoy no fue fácil, y aun así estuviste aquí. Eso es disciplina en acción.";
+          "Hoy no fue fácil, y aun así estuviste aquí. Eso es disciplina real.";
       } else if (reflection.length > 40) {
         message =
-          "Tu reflexión muestra intención real. No busques perfección, busca continuidad.";
+          "Tu reflexión muestra intención. No busques perfección, busca continuidad.";
       } else {
         message =
           "Hoy hiciste lo más importante: no romper la cadena.";
       }
     }
 
-    // 💬 Chat libre con el Coach (sin GPT aún)
+    /* ----------------------------
+       Intent: chat
+    ---------------------------- */
     if (intent === "chat") {
-      const text = (body?.user_input || "").trim();
+      const text = (user_input || "").trim();
+      const mood = context?.mindset?.mood ?? null;
 
-      message = text
-        ? "Te leo. Dime: ¿qué es lo más importante que quieres resolver ahora de esta lección?"
-        : "Escríbeme lo que te pasa y te guío.";
+      if (!text) {
+        message =
+          "Escríbeme lo que te pasa y lo vemos juntos.";
+      } else if (mood !== null && mood <= 2) {
+        message =
+          "Antes de avanzar, dime: ¿qué fue lo más pesado hoy?";
+      } else if (text.length < 20) {
+        message =
+          "Tómate un segundo más. ¿Qué es lo que realmente quieres resolver?";
+      } else {
+        message =
+          "Gracias por decirlo así. Ahora vamos paso a paso.";
+      }
     }
 
+    /* ----------------------------
+       Unknown intent (safe default)
+    ---------------------------- */
+    if (intent !== "lesson_observer" && intent !== "chat") {
+      message = "Estoy aquí para acompañarte.";
+    }
 
+    /* ============================================================
+       Response
+    ============================================================ */
     return new Response(
       JSON.stringify({ message }),
       {
