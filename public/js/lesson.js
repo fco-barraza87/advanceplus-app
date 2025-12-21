@@ -485,6 +485,13 @@ async function initCoachIA({ userId, courseId, lesson }) {
       .eq("user_id", userId).eq("lesson_id", lesson.id).maybeSingle()
   ]);
 
+  // 🌍 Guardar contexto para el chat
+  window.lastCoachContext = {
+    course_id: courseId,
+    lesson_id: lesson.id,
+    context
+  };
+
   const context = {
     lesson: {
       id: lesson.id,
@@ -752,6 +759,11 @@ async function init() {
     // ✅ CAPA 6 — AQUÍ Y SOLO AQUÍ
     initNavigation({ userId: user.id, course, lesson });
 
+    // boton chat
+    await initCoachIA({ userId, courseId, lesson });
+      initCoachChatButton();
+
+
   } catch (e) {
     console.error("[lesson]", e);
     alert("No se pudo cargar la lección");
@@ -760,5 +772,24 @@ async function init() {
 
 
 }
+
+/* ============================================================
+   boton chat
+============================================================ */
+function initCoachChatButton() {
+  const btn = document.getElementById("openCoachChatBtn");
+  const chatBlock = document.getElementById("lessonChatBlock");
+
+  if (!btn || !chatBlock) return;
+
+  btn.addEventListener("click", () => {
+    chatBlock.classList.remove("hidden");
+
+    // Enfocar input si existe
+    const input = document.getElementById("coachChatInput");
+    if (input) input.focus();
+  });
+}
+
 
 init();
