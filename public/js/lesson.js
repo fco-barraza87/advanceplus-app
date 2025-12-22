@@ -553,6 +553,10 @@ async function initCoachIA({ userId, courseId, lesson }) {
     coachBlock.classList.remove("hidden");
   }
 
+  coachBlock.classList.remove("hidden");
+  coachMsg.textContent = "DEBUG: Coach forzado visible";
+
+
 }
 
 /* ============================================================
