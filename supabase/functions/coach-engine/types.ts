@@ -1,13 +1,11 @@
-export type CoachIntent =
-  | "lesson_observer"
-  | "chat";
+// coach.types.ts
 
 export type CoachInput = {
-  intent: CoachIntent;
+  intent: "lesson_observer" | "chat";
   course_id: string;
   lesson_id: string;
   context?: any;
-  user_input?: string | null;
+  user_input?: string;
 };
 
 export type CoachOutput = {

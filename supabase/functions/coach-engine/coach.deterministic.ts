@@ -207,6 +207,3 @@ export function runCoachLogic(input: CoachInput): CoachOutput {
   return { message: "Estoy aquí para acompañarte." };
 }
 
-export function runCoachDeterministic(input: CoachInput): CoachOutput {
-  // 👉 aquí va EXACTAMENTE el motor que mostraste primero
-}
