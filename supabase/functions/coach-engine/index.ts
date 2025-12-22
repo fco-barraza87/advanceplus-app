@@ -94,23 +94,106 @@ serve(async (req) => {
        Intent: chat
     ---------------------------- */
     if (intent === "chat") {
-      const text = (user_input || "").trim();
-      const mood = context?.mindset?.mood ?? null;
+      const text = (body.user_input || "").trim().toLowerCase();
 
-      if (!text) {
+      // Helpers
+      const len = text.length;
+      const hasWords = (arr: string[]) =>
+        arr.some(w => text.includes(w));
+
+      // Estados
+      const isVeryShort = len < 6;
+
+      const isVague = hasWords([
+        "todo",
+        "la vida",
+        "muchas cosas",
+        "no sé",
+        "nose",
+        "confuso",
+        "perdido"
+      ]);
+
+      const isEmotional = hasWords([
+        "cansado",
+        "agotado",
+        "frustrado",
+        "triste",
+        "rabia",
+        "enojo",
+        "desmotivado",
+        "ansioso",
+        "estresado"
+      ]);
+
+      const isReflective = hasWords([
+        "me doy cuenta",
+        "entiendo",
+        "veo que",
+        "aprendí",
+        "noté que"
+      ]);
+
+      const isActionOriented = hasWords([
+        "quiero",
+        "voy a",
+        "decidí",
+        "necesito",
+        "haré"
+      ]);
+
+      // Respuesta por defecto
+      let message =
+        "Tómate un segundo. ¿Qué es lo que realmente quieres resolver hoy?";
+
+      // ESTADO 1 — vacío / muy corto
+      if (isVeryShort) {
         message =
-          "Escríbeme lo que te pasa y lo vemos juntos.";
-      } else if (mood !== null && mood <= 2) {
-        message =
-          "Antes de avanzar, dime: ¿qué fue lo más pesado hoy?";
-      } else if (text.length < 20) {
-        message =
-          "Tómate un segundo más. ¿Qué es lo que realmente quieres resolver?";
-      } else {
-        message =
-          "Gracias por decirlo así. Ahora vamos paso a paso.";
+          "Tómate un segundo. ¿Qué es lo que realmente quieres resolver hoy?";
       }
+
+      // ESTADO 2 — vago / abstracto
+      else if (isVague) {
+        message =
+          "De todo eso, ¿qué es lo que más te está drenando energía ahora mismo?";
+      }
+
+      // ESTADO 3 — emocional
+      else if (isEmotional) {
+        message =
+          "Tiene sentido que te sientas así. ¿Qué acción pequeña sí está bajo tu control hoy?";
+      }
+
+      // ESTADO 4 — reflexivo
+      else if (isReflective) {
+        message =
+          "Buena observación. ¿Qué decisión concreta se desprende de eso?";
+      }
+
+      // ESTADO 5 — orientado a acción
+      else if (isActionOriented) {
+        message =
+          "Perfecto. ¿Cuándo y cómo vas a ejecutar eso?";
+      }
+
+      // Fallback consciente
+      else {
+        message =
+          "Bien. Llevémoslo a algo concreto: ¿qué quieres cambiar a partir de hoy?";
+      }
+
+      return new Response(
+        JSON.stringify({ message }),
+        {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json"
+          }
+        }
+      );
     }
+
 
     /* ----------------------------
        Unknown intent (safe default)
