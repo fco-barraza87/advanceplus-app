@@ -603,8 +603,16 @@ function initCoachChat() {
         }
       );
 
-      const out = await res.json();
-      appendMessage("coach", out?.message || "Te leo.");
+    const out = await res.json();
+
+    // 🟡 HOOK PREMIUM — solo observación (no UI, no DB)
+    if (out?.meta?.premium_hint) {
+      console.log("Premium hint:", out.meta);
+    }
+
+    // Mensaje visible al usuario
+    appendMessage("coach", out?.message || "Te leo.");
+
 
     } catch {
       appendMessage(
