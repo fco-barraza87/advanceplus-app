@@ -3,18 +3,19 @@ import type { CoachInput, CoachOutput } from "./coach.types.ts";
 import { COACH_SYSTEM_PROMPT } from "./coach.prompt.ts";
 
 /* ============================================================
-   OpenAI client (fetch nativo)
+   Environment
 ============================================================ */
 
-const OPENAI_API_KEY = Deno.env.get("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");
-const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") || "gpt-4.1-mini";
+const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+const OPENAI_MODEL =
+  Deno.env.get("OPENAI_MODEL") || "gpt-4.1-mini";
 
 if (!OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY not configured");
 }
 
 /* ============================================================
-   Helper · build user prompt
+   Helper · Build user prompt
 ============================================================ */
 
 function buildUserPrompt(input: CoachInput): string {
@@ -30,10 +31,10 @@ Lección actual:
 Estado del usuario:
 - Mood: ${context?.mindset?.mood ?? "n/a"}
 
-Reflexión:
+Reflexión del usuario:
 ${context?.reflection?.content ?? "—"}
 
-Devuelve un mensaje breve de acompañamiento.
+Entrega un mensaje breve, claro y accionable de acompañamiento.
 `;
   }
 
@@ -43,14 +44,15 @@ Mensaje del usuario:
 "${user_input}"
 
 Responde como Coach IA de Advance+, siguiendo estrictamente el system prompt.
+Guía hacia claridad y acción concreta.
 `;
   }
 
-  return "Acompaña al usuario con claridad y enfoque.";
+  return "Acompaña al usuario con claridad, enfoque y acción.";
 }
 
 /* ============================================================
-   Main GPT runner
+   Main GPT Runner (7.0)
 ============================================================ */
 
 export async function runCoachGPT(
@@ -59,28 +61,31 @@ export async function runCoachGPT(
 
   const userPrompt = buildUserPrompt(input);
 
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${OPENAI_API_KEY}`
-    },
-    body: JSON.stringify({
-      model: OPENAI_MODEL,
-      temperature: 0.4, // control > creatividad
-      max_tokens: 220,
-      messages: [
-        {
-          role: "system",
-          content: COACH_SYSTEM_PROMPT
-        },
-        {
-          role: "user",
-          content: userPrompt
-        }
-      ]
-    })
-  });
+  const res = await fetch(
+    "https://api.openai.com/v1/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: OPENAI_MODEL,
+        temperature: 0.4,
+        max_tokens: 220,
+        messages: [
+          {
+            role: "system",
+            content: COACH_SYSTEM_PROMPT
+          },
+          {
+            role: "user",
+            content: userPrompt
+          }
+        ]
+      })
+    }
+  );
 
   if (!res.ok) {
     const err = await res.text();
@@ -96,7 +101,5 @@ export async function runCoachGPT(
     throw new Error("Empty GPT response");
   }
 
-  return {
-    message
-  };
+  return { message };
 }
