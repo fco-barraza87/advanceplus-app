@@ -31,7 +31,8 @@ serve(async (req) => {
       });
     }
 
-    const out = runCoachLogic(body);
+    const out = await runCoachLogic(body);
+
 
     return new Response(JSON.stringify(out), {
       status: 200,
