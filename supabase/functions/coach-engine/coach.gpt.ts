@@ -1,49 +1,102 @@
 // coach.gpt.ts
+import type { CoachInput, CoachOutput } from "./coach.types.ts";
 import { COACH_SYSTEM_PROMPT } from "./coach.prompt.ts";
-import { CoachInput, CoachOutput } from "./coach.types.ts";
 
-const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+/* ============================================================
+   OpenAI client (fetch nativo)
+============================================================ */
+
+const OPENAI_API_KEY = Deno.env.get("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");
+const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") || "gpt-4.1-mini";
+
+if (!OPENAI_API_KEY) {
+  throw new Error("OPENAI_API_KEY not configured");
+}
+
+/* ============================================================
+   Helper · build user prompt
+============================================================ */
+
+function buildUserPrompt(input: CoachInput): string {
+  const { intent, context, user_input } = input;
+
+  if (intent === "lesson_observer") {
+    return `
+Lección actual:
+- Día: ${context?.lesson?.day ?? "?"}
+- Tema: ${context?.lesson?.ai_meta?.day_theme ?? "n/a"}
+- Enfoque: ${context?.lesson?.ai_meta?.coach_focus ?? "n/a"}
+
+Estado del usuario:
+- Mood: ${context?.mindset?.mood ?? "n/a"}
+
+Reflexión:
+${context?.reflection?.content ?? "—"}
+
+Devuelve un mensaje breve de acompañamiento.
+`;
+  }
+
+  if (intent === "chat") {
+    return `
+Mensaje del usuario:
+"${user_input}"
+
+Responde como Coach IA de Advance+, siguiendo estrictamente el system prompt.
+`;
+  }
+
+  return "Acompaña al usuario con claridad y enfoque.";
+}
+
+/* ============================================================
+   Main GPT runner
+============================================================ */
 
 export async function runCoachGPT(
   input: CoachInput
 ): Promise<CoachOutput> {
 
-  const apiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY not configured");
-  }
+  const userPrompt = buildUserPrompt(input);
 
-  const userMessage =
-    input.intent === "lesson_observer"
-      ? `Contexto de la lección:\n${JSON.stringify(input.context)}`
-      : input.user_input || "";
-
-  const res = await fetch(OPENAI_URL, {
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${OPENAI_API_KEY}`
     },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
-      temperature: 0.4,
+      model: OPENAI_MODEL,
+      temperature: 0.4, // control > creatividad
       max_tokens: 220,
       messages: [
-        { role: "system", content: COACH_SYSTEM_PROMPT },
-        { role: "user", content: userMessage }
+        {
+          role: "system",
+          content: COACH_SYSTEM_PROMPT
+        },
+        {
+          role: "user",
+          content: userPrompt
+        }
       ]
     })
   });
 
   if (!res.ok) {
-    throw new Error("GPT request failed");
+    const err = await res.text();
+    throw new Error(`OpenAI error: ${err}`);
   }
 
-  const json = await res.json();
-  const text =
-    json.choices?.[0]?.message?.content?.trim();
+  const data = await res.json();
+
+  const message =
+    data?.choices?.[0]?.message?.content?.trim();
+
+  if (!message) {
+    throw new Error("Empty GPT response");
+  }
 
   return {
-    message: text || "Sigamos con una acción concreta hoy."
+    message
   };
 }
