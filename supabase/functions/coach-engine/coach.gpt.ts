@@ -3,19 +3,18 @@ import type { CoachInput, CoachOutput } from "./coach.types.ts";
 import { COACH_SYSTEM_PROMPT } from "./coach.prompt.ts";
 
 /* ============================================================
-   Environment
+   OpenAI config (Edge Functions)
 ============================================================ */
 
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-const OPENAI_MODEL =
-  Deno.env.get("OPENAI_MODEL") || "gpt-4.1-mini";
+const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") ?? "gpt-4.1-mini";
 
 if (!OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY not configured");
 }
 
 /* ============================================================
-   Helper · Build user prompt
+   Helper · build user prompt
 ============================================================ */
 
 function buildUserPrompt(input: CoachInput): string {
@@ -23,18 +22,18 @@ function buildUserPrompt(input: CoachInput): string {
 
   if (intent === "lesson_observer") {
     return `
-Lección actual:
+Lección:
 - Día: ${context?.lesson?.day ?? "?"}
 - Tema: ${context?.lesson?.ai_meta?.day_theme ?? "n/a"}
 - Enfoque: ${context?.lesson?.ai_meta?.coach_focus ?? "n/a"}
 
-Estado del usuario:
+Estado:
 - Mood: ${context?.mindset?.mood ?? "n/a"}
 
-Reflexión del usuario:
+Reflexión:
 ${context?.reflection?.content ?? "—"}
 
-Entrega un mensaje breve, claro y accionable de acompañamiento.
+Devuelve un mensaje breve, claro y accionable.
 `;
   }
 
@@ -44,15 +43,14 @@ Mensaje del usuario:
 "${user_input}"
 
 Responde como Coach IA de Advance+, siguiendo estrictamente el system prompt.
-Guía hacia claridad y acción concreta.
 `;
   }
 
-  return "Acompaña al usuario con claridad, enfoque y acción.";
+  return "Acompaña al usuario con claridad y enfoque.";
 }
 
 /* ============================================================
-   Main GPT Runner (7.0)
+   Main GPT runner
 ============================================================ */
 
 export async function runCoachGPT(
@@ -61,31 +59,22 @@ export async function runCoachGPT(
 
   const userPrompt = buildUserPrompt(input);
 
-  const res = await fetch(
-    "https://api.openai.com/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: OPENAI_MODEL,
-        temperature: 0.4,
-        max_tokens: 220,
-        messages: [
-          {
-            role: "system",
-            content: COACH_SYSTEM_PROMPT
-          },
-          {
-            role: "user",
-            content: userPrompt
-          }
-        ]
-      })
-    }
-  );
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${OPENAI_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: OPENAI_MODEL,
+      temperature: 0.4,
+      max_tokens: 220,
+      messages: [
+        { role: "system", content: COACH_SYSTEM_PROMPT },
+        { role: "user", content: userPrompt }
+      ]
+    })
+  });
 
   if (!res.ok) {
     const err = await res.text();
