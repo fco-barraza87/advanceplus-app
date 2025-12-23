@@ -3,20 +3,19 @@ import type { CoachInput, CoachOutput } from "./coach.types.ts";
 import { COACH_SYSTEM_PROMPT } from "./coach.prompt.ts";
 
 /* ============================================================
-   OpenAI config (Edge Functions)
+   ENV
 ============================================================ */
-
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") ?? "gpt-4.1-mini";
+const OPENAI_MODEL =
+  Deno.env.get("OPENAI_MODEL") || "gpt-4.1-mini";
 
 if (!OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY not configured");
 }
 
 /* ============================================================
-   Helper · build user prompt
+   Build user prompt
 ============================================================ */
-
 function buildUserPrompt(input: CoachInput): string {
   const { intent, context, user_input } = input;
 
@@ -33,7 +32,7 @@ Estado:
 Reflexión:
 ${context?.reflection?.content ?? "—"}
 
-Devuelve un mensaje breve, claro y accionable.
+Devuelve un mensaje breve, claro y enfocado.
 `;
   }
 
@@ -42,47 +41,48 @@ Devuelve un mensaje breve, claro y accionable.
 Mensaje del usuario:
 "${user_input}"
 
-Responde como Coach IA de Advance+, siguiendo estrictamente el system prompt.
+Responde como Coach IA de Advance+.
 `;
   }
 
-  return "Acompaña al usuario con claridad y enfoque.";
+  return "Acompaña al usuario con claridad.";
 }
 
 /* ============================================================
-   Main GPT runner
+   GPT runner
 ============================================================ */
-
 export async function runCoachGPT(
   input: CoachInput
 ): Promise<CoachOutput> {
 
   const userPrompt = buildUserPrompt(input);
 
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${OPENAI_API_KEY}`
-    },
-    body: JSON.stringify({
-      model: OPENAI_MODEL,
-      temperature: 0.4,
-      max_tokens: 220,
-      messages: [
-        { role: "system", content: COACH_SYSTEM_PROMPT },
-        { role: "user", content: userPrompt }
-      ]
-    })
-  });
+  const res = await fetch(
+    "https://api.openai.com/v1/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: OPENAI_MODEL,
+        temperature: 0.4,
+        max_tokens: 220,
+        messages: [
+          { role: "system", content: COACH_SYSTEM_PROMPT },
+          { role: "user", content: userPrompt }
+        ]
+      })
+    }
+  );
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`OpenAI error: ${err}`);
+    throw new Error(err);
   }
 
   const data = await res.json();
-
   const message =
     data?.choices?.[0]?.message?.content?.trim();
 
