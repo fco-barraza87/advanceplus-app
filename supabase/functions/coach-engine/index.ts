@@ -47,3 +47,32 @@ serve(async (req) => {
     });
   }
 });
+
+const { data: access } = await supabase
+  .from("user_coach_access")
+  .select("active, level")
+  .eq("user_id", userId)
+  .single();
+
+const coachLevel: CoachLevel =
+  access?.active ? (access.level as CoachLevel) : "basic";
+
+let memory: CoachMemorySnapshot | undefined;
+
+if (coachLevel === "pro") {
+  const { data } = await supabase
+    .from("user_coach_memory")
+    .select("*")
+    .eq("user_id", userId)
+    .single();
+
+  if (data) {
+    memory = {
+      facts: data.facts,
+      thread: data.thread,
+      version: data.version,
+      updated_at: data.updated_at,
+    };
+  }
+}
+
