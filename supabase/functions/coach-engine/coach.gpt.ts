@@ -1,5 +1,10 @@
 // coach.gpt.ts
-import type { CoachInput, CoachOutput } from "./coach.types.ts";
+import type {
+  CoachInput,
+  CoachOutput,
+  CoachRuntimeContext,
+} from "./coach.types.ts";
+
 import { COACH_SYSTEM_PROMPT } from "./coach.prompt.ts";
 
 /* ============================================================
@@ -79,8 +84,10 @@ function cleanMessage(s: string) {
    GPT runner (fetch con timeout)
 ============================================================ */
 export async function runCoachGPT(
-  input: CoachInput
+  input: CoachInput,
+  runtimeContext?: CoachRuntimeContext
 ): Promise<CoachOutput> {
+
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12000); // 12s
@@ -120,7 +127,7 @@ export async function runCoachGPT(
 
     if (!message) throw new Error("Empty GPT response");
 
-    return { message };
+    return { text: message };
 
   } finally {
     clearTimeout(timeout);

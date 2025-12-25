@@ -5,74 +5,55 @@ import { runCoachLogic } from "./coach.logic.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS"
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 serve(async (req) => {
   try {
+    // Preflight
     if (req.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders });
     }
 
     if (req.method !== "POST") {
-      return new Response(JSON.stringify({ error: "Method not allowed" }), {
-        status: 405,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
+      return new Response(
+        JSON.stringify({ error: "Method not allowed" }),
+        {
+          status: 405,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     const body = await req.json();
-    const { intent, course_id, lesson_id } = body ?? {};
 
-    if (!intent || !course_id || !lesson_id) {
-      return new Response(JSON.stringify({ error: "Invalid payload" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
+    // Validación mínima (7.0 existente)
+    if (!body || !body.intent) {
+      return new Response(
+        JSON.stringify({ error: "Invalid payload" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
+    // 🔑 TODA la lógica vive aquí
     const out = await runCoachLogic(body);
-
 
     return new Response(JSON.stringify(out), {
       status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
   } catch (err) {
     console.error("[coach-engine]", err);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
-    });
+    return new Response(
+      JSON.stringify({ error: "Internal server error" }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 });
-
-const { data: access } = await supabase
-  .from("user_coach_access")
-  .select("active, level")
-  .eq("user_id", userId)
-  .single();
-
-const coachLevel: CoachLevel =
-  access?.active ? (access.level as CoachLevel) : "basic";
-
-let memory: CoachMemorySnapshot | undefined;
-
-if (coachLevel === "pro") {
-  const { data } = await supabase
-    .from("user_coach_memory")
-    .select("*")
-    .eq("user_id", userId)
-    .single();
-
-  if (data) {
-    memory = {
-      facts: data.facts,
-      thread: data.thread,
-      version: data.version,
-      updated_at: data.updated_at,
-    };
-  }
-}
-

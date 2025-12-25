@@ -540,10 +540,11 @@ async function initCoachIA({ userId, courseId, lesson }) {
 
     const out = await res.json();
 
-    if (out?.message) {
-      coachMsg.textContent = out.message;
+    if (out?.text && typeof out.text === "string") {
+      coachMsg.textContent = out.text;
       coachBlock.classList.remove("hidden");
     }
+
 
   } catch {
     coachMsg.innerHTML = `
@@ -609,13 +610,9 @@ function initCoachChat() {
 
     const out = await res.json();
 
-    // 🟡 HOOK PREMIUM — solo observación (no UI, no DB)
-    if (out?.meta?.premium_hint) {
-      console.log("Premium hint:", out.meta);
-    }
+    // Mensaje visible al usuario (7.0 correcto)
+    appendMessage("coach", out?.text || "Te leo.");
 
-    // Mensaje visible al usuario
-    appendMessage("coach", out?.message || "Te leo.");
 
 
     } catch {
