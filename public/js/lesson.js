@@ -554,9 +554,6 @@ async function initCoachIA({ userId, courseId, lesson }) {
     coachBlock.classList.remove("hidden");
   }
 
-  /*coachBlock.classList.remove("hidden");
-  coachMsg.textContent = "DEBUG: Coach forzado visible";*/
-
 
 }
 
@@ -577,8 +574,30 @@ function initCoachChat() {
   --------------------------- */
   btnOpen.addEventListener("click", () => {
     chatBlock.classList.toggle("hidden");
-    setTimeout(() => input.focus(), 50);
+
+    // Esperar render
+    setTimeout(() => {
+      const tabbarHeight =
+        parseInt(getComputedStyle(document.documentElement)
+          .getPropertyValue("--tabbar-height")) || 64;
+
+      const rect = chatBlock.getBoundingClientRect();
+      const scrollTop =
+        window.pageYOffset +
+        rect.bottom -
+        window.innerHeight +
+        tabbarHeight +
+        12; // pequeño aire visual
+
+      window.scrollTo({
+        top: scrollTop,
+        behavior: "smooth",
+      });
+
+      input.focus();
+    }, 80);
   });
+
 
   /* ---------------------------
      Auto-grow del textarea
