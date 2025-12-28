@@ -568,17 +568,20 @@ function initCoachChat() {
   const input = document.getElementById("coachChatInput");
   const sendBtn = document.getElementById("coachChatSend");
 
-  if (!btnOpen || !overlay || !messages || !input || !sendBtn) return;
+  if (!btnOpen || !overlay || !closeBtn || !messages || !input || !sendBtn) return;
 
   const openChat = () => {
     overlay.classList.remove("hidden");
-    document.body.style.overflow = "hidden"; // 🔥 evita scroll/zoom
-    setTimeout(() => input.focus(), 150);
+    document.body.dataset.chat = "open";
+    setTimeout(() => {
+      input.focus();
+      messages.scrollTop = messages.scrollHeight;
+    }, 80);
   };
 
   const closeChat = () => {
     overlay.classList.add("hidden");
-    document.body.style.overflow = "";
+    document.body.dataset.chat = "closed";
     input.blur();
   };
 
@@ -594,7 +597,9 @@ function initCoachChat() {
 
     try {
       const session = (await supabase.auth.getSession())?.data?.session;
-      if (!session?.access_token) throw new Error("No session");
+      if (!session?.access_token) throw new Error();
+
+      appendTyping();
 
       const res = await fetch(
         "https://lmlfvbzukymtkcyfromr.supabase.co/functions/v1/coach-engine",
@@ -615,16 +620,17 @@ function initCoachChat() {
       );
 
       const out = await res.json();
+      removeTyping();
       appendMessage("coach", out?.text || "Te leo.");
 
     } catch {
+      removeTyping();
       appendMessage("coach", "⚠️ No pude responder ahora.");
     }
   }
 
   sendBtn.addEventListener("click", send);
-
-  input.addEventListener("keydown", (e) => {
+  input.addEventListener("keydown", e => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       send();
@@ -638,10 +644,10 @@ function initCoachChat() {
 
     const bubble = document.createElement("div");
     bubble.textContent = text;
-    bubble.style.maxWidth = "80%";
+    bubble.style.maxWidth = "78%";
     bubble.style.padding = "10px 12px";
-    bubble.style.margin = "6px 0";
     bubble.style.borderRadius = "14px";
+    bubble.style.marginBottom = "6px";
     bubble.style.background =
       role === "user"
         ? "rgba(74,242,197,0.18)"
@@ -650,12 +656,23 @@ function initCoachChat() {
 
     row.appendChild(bubble);
     messages.appendChild(row);
+    messages.scrollTop = messages.scrollHeight;
+  }
 
-    requestAnimationFrame(() => {
-      messages.scrollTop = messages.scrollHeight;
-    });
+  function appendTyping() {
+    const el = document.createElement("div");
+    el.id = "typing";
+    el.textContent = "Escribiendo…";
+    el.style.opacity = "0.6";
+    messages.appendChild(el);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function removeTyping() {
+    document.getElementById("typing")?.remove();
   }
 }
+
 
 
 

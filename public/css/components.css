@@ -596,84 +596,68 @@ button:active {
 
 
 /* ============================================================
-   COACH CHAT OVERLAY — FIX MOBILE iOS
+   Coach Chat Overlay — FIX MOBILE iOS
 ============================================================ */
 
 .coach-chat-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1000;
-  background: rgba(6, 18, 48, 0.85);
-  backdrop-filter: blur(6px);
+  z-index: 999;
+  background: rgba(5, 15, 40, 0.65);
+  backdrop-filter: blur(8px);
   display: flex;
-  justify-content: center;
   align-items: flex-end;
 }
 
-/* Panel */
+/* Panel principal */
 .coach-chat-panel {
   background: var(--color-primary-dark);
   width: 100%;
-  max-width: 720px;
-  height: calc(100dvh - 64px); /* 🔥 respeta tabbar */
+  height: calc(100dvh - 64px); /* ⬅️ respeta tabbar */
   display: flex;
   flex-direction: column;
   border-radius: 16px 16px 0 0;
   overflow: hidden;
 }
 
-/* Header */
+/* Header fijo */
 .coach-chat-header {
   flex-shrink: 0;
-  height: 56px;
-  padding: 0 16px;
+  padding: 14px 16px;
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
-.coach-chat-header h3 {
-  font-size: var(--text-md);
-  font-weight: 600;
-}
-
-.coach-chat-header button {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 20px;
-}
-
-/* Messages (SCROLL AQUÍ) */
+/* Mensajes scrolleables */
 .coach-chat-messages {
   flex: 1;
-  padding: 14px;
   overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
+  padding: 16px;
+  scroll-behavior: smooth;
 }
 
-/* Input */
+/* Input SIEMPRE visible */
 .coach-chat-input {
   flex-shrink: 0;
   display: flex;
   gap: 10px;
   padding: 12px;
-  padding-bottom: calc(12px + env(safe-area-inset-bottom));
   border-top: 1px solid rgba(255,255,255,0.08);
+  background: var(--color-primary-dark);
 }
 
+/* Textarea auto-resize */
 .coach-chat-input textarea {
   flex: 1;
   resize: none;
   max-height: 120px;
-  min-height: 42px;
   overflow-y: auto;
 }
 
-/* Evita zoom iOS */
-.coach-chat-input textarea,
-.coach-chat-input button {
-  font-size: 16px;
+/* Cuando el chat está abierto */
+body[data-chat="open"] {
+  overflow: hidden;
+  height: 100dvh;
 }
