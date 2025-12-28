@@ -570,33 +570,48 @@ function initCoachChat() {
   if (!btnOpen || !chatBlock || !messages || !input || !sendBtn) return;
 
   /* ---------------------------
+     Detector de viewportheight
+  --------------------------- */
+  function getViewportHeight() {
+    return window.visualViewport
+      ? window.visualViewport.height
+      : window.innerHeight;
+  }
+
+  function scrollChatIntoView() {
+    const tabbarHeight =
+      parseInt(
+        getComputedStyle(document.documentElement)
+          .getPropertyValue("--tabbar-height")
+      ) || 64;
+
+    const rect = chatBlock.getBoundingClientRect();
+
+    const scrollTop =
+      window.pageYOffset +
+      rect.bottom -
+      getViewportHeight() +
+      tabbarHeight +
+      12;
+
+    window.scrollTo({
+      top: scrollTop,
+      behavior: "smooth",
+    });
+  }
+
+  /* ---------------------------
      Abrir / cerrar chat
   --------------------------- */
   btnOpen.addEventListener("click", () => {
     chatBlock.classList.toggle("hidden");
 
-    // Esperar render
     setTimeout(() => {
-      const tabbarHeight =
-        parseInt(getComputedStyle(document.documentElement)
-          .getPropertyValue("--tabbar-height")) || 64;
-
-      const rect = chatBlock.getBoundingClientRect();
-      const scrollTop =
-        window.pageYOffset +
-        rect.bottom -
-        window.innerHeight +
-        tabbarHeight +
-        12; // pequeño aire visual
-
-      window.scrollTo({
-        top: scrollTop,
-        behavior: "smooth",
-      });
-
+      scrollChatIntoView();
       input.focus();
     }, 80);
   });
+
 
 
   /* ---------------------------
@@ -703,6 +718,15 @@ function initCoachChat() {
 
     return isTyping ? row : null;
   }
+  
+  if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", () => {
+    if (!chatBlock.classList.contains("hidden")) {
+      scrollChatIntoView();
+    }
+  });
+}
+
 }
 
 
