@@ -642,3 +642,33 @@ button:active {
   );
 }
 
+
+/* Chat Coach – FIX iOS definitivo */
+.coach-chat-panel {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;              /* 👈 CLAVE */
+  max-height: 100dvh;
+  background: #0b1d4a;
+}
+
+/* Zona mensajes: ocupa todo menos el input */
+.coach-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Input SIEMPRE pegado abajo del viewport visible */
+.coach-chat-input {
+  position: sticky;
+  bottom: 0;
+  padding: 12px;
+  background: linear-gradient(
+    to top,
+    rgba(11,29,74,0.98),
+    rgba(11,29,74,0.92)
+  );
+}
+
