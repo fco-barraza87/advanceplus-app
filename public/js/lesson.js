@@ -561,63 +561,42 @@ async function initCoachIA({ userId, courseId, lesson }) {
    Coach Chat — Capa 5.1 (UX PRO, sin estado persistente)
 ============================================================ */
 function initCoachChat() {
-  const btnOpen = document.getElementById("openCoachChatBtn");
-  const btnClose = document.getElementById("closeCoachChatBtn");
-  const chatBlock = document.getElementById("lessonChatBlock");
+  const openBtn = document.getElementById("openCoachChatBtn");
+  const overlay = document.getElementById("coachChatOverlay");
+  const closeBtn = document.getElementById("closeCoachChatBtn");
   const messages = document.getElementById("coachChatMessages");
   const input = document.getElementById("coachChatInput");
   const sendBtn = document.getElementById("coachChatSend");
 
-  if (!btnOpen || !chatBlock || !messages || !input || !sendBtn) return;
+  if (!openBtn || !overlay || !closeBtn) return;
 
-  let isOpen = false;
-
-  /* =============================
-     Abrir / cerrar chat
-  ============================= */
   function openChat() {
-    chatBlock.classList.remove("hidden");
-    isOpen = true;
-
-    requestAnimationFrame(() => {
-      input.focus();
-      scrollToBottom();
-    });
+    overlay.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+    setTimeout(() => input.focus(), 120);
   }
 
   function closeChat() {
-    chatBlock.classList.add("hidden");
-    isOpen = false;
-    input.blur();
+    overlay.classList.add("hidden");
+    document.body.style.overflow = "";
   }
 
-  btnOpen.addEventListener("click", openChat);
-  btnClose?.addEventListener("click", closeChat);
+  openBtn.addEventListener("click", openChat);
+  closeBtn.addEventListener("click", closeChat);
 
-  /* =============================
-     Autosize textarea
-  ============================= */
-  input.addEventListener("input", () => {
-    input.style.height = "auto";
-    input.style.height = Math.min(input.scrollHeight, 120) + "px";
-  });
-
-  /* =============================
-     Enviar mensaje
-  ============================= */
   async function send() {
     const text = input.value.trim();
     if (!text || !lastCoachContext) return;
 
-    input.value = "";
-    input.style.height = "auto";
     appendMessage("user", text);
-
-    showTyping(true);
+    input.value = "";
+    autoResize();
 
     try {
       const session = (await supabase.auth.getSession())?.data?.session;
       if (!session?.access_token) throw new Error("No session");
+
+      appendTyping();
 
       const res = await fetch(
         "https://lmlfvbzukymtkcyfromr.supabase.co/functions/v1/coach-engine",
@@ -625,89 +604,75 @@ function initCoachChat() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
+            Authorization: `Bearer ${session.access_token}`
           },
           body: JSON.stringify({
             intent: "chat",
             course_id: lastCoachContext.course_id,
             lesson_id: lastCoachContext.lesson_id,
             context: lastCoachContext.context,
-            user_input: text,
-          }),
+            user_input: text
+          })
         }
       );
 
       const out = await res.json();
+      removeTyping();
       appendMessage("coach", out?.text || "Te leo.");
 
     } catch {
+      removeTyping();
       appendMessage("coach", "⚠️ No pude responder ahora.");
-    } finally {
-      showTyping(false);
     }
   }
 
   sendBtn.addEventListener("click", send);
 
-  input.addEventListener("keydown", (e) => {
+  input.addEventListener("keydown", e => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       send();
     }
   });
 
-  /* =============================
-     Render mensajes
-  ============================= */
-  function appendMessage(role, text) {
-    const row = document.createElement("div");
-    row.style.display = "flex";
-    row.style.justifyContent = role === "user" ? "flex-end" : "flex-start";
+  input.addEventListener("input", autoResize);
 
+  function autoResize() {
+    input.style.height = "auto";
+    input.style.height = input.scrollHeight + "px";
+  }
+
+  function appendMessage(role, text) {
     const bubble = document.createElement("div");
     bubble.textContent = text;
+    bubble.style.alignSelf = role === "user" ? "flex-end" : "flex-start";
     bubble.style.maxWidth = "80%";
-    bubble.style.padding = "10px 14px";
-    bubble.style.margin = "6px 0";
-    bubble.style.borderRadius = "16px";
+    bubble.style.padding = "10px 12px";
+    bubble.style.borderRadius = "14px";
     bubble.style.background =
       role === "user"
-        ? "rgba(74,242,197,0.22)"
-        : "rgba(255,255,255,0.10)";
+        ? "rgba(74,242,197,0.18)"
+        : "rgba(255,255,255,0.08)";
     bubble.style.color = "#fff";
 
-    row.appendChild(bubble);
-    messages.appendChild(row);
-    scrollToBottom();
+    messages.appendChild(bubble);
+    messages.scrollTop = messages.scrollHeight;
   }
 
-  function scrollToBottom() {
-    requestAnimationFrame(() => {
-      messages.scrollTop = messages.scrollHeight;
-    });
+  function appendTyping() {
+    const t = document.createElement("div");
+    t.id = "coachTyping";
+    t.textContent = "…";
+    t.style.opacity = "0.6";
+    messages.appendChild(t);
+    messages.scrollTop = messages.scrollHeight;
   }
 
-  /* =============================
-     Indicador escribiendo
-  ============================= */
-  let typingEl = null;
-
-  function showTyping(show) {
-    if (show && !typingEl) {
-      typingEl = document.createElement("div");
-      typingEl.textContent = "✍️ El Coach está escribiendo…";
-      typingEl.style.fontSize = "0.85rem";
-      typingEl.style.opacity = "0.6";
-      messages.appendChild(typingEl);
-      scrollToBottom();
-    }
-
-    if (!show && typingEl) {
-      typingEl.remove();
-      typingEl = null;
-    }
+  function removeTyping() {
+    document.getElementById("coachTyping")?.remove();
   }
 }
+
 
 
 

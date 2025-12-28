@@ -593,3 +593,89 @@ button:active {
   color: #fff;
   font-size: 1.2rem;
 }
+
+/* ============================================================
+   Coach Chat Overlay (Mobile First)
+============================================================ */
+
+.coach-chat-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 15, 40, 0.55);
+  backdrop-filter: blur(6px);
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.coach-chat-overlay.hidden {
+  display: none;
+}
+
+.coach-chat-panel {
+  width: 100%;
+  max-height: calc(100vh - 64px); /* respeta header */
+  background: var(--color-primary-dark);
+  border-radius: 18px 18px 0 0;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* HEADER */
+.coach-chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.coach-chat-header h3 {
+  font-size: var(--text-md);
+  margin: 0;
+}
+
+.coach-chat-header button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.4rem;
+}
+
+/* MENSAJES */
+.coach-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* INPUT */
+.coach-chat-input {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.coach-chat-input textarea {
+  flex: 1;
+  resize: none;
+  max-height: 120px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  border: none;
+  color: #fff;
+  font-size: var(--text-sm);
+}
+
+/* Evita zoom iOS */
+.coach-chat-input textarea {
+  font-size: 16px;
+}
