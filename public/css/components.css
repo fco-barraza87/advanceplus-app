@@ -527,3 +527,59 @@ button:active {
 .coach-chat-messages {
   scroll-behavior: smooth;
 }
+
+
+/* ===============================
+   CHAT COACH — MOBILE FIRST
+================================ */
+
+.coach-chat {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 64px; /* altura del tabbar */
+  top: 64px;    /* header */
+  background: var(--color-primary-dark);
+  display: flex;
+  flex-direction: column;
+  z-index: 999;
+}
+
+/* Título fijo */
+.coach-chat-title {
+  padding: 16px;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Mensajes */
+.coach-chat-messages {
+  flex: 1;
+  padding: 12px 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Input fijo abajo */
+.coach-chat-input {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  background: var(--color-primary-dark);
+}
+
+/* Textarea auto-resize */
+#coachChatInput {
+  flex: 1;
+  resize: none;
+  max-height: 120px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  font-size: 16px; /* 🔥 evita zoom iOS */
+  line-height: 1.4;
+}

@@ -569,75 +569,26 @@ function initCoachChat() {
 
   if (!btnOpen || !chatBlock || !messages || !input || !sendBtn) return;
 
-  /* ---------------------------
-     Detector de viewportheight
-  --------------------------- */
-  function getViewportHeight() {
-    return window.visualViewport
-      ? window.visualViewport.height
-      : window.innerHeight;
-  }
-
-  function scrollChatIntoView() {
-    const tabbarHeight =
-      parseInt(
-        getComputedStyle(document.documentElement)
-          .getPropertyValue("--tabbar-height")
-      ) || 64;
-
-    const rect = chatBlock.getBoundingClientRect();
-
-    const scrollTop =
-      window.pageYOffset +
-      rect.bottom -
-      getViewportHeight() +
-      tabbarHeight +
-      12;
-
-    window.scrollTo({
-      top: scrollTop,
-      behavior: "smooth",
-    });
-  }
-
-  /* ---------------------------
-     Abrir / cerrar chat
-  --------------------------- */
+  // Abrir chat
   btnOpen.addEventListener("click", () => {
-    chatBlock.classList.toggle("hidden");
+    chatBlock.classList.remove("hidden");
 
-    setTimeout(() => {
-      scrollChatIntoView();
-      input.focus();
-    }, 80);
+    // Forzar layout estable
+    requestAnimationFrame(() => {
+      input.focus({ preventScroll: true });
+      scrollToBottom();
+    });
   });
 
-
-
-  /* ---------------------------
-     Auto-grow del textarea
-  --------------------------- */
-  input.addEventListener("input", () => {
-    input.style.height = "auto";
-    input.style.height = Math.min(input.scrollHeight, 120) + "px";
-  });
-
-  /* ---------------------------
-     Enviar mensaje
-  --------------------------- */
+  // Enviar mensaje
   async function send() {
     const text = input.value.trim();
     if (!text || !lastCoachContext) return;
 
-    // Reset input
     input.value = "";
-    input.style.height = "auto";
-
-    // Mensaje usuario
+    resizeTextarea();
     appendMessage("user", text);
-
-    // Indicador de escritura
-    const typingBubble = appendMessage("coach", "El coach está escribiendo…", true);
+    showTyping();
 
     try {
       const session = (await supabase.auth.getSession())?.data?.session;
@@ -662,20 +613,12 @@ function initCoachChat() {
       );
 
       const out = await res.json();
-
-      // Quitar typing
-      if (typingBubble) typingBubble.remove();
-
-      // Respuesta coach (contrato 7.0)
+      hideTyping();
       appendMessage("coach", out?.text || "Te leo.");
 
-    } catch (err) {
-      if (typingBubble) typingBubble.remove();
-
-      appendMessage(
-        "coach",
-        "⚠️ No pude responder ahora. Intenta de nuevo."
-      );
+    } catch {
+      hideTyping();
+      appendMessage("coach", "⚠️ No pude responder ahora.");
     }
   }
 
@@ -688,10 +631,14 @@ function initCoachChat() {
     }
   });
 
-  /* ---------------------------
-     Render de mensajes
-  --------------------------- */
-  function appendMessage(role, text, isTyping = false) {
+  input.addEventListener("input", resizeTextarea);
+
+  function resizeTextarea() {
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 120) + "px";
+  }
+
+  function appendMessage(role, text) {
     const row = document.createElement("div");
     row.style.display = "flex";
     row.style.justifyContent = role === "user" ? "flex-end" : "flex-start";
@@ -707,26 +654,32 @@ function initCoachChat() {
         ? "rgba(74,242,197,0.18)"
         : "rgba(255,255,255,0.08)";
     bubble.style.color = "#fff";
-    bubble.style.opacity = isTyping ? "0.6" : "1";
-    bubble.style.fontStyle = isTyping ? "italic" : "normal";
 
     row.appendChild(bubble);
     messages.appendChild(row);
-
-    // Auto-scroll tipo WhatsApp
-    messages.scrollTop = messages.scrollHeight;
-
-    return isTyping ? row : null;
+    scrollToBottom();
   }
-  
-  if (window.visualViewport) {
-  window.visualViewport.addEventListener("resize", () => {
-    if (!chatBlock.classList.contains("hidden")) {
-      scrollChatIntoView();
-    }
-  });
-}
 
+  function scrollToBottom() {
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  // Indicador escribiendo
+  let typingEl = null;
+
+  function showTyping() {
+    typingEl = document.createElement("div");
+    typingEl.textContent = "…";
+    typingEl.style.opacity = "0.6";
+    typingEl.style.margin = "6px";
+    messages.appendChild(typingEl);
+    scrollToBottom();
+  }
+
+  function hideTyping() {
+    if (typingEl) typingEl.remove();
+    typingEl = null;
+  }
 }
 
 
