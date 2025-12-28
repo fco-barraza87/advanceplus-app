@@ -474,3 +474,56 @@ button {
 button:active {
   transform: scale(0.97);
 }
+
+
+/* ===============================
+   Coach Chat — UX PRO
+================================ */
+
+.coach-chat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.coach-chat-title {
+  margin-bottom: 4px;
+}
+
+/* Contenedor de mensajes */
+.coach-chat-messages {
+  flex: 1;
+  min-height: 220px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Input area */
+.coach-chat-input {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+/* Textarea inteligente */
+#coachChatInput {
+  flex: 1;
+  resize: none;
+  max-height: 120px;
+  min-height: 38px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.07);
+  color: var(--color-white);
+  font-size: var(--text-sm);
+  overflow-y: auto;
+}
+
+/* Scroll suave */
+.coach-chat-messages {
+  scroll-behavior: smooth;
+}

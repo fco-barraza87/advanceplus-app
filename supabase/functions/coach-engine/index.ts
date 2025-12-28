@@ -1,5 +1,6 @@
 // index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { runCoachLogic } from "./coach.logic.ts";
 
 const corsHeaders = {
@@ -10,7 +11,9 @@ const corsHeaders = {
 
 serve(async (req) => {
   try {
+    // =========================================================
     // Preflight
+    // =========================================================
     if (req.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders });
     }
@@ -25,6 +28,9 @@ serve(async (req) => {
       );
     }
 
+    // =========================================================
+    // Parse body
+    // =========================================================
     const body = await req.json();
 
     // Validación mínima (7.0 existente)
@@ -38,8 +44,40 @@ serve(async (req) => {
       );
     }
 
-    // 🔑 TODA la lógica vive aquí
-    const out = await runCoachLogic(body);
+    // =========================================================
+    // 🔐 Resolver usuario desde JWT (FUENTE DE VERDAD)
+    // =========================================================
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      {
+        global: {
+          headers: {
+            Authorization: req.headers.get("Authorization") || "",
+          },
+        },
+      }
+    );
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    // =========================================================
+    // 🧠 Inyectar user_id en context (sin romper frontend)
+    // =========================================================
+    const enrichedBody = {
+      ...body,
+      context: {
+        ...(body.context ?? {}),
+        user_id: user?.id,
+      },
+    };
+
+    // =========================================================
+    // Ejecutar lógica del Coach
+    // =========================================================
+    const out = await runCoachLogic(enrichedBody);
 
     return new Response(JSON.stringify(out), {
       status: 200,

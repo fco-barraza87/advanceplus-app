@@ -561,7 +561,7 @@ async function initCoachIA({ userId, courseId, lesson }) {
 }
 
 /* ============================================================
-   Coach Chat — Capa 5.1 (inline, sin estado)
+   Coach Chat — Capa 5.1 (UX PRO, sin estado persistente)
 ============================================================ */
 function initCoachChat() {
   const btnOpen = document.getElementById("openCoachChatBtn");
@@ -572,19 +572,38 @@ function initCoachChat() {
 
   if (!btnOpen || !chatBlock || !messages || !input || !sendBtn) return;
 
-  // Abrir / cerrar chat
+  /* ---------------------------
+     Abrir / cerrar chat
+  --------------------------- */
   btnOpen.addEventListener("click", () => {
     chatBlock.classList.toggle("hidden");
     setTimeout(() => input.focus(), 50);
   });
 
-  // Enviar mensaje
+  /* ---------------------------
+     Auto-grow del textarea
+  --------------------------- */
+  input.addEventListener("input", () => {
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 120) + "px";
+  });
+
+  /* ---------------------------
+     Enviar mensaje
+  --------------------------- */
   async function send() {
     const text = input.value.trim();
     if (!text || !lastCoachContext) return;
 
+    // Reset input
     input.value = "";
+    input.style.height = "auto";
+
+    // Mensaje usuario
     appendMessage("user", text);
+
+    // Indicador de escritura
+    const typingBubble = appendMessage("coach", "El coach está escribiendo…", true);
 
     try {
       const session = (await supabase.auth.getSession())?.data?.session;
@@ -596,26 +615,29 @@ function initCoachChat() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`
+            Authorization: `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({
             intent: "chat",
             course_id: lastCoachContext.course_id,
             lesson_id: lastCoachContext.lesson_id,
             context: lastCoachContext.context,
-            user_input: text
-          })
+            user_input: text,
+          }),
         }
       );
 
-    const out = await res.json();
+      const out = await res.json();
 
-    // Mensaje visible al usuario (7.0 correcto)
-    appendMessage("coach", out?.text || "Te leo.");
+      // Quitar typing
+      if (typingBubble) typingBubble.remove();
 
+      // Respuesta coach (contrato 7.0)
+      appendMessage("coach", out?.text || "Te leo.");
 
+    } catch (err) {
+      if (typingBubble) typingBubble.remove();
 
-    } catch {
       appendMessage(
         "coach",
         "⚠️ No pude responder ahora. Intenta de nuevo."
@@ -624,14 +646,18 @@ function initCoachChat() {
   }
 
   sendBtn.addEventListener("click", send);
+
   input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       send();
     }
   });
 
-  function appendMessage(role, text) {
+  /* ---------------------------
+     Render de mensajes
+  --------------------------- */
+  function appendMessage(role, text, isTyping = false) {
     const row = document.createElement("div");
     row.style.display = "flex";
     row.style.justifyContent = role === "user" ? "flex-end" : "flex-start";
@@ -647,12 +673,19 @@ function initCoachChat() {
         ? "rgba(74,242,197,0.18)"
         : "rgba(255,255,255,0.08)";
     bubble.style.color = "#fff";
+    bubble.style.opacity = isTyping ? "0.6" : "1";
+    bubble.style.fontStyle = isTyping ? "italic" : "normal";
 
     row.appendChild(bubble);
     messages.appendChild(row);
+
+    // Auto-scroll tipo WhatsApp
     messages.scrollTop = messages.scrollHeight;
+
+    return isTyping ? row : null;
   }
 }
+
 
 
 /* ============================================================
