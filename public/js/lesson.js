@@ -567,12 +567,19 @@ function initCoachChat() {
   const messages = document.getElementById("coachChatMessages");
   const input = document.getElementById("coachChatInput");
   const sendBtn = document.getElementById("coachChatSend");
+  const tabbar = document.querySelector(".tabbar");
 
   if (!btnOpen || !overlay || !closeBtn || !messages || !input || !sendBtn) return;
 
+  /* =========================
+     OPEN / CLOSE
+  ========================= */
   const openChat = () => {
     overlay.classList.remove("hidden");
     document.body.dataset.chat = "open";
+    document.body.style.overflow = "hidden";     // 🔒 bloquea scroll fondo
+    if (tabbar) tabbar.style.display = "none";   // 🔥 CLAVE
+
     setTimeout(() => {
       input.focus();
       messages.scrollTop = messages.scrollHeight;
@@ -582,12 +589,17 @@ function initCoachChat() {
   const closeChat = () => {
     overlay.classList.add("hidden");
     document.body.dataset.chat = "closed";
+    document.body.style.overflow = "";
+    if (tabbar) tabbar.style.display = "";       // 🔥 vuelve
     input.blur();
   };
 
   btnOpen.addEventListener("click", openChat);
   closeBtn.addEventListener("click", closeChat);
 
+  /* =========================
+     SEND MESSAGE
+  ========================= */
   async function send() {
     const text = input.value.trim();
     if (!text || !lastCoachContext) return;
@@ -637,6 +649,9 @@ function initCoachChat() {
     }
   });
 
+  /* =========================
+     UI HELPERS
+  ========================= */
   function appendMessage(role, text) {
     const row = document.createElement("div");
     row.style.display = "flex";
@@ -664,6 +679,7 @@ function initCoachChat() {
     el.id = "typing";
     el.textContent = "Escribiendo…";
     el.style.opacity = "0.6";
+    el.style.margin = "6px 0";
     messages.appendChild(el);
     messages.scrollTop = messages.scrollHeight;
   }
@@ -672,7 +688,9 @@ function initCoachChat() {
     document.getElementById("typing")?.remove();
   }
 
-  // --- FIX teclado iOS (mínimo) ---
+  /* =========================
+     FIX TECLADO iOS (mínimo)
+  ========================= */
   if (window.visualViewport) {
     const inputBar = document.querySelector(".coach-chat-input");
 
@@ -684,7 +702,6 @@ function initCoachChat() {
         offset > 0 ? `translateY(-${offset}px)` : "translateY(0)";
     });
   }
-
 }
 
 
