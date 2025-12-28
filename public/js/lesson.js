@@ -671,6 +671,20 @@ function initCoachChat() {
   function removeTyping() {
     document.getElementById("typing")?.remove();
   }
+
+  // --- FIX teclado iOS (mínimo) ---
+  if (window.visualViewport) {
+    const inputBar = document.querySelector(".coach-chat-input");
+
+    visualViewport.addEventListener("resize", () => {
+      const offset =
+        window.innerHeight - visualViewport.height - visualViewport.offsetTop;
+
+      inputBar.style.transform =
+        offset > 0 ? `translateY(-${offset}px)` : "translateY(0)";
+    });
+  }
+
 }
 
 
