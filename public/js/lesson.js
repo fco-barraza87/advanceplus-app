@@ -561,42 +561,40 @@ async function initCoachIA({ userId, courseId, lesson }) {
    Coach Chat — Capa 5.1 (UX PRO, sin estado persistente)
 ============================================================ */
 function initCoachChat() {
-  const openBtn = document.getElementById("openCoachChatBtn");
+  const btnOpen = document.getElementById("openCoachChatBtn");
   const overlay = document.getElementById("coachChatOverlay");
   const closeBtn = document.getElementById("closeCoachChatBtn");
   const messages = document.getElementById("coachChatMessages");
   const input = document.getElementById("coachChatInput");
   const sendBtn = document.getElementById("coachChatSend");
 
-  if (!openBtn || !overlay || !closeBtn) return;
+  if (!btnOpen || !overlay || !messages || !input || !sendBtn) return;
 
-  function openChat() {
+  const openChat = () => {
     overlay.classList.remove("hidden");
-    document.body.style.overflow = "hidden";
-    setTimeout(() => input.focus(), 120);
-  }
+    document.body.style.overflow = "hidden"; // 🔥 evita scroll/zoom
+    setTimeout(() => input.focus(), 150);
+  };
 
-  function closeChat() {
+  const closeChat = () => {
     overlay.classList.add("hidden");
     document.body.style.overflow = "";
-  }
+    input.blur();
+  };
 
-  openBtn.addEventListener("click", openChat);
+  btnOpen.addEventListener("click", openChat);
   closeBtn.addEventListener("click", closeChat);
 
   async function send() {
     const text = input.value.trim();
     if (!text || !lastCoachContext) return;
 
-    appendMessage("user", text);
     input.value = "";
-    autoResize();
+    appendMessage("user", text);
 
     try {
       const session = (await supabase.auth.getSession())?.data?.session;
       if (!session?.access_token) throw new Error("No session");
-
-      appendTyping();
 
       const res = await fetch(
         "https://lmlfvbzukymtkcyfromr.supabase.co/functions/v1/coach-engine",
@@ -617,37 +615,32 @@ function initCoachChat() {
       );
 
       const out = await res.json();
-      removeTyping();
       appendMessage("coach", out?.text || "Te leo.");
 
     } catch {
-      removeTyping();
       appendMessage("coach", "⚠️ No pude responder ahora.");
     }
   }
 
   sendBtn.addEventListener("click", send);
 
-  input.addEventListener("keydown", e => {
+  input.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       send();
     }
   });
 
-  input.addEventListener("input", autoResize);
-
-  function autoResize() {
-    input.style.height = "auto";
-    input.style.height = input.scrollHeight + "px";
-  }
-
   function appendMessage(role, text) {
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.justifyContent = role === "user" ? "flex-end" : "flex-start";
+
     const bubble = document.createElement("div");
     bubble.textContent = text;
-    bubble.style.alignSelf = role === "user" ? "flex-end" : "flex-start";
     bubble.style.maxWidth = "80%";
     bubble.style.padding = "10px 12px";
+    bubble.style.margin = "6px 0";
     bubble.style.borderRadius = "14px";
     bubble.style.background =
       role === "user"
@@ -655,21 +648,12 @@ function initCoachChat() {
         : "rgba(255,255,255,0.08)";
     bubble.style.color = "#fff";
 
-    messages.appendChild(bubble);
-    messages.scrollTop = messages.scrollHeight;
-  }
+    row.appendChild(bubble);
+    messages.appendChild(row);
 
-  function appendTyping() {
-    const t = document.createElement("div");
-    t.id = "coachTyping";
-    t.textContent = "…";
-    t.style.opacity = "0.6";
-    messages.appendChild(t);
-    messages.scrollTop = messages.scrollHeight;
-  }
-
-  function removeTyping() {
-    document.getElementById("coachTyping")?.remove();
+    requestAnimationFrame(() => {
+      messages.scrollTop = messages.scrollHeight;
+    });
   }
 }
 
