@@ -641,6 +641,9 @@ function initCoachChat() {
       removeTyping();
       appendMessage("coach", "⚠️ No pude responder ahora. Intenta de nuevo.");
     }
+    setTimeout(() => {
+      input.focus({ preventScroll: true });
+    }, 50);
   }
 
   sendBtn.addEventListener("click", send);
