@@ -231,39 +231,39 @@
     <!-- =========================
       CHAT IA (OPCIONAL)
     ========================= -->
-    <!-- =========================
-        COACH CHAT OVERLAY
-    ========================= -->
-    <div id="coachChatOverlay" class="coach-chat-overlay hidden">
+<!-- =========================
+     COACH CHAT INLINE (CARD)
+========================= -->
+<section
+  id="coachChatCard"
+  class="dash-section coach-chat-card hidden"
+>
 
-      <div class="coach-chat-panel">
+  <div class="coach-chat-header">
+    <h3>Habla con tu Coach</h3>
+  </div>
 
-        <div class="coach-chat-header">
-          <h3>Habla con tu Coach</h3>
-          <button id="closeCoachChatBtn" aria-label="Cerrar">✕</button>
-        </div>
+  <div
+    id="coachChatMessages"
+    class="coach-chat-messages"
+  ></div>
 
-        <div
-          id="coachChatMessages"
-          class="coach-chat-messages"
-        ></div>
+  <div class="coach-chat-input">
+    <textarea
+      id="coachChatInput"
+      rows="2"
+      placeholder="Escribe tu mensaje..."
+    ></textarea>
 
-        <div class="coach-chat-input">
-          <textarea
-            id="coachChatInput"
-            rows="1"
-            placeholder="Escribe tu mensaje..."
-          ></textarea>
-          <button
-            id="coachChatSend"
-            class="btn btn-primary"
-          >
-            Enviar
-          </button>
-        </div>
+    <button
+      id="coachChatSend"
+      class="btn btn-primary"
+    >
+      Enviar
+    </button>
+  </div>
 
-      </div>
-    </div>
+</section>
 
 
     <!-- =========================

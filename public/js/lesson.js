@@ -561,9 +561,9 @@ async function initCoachIA({ userId, courseId, lesson }) {
    Coach Chat — Capa 5.1 (UX PRO, sin estado persistente)
 ============================================================ */
 function initCoachChat() {
-  const btnOpen = document.getElementById("openCoachChatBtn");
+  const btnOpen = document.getElementById("openCoachChatBtn")
+  const chatCard = document.getElementById("coachChatCard");
   const overlay = document.getElementById("coachChatOverlay");
-  const closeBtn = document.getElementById("closeCoachChatBtn");
   const messages = document.getElementById("coachChatMessages");
   const input = document.getElementById("coachChatInput");
   const sendBtn = document.getElementById("coachChatSend");
@@ -571,31 +571,45 @@ function initCoachChat() {
 
   if (!btnOpen || !overlay || !closeBtn || !messages || !input || !sendBtn) return;
 
-  /* =========================
-     OPEN / CLOSE
-  ========================= */
-  const openChat = () => {
-    overlay.classList.remove("hidden");
-    document.body.dataset.chat = "open";
-    document.body.style.overflow = "hidden";     // 🔒 bloquea scroll fondo
-    if (tabbar) tabbar.style.display = "none";   // 🔥 CLAVE
+/* =========================
+   OPEN / CLOSE (INLINE CHAT)
+========================= */
 
-    setTimeout(() => {
-      input.focus();
-      messages.scrollTop = messages.scrollHeight;
-    }, 80);
-  };
+const openChat = () => {
+  // Mostrar card inline
+  chatCard.classList.remove("hidden");
 
-  const closeChat = () => {
-    overlay.classList.add("hidden");
-    document.body.dataset.chat = "closed";
-    document.body.style.overflow = "";
-    if (tabbar) tabbar.style.display = "";       // 🔥 vuelve
-    input.blur();
-  };
+  // Scroll suave hacia el chat
+  chatCard.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
 
-  btnOpen.addEventListener("click", openChat);
+  // Focus SIN forzar layout
+  setTimeout(() => {
+    input.focus({ preventScroll: true });
+    messages.scrollTop = messages.scrollHeight;
+  }, 150);
+};
+
+const closeChat = () => {
+  // Simplemente ocultamos la card
+  chatCard.classList.add("hidden");
+
+  input.blur();
+};
+
+/* =========================
+   EVENTS
+========================= */
+
+btnOpen.addEventListener("click", openChat);
+
+// ⚠️ opcional: si decides mantener botón cerrar
+if (closeBtn) {
   closeBtn.addEventListener("click", closeChat);
+}
+
 
   /* =========================
      SEND MESSAGE
