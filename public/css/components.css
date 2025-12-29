@@ -672,3 +672,35 @@ button:active {
   );
 }
 
+
+/* =========================
+   COACH CHAT INLINE CARD
+========================= */
+
+.coach-chat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.coach-chat-header {
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  padding-bottom: 8px;
+}
+
+.coach-chat-messages {
+  max-height: 320px;          /* 👈 clave */
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.coach-chat-input {
+  display: flex;
+  gap: 10px;
+}
+
+.coach-chat-input textarea {
+  flex: 1;
+  resize: none;
+}
+
