@@ -644,7 +644,6 @@ function initCoachChat() {
     setTimeout(() => {
       input.focus({ preventScroll: true });
     }, 50);
-    ...
   }
 
   sendBtn.addEventListener("click", send);
