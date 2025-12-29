@@ -501,13 +501,6 @@ button:active {
   flex-direction: column;
 }
 
-/* Input area */
-.coach-chat-input {
-  display: flex;
-  gap: 10px;
-  align-items: flex-end;
-}
-
 /* Textarea inteligente */
 #coachChatInput {
   flex: 1;
@@ -565,13 +558,6 @@ button:active {
 }
 
 
-/* Input fijo abajo */
-.coach-chat-input {
-  display: flex;
-  gap: 10px;
-  align-items: flex-end;
-}
-
 /* Textarea auto-resize */
 #coachChatInput {
   flex: 1;
@@ -628,21 +614,6 @@ button:active {
   padding: 16px;
 }
 
-/* Input SIEMPRE pegado abajo */
-.coach-chat-input {
-  position: sticky;
-  bottom: 0;
-  padding: 12px 14px;
-  display: flex;
-  gap: 10px;
-  background: linear-gradient(
-    to top,
-    rgba(10, 25, 70, 0.98),
-    rgba(10, 25, 70, 0.92)
-  );
-}
-
-
 /* Chat Coach – FIX iOS definitivo */
 .coach-chat-panel {
   position: fixed;
@@ -658,18 +629,6 @@ button:active {
 .coach-chat-messages {
   flex: 1;
   overflow-y: auto;
-}
-
-/* Input SIEMPRE pegado abajo del viewport visible */
-.coach-chat-input {
-  position: sticky;
-  bottom: 0;
-  padding: 12px;
-  background: linear-gradient(
-    to top,
-    rgba(11,29,74,0.98),
-    rgba(11,29,74,0.92)
-  );
 }
 
 
@@ -694,10 +653,6 @@ button:active {
   padding-right: 4px;
 }
 
-.coach-chat-input {
-  display: flex;
-  gap: 10px;
-}
 
 .coach-chat-input textarea {
   flex: 1;
@@ -713,3 +668,21 @@ button:active {
 .coach-chat-input { display:flex; gap:10px; align-items:flex-end; }
 .coach-chat-input textarea { width: 100%; resize: none; }
 
+/* ===============================
+   COACH CHAT INPUT (MASTER)
+=============================== */
+
+.coach-chat-input {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  background: linear-gradient(
+    to top,
+    rgba(15,30,68,0.98),
+    rgba(15,30,68,0.85)
+  );
+  z-index: 5;
+}
