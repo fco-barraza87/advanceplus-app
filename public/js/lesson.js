@@ -451,7 +451,7 @@ async function initFeedback({ userId, courseId, lesson }) {
    Coach IA — Observador puro (Capa 5)
 ============================================================ */
 async function initCoachIA({ userId, courseId, lesson }) {
-  console.log("initCoachChat() loaded");
+  console.log("initCoachIA() loaded");
 
   const coachBlock = q("#lessonCoachBlock");
   const coachMsg = q("#coachMessage");
@@ -560,59 +560,44 @@ async function initCoachIA({ userId, courseId, lesson }) {
 }
 
 /* ============================================================
-   Coach Chat — Capa 5.1 (UX PRO, sin estado persistente)
+   Coach Chat — Capa 5.1 (INLINE CARD, sin estado persistente)
 ============================================================ */
 function initCoachChat() {
-  const btnOpen = document.getElementById("openCoachChatBtn")
-  const chatCard = document.getElementById("coachChatCard");
-  const overlay = document.getElementById("coachChatOverlay");
+  const btnOpen  = document.getElementById("openCoachChatBtn");
+  const chatCard = document.getElementById("coachChatCard");      // ✅ ahora existe
+  const closeBtn = document.getElementById("closeCoachChatBtn");  // ✅ existe en tu HTML
   const messages = document.getElementById("coachChatMessages");
-  const input = document.getElementById("coachChatInput");
-  const sendBtn = document.getElementById("coachChatSend");
-  const tabbar = document.querySelector(".tabbar");
+  const input    = document.getElementById("coachChatInput");
+  const sendBtn  = document.getElementById("coachChatSend");
 
-  if (!btnOpen || !overlay || !closeBtn || !messages || !input || !sendBtn) return;
+  // ✅ NO exijas closeBtn aquí (puede faltar si lo quitas)
+  if (!btnOpen || !chatCard || !messages || !input || !sendBtn) return;
 
-/* =========================
-   OPEN / CLOSE (INLINE CHAT)
-========================= */
+  /* =========================
+     OPEN / CLOSE
+  ========================= */
+  const openChat = () => {
+    chatCard.classList.remove("hidden");
 
-const openChat = () => {
-  // Mostrar card inline
-  chatCard.classList.remove("hidden");
+    // Scroll al inicio de la card
+    chatCard.scrollIntoView({ behavior: "smooth", block: "start" });
 
-  // Scroll suave hacia el chat
-  chatCard.scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
+    // Focus sin empujar el layout (iOS)
+    setTimeout(() => {
+      try { input.focus({ preventScroll: true }); }
+      catch { input.focus(); }
 
-  // Focus SIN forzar layout
-  setTimeout(() => {
-    input.focus({ preventScroll: true });
-    messages.scrollTop = messages.scrollHeight;
-  }, 150);
-};
+      messages.scrollTop = messages.scrollHeight;
+    }, 150);
+  };
 
-const closeChat = () => {
-  // Simplemente ocultamos la card
-  chatCard.classList.add("hidden");
+  const closeChat = () => {
+    chatCard.classList.add("hidden");
+    input.blur();
+  };
 
-  input.blur();
-};
-
-/* =========================
-   EVENTS
-========================= */
-console.log("btnOpen:", btnOpen);
-
-btnOpen.addEventListener("click", openChat);
-
-// ⚠️ opcional: si decides mantener botón cerrar
-if (closeBtn) {
-  closeBtn.addEventListener("click", closeChat);
-}
-
+  btnOpen.addEventListener("click", openChat);
+  if (closeBtn) closeBtn.addEventListener("click", closeChat);
 
   /* =========================
      SEND MESSAGE
@@ -626,7 +611,7 @@ if (closeBtn) {
 
     try {
       const session = (await supabase.auth.getSession())?.data?.session;
-      if (!session?.access_token) throw new Error();
+      if (!session?.access_token) throw new Error("No session");
 
       appendTyping();
 
@@ -652,14 +637,15 @@ if (closeBtn) {
       removeTyping();
       appendMessage("coach", out?.text || "Te leo.");
 
-    } catch {
+    } catch (e) {
       removeTyping();
-      appendMessage("coach", "⚠️ No pude responder ahora.");
+      appendMessage("coach", "⚠️ No pude responder ahora. Intenta de nuevo.");
     }
   }
 
   sendBtn.addEventListener("click", send);
-  input.addEventListener("keydown", e => {
+
+  input.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       send();
@@ -681,9 +667,7 @@ if (closeBtn) {
     bubble.style.borderRadius = "14px";
     bubble.style.marginBottom = "6px";
     bubble.style.background =
-      role === "user"
-        ? "rgba(74,242,197,0.18)"
-        : "rgba(255,255,255,0.08)";
+      role === "user" ? "rgba(74,242,197,0.18)" : "rgba(255,255,255,0.08)";
     bubble.style.color = "#fff";
 
     row.appendChild(bubble);
@@ -692,6 +676,7 @@ if (closeBtn) {
   }
 
   function appendTyping() {
+    removeTyping();
     const el = document.createElement("div");
     el.id = "typing";
     el.textContent = "Escribiendo…";
@@ -703,21 +688,6 @@ if (closeBtn) {
 
   function removeTyping() {
     document.getElementById("typing")?.remove();
-  }
-
-  /* =========================
-     FIX TECLADO iOS (mínimo)
-  ========================= */
-  if (window.visualViewport) {
-    const inputBar = document.querySelector(".coach-chat-input");
-
-    visualViewport.addEventListener("resize", () => {
-      const offset =
-        window.innerHeight - visualViewport.height - visualViewport.offsetTop;
-
-      inputBar.style.transform =
-        offset > 0 ? `translateY(-${offset}px)` : "translateY(0)";
-    });
   }
 }
 

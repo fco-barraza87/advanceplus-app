@@ -704,3 +704,12 @@ button:active {
   resize: none;
 }
 
+
+.coach-chat-card.hidden { display:none; }
+
+/* hace que el chat sea usable */
+.coach-chat-panel { width: 100%; }
+.coach-chat-messages { min-height: 220px; max-height: 45vh; overflow: auto; padding: 10px 4px; }
+.coach-chat-input { display:flex; gap:10px; align-items:flex-end; }
+.coach-chat-input textarea { width: 100%; resize: none; }
+
