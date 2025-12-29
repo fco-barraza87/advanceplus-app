@@ -451,6 +451,8 @@ async function initFeedback({ userId, courseId, lesson }) {
    Coach IA — Observador puro (Capa 5)
 ============================================================ */
 async function initCoachIA({ userId, courseId, lesson }) {
+  console.log("initCoachChat() loaded");
+
   const coachBlock = q("#lessonCoachBlock");
   const coachMsg = q("#coachMessage");
   if (!coachBlock || !coachMsg) return;
@@ -602,6 +604,7 @@ const closeChat = () => {
 /* =========================
    EVENTS
 ========================= */
+console.log("btnOpen:", btnOpen);
 
 btnOpen.addEventListener("click", openChat);
 
