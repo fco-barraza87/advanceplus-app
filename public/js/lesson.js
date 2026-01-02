@@ -88,12 +88,16 @@ function renderHeader(course, lesson, dayNum) {
 }
 
 function renderContent(lesson) {
-  q("#lessonContentHtml").innerHTML =
+  const content = q("#lessonContentHtml");
+  content.innerHTML =
     lesson.content_html || "<p>Contenido próximamente.</p>";
 
   const media = q("#lessonMedia");
   media.innerHTML = "";
 
+  /* =========================
+     AUDIO (OK fuera del flujo)
+  ========================= */
   if (lesson.audio_url) {
     const a = document.createElement("audio");
     a.controls = true;
@@ -101,10 +105,14 @@ function renderContent(lesson) {
     media.appendChild(a);
   }
 
+  /* =========================
+     VIDEO — INSERTADO ANTES DEL CIERRE
+  ========================= */
   if (lesson.video_url) {
-  const videoId = getVimeoId(lesson.video_url);
+    const videoId = getVimeoId(lesson.video_url);
+    const closeBlock = content.querySelector(".a-close");
 
-    if (videoId) {
+    if (videoId && closeBlock) {
       const wrapper = document.createElement("div");
       wrapper.className = "lesson-video-wrapper";
 
@@ -135,19 +143,28 @@ function renderContent(lesson) {
       wrapper.appendChild(videoDesc);
       wrapper.appendChild(iframe);
 
-      media.appendChild(wrapper);
+      // 🔥 CLAVE: insertar ANTES del cierre
+      closeBlock.before(wrapper);
     }
   }
 
+  /* =========================
+     IMAGEN (SI EXISTE)
+  ========================= */
   if (lesson.image_url) {
     const img = document.createElement("img");
     img.src = lesson.image_url;
+    img.className = "lesson-image";
     media.appendChild(img);
   }
 
+  /* =========================
+     EJERCICIO
+  ========================= */
   q("#lessonExerciseText").innerHTML =
     lesson.exercise_content || "";
 }
+
 
 /* ============================================================
    Mission Checkin (Capa 1)
