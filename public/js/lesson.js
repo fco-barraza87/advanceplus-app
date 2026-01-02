@@ -802,6 +802,19 @@ function initNavigation({ userId, course, lesson }) {
   }
 }
 
+function initLessonProgress({ dayNum, totalDays }) {
+  const label = document.getElementById("lessonProgressLabel");
+  const percentEl = document.getElementById("lessonProgressPercent");
+  const fill = document.getElementById("lessonProgressFill");
+
+  if (!label || !fill) return;
+
+  const progress = Math.round((dayNum / totalDays) * 100);
+
+  label.textContent = `Día ${dayNum} de ${totalDays}`;
+  if (percentEl) percentEl.textContent = `${progress}%`;
+  fill.style.width = `${progress}%`;
+}
 
 
 /* ============================================================
@@ -827,6 +840,13 @@ async function init() {
       await loadLessonBase(courseId, day);
 
     renderHeader(course, lesson, dayNum);
+    
+    // 👉 PROGRESO LECCIÓN (Día X de Y)
+    initLessonProgress({
+      dayNum,
+      totalDays: course.duration_days || 1
+    });
+
     renderContent(lesson);
 
     await initMissionCheckin({ userId: user.id, courseId, lesson });
