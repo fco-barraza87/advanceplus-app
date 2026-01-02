@@ -909,34 +909,6 @@
   color: var(--accent-cyan);
 }
 
-
-/* =========================================
-   Media: video/audio/image premium
-========================================= */
-
-.lesson-media video,
-.lesson-media audio,
-.lesson-media img {
-  width: 100%;
-  display: block;
-}
-
-.lesson-media video {
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(0,0,0,0.35);
-  aspect-ratio: 16 / 9; /* clave */
-  object-fit: cover;
-  box-shadow: 0 10px 26px rgba(0,0,0,0.25);
-}
-
-.lesson-media audio {
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-}
-
-
 /* =========================================
    Ejercicio del día — refresh
 ========================================= */
@@ -999,4 +971,27 @@
   border-radius: 999px;
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.10);
+}
+
+/* =========================================
+   Vimeo Embed — Mobile First / AppMySite
+========================================= */
+
+.vimeo-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 */
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+}
+
+.vimeo-wrapper iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
