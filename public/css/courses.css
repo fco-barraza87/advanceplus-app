@@ -744,3 +744,99 @@
 }
 
 /* Reusar estilo de .lesson-reflection-input aquí funciona perfecto */
+
+
+/* ===============================
+   LESSON ZONES — BASE
+=============================== */
+
+.lesson-zone {
+  position: relative;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+/* ===============================
+   LOCKED (bloqueo suave)
+=============================== */
+
+.lesson-zone.is-locked {
+  opacity: 0.45;
+  pointer-events: none;
+  transform: translateY(6px);
+}
+
+.lesson-zone.is-locked::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(15,30,68,0.1),
+    rgba(15,30,68,0.35)
+  );
+  pointer-events: none;
+}
+
+
+/* ===============================
+   OPEN (zona activa)
+=============================== */
+
+.lesson-zone.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+
+/* ===============================
+   ZONA DE CONSUMO
+=============================== */
+
+.lesson-zone[data-zone="consume"] {
+  padding-top: 4px;
+}
+
+
+.lesson-zone[data-zone="mission"] {
+  border-left: 3px solid rgba(74,242,197,0.35);
+  padding-left: 14px;
+}
+
+.lesson-zone[data-zone="evidence"] {
+  border-left: 3px solid rgba(201,168,106,0.35);
+  padding-left: 14px;
+}
+
+
+.lesson-zone[data-zone="mindset"] {
+  background: rgba(255,255,255,0.03);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+
+.lesson-zone[data-zone="feedback"] {
+  opacity: 0.85;
+}
+
+
+.lesson-zone[data-zone="coach"] {
+  border-top: 1px solid rgba(255,255,255,0.12);
+  padding-top: 18px;
+}
+
+
+/* ===============================
+   CIERRE UX
+=============================== */
+
+.lesson-close-ux {
+  text-align: center;
+  padding: 18px;
+  border-radius: 14px;
+  background: rgba(74,242,197,0.12);
+  border: 1px solid rgba(74,242,197,0.35);
+  font-weight: 600;
+  font-size: 15px;
+}
