@@ -861,10 +861,12 @@
   color: var(--color-gray-1);
 }
 .a-mantra {
-  padding: 18px;
-  border-radius: 14px;
-  background: rgba(201,168,106,0.14);
-  border-left: 4px solid var(--accent-gold);
+  margin-top: 14px;            /* <-- esto resuelve tu “falta aire arriba” */
+  padding: 14px 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(201,168,106,0.35);
+  position: relative;
 }
 
 .a-mantra h2 {
