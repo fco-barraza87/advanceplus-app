@@ -778,6 +778,9 @@ async function init() {
     // 👉 CAPA 5.1 — Chat del Coach (usa ese contexto)
     initCoachChat();
 
+    // 👉 CAPA UX — RITMO PROGRESIVO (AQUÍ)
+    initLessonRhythm();
+
     // ✅ CAPA 6 — AQUÍ Y SOLO AQUÍ
     initNavigation({ userId: user.id, course, lesson });
 
