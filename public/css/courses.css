@@ -840,3 +840,69 @@
   font-weight: 600;
   font-size: 15px;
 }
+
+
+/* ===============================
+   MEJORAS A CONTENIDO
+=============================== */
+.lesson-theory {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.a-lesson > header h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.a-lesson > header .subtitle {
+  font-size: 0.95rem;
+  color: var(--color-gray-1);
+}
+.a-mantra {
+  padding: 18px;
+  border-radius: 14px;
+  background: rgba(201,168,106,0.14);
+  border-left: 4px solid var(--accent-gold);
+}
+
+.a-mantra h2 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.8;
+}
+
+.a-mantra p strong {
+  font-size: 1.15rem;
+}
+.a-story {
+  background: rgba(255,255,255,0.04);
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.a-story h2 {
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+.a-learn ul {
+  margin-top: 8px;
+  padding-left: 18px;
+}
+
+.a-learn li {
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+.a-close {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(255,255,255,0.25);
+  opacity: 0.9;
+}
+
+.a-close p strong {
+  color: var(--accent-cyan);
+}
