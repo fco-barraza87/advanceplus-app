@@ -108,18 +108,36 @@ function renderContent(lesson) {
       const wrapper = document.createElement("div");
       wrapper.className = "lesson-video-wrapper";
 
+      // 👉 TÍTULO DEL VIDEO
+      const videoTitle = document.createElement("h3");
+      videoTitle.className = "lesson-video-title";
+      videoTitle.textContent = "Video del día";
+
+      // 👉 DESCRIPCIÓN DEL VIDEO
+      const videoDesc = document.createElement("p");
+      videoDesc.className = "lesson-video-desc";
+      videoDesc.textContent =
+        "Mira este mensaje antes de ejecutar el ejercicio.";
+
+      // 👉 IFRAME VIMEO
       const iframe = document.createElement("iframe");
       iframe.src = buildVimeoEmbedUrl(videoId);
       iframe.setAttribute("frameborder", "0");
-      iframe.setAttribute("allow", "autoplay; fullscreen; picture-in-picture");
+      iframe.setAttribute(
+        "allow",
+        "autoplay; fullscreen; picture-in-picture"
+      );
       iframe.setAttribute("allowfullscreen", "");
       iframe.setAttribute("loading", "lazy");
 
+      // 👉 ORDEN CORRECTO
+      wrapper.appendChild(videoTitle);
+      wrapper.appendChild(videoDesc);
       wrapper.appendChild(iframe);
+
       media.appendChild(wrapper);
     }
   }
-
 
   if (lesson.image_url) {
     const img = document.createElement("img");
