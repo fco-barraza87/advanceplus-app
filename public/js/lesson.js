@@ -809,12 +809,28 @@ function initLessonProgress({ dayNum, totalDays }) {
 
   if (!label || !fill) return;
 
-  const progress = Math.round((dayNum / totalDays) * 100);
+  const target = Math.round((dayNum / totalDays) * 100);
 
   label.textContent = `Día ${dayNum} de ${totalDays}`;
-  if (percentEl) percentEl.textContent = `${progress}%`;
-  fill.style.width = `${progress}%`;
+  if (percentEl) percentEl.textContent = `${target}%`;
+
+  // --- Animación suave (300 ms)
+  let start = null;
+  const duration = 300;
+
+  function animate(timestamp) {
+    if (!start) start = timestamp;
+    const progress = Math.min((timestamp - start) / duration, 1);
+    fill.style.width = `${progress * target}%`;
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    }
+  }
+
+  requestAnimationFrame(animate);
 }
+
 
 
 /* ============================================================
