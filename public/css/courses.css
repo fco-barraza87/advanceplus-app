@@ -1016,13 +1016,40 @@
   padding: 2px 0;
 }
 
-/* Etiquetas Starter / Standard / Elite */
+/* ===============================
+   MICRO-BADGES — STARTER / STANDARD / ELITE
+================================ */
+
 .lesson-exercise-section ul li strong {
-  display: inline-block;
-  min-width: 72px;
-  font-weight: 600;
-  color: var(--accent-cyan);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  letter-spacing: 0.3px;
+  margin-right: 6px;
+  text-transform: uppercase;
 }
+
+/* Starter */
+.lesson-exercise-section ul li strong:contains("Starter"),
+.lesson-exercise-section ul li strong.starter {
+  background: rgba(0, 255, 200, 0.15);
+  color: #7fffe0;
+}
+
+/* Standard */
+.lesson-exercise-section ul li strong:contains("Standard"),
+.lesson-exercise-section ul li strong.standard {
+  background: rgba(255, 200, 0, 0.18);
+  color: #ffe08a;
+}
+
+/* Elite */
+.lesson-exercise-section ul li strong:contains("Elite"),
+.lesson-exercise-section ul li strong.elite {
+  background: rgba(255, 80, 80, 0.2);
+  color: #ff9a9a;
+}
+
 
 /* ===============================
    LISTA DE REFLEXIÓN (ENUMERADA)
