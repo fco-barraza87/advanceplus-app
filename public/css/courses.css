@@ -448,24 +448,49 @@
   border-radius: var(--radius-md);
 }
 
-.lesson-video-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #ffffff;
+/* ===============================
+   VIDEO DEL DÍA — CARD PREMIUM
+================================ */
+
+.lesson-video-wrapper {
+  margin-top: 28px;
+  margin-bottom: 28px;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* Título del video */
+.lesson-video-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-white);
+  margin-bottom: 4px;
+}
+
+/* Descripción */
 .lesson-video-desc {
-  font-size: 0.9rem;
-  opacity: 0.75;
+  font-size: 0.85rem;
+  color: var(--color-gray-2);
   margin-bottom: 12px;
 }
 
-.lesson-video-wrapper {
-  margin-top: 16px;
-  margin-bottom: 24px;
-  padding-top: 62%; /* ⬅️ un poco más grande que 16:9 */
+/* Wrapper iframe responsive */
+.lesson-video-wrapper iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  background: #000;
 }
+
+/* Evitar que se vea “chico” */
+@media (min-width: 768px) {
+  .lesson-video-wrapper {
+    padding: 22px;
+  }
+}
+
 
 
 /* ejercicio */
