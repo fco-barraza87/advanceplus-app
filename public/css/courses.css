@@ -1120,6 +1120,28 @@
   opacity: 0.7;
 }
 
+/* ===============================
+   REFLEXIÓN — STEPS VISUALES (OPCIONAL)
+================================ */
+
+.lesson-exercise-section h3[data-step]::before {
+  content: attr(data-step);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 22px;
+  height: 22px;
+  margin-right: 8px;
+
+  border-radius: 50%;
+  background: rgba(74,242,197,0.25);
+  color: #fff;
+
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
 
 /* =========================================
    Vimeo Embed — Mobile First / AppMySite
