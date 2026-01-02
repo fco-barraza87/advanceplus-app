@@ -943,6 +943,15 @@
 }
 
 
+.a-mantra p {
+  font-size: 1.05rem;
+  line-height: 1.45;
+  font-weight: 600;
+  color: var(--color-white);
+  padding-left: 14px;
+  border-left: 3px solid var(--accent-gold);
+}
+
 .a-story {
   background: rgba(255,255,255,0.04);
   padding: 16px;
