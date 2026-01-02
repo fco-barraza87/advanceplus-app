@@ -984,11 +984,11 @@
   color: var(--color-white);
 }
 
-/* Subtítulos internos (Reflexión, etc.) */
+/* Subtítulos internos (Reflexión, Ritual, etc.) */
 .lesson-exercise-section h3,
 .lesson-exercise-section h4 {
-  margin-top: 22px;
-  margin-bottom: 8px;
+  margin-top: 16px;
+  margin-bottom: 6px;
   font-size: 1rem;
   color: var(--color-white);
 }
@@ -1001,22 +1001,23 @@
 }
 
 /* ===============================
-   LISTA DEL DESAFÍO (Starter / Standard / Elite)
+   LISTA DEL DESAFÍO
+   (Starter / Standard / Elite)
 ================================ */
 
 .lesson-exercise-section ul {
-  margin: 14px 0 20px;
+  margin: 12px 0 16px;
   padding-left: 18px;
 }
 
-.lesson-exercise-section li {
-  margin-bottom: 8px;
+.lesson-exercise-section ul li {
+  margin-bottom: 6px;
   line-height: 1.45;
-  padding: 4px 0;
+  padding: 2px 0;
 }
 
 /* Etiquetas Starter / Standard / Elite */
-.lesson-exercise-section li strong {
+.lesson-exercise-section ul li strong {
   display: inline-block;
   min-width: 72px;
   font-weight: 600;
@@ -1024,32 +1025,39 @@
 }
 
 /* ===============================
-   SEPARACIÓN COGNITIVA (REFLEXIÓN / RITUAL)
+   LISTA DE REFLEXIÓN (ENUMERADA)
 ================================ */
 
-/* Crear pausa antes de reflexión */
-.lesson-exercise-section strong + br,
-.lesson-exercise-section strong {
-  margin-top: 16px;
-  display: inline-block;
+.lesson-exercise-section ol {
+  margin: 10px 0 14px;
+  padding-left: 22px; /* alineación visual correcta */
 }
 
-/* Ritual / frase final */
+.lesson-exercise-section ol li {
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+/* ===============================
+   RITUAL / FRASE FINAL
+================================ */
+
 .lesson-exercise-section em,
 .lesson-exercise-section i {
   display: block;
-  margin-top: 14px;
+  margin-top: 12px;
   font-size: 0.85rem;
   opacity: 0.85;
 }
 
 /* ===============================
-   INPUT DE REFLEXIÓN (MOMENTO DE ACCIÓN)
+   INPUT DE REFLEXIÓN
+   (MOMENTO DE ACCIÓN)
 ================================ */
 
 .lesson-reflection-input {
-  margin-top: 16px;
-  min-height: 120px;
+  margin-top: 12px;
+  min-height: 110px;
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.18);
   border-radius: 14px;
