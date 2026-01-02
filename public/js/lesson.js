@@ -102,11 +102,24 @@ function renderContent(lesson) {
   }
 
   if (lesson.video_url) {
-    const v = document.createElement("video");
-    v.controls = true;
-    v.src = lesson.video_url;
-    media.appendChild(v);
+  const videoId = getVimeoId(lesson.video_url);
+
+    if (videoId) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "lesson-video-wrapper";
+
+      const iframe = document.createElement("iframe");
+      iframe.src = buildVimeoEmbedUrl(videoId);
+      iframe.setAttribute("frameborder", "0");
+      iframe.setAttribute("allow", "autoplay; fullscreen; picture-in-picture");
+      iframe.setAttribute("allowfullscreen", "");
+      iframe.setAttribute("loading", "lazy");
+
+      wrapper.appendChild(iframe);
+      media.appendChild(wrapper);
+    }
   }
+
 
   if (lesson.image_url) {
     const img = document.createElement("img");
