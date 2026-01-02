@@ -15,6 +15,20 @@ function getQueryParam(key) {
 }
 
 /* ============================================================
+   Video helpers (Vimeo)
+============================================================ */
+function getVimeoId(url) {
+  if (!url) return null;
+
+  const match = url.match(/vimeo\.com\/(?:.*\/)?(\d+)/);
+  return match ? match[1] : null;
+}
+
+function buildVimeoEmbedUrl(videoId) {
+  return `https://player.vimeo.com/video/${videoId}?badge=0&autopause=1&playsinline=1`;
+}
+
+/* ============================================================
    Auth
 ============================================================ */
 async function getCurrentUser() {
