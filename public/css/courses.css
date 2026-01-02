@@ -1123,3 +1123,35 @@
   height: 100%;
   border: 0;
 }
+
+/* ===============================
+   PROGRESO LECCIÓN — HEADER
+================================ */
+
+.lesson-progress {
+  margin-top: 14px;
+}
+
+.lesson-progress-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-xs);
+  color: var(--color-gray-2);
+  margin-bottom: 6px;
+}
+
+.lesson-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.lesson-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--gradient-cyan);
+  border-radius: 999px;
+  transition: width 0.4s ease-out;
+}
