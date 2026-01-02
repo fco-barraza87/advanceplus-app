@@ -1153,5 +1153,4 @@
   width: 0%;
   background: var(--gradient-cyan);
   border-radius: 999px;
-  transition: width 0.4s ease-out;
 }
