@@ -790,4 +790,78 @@ async function init() {
 
 }
 
+/* ============================================================
+   CAPA UX — RITMO PROGRESIVO (SCROLL + ACCIÓN)
+============================================================ */
+
+function initLessonRhythm() {
+  const zones = {
+    consume: document.querySelector('[data-zone="consume"]'),
+    mission: document.querySelector('[data-zone="mission"]'),
+    evidence: document.querySelector('[data-zone="evidence"]'),
+    mindset: document.querySelector('[data-zone="mindset"]'),
+    feedback: document.querySelector('[data-zone="feedback"]'),
+    coach: document.querySelector('[data-zone="coach"]'),
+    close: document.querySelector('[data-zone="close"]')
+  };
+
+  function open(zone) {
+    if (!zone) return;
+    zone.classList.remove("is-locked");
+    zone.classList.add("is-open");
+  }
+
+  /* ========= 1. SCROLL → MISIÓN ========= */
+  if (zones.consume && zones.mission) {
+    const observer = new IntersectionObserver(
+      ([e]) => e.isIntersecting && open(zones.mission),
+      { threshold: 0.6 }
+    );
+    observer.observe(zones.consume);
+  }
+
+  /* ========= 2. MISIÓN → EVIDENCIA ========= */
+  if (zones.mission && zones.evidence) {
+    const observer = new IntersectionObserver(
+      ([e]) => e.isIntersecting && open(zones.evidence),
+      { threshold: 0.5 }
+    );
+    observer.observe(zones.mission);
+  }
+
+  /* ========= 3. EVIDENCIA → MINDSET ========= */
+  const evidenceInput = document.getElementById("lessonExerciseInput");
+  if (evidenceInput && zones.mindset) {
+    evidenceInput.addEventListener("input", () => {
+      if (evidenceInput.value.trim().length >= 20) {
+        open(zones.mindset);
+      }
+    });
+  }
+
+  /* ========= 4. MINDSET → FEEDBACK ========= */
+  if (zones.mindset && zones.feedback) {
+    zones.mindset.addEventListener("change", () => {
+      open(zones.feedback);
+    });
+  }
+
+  /* ========= 5. DATOS → COACH ========= */
+  if (zones.coach) {
+    document.addEventListener("input", () => {
+      open(zones.coach);
+    });
+  }
+
+  /* ========= 6. TODO → CIERRE ========= */
+  if (zones.close) {
+    document.addEventListener("change", () => {
+      open(zones.close);
+    });
+  }
+}
+
+
 init();
+
+
