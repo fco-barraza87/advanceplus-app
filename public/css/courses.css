@@ -907,21 +907,41 @@
 }
 
 /* ===============================
-   MANTRA DEL DÍA — JERARQUÍA
+   MANTRA DEL DÍA — BLOQUE ANCLA
 ================================ */
 
 .a-mantra {
-  margin-top: 26px;       /* 🔥 aire desde header */
-  margin-bottom: 24px;
+  margin: 24px 0;
+  padding: 20px 18px;
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(74,242,197,0.14),
+      rgba(74,242,197,0.04)
+    );
+
+  border: 1px solid rgba(74,242,197,0.35);
 }
 
+/* Título del mantra */
 .a-mantra h2 {
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--color-gray-2);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
+
+/* Frase mantra */
+.a-mantra strong {
+  display: block;
+  font-size: 1.1rem;
+  line-height: 1.45;
+  color: var(--color-white);
+}
+
 
 .a-mantra p {
   font-size: 1.05rem;
