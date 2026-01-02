@@ -448,6 +448,26 @@
   border-radius: var(--radius-md);
 }
 
+.lesson-video-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #ffffff;
+}
+
+.lesson-video-desc {
+  font-size: 0.9rem;
+  opacity: 0.75;
+  margin-bottom: 12px;
+}
+
+.lesson-video-wrapper {
+  margin-top: 16px;
+  margin-bottom: 24px;
+  padding-top: 62%; /* ⬅️ un poco más grande que 16:9 */
+}
+
+
 /* ejercicio */
 .lesson-exercise-text {
   font-size: var(--text-sm);
