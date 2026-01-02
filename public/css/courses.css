@@ -908,3 +908,30 @@
 .a-close p strong {
   color: var(--accent-cyan);
 }
+
+
+/* =========================================
+   Media: video/audio/image premium
+========================================= */
+
+.lesson-media video,
+.lesson-media audio,
+.lesson-media img {
+  width: 100%;
+  display: block;
+}
+
+.lesson-media video {
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.35);
+  aspect-ratio: 16 / 9; /* clave */
+  object-fit: cover;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.25);
+}
+
+.lesson-media audio {
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+}
