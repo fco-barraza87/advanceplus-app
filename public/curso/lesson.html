@@ -34,23 +34,46 @@
 <main class="dashboard-main">
   <div class="dashboard-wrapper">
 
-    <!-- =========================
-      ENCABEZADO LECCIÓN
-    ========================= -->
-    <section class="dash-section lesson-header-section">
-      <button class="btn-outline lesson-back-btn" id="lessonBackBtn">
-        ← Volver al curso
-      </button>
+<!-- =========================
+  ENCABEZADO LECCIÓN
+========================= -->
+<section class="dash-section lesson-header-section">
 
-      <p class="lesson-course-label" id="lessonCourseLabel"></p>
-      <h1 class="lesson-title" id="lessonTitle">Cargando lección...</h1>
-      <p class="lesson-subtitle" id="lessonSubtitle"></p>
-      <p class="lesson-meta" id="lessonMeta"></p>
+  <button class="btn-outline lesson-back-btn" id="lessonBackBtn">
+    ← Volver al curso
+  </button>
 
-      <!-- línea IA sutil -->
-      <p class="coach-miniline" id="lessonAiMetaLine" style="display:none;"></p>
-    </section>
+  <p class="lesson-course-label" id="lessonCourseLabel"></p>
 
+  <h1 class="lesson-title" id="lessonTitle">
+    Cargando lección...
+  </h1>
+
+  <p class="lesson-subtitle" id="lessonSubtitle"></p>
+
+  <p class="lesson-meta" id="lessonMeta"></p>
+
+  <!-- =========================
+     PROGRESO LECCIÓN (Día X de Y)
+  ========================= -->
+  <div class="lesson-progress">
+    <div class="lesson-progress-top">
+      <span id="lessonProgressLabel">Día 1 de 7</span>
+      <span id="lessonProgressPercent">14%</span>
+    </div>
+    <div class="lesson-progress-bar">
+      <div id="lessonProgressFill" class="lesson-progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- línea IA sutil -->
+  <p
+    class="coach-miniline"
+    id="lessonAiMetaLine"
+    style="display:none;"
+  ></p>
+
+</section>
 
     <!-- =========================
       MICRO-CHEQUEO DÍA ANTERIOR
