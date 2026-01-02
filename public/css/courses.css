@@ -935,3 +935,68 @@
   border: 1px solid rgba(255,255,255,0.12);
   background: rgba(255,255,255,0.06);
 }
+
+
+/* =========================================
+   Ejercicio del día — refresh
+========================================= */
+
+.lesson-exercise-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.lesson-exercise-section .section-title {
+  margin-bottom: 10px;
+}
+
+.lesson-exercise-text {
+  color: rgba(255,255,255,0.92);
+  line-height: 1.55;
+  font-size: 0.98rem;
+}
+
+/* Si exercise_content trae h3/h4/strong/ul */
+#lessonExerciseText h3,
+#lessonExerciseText h4 {
+  margin: 14px 0 8px;
+  font-size: 1rem;
+  color: var(--color-white);
+}
+
+#lessonExerciseText ul {
+  margin: 10px 0 0;
+  padding-left: 18px;
+}
+
+#lessonExerciseText li {
+  margin: 10px 0;
+  color: var(--color-gray-1);
+  line-height: 1.45;
+}
+
+/* Input: más “acción”, menos formulario */
+#lessonExerciseInput {
+  margin-top: 12px;
+  min-height: 140px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.06);
+}
+
+#lessonExerciseInput:focus {
+  outline: none;
+  border-color: rgba(74,242,197,0.55);
+  box-shadow: 0 0 0 3px rgba(74,242,197,0.12);
+}
+
+/* Nota de guardado: que no sea texto muerto */
+.lesson-save-note {
+  margin-top: 10px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+}
