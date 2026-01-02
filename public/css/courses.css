@@ -905,25 +905,33 @@
   font-size: 0.95rem;
   color: var(--color-gray-1);
 }
+
+/* ===============================
+   MANTRA DEL DÍA — JERARQUÍA
+================================ */
+
 .a-mantra {
-  margin-top: 14px;
-  padding: 18px;
-  margin-bottom: 14px;
-  border-radius: 14px;
-  background: rgba(201,168,106,0.14);
-  border-left: 4px solid var(--accent-gold);
+  margin-top: 26px;       /* 🔥 aire desde header */
+  margin-bottom: 24px;
 }
 
 .a-mantra h2 {
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  opacity: 0.8;
+  color: var(--color-gray-2);
+  margin-bottom: 8px;
 }
 
-.a-mantra p strong {
-  font-size: 1.15rem;
+.a-mantra p {
+  font-size: 1.05rem;
+  line-height: 1.45;
+  font-weight: 600;
+  color: var(--color-white);
+  padding-left: 14px;
+  border-left: 3px solid var(--accent-gold);
 }
+
 .a-story {
   background: rgba(255,255,255,0.04);
   padding: 16px;
@@ -954,68 +962,57 @@
   color: var(--accent-cyan);
 }
 
-/* =========================================
-   Ejercicio del día — refresh
-========================================= */
+/* ===============================
+   EJERCICIO DEL DÍA — CARD
+================================ */
 
 .lesson-exercise-section {
-  position: relative;
-  overflow: hidden;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  padding: 20px;
 }
 
-.lesson-exercise-section .section-title {
+/* Título */
+.lesson-exercise-section h2 {
+  font-size: 1.15rem;
   margin-bottom: 10px;
 }
 
+/* Texto introductorio */
 .lesson-exercise-text {
-  color: rgba(255,255,255,0.92);
-  line-height: 1.55;
-  font-size: 0.98rem;
+  font-size: 0.95rem;
+  color: var(--color-gray-1);
+  margin-bottom: 16px;
 }
 
-/* Si exercise_content trae h3/h4/strong/ul */
-#lessonExerciseText h3,
-#lessonExerciseText h4 {
-  margin: 14px 0 8px;
-  font-size: 1rem;
-  color: var(--color-white);
-}
-
-#lessonExerciseText ul {
-  margin: 10px 0 0;
+/* Listas del ejercicio */
+.lesson-exercise-section ul {
+  margin: 12px 0 18px;
   padding-left: 18px;
 }
 
-#lessonExerciseText li {
-  margin: 10px 0;
-  color: var(--color-gray-1);
-  line-height: 1.45;
+.lesson-exercise-section li {
+  margin-bottom: 8px;
+  line-height: 1.4;
 }
 
-/* Input: más “acción”, menos formulario */
-#lessonExerciseInput {
-  margin-top: 12px;
-  min-height: 140px;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(255,255,255,0.06);
+/* Destacar niveles */
+.lesson-exercise-section li strong {
+  color: var(--accent-cyan);
 }
 
-#lessonExerciseInput:focus {
-  outline: none;
-  border-color: rgba(74,242,197,0.55);
-  box-shadow: 0 0 0 3px rgba(74,242,197,0.12);
-}
-
-/* Nota de guardado: que no sea texto muerto */
-.lesson-save-note {
+/* Input reflexión */
+.lesson-reflection-input {
   margin-top: 10px;
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.10);
+  min-height: 120px;
+}
+
+/* Nota autosave */
+.lesson-save-note {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  opacity: 0.7;
 }
 
 /* =========================================
